@@ -1,0 +1,271 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ============================================
+// 球员相关模型
+// ============================================
+
+// 球员
+model Player {
+  id          String   @id @default(uuid())
+  name        String
+  birthDate   DateTime
+  gender      String   @default("male")  // male/female
+  
+  // 分组
+  group       String   @default("U10")   // U6/U8/U10/U12/U14
+  
+  // 身体数据（随时间变化）
+  height      Float?   // cm
+  weight      Float?   // kg
+  
+  // 技术能力 (1-10)
+  dribbling   Int      @default(5)
+  passing     Int      @default(5)
+  shooting    Int      @default(5)
+  defending   Int      @default(5)
+  physical    Int      @default(5)
+  tactical    Int      @default(5)
+  
+  // 伤病记录
+  injuries    String   @default("[]")  // JSON array
+  
+  // 所属球队
+  teamId      String?
+  team        Team?    @relation(fields: [teamId], references: [id])
+  
+  // 家长联系
+  parentName  String?
+  parentPhone String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // 关联
+  records     TrainingRecord[]
+  assessments PlayerAssessment[]
+  goals       PlayerGoal[]
+}
+
+// 球员阶段目标
+model PlayerGoal {
+  id          String   @id @default(uuid())
+  playerId    String
+  player      Player   @relation(fields: [playerId], references: [id])
+  
+  skillType   String   // dribbling/passing/shooting/defending/physical/tactical
+  targetScore Int
+  currentScore Int    @default(0)
+  
+  status      String   @default("active")  // active/achieved/abandoned
+  
+  targetDate  DateTime?
+  achievedAt  DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// 球员评估记录
+model PlayerAssessment {
+  id          String   @id @default(uuid())
+  playerId    String
+  player      Player   @relation(fields: [playerId], references: [id])
+  
+  // 评估维度
+  dribbling   Int?
+  passing     Int?
+  shooting   Int?
+  defending  Int?
+  physical   Int?
+  tactical   Int?
+  
+  // 总体评价
+  overall     Int?
+  notes       String?
+  
+  assessor    String?  // 评估教练
+  assessedAt  DateTime @default(now())
+  
+  createdAt   DateTime @default(now())
+}
+
+// ============================================
+// 球队相关模型
+// ============================================
+
+model Team {
+  id          String   @id @default(uuid())
+  name        String
+  group       String   @default("U10")   // U6/U8/U10/U12/U14
+  
+  coachName   String?
+  coachPhone  String?
+  
+  location    String?  // 训练地点
+  trainingTime String? // 训练时间
+  
+  players     Player[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  trainingPlans TrainingPlan[]
+}
+
+// ============================================
+// 教案相关模型
+// ============================================
+
+// 训练教案
+model TrainingPlan {
+  id          String   @id @default(uuid())
+
+  // 基本信息
+  title       String
+  date        DateTime
+  duration    Int      @default(90)  // 分钟
+  group       String   @default("U10")  // U6/U8/UU10/U12/U14
+
+  // 训练环境
+  location    String   @default("室内")  // 室内/室外
+  weather     String?  // 晴/阴/雨/雪
+  temperature Int?    // 温度
+
+  // 主题
+  theme       String?  // 本次训练主题
+  focusSkills String   @default("[]")  // JSON: 本次重点技术
+
+  // 负荷
+  intensity   String   @default("medium")  // low/medium/high
+  restTime    Int     @default(60)  // 秒
+
+  // 完整教案内容（JSON格式，支持AI生成和自定义）
+  sections    String   @default("[]")   // JSON: 完整的sections数组
+
+  // 训练内容（兼容旧格式）
+  warmup      String   @default("[]")   // JSON: 热身活动
+  technical   String   @default("[]")   // JSON: 技术训练
+  tactical    String   @default("[]")   // JSON: 战术训练
+  game        String   @default("[]")   // JSON: 对抗比赛
+  cooldown    String   @default("[]")   // JSON: 放松活动
+
+  // 备注
+  notes       String?
+
+  // 状态
+  status      String   @default("draft")  // draft/published/completed
+
+  // 生成方式
+  generatedBy String   @default("rule")  // rule/ai
+
+  // 关联
+  teamId      String?
+  team        Team?    @relation(fields: [teamId], references: [id])
+
+  // 训练记录
+  records     TrainingRecord[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// 训练记录（课后填写）
+model TrainingRecord {
+  id          String   @id @default(uuid())
+  
+  planId      String
+  plan        TrainingPlan @relation(fields: [planId], references: [id])
+  
+  playerId    String?
+  player      Player?  @relation(fields: [playerId], references: [id])
+  
+  // 出席情况
+  attendance  String   @default("present")  // present/absent/late
+  
+  // 表现评价
+  performance Int?    // 1-10
+  effort      Int?    // 1-10
+  attitude    Int?    // 1-10
+  
+  // 特别记录
+  highlights  String?  // 亮点
+  issues      String?  // 问题
+  improvements String? // 改进建议
+  
+  // 课后作业
+  homework    String?
+  
+  recordedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
+// ============================================
+// 训练模块库
+// ============================================
+
+// 训练活动模板
+model TrainingActivity {
+  id          String   @id @default(uuid())
+  
+  // 分类
+  category    String   // warmup/technical/tactical/game/cooldown
+  subCategory String?  // 细分
+  
+  // 名称和描述
+  name        String
+  description String?
+  
+  // 适用年龄段
+  minAge      Int      @default(4)
+  maxAge      Int      @default(16)
+  
+  // 适用分组
+  groups      String   @default("[]")  // JSON: ["U6","U8","U10"]
+  
+  // 时长建议（分钟）
+  duration    Int      @default(10)
+  
+  // 难度
+  difficulty  Int      @default(1)  // 1-5
+  
+  // 所需器材
+  equipment   String   @default("[]")  // JSON
+  
+  // 人数要求
+  minPlayers  Int      @default(1)
+  maxPlayers  Int      @default(20)
+  
+  // 技能标签
+  skills      String   @default("[]")  // JSON: ["dribbling","shooting"]
+  
+  // 体能标签
+  physical    String   @default("[]")  // JSON: ["agility","endurance"]
+  
+  // 是否为 favoris
+  isFavorite  Boolean  @default(false)
+  
+  // 使用次数
+  usageCount  Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ============================================
+// 系统设置
+// ============================================
+
+model Setting {
+  id    String @id @default(uuid())
+  key   String @unique
+  value String
+}
