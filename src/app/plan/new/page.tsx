@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Plus, Save, Calendar, Clock, MapPin, Sun, Cloud, CloudRain, Snowflake, Sparkles } from 'lucide-react'
 import { generateTrainingPlan, type AgeGroup, type Location, type TrainingPlanOutput } from '@/lib/plan-generator'
-import { generateAIPlan, type AIPlanParams } from '@/lib/ai-plan-generator'
 
 export default function NewPlanPage() {
   const [generating, setGenerating] = useState(false)
@@ -59,8 +58,8 @@ export default function NewPlanPage() {
       let result: TrainingPlanOutput
 
       if (useAI) {
-        // AI生成
-        const aiParams: AIPlanParams = {
+        // AI生成（通过服务端API代理）
+        const aiParams = {
           group: form.group,
           duration: form.duration,
           location: form.location,
@@ -72,7 +71,18 @@ export default function NewPlanPage() {
           skillLevel: aiConfig.skillLevel,
           previousTraining: aiConfig.previousTraining ? aiConfig.previousTraining.split(/[,，]/).map(s => s.trim()) : undefined
         }
-        result = await generateAIPlan(aiParams)
+
+        // 调用服务端API生成教案
+        const response = await fetch('/api/generate-plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(aiParams)
+        })
+        const data = await response.json()
+        if (!data.success) {
+          throw new Error(data.error || 'AI生成失败')
+        }
+        result = data.plan
       } else {
         // 规则引擎生成
         await new Promise(resolve => setTimeout(resolve, 800))
