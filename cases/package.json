@@ -1,0 +1,26 @@
+{
+  "name": "basketball-cases",
+  "version": "1.0.0",
+  "description": "篮球教案案例库 for RAG retrieval",
+  "cases_file": "./lesson_plans_raw.json",
+  "stats": {
+    "total": 5611,
+    "by_age_group": {
+      "U6": 1618,
+      "U8": 1739,
+      "U10": 708,
+      "U12": 1458,
+      "U14": 88
+    },
+    "by_category": {
+      "technical": 1459,
+      "warmup": 939,
+      "physical": 545,
+      "etiquette": 432,
+      "game": 245,
+      "cooldown": 10,
+      "tactical": 9,
+      "other": 1972
+    }
+  }
+}

@@ -472,7 +472,7 @@ export default function NewPlanPage() {
                   
                   {/* 重点技能标签 */}
                   <div className="flex flex-wrap gap-2">
-                    {plan.focusSkills.map(skill => (
+                    {(plan.focusSkills || []).map(skill => (
                       <span key={skill} className="px-2 py-1 bg-white/20 rounded text-sm">
                         {skill}
                       </span>
@@ -502,13 +502,24 @@ export default function NewPlanPage() {
                               <span className="text-sm text-gray-500">{activity.duration}分钟</span>
                             </div>
                             <p className="text-sm text-gray-600 mb-2">{activity.description}</p>
-                            {activity.keyPoints.length > 0 && (
-                              <div className="flex flex-wrap gap-1">
+                            {activity.coachGuide && (
+                              <div className="mt-2 p-2 bg-purple-50 border border-purple-100 rounded text-sm">
+                                <div className="text-purple-700 font-medium mb-1">教练引导语</div>
+                                <p className="text-gray-700">{activity.coachGuide}</p>
+                              </div>
+                            )}
+                            {activity.keyPoints && activity.keyPoints.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-2">
                                 {activity.keyPoints.map((point, pIdx) => (
                                   <span key={pIdx} className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
                                     {point}
                                   </span>
                                 ))}
+                              </div>
+                            )}
+                            {activity.equipment && activity.equipment.length > 0 && (
+                              <div className="text-xs text-gray-500 mt-1">
+                                器材：{activity.equipment.join('、')}
                               </div>
                             )}
                           </div>
