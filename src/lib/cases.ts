@@ -39,15 +39,25 @@ function loadPlans(): LessonPlan[] {
   if (externalPath && existsSync(externalPath)) {
     try {
       const externalData = readFileSync(externalPath, 'utf-8');
-      console.log(`[RAG] 已加载外部教案数据: ${externalPath}`);
-      return JSON.parse(externalData);
+      const parsed = JSON.parse(externalData);
+      console.log(`[RAG] 已加载外部教案数据: ${externalPath}, 条目: ${parsed.length}`);
+      return parsed;
     } catch (e) {
       console.error(`[RAG] 加载外部数据失败: ${e}，使用内置数据`);
     }
   }
 
-  console.log(`[RAG] 使用内置教案数据 (${(plansData as LessonPlan[]).length} 条)`);
-  return plansData as LessonPlan[];
+  // 验证内置数据
+  const builtIn = plansData as LessonPlan[];
+  console.log(`[RAG] 使用内置教案数据 (${builtIn.length} 条)`);
+
+  // 调试：检查第一条 U10 数据的关键词匹配
+  const u10Sample = builtIn.find(p => p.age_group === 'U10');
+  if (u10Sample) {
+    console.log(`[RAG] U10样本: tech_type="${u10Sample.tech_type}", content前30字="${u10Sample.content?.substring(0, 30)}"`);
+  }
+
+  return builtIn;
 }
 
 const allPlans: LessonPlan[] = loadPlans();
@@ -70,19 +80,25 @@ export function retrieveSimilarCases(params: {
 
   // 按年龄组筛选
   if (ageGroup) {
+    const before = results.length;
     results = results.filter(p => p.age_group === ageGroup);
+    console.log(`[RAG] 年龄组筛选: ${ageGroup}, ${before} -> ${results.length}`);
   }
 
   // 按分类筛选
   if (category) {
+    const before = results.length;
     results = results.filter(p => p.category === category);
+    console.log(`[RAG] 分类筛选: ${category}, ${before} -> ${results.length}`);
   }
 
   // 按技术类型筛选
   if (techType) {
+    const before = results.length;
     results = results.filter(p =>
       p.tech_type.toLowerCase().includes(techType.toLowerCase())
     );
+    console.log(`[RAG] 技术类型筛选: ${techType}, ${before} -> ${results.length}`);
   }
 
   // 按时长筛选 (误差2分钟)
@@ -94,13 +110,19 @@ export function retrieveSimilarCases(params: {
 
   // 按关键词搜索 (content, method, coach_guide)
   if (keyword) {
+    const before = results.length;
     const kw = keyword.toLowerCase();
-    results = results.filter(p =>
-      p.content.toLowerCase().includes(kw) ||
-      p.method.toLowerCase().includes(kw) ||
-      p.tech_type.toLowerCase().includes(kw) ||
-      p.game_name.toLowerCase().includes(kw)
+    const filtered = results.filter(p =>
+      (p.content && p.content.toLowerCase().includes(kw)) ||
+      (p.method && p.method.toLowerCase().includes(kw)) ||
+      (p.tech_type && p.tech_type.toLowerCase().includes(kw)) ||
+      (p.game_name && p.game_name.toLowerCase().includes(kw))
     );
+    console.log(`[RAG] 关键词筛选: "${kw}", ${before} -> ${filtered.length}`);
+    if (filtered.length > 0) {
+      console.log(`[RAG] 匹配样本: tech_type="${filtered[0].tech_type}"`);
+    }
+    results = filtered;
   }
 
   // 返回结果，限制数量
