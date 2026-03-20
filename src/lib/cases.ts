@@ -109,18 +109,24 @@ export function retrieveSimilarCases(params: {
   }
 
   // 按关键词搜索 (content, method, coach_guide)
+  // 支持多关键词，任何一个匹配即返回
   if (keyword) {
     const before = results.length;
-    const kw = keyword.toLowerCase();
-    const filtered = results.filter(p =>
-      (p.content && p.content.toLowerCase().includes(kw)) ||
-      (p.method && p.method.toLowerCase().includes(kw)) ||
-      (p.tech_type && p.tech_type.toLowerCase().includes(kw)) ||
-      (p.game_name && p.game_name.toLowerCase().includes(kw))
-    );
-    console.log(`[RAG] 关键词筛选: "${kw}", ${before} -> ${filtered.length}`);
+    const keywords = keyword.toLowerCase().split(/\s+/).filter(Boolean);
+    console.log(`[RAG] 关键词列表: ${JSON.stringify(keywords)}`);
+    const filtered = results.filter(p => {
+      const searchableText = [
+        p.content,
+        p.method,
+        p.tech_type,
+        p.game_name
+      ].filter(Boolean).join(' ').toLowerCase();
+      // 只要任意一个关键词匹配即可
+      return keywords.some(kw => searchableText.includes(kw));
+    });
+    console.log(`[RAG] 关键词筛选: "${keyword}", ${before} -> ${filtered.length}`);
     if (filtered.length > 0) {
-      console.log(`[RAG] 匹配样本: tech_type="${filtered[0].tech_type}"`);
+      console.log(`[RAG] 匹配样本: tech_type="${filtered[0].tech_type}", method前30字="${filtered[0].method?.substring(0, 30)}"`);
     }
     results = filtered;
   }
