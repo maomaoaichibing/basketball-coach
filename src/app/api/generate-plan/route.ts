@@ -15,6 +15,8 @@ interface AIPlanParams {
   playerCount?: number
   skillLevel?: 'beginner' | 'intermediate' | 'advanced'
   previousTraining?: string[]
+  // 调试参数：设为 true 时返回检索到的 RAG 案例
+  debug?: boolean
 }
 
 // AI生成提示词
@@ -178,11 +180,12 @@ export async function POST(request: NextRequest) {
     const MINIMAX_API_KEY = process.env.MINIMAX_API_KEY || process.env.NEXT_PUBLIC_MINIMAX_API_KEY || ''
 
     // RAG: 检索相似案例
+    // keyword 合并 theme 和 focusSkills，category 留空让 keyword 全局搜索
+    const searchKeyword = [params.theme, ...(params.focusSkills || [])].filter(Boolean).join(' ');
     const similarCases = retrieveSimilarCases({
       ageGroup: params.group,
-      category: params.focusSkills?.[0],
-      keyword: params.theme,
-      limit: 3
+      keyword: searchKeyword || undefined,
+      limit: 5
     })
 
     // 调试日志：输出检索到的案例
@@ -224,7 +227,31 @@ export async function POST(request: NextRequest) {
           notes: aiResult.notes
         }
 
-        return NextResponse.json({ success: true, plan: planOutput })
+        // 返回结果（支持调试模式）
+        const response: any = { success: true, plan: planOutput }
+
+        // 如果是调试模式，返回检索到的案例
+        if (params.debug) {
+          response.debug = {
+            retrievedCases: similarCases.map(c => ({
+              age_group: c.age_group,
+              class_level: c.class_level,
+              section: c.section,
+              tech_type: c.tech_type,
+              method: c.method?.substring(0, 200),
+              coach_guide: c.coach_guide?.substring(0, 100),
+              key_points: c.key_points?.substring(0, 100)
+            })),
+            totalCasesInDb: similarCases.length > 0 ? '数据已加载' : '无数据',
+            retrievalParams: {
+              ageGroup: params.group,
+              keyword: params.theme,
+              category: params.focusSkills?.[0]
+            }
+          }
+        }
+
+        return NextResponse.json(response)
       }
 
       console.log('Kimi API 失败，尝试 MiniMax:', kimiResult.error)
@@ -257,7 +284,31 @@ export async function POST(request: NextRequest) {
           notes: aiResult.notes
         }
 
-        return NextResponse.json({ success: true, plan: planOutput })
+        // 返回结果（支持调试模式）
+        const response: any = { success: true, plan: planOutput }
+
+        // 如果是调试模式，返回检索到的案例
+        if (params.debug) {
+          response.debug = {
+            retrievedCases: similarCases.map(c => ({
+              age_group: c.age_group,
+              class_level: c.class_level,
+              section: c.section,
+              tech_type: c.tech_type,
+              method: c.method?.substring(0, 200),
+              coach_guide: c.coach_guide?.substring(0, 100),
+              key_points: c.key_points?.substring(0, 100)
+            })),
+            totalCasesInDb: similarCases.length > 0 ? '数据已加载' : '无数据',
+            retrievalParams: {
+              ageGroup: params.group,
+              keyword: params.theme,
+              category: params.focusSkills?.[0]
+            }
+          }
+        }
+
+        return NextResponse.json(response)
       }
 
       return NextResponse.json(
