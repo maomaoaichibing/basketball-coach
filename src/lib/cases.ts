@@ -1,9 +1,16 @@
 /**
  * 篮球教案案例库 - RAG数据加载模块
  * Phase 1: 基于字段匹配的快速检索
+ *
+ * 支持外部配置文件：
+ * - 通过环境变量 LESSON_PLANS_PATH 指定外部数据文件路径
+ * - 如果环境变量存在，从外部路径加载（热更新，无需重新部署）
+ * - 如果环境变量不存在，使用内置的默认数据
  */
 
 import plansData from './lesson_plans_raw.json';
+import { readFileSync, existsSync } from 'fs';
+import { join } from 'path';
 
 export interface LessonPlan {
   class_level: string;    // 班级: "幼儿班", "小班", "中班", "大班"
@@ -25,7 +32,25 @@ export interface LessonPlan {
 }
 
 // 转换为数组
-const allPlans: LessonPlan[] = plansData as LessonPlan[];
+// 支持外部配置文件热更新
+function loadPlans(): LessonPlan[] {
+  const externalPath = process.env.LESSON_PLANS_PATH;
+
+  if (externalPath && existsSync(externalPath)) {
+    try {
+      const externalData = readFileSync(externalPath, 'utf-8');
+      console.log(`[RAG] 已加载外部教案数据: ${externalPath}`);
+      return JSON.parse(externalData);
+    } catch (e) {
+      console.error(`[RAG] 加载外部数据失败: ${e}，使用内置数据`);
+    }
+  }
+
+  console.log(`[RAG] 使用内置教案数据 (${(plansData as LessonPlan[]).length} 条)`);
+  return plansData as LessonPlan[];
+}
+
+const allPlans: LessonPlan[] = loadPlans();
 
 /**
  * 检索相似案例
