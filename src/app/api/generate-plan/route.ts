@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { TrainingPlanOutput } from '@/lib/plan-generator'
-import { retrieveSimilarCases } from '@/lib/cases'
+import { retrieveSimilarCases, allPlans } from '@/lib/cases'
 import https from 'https'
 
 // AI生成参数
@@ -233,6 +233,17 @@ export async function POST(request: NextRequest) {
         // 如果是调试模式，返回检索到的案例
         if (params.debug) {
           response.debug = {
+            // 获取总数据量
+            totalPlansInDb: allPlans.length,
+            // 各年龄组分布
+            ageGroupCounts: {
+              U6: allPlans.filter(p => p.age_group === 'U6').length,
+              U8: allPlans.filter(p => p.age_group === 'U8').length,
+              U10: allPlans.filter(p => p.age_group === 'U10').length,
+              U12: allPlans.filter(p => p.age_group === 'U12').length,
+              U14: allPlans.filter(p => p.age_group === 'U14').length,
+            },
+            // 检索到的案例
             retrievedCases: similarCases.map(c => ({
               age_group: c.age_group,
               class_level: c.class_level,
@@ -242,10 +253,10 @@ export async function POST(request: NextRequest) {
               coach_guide: c.coach_guide?.substring(0, 100),
               key_points: c.key_points?.substring(0, 100)
             })),
-            totalCasesInDb: similarCases.length > 0 ? '数据已加载' : '无数据',
             retrievalParams: {
               ageGroup: params.group,
               keyword: params.theme,
+              searchKeyword: searchKeyword,
               category: params.focusSkills?.[0]
             }
           }
@@ -290,6 +301,17 @@ export async function POST(request: NextRequest) {
         // 如果是调试模式，返回检索到的案例
         if (params.debug) {
           response.debug = {
+            // 获取总数据量
+            totalPlansInDb: allPlans.length,
+            // 各年龄组分布
+            ageGroupCounts: {
+              U6: allPlans.filter(p => p.age_group === 'U6').length,
+              U8: allPlans.filter(p => p.age_group === 'U8').length,
+              U10: allPlans.filter(p => p.age_group === 'U10').length,
+              U12: allPlans.filter(p => p.age_group === 'U12').length,
+              U14: allPlans.filter(p => p.age_group === 'U14').length,
+            },
+            // 检索到的案例
             retrievedCases: similarCases.map(c => ({
               age_group: c.age_group,
               class_level: c.class_level,
@@ -299,10 +321,10 @@ export async function POST(request: NextRequest) {
               coach_guide: c.coach_guide?.substring(0, 100),
               key_points: c.key_points?.substring(0, 100)
             })),
-            totalCasesInDb: similarCases.length > 0 ? '数据已加载' : '无数据',
             retrievalParams: {
               ageGroup: params.group,
               keyword: params.theme,
+              searchKeyword: searchKeyword,
               category: params.focusSkills?.[0]
             }
           }
