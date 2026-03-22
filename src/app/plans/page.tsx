@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ArrowLeft, Plus, Search, Calendar, Clock, MapPin, Target, MoreVertical, Copy, Edit, Trash2, Download, Sparkles } from 'lucide-react'
 
 // 教案类型
@@ -19,6 +20,7 @@ type TrainingPlan = {
   status?: string
   generatedBy?: string
   createdAt?: string
+  sections?: string
 }
 
 export default function PlansPage() {
@@ -27,6 +29,9 @@ export default function PlansPage() {
   const [search, setSearch] = useState('')
   const [groupFilter, setGroupFilter] = useState('all')
   const [themeFilter, setThemeFilter] = useState('all')
+  const [copyingId, setCopyingId] = useState<string | null>(null)
+
+  const router = useRouter()
 
   const groups = ['all', 'U6', 'U8', 'U10', 'U12', 'U14']
   const themes = ['all', '运球基础', '传球技术', '投篮训练', '防守入门', '进攻战术', '体能训练', '综合训练', '对抗比赛']
@@ -43,7 +48,7 @@ export default function PlansPage() {
 
       if (data.success) {
         // 解析 focusSkills
-        const parsedPlans = data.plans.map((plan: any) => ({
+        const parsedPlans = data.plans.map((plan: TrainingPlan) => ({
           ...plan,
           focusSkills: plan.focusSkills ? JSON.parse(plan.focusSkills) : []
         }))
@@ -53,6 +58,49 @@ export default function PlansPage() {
       console.error('获取教案列表失败:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  // 复制教案
+  async function handleCopyPlan(plan: TrainingPlan, e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+
+    try {
+      setCopyingId(plan.id)
+      const response = await fetch('/api/plans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: `${plan.title} (副本)`,
+          date: new Date().toISOString(),
+          duration: plan.duration,
+          group: plan.group,
+          location: plan.location,
+          weather: plan.weather,
+          theme: plan.theme,
+          focusSkills: plan.focusSkills ? JSON.parse(plan.focusSkills) : [],
+          intensity: plan.intensity || 'medium',
+          sections: plan.sections ? JSON.parse(plan.sections) : [],
+          notes: '',
+          generatedBy: plan.generatedBy
+        })
+      })
+
+      const result = await response.json()
+      if (result.success) {
+        alert('教案复制成功！')
+        fetchPlans()
+        // 跳转到新教案详情页
+        router.push(`/plans/${result.id}`)
+      } else {
+        alert('复制失败: ' + result.error)
+      }
+    } catch (error) {
+      console.error('复制教案失败:', error)
+      alert('复制失败')
+    } finally {
+      setCopyingId(null)
     }
   }
 
@@ -76,10 +124,20 @@ export default function PlansPage() {
               <h1 className="text-xl font-bold text-gray-900">教案库</h1>
               <span className="text-sm text-gray-500">{filteredPlans.length}份教案</span>
             </div>
-            <Link href="/plan/new" className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg">
-              <Plus className="w-4 h-4" />
-              新建教案
-            </Link>
+            <div className="flex items-center gap-2">
+              <a
+                href="/api/export?type=plans&format=excel"
+                download
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg"
+              >
+                <Download className="w-4 h-4" />
+                导出
+              </a>
+              <Link href="/plan/new" className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg">
+                <Plus className="w-4 h-4" />
+                新建教案
+              </Link>
+            </div>
           </div>
         </div>
       </header>
@@ -158,11 +216,16 @@ export default function PlansPage() {
                 {/* 操作按钮 */}
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={(e) => e.preventDefault()}
-                    className="p-2 hover:bg-gray-100 rounded-lg"
+                    onClick={(e) => handleCopyPlan(plan, e)}
+                    disabled={copyingId === plan.id}
+                    className="p-2 hover:bg-gray-100 rounded-lg disabled:opacity-50"
                     title="复制"
                   >
-                    <Copy className="w-4 h-4 text-gray-400" />
+                    {copyingId === plan.id ? (
+                      <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-gray-400" />
+                    )}
                   </button>
                   <button
                     onClick={(e) => e.preventDefault()}

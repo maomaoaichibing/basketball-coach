@@ -1,94 +1,238 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Plus, Search, Users, TrendingUp, Star, Filter, X } from 'lucide-react'
+import { ArrowLeft, Plus, Search, Users, TrendingUp, Star, Filter, X, ChevronRight, Phone, Edit2, Trash2, Download } from 'lucide-react'
 
-// 模拟球员数据类型
+// 学员类型
 type Player = {
   id: string
   name: string
   group: string
-  age: number
-  dribbling: number
-  passing: number
-  shooting: number
-  defending: number
-  physical: number
-  tactical: number
+  gender: string
+  birthDate: string
+  age?: number
+  status: string
+  school?: string
+  parentName?: string
+  parentPhone?: string
+  parentWechat?: string
+  team?: { id: string; name: string }
+  guardians?: Guardian[]
+  trainingCount: number
+  assessmentCount: number
 }
 
-// 初始球员数据
-const INITIAL_PLAYERS: Player[] = [
-  { id: '1', name: '张三', group: 'U10', age: 9, dribbling: 7, passing: 6, shooting: 8, defending: 5, physical: 6, tactical: 5 },
-  { id: '2', name: '李四', group: 'U10', age: 10, dribbling: 8, passing: 7, shooting: 6, defending: 7, physical: 7, tactical: 6 },
-  { id: '3', name: '王五', group: 'U10', age: 9, dribbling: 5, passing: 6, shooting: 5, defending: 6, physical: 8, tactical: 4 },
-  { id: '4', name: '赵六', group: 'U8', age: 7, dribbling: 6, passing: 5, shooting: 7, defending: 4, physical: 5, tactical: 3 },
-  { id: '5', name: '钱七', group: 'U8', age: 8, dribbling: 7, passing: 6, shooting: 6, defending: 5, physical: 6, tactical: 4 },
-  { id: '6', name: '孙八', group: 'U12', age: 11, dribbling: 8, passing: 8, shooting: 7, defending: 8, physical: 7, tactical: 7 },
+type Guardian = {
+  id: string
+  name: string
+  relation: string
+  mobile: string
+  isPrimary: boolean
+}
+
+const groups = ['all', 'U6', 'U8', 'U10', 'U12', 'U14']
+const statuses = [
+  { value: 'all', label: '全部状态' },
+  { value: 'trial', label: '试听中' },
+  { value: 'training', label: '在训' },
+  { value: 'vacation', label: '请假' },
+  { value: 'suspended', label: '停课' },
+  { value: 'graduated', label: '结业' }
 ]
 
+const statusColors: Record<string, string> = {
+  trial: 'bg-purple-100 text-purple-700',
+  training: 'bg-green-100 text-green-700',
+  vacation: 'bg-yellow-100 text-yellow-700',
+  suspended: 'bg-gray-100 text-gray-700',
+  graduated: 'bg-blue-100 text-blue-700'
+}
+
+const statusLabels: Record<string, string> = {
+  trial: '试听',
+  training: '在训',
+  vacation: '请假',
+  suspended: '停课',
+  graduated: '结业'
+}
+
 export default function PlayersPage() {
-  const [players, setPlayers] = useState<Player[]>(INITIAL_PLAYERS)
+  const [players, setPlayers] = useState<Player[]>([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [groupFilter, setGroupFilter] = useState('all')
-  const [sortBy, setSortBy] = useState('name')
+  const [statusFilter, setStatusFilter] = useState('all')
   const [showAddModal, setShowAddModal] = useState(false)
-  const [newPlayer, setNewPlayer] = useState({ name: '', age: '', group: '' })
+  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null)
 
-  const groups = ['all', 'U6', 'U8', 'U10', 'U12', 'U14']
+  // 新建/编辑表单
+  const [formData, setFormData] = useState({
+    name: '',
+    gender: 'male',
+    birthDate: '',
+    group: 'U10',
+    status: 'training',
+    school: '',
+    parentName: '',
+    parentPhone: '',
+    parentWechat: ''
+  })
 
-  const handleAddPlayer = () => {
-    if (!newPlayer.name || !newPlayer.age || !newPlayer.group) {
-      alert('请填写完整信息')
+  useEffect(() => {
+    fetchPlayers()
+  }, [])
+
+  async function fetchPlayers() {
+    try {
+      setLoading(true)
+      const params = new URLSearchParams()
+      if (groupFilter !== 'all') params.set('group', groupFilter)
+      if (statusFilter !== 'all') params.set('status', statusFilter)
+      if (search) params.set('search', search)
+
+      const response = await fetch(`/api/players?${params}`)
+      const data = await response.json()
+
+      if (data.success) {
+        setPlayers(data.players)
+      }
+    } catch (error) {
+      console.error('获取学员列表失败:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchPlayers()
+  }, [groupFilter, statusFilter])
+
+  const handleSearch = () => {
+    fetchPlayers()
+  }
+
+  const handleAddPlayer = async () => {
+    if (!formData.name || !formData.birthDate) {
+      alert('请填写姓名和出生日期')
       return
     }
 
-    // 添加新球员
-    setPlayers([...players, {
-      id: String(Date.now()),
-      name: newPlayer.name,
-      age: parseInt(newPlayer.age),
-      group: newPlayer.group,
-      dribbling: 5,
-      passing: 5,
-      shooting: 5,
-      defending: 5,
-      physical: 5,
-      tactical: 5
-    }])
-
-    // 重置表单并关闭弹窗
-    setNewPlayer({ name: '', age: '', group: '' })
-    setShowAddModal(false)
-  }
-
-  const filteredPlayers = useMemo(() => {
-    return players
-      .filter(p => {
-        if (groupFilter !== 'all' && p.group !== groupFilter) return false
-        if (search && !p.name.includes(search)) return false
-        return true
+    try {
+      const response = await fetch('/api/players', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
       })
-      .sort((a, b) => {
-        if (sortBy === 'name') return a.name.localeCompare(b.name)
-        if (sortBy === 'age') return a.age - b.age
-        return 0
+
+      const data = await response.json()
+
+      if (data.success) {
+        setShowAddModal(false)
+        setFormData({
+          name: '',
+          gender: 'male',
+          birthDate: '',
+          group: 'U10',
+          status: 'training',
+          school: '',
+          parentName: '',
+          parentPhone: '',
+          parentWechat: ''
+        })
+        fetchPlayers()
+      } else {
+        alert(data.error || '创建失败')
+      }
+    } catch (error) {
+      console.error('创建学员失败:', error)
+      alert('创建学员失败')
+    }
+  }
+
+  const handleEditPlayer = (player: Player) => {
+    setEditingPlayer(player)
+    setFormData({
+      name: player.name,
+      gender: player.gender,
+      birthDate: player.birthDate.split('T')[0],
+      group: player.group,
+      status: player.status,
+      school: player.school || '',
+      parentName: player.parentName || '',
+      parentPhone: player.parentPhone || '',
+      parentWechat: player.parentWechat || ''
+    })
+    setShowAddModal(true)
+  }
+
+  const handleUpdatePlayer = async () => {
+    if (!editingPlayer || !formData.name || !formData.birthDate) {
+      alert('请填写姓名和出生日期')
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/players/${editingPlayer.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
       })
-  }, [players, search, groupFilter, sortBy])
 
-  // 计算平均能力值
-  const getAvgAbility = (player: Player) => {
-    return ((player.dribbling + player.passing + player.shooting + player.defending + player.physical + player.tactical) / 6).toFixed(1)
+      const data = await response.json()
+
+      if (data.success) {
+        setShowAddModal(false)
+        setEditingPlayer(null)
+        setFormData({
+          name: '',
+          gender: 'male',
+          birthDate: '',
+          group: 'U10',
+          status: 'training',
+          school: '',
+          parentName: '',
+          parentPhone: '',
+          parentWechat: ''
+        })
+        fetchPlayers()
+      } else {
+        alert(data.error || '更新失败')
+      }
+    } catch (error) {
+      console.error('更新学员失败:', error)
+      alert('更新学员失败')
+    }
   }
 
-  // 能力条颜色
-  const getAbilityColor = (score: number) => {
-    if (score >= 8) return 'bg-green-500'
-    if (score >= 6) return 'bg-blue-500'
-    if (score >= 4) return 'bg-yellow-500'
-    return 'bg-gray-400'
+  const handleDeletePlayer = async (id: string, name: string) => {
+    if (!confirm(`确定要删除学员「${name}」吗？此操作不可恢复。`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/players/${id}`, { method: 'DELETE' })
+      const data = await response.json()
+
+      if (data.success) {
+        fetchPlayers()
+      } else {
+        alert(data.error || '删除失败')
+      }
+    } catch (error) {
+      console.error('删除学员失败:', error)
+      alert('删除学员失败')
+    }
   }
+
+  // 计算统计数据
+  const stats = useMemo(() => {
+    return {
+      total: players.length,
+      training: players.filter(p => p.status === 'training').length,
+      trial: players.filter(p => p.status === 'trial').length
+    }
+  }, [players])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -100,16 +244,42 @@ export default function PlayersPage() {
               <Link href="/" className="p-2 hover:bg-gray-100 rounded-lg">
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </Link>
-              <h1 className="text-xl font-bold text-gray-900">球员管理</h1>
-              <span className="text-sm text-gray-500">{filteredPlayers.length}名球员</span>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">学员管理</h1>
+                <p className="text-sm text-gray-500">
+                  共 {stats.total} 名学员 · {stats.training} 在训 · {stats.trial} 试听
+                </p>
+              </div>
             </div>
             <button
-              onClick={() => setShowAddModal(true)}
+              onClick={() => {
+                setEditingPlayer(null)
+                setFormData({
+                  name: '',
+                  gender: 'male',
+                  birthDate: '',
+                  group: 'U10',
+                  status: 'training',
+                  school: '',
+                  parentName: '',
+                  parentPhone: '',
+                  parentWechat: ''
+                })
+                setShowAddModal(true)
+              }}
               className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg"
             >
               <Plus className="w-4 h-4" />
-              添加球员
+              添加学员
             </button>
+            <a
+              href="/api/export?type=players&format=excel"
+              download
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg"
+            >
+              <Download className="w-4 h-4" />
+              导出
+            </a>
           </div>
         </div>
       </header>
@@ -121,164 +291,298 @@ export default function PlayersPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="搜索球员姓名..."
+              placeholder="搜索学员姓名、家长姓名或电话..."
               value={search}
               onChange={e => setSearch(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSearch()}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             />
           </div>
-          
-          <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-gray-400" />
-            <select
-              value={groupFilter}
-              onChange={e => setGroupFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg"
-            >
-              {groups.map(g => (
-                <option key={g} value={g}>{g === 'all' ? '全部分组' : g}</option>
-              ))}
-            </select>
-          </div>
 
           <select
-            value={sortBy}
-            onChange={e => setSortBy(e.target.value)}
+            value={groupFilter}
+            onChange={e => setGroupFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg"
           >
-            <option value="name">按姓名</option>
-            <option value="age">按年龄</option>
+            {groups.map(g => (
+              <option key={g} value={g}>{g === 'all' ? '全部分组' : g}</option>
+            ))}
+          </select>
+
+          <select
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg"
+          >
+            {statuses.map(s => (
+              <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
           </select>
         </div>
 
-        {/* 球员列表 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredPlayers.map(player => (
-            <div key={player.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-              {/* 球员基本信息 */}
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="font-bold text-lg text-gray-900">{player.name}</h3>
-                  <p className="text-sm text-gray-500">{player.group} · {player.age}岁</p>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-orange-600">{getAvgAbility(player)}</div>
-                  <div className="text-xs text-gray-400">综合评分</div>
-                </div>
-              </div>
-
-              {/* 能力雷达/条形图 */}
-              <div className="space-y-2 mb-4">
-                {(['dribbling', 'passing', 'shooting', 'defending', 'physical', 'tactical'] as const).map(skill => {
-                  const score = player[skill]
-                  const labels: Record<string, string> = {
-                    dribbling: '运球', passing: '传球', shooting: '投篮',
-                    defending: '防守', physical: '体能', tactical: '战术'
-                  }
-                  return (
-                    <div key={skill} className="flex items-center gap-2">
-                      <span className="text-xs text-gray-500 w-8">{labels[skill]}</span>
-                      <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full rounded-full ${getAbilityColor(score)}`}
-                          style={{ width: `${score * 10}%` }}
-                        />
-                      </div>
-                      <span className="text-xs text-gray-600 w-4">{score}</span>
-                    </div>
-                  )
-                })}
-              </div>
-
-              {/* 操作按钮 */}
-              <div className="flex gap-2">
-                <button className="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm transition-colors">
-                  评估
-                </button>
-                <button className="flex-1 py-2 bg-orange-50 hover:bg-orange-100 text-orange-700 rounded-lg text-sm transition-colors">
-                  成长记录
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* 空状态 */}
-        {filteredPlayers.length === 0 && (
+        {/* 学员列表 */}
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="inline-block w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+            <p className="mt-2 text-gray-500">加载中...</p>
+          </div>
+        ) : players.length === 0 ? (
           <div className="text-center py-12">
             <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">暂无球员</h3>
-            <p className="text-gray-500 mb-4">点击右上角添加球员开始管理</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">暂无学员</h3>
+            <p className="text-gray-500 mb-4">点击右上角添加学员开始管理</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {players.map(player => (
+              <div
+                key={player.id}
+                className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-4">
+                    {/* 头像 */}
+                    <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                      <span className="text-xl font-bold text-orange-600">
+                        {player.name.charAt(0)}
+                      </span>
+                    </div>
+
+                    {/* 基本信息 */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-bold text-lg text-gray-900">{player.name}</h3>
+                        <span className={`px-2 py-0.5 text-xs rounded-full ${statusColors[player.status]}`}>
+                          {statusLabels[player.status]}
+                        </span>
+                        <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
+                          {player.group}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                        {player.gender === 'male' ? '男' : '女'}
+                        {player.age && <span>{player.age}岁</span>}
+                        {player.school && <span>{player.school}</span>}
+                        {player.team && <span className="text-orange-600">{player.team.name}</span>}
+                      </div>
+
+                      {/* 家长信息 */}
+                      {(player.parentName || player.parentPhone) && (
+                        <div className="flex items-center gap-3 mt-2 text-sm text-gray-500">
+                          {player.parentName && (
+                            <span className="flex items-center gap-1">
+                              <span className="text-gray-400">家长:</span>
+                              {player.parentName}
+                            </span>
+                          )}
+                          {player.parentPhone && (
+                            <span className="flex items-center gap-1">
+                              <Phone className="w-3 h-3" />
+                              {player.parentPhone}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* 统计 */}
+                      <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
+                        <span>训练 {player.trainingCount} 次</span>
+                        <span>评估 {player.assessmentCount} 次</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 操作按钮 */}
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/players/${player.id}`}
+                      className="p-2 hover:bg-gray-100 rounded-lg text-orange-600"
+                      title="查看详情"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </Link>
+                    <button
+                      onClick={() => handleEditPlayer(player)}
+                      className="p-2 hover:bg-gray-100 rounded-lg text-gray-400"
+                      title="编辑"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeletePlayer(player.id, player.name)}
+                      className="p-2 hover:bg-gray-100 rounded-lg text-red-400"
+                      title="删除"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </main>
 
-      {/* 添加球员弹窗 */}
+      {/* 添加/编辑学员弹窗 */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h2 className="text-lg font-bold text-gray-900">添加新球员</h2>
+          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 sticky top-0 bg-white">
+              <h2 className="text-lg font-bold text-gray-900">
+                {editingPlayer ? '编辑学员' : '添加新学员'}
+              </h2>
               <button
-                onClick={() => setShowAddModal(false)}
+                onClick={() => {
+                  setShowAddModal(false)
+                  setEditingPlayer(null)
+                }}
                 className="p-1 hover:bg-gray-100 rounded-lg"
               >
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
+
             <div className="p-4 space-y-4">
+              {/* 姓名 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">姓名</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  姓名 <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
-                  value={newPlayer.name}
-                  onChange={e => setNewPlayer({ ...newPlayer, name: e.target.value })}
-                  placeholder="请输入球员姓名"
+                  value={formData.name}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="请输入学员姓名"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
               </div>
+
+              {/* 出生日期 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">年龄</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  出生日期 <span className="text-red-500">*</span>
+                </label>
                 <input
-                  type="number"
-                  min="4"
-                  max="16"
-                  value={newPlayer.age}
-                  onChange={e => setNewPlayer({ ...newPlayer, age: e.target.value })}
-                  placeholder="请输入年龄"
+                  type="date"
+                  value={formData.birthDate}
+                  onChange={e => setFormData({ ...formData, birthDate: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">分组</label>
-                <select
-                  value={newPlayer.group}
-                  onChange={e => setNewPlayer({ ...newPlayer, group: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                >
-                  <option value="">请选择分组</option>
-                  <option value="U6">U6 (4-6岁)</option>
-                  <option value="U8">U8 (6-8岁)</option>
-                  <option value="U10">U10 (8-10岁)</option>
-                  <option value="U12">U12 (10-12岁)</option>
-                  <option value="U14">U14 (12-14岁)</option>
-                </select>
+
+              {/* 性别和分组 */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">性别</label>
+                  <select
+                    value={formData.gender}
+                    onChange={e => setFormData({ ...formData, gender: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="male">男</option>
+                    <option value="female">女</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">分组</label>
+                  <select
+                    value={formData.group}
+                    onChange={e => setFormData({ ...formData, group: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="U6">U6 (4-6岁)</option>
+                    <option value="U8">U8 (6-8岁)</option>
+                    <option value="U10">U10 (8-10岁)</option>
+                    <option value="U12">U12 (10-12岁)</option>
+                    <option value="U14">U14 (12-14岁)</option>
+                  </select>
+                </div>
               </div>
+
+              {/* 状态和学校 */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">状态</label>
+                  <select
+                    value={formData.status}
+                    onChange={e => setFormData({ ...formData, status: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="trial">试听中</option>
+                    <option value="training">在训</option>
+                    <option value="vacation">请假</option>
+                    <option value="suspended">停课</option>
+                    <option value="graduated">结业</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">学校</label>
+                  <input
+                    type="text"
+                    value={formData.school}
+                    onChange={e => setFormData({ ...formData, school: e.target.value })}
+                    placeholder="所在学校"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  />
+                </div>
+              </div>
+
+              {/* 家长信息 */}
+              <div className="border-t border-gray-200 pt-4">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">家长联系方式</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm text-gray-500 mb-1">家长姓名</label>
+                    <input
+                      type="text"
+                      value={formData.parentName}
+                      onChange={e => setFormData({ ...formData, parentName: e.target.value })}
+                      placeholder="请输入家长姓名"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-gray-500 mb-1">联系电话</label>
+                      <input
+                        type="tel"
+                        value={formData.parentPhone}
+                        onChange={e => setFormData({ ...formData, parentPhone: e.target.value })}
+                        placeholder="手机号码"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-500 mb-1">微信</label>
+                      <input
+                        type="text"
+                        value={formData.parentWechat}
+                        onChange={e => setFormData({ ...formData, parentWechat: e.target.value })}
+                        placeholder="微信号"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 操作按钮 */}
               <div className="flex gap-2 pt-2">
                 <button
                   onClick={() => {
-                    setNewPlayer({ name: '', age: '', group: '' })
                     setShowAddModal(false)
+                    setEditingPlayer(null)
                   }}
-                  className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
                 >
                   取消
                 </button>
                 <button
-                  onClick={handleAddPlayer}
-                  className="flex-1 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
+                  onClick={editingPlayer ? handleUpdatePlayer : handleAddPlayer}
+                  className="flex-1 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg"
                 >
-                  添加
+                  {editingPlayer ? '保存修改' : '添加学员'}
                 </button>
               </div>
             </div>

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Clock, MapPin, Users, Target, Play, CheckCircle2, Download, Edit, Sparkles } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { ArrowLeft, Clock, MapPin, Users, Target, Play, CheckCircle2, Download, Edit, Sparkles, Copy } from 'lucide-react'
 
 // 教案类型
 type TrainingPlan = {
@@ -20,11 +21,15 @@ type TrainingPlan = {
   generatedBy?: string
   sections?: any[]
   notes?: string
+  focusSkills?: string
 }
 
 export default function PlanDetailPage({ params }: { params: { id: string } }) {
   const [plan, setPlan] = useState<TrainingPlan | null>(null)
   const [loading, setLoading] = useState(true)
+  const [copying, setCopying] = useState(false)
+
+  const router = useRouter()
 
   useEffect(() => {
     fetchPlan()
@@ -47,6 +52,46 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
       console.error('获取教案详情失败:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  // 复制教案
+  async function handleCopyPlan() {
+    if (!plan) return
+
+    try {
+      setCopying(true)
+      const response = await fetch('/api/plans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: `${plan.title} (副本)`,
+          date: new Date().toISOString(),
+          duration: plan.duration,
+          group: plan.group,
+          location: plan.location,
+          weather: plan.weather,
+          theme: plan.theme,
+          focusSkills: plan.focusSkills ? JSON.parse(plan.focusSkills) : [],
+          intensity: plan.intensity || 'medium',
+          sections: plan.sections || [],
+          notes: plan.notes,
+          generatedBy: plan.generatedBy
+        })
+      })
+
+      const result = await response.json()
+      if (result.success) {
+        alert('教案复制成功！')
+        router.push(`/plans/${result.id}`)
+      } else {
+        alert('复制失败: ' + result.error)
+      }
+    } catch (error) {
+      console.error('复制教案失败:', error)
+      alert('复制失败')
+    } finally {
+      setCopying(false)
     }
   }
 
@@ -130,10 +175,25 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+              <button
+                onClick={handleCopyPlan}
+                disabled={copying}
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+              >
+                {copying ? (
+                  <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Copy className="w-4 h-4" />
+                )}
+                复制
+              </button>
+              <Link
+                href={`/plans/${plan.id}/edit`}
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              >
                 <Edit className="w-4 h-4" />
                 编辑
-              </button>
+              </Link>
               <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
                 <Download className="w-4 h-4" />
                 导出

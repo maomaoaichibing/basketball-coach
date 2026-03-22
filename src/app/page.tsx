@@ -13,8 +13,31 @@ import {
   ChevronRight,
   Dumbbell,
   Trophy,
-  Sparkles
+  Sparkles,
+  Activity,
+  Play,
+  Package,
+  User,
+  CalendarDays,
+  Ticket,
+  Receipt,
+  Bell,
+  Building2,
+  Lightbulb,
+  BarChart3,
+  Medal,
+  FileText,
+  MessageCircle,
+  CalendarCheck
 } from 'lucide-react'
+
+// 统计数据类型
+type Stats = {
+  totalPlayers: number
+  totalPlans: number
+  totalFeedback: number
+  totalAssessments: number
+}
 
 // 教案类型
 type TrainingPlan = {
@@ -37,10 +60,41 @@ export default function Home() {
   const [selectedGroup, setSelectedGroup] = useState('U10')
   const [recentPlans, setRecentPlans] = useState<TrainingPlan[]>([])
   const [loadingPlans, setLoadingPlans] = useState(false)
+  const [stats, setStats] = useState<Stats>({
+    totalPlayers: 0,
+    totalPlans: 0,
+    totalFeedback: 0,
+    totalAssessments: 0
+  })
 
   useEffect(() => {
     fetchRecentPlans()
+    fetchStats()
   }, [])
+
+  async function fetchStats() {
+    try {
+      const [playersRes, plansRes, recordsRes, assessmentsRes] = await Promise.all([
+        fetch('/api/players'),
+        fetch('/api/plans'),
+        fetch('/api/records'),
+        fetch('/api/assessments')
+      ])
+      const playersData = await playersRes.json()
+      const plansData = await plansRes.json()
+      const recordsData = await recordsRes.json()
+      const assessmentsData = await assessmentsRes.json()
+
+      setStats({
+        totalPlayers: playersData.total || 0,
+        totalPlans: plansData.total || 0,
+        totalFeedback: recordsData.total || 0,
+        totalAssessments: assessmentsData.total || 0
+      })
+    } catch (error) {
+      console.error('获取统计数据失败:', error)
+    }
+  }
 
   async function fetchRecentPlans() {
     try {
@@ -96,16 +150,76 @@ export default function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
+        {/* 统计概览 */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Users className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">{stats.totalPlayers}</div>
+                <div className="text-sm text-gray-500">学员总数</div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <ClipboardList className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">{stats.totalPlans}</div>
+                <div className="text-sm text-gray-500">教案总数</div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                <Activity className="w-5 h-5 text-orange-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">{stats.totalFeedback}</div>
+                <div className="text-sm text-gray-500">课后反馈</div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">{stats.totalAssessments}</div>
+                <div className="text-sm text-gray-500">成长记录</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* 快速操作 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Link href="/plan/new" className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 group">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center group-hover:bg-orange-500 transition-colors">
                 <Plus className="w-6 h-6 text-orange-600 group-hover:text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">生成新教案</h3>
-                <p className="text-sm text-gray-500">AI 智能生成训练教案</p>
+                <h3 className="font-semibold text-gray-900">生成教案</h3>
+                <p className="text-sm text-gray-500">AI 智能生成</p>
+              </div>
+            </div>
+          </Link>
+
+          <Link href="/training" className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 group">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center group-hover:bg-red-500 transition-colors">
+                <Play className="w-6 h-6 text-red-600 group-hover:text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">训练执行</h3>
+                <p className="text-sm text-gray-500">开始训练课</p>
               </div>
             </div>
           </Link>
@@ -117,19 +231,19 @@ export default function Home() {
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900">球员管理</h3>
-                <p className="text-sm text-gray-500">查看和评估球员</p>
+                <p className="text-sm text-gray-500">查看和评估</p>
               </div>
             </div>
           </Link>
 
-          <Link href="/plans" className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 group">
+          <Link href="/assessment" className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 group">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center group-hover:bg-green-500 transition-colors">
-                <ClipboardList className="w-6 h-6 text-green-600 group-hover:text-white" />
+              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-500 transition-colors">
+                <Trophy className="w-6 h-6 text-purple-600 group-hover:text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">教案库</h3>
-                <p className="text-sm text-gray-500">历史教案管理</p>
+                <h3 className="font-semibold text-gray-900">球员评估</h3>
+                <p className="text-sm text-gray-500">打分记录</p>
               </div>
             </div>
           </Link>
@@ -233,7 +347,19 @@ export default function Home() {
         {/* 快捷功能 */}
         <section>
           <h2 className="text-lg font-semibold text-gray-900 mb-4">快捷功能</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <Link href="/checkin" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+              <Activity className="w-8 h-8 text-green-600 mx-auto mb-2" />
+              <span className="text-sm font-medium text-gray-700">签到点名</span>
+            </Link>
+            <Link href="/training" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+              <Play className="w-8 h-8 text-red-500 mx-auto mb-2" />
+              <span className="text-sm font-medium text-gray-700">训练执行</span>
+            </Link>
+            <Link href="/goals" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+              <Target className="w-8 h-8 text-orange-600 mx-auto mb-2" />
+              <span className="text-sm font-medium text-gray-700">阶段目标</span>
+            </Link>
             <Link href="/growth" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
               <TrendingUp className="w-8 h-8 text-purple-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">成长追踪</span>
@@ -242,15 +368,78 @@ export default function Home() {
               <Trophy className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">球员评估</span>
             </Link>
-            <Link href="/teams" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
-              <Users className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-              <span className="text-sm font-medium text-gray-700">球队管理</span>
+            <Link href="/feedback" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+              <ClipboardList className="w-8 h-8 text-red-600 mx-auto mb-2" />
+              <span className="text-sm font-medium text-gray-700">课后反馈</span>
             </Link>
-            <Link href="/library" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
-              <ClipboardList className="w-8 h-8 text-green-600 mx-auto mb-2" />
-              <span className="text-sm font-medium text-gray-700">训练库</span>
+            <Link href="/courses" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+              <Package className="w-8 h-8 text-cyan-600 mx-auto mb-2" />
+              <span className="text-sm font-medium text-gray-700">课时管理</span>
+            </Link>
+            <Link href="/schedule" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+              <CalendarDays className="w-8 h-8 text-indigo-600 mx-auto mb-2" />
+              <span className="text-sm font-medium text-gray-700">课程安排</span>
+            </Link>
+            <Link href="/booking" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+              <Ticket className="w-8 h-8 text-pink-600 mx-auto mb-2" />
+              <span className="text-sm font-medium text-gray-700">课程预约</span>
+            </Link>
+            <Link href="/parent" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+              <User className="w-8 h-8 text-teal-600 mx-auto mb-2" />
+              <span className="text-sm font-medium text-gray-700">家长端</span>
+            </Link>
+            <Link href="/orders" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+              <Receipt className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
+              <span className="text-sm font-medium text-gray-700">订单管理</span>
+            </Link>
+            <Link href="/notifications" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+              <Bell className="w-8 h-8 text-amber-600 mx-auto mb-2" />
+              <span className="text-sm font-medium text-gray-700">通知管理</span>
+            </Link>
+            <Link href="/campuses" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+              <Building2 className="w-8 h-8 text-violet-600 mx-auto mb-2" />
+              <span className="text-sm font-medium text-gray-700">多校区管理</span>
+            </Link>
+            <Link href="/recommendations" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+              <Lightbulb className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+              <span className="text-sm font-medium text-gray-700">智能推荐</span>
+            </Link>
+            <Link href="/stats" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+              <BarChart3 className="w-8 h-8 text-cyan-600 mx-auto mb-2" />
+              <span className="text-sm font-medium text-gray-700">数据统计</span>
+            </Link>
+            <Link href="/training-analysis" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+              <Activity className="w-8 h-8 text-teal-600 mx-auto mb-2" />
+              <span className="text-sm font-medium text-gray-700">训练分析</span>
+            </Link>
+            <Link href="/matches" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+              <Medal className="w-8 h-8 text-amber-600 mx-auto mb-2" />
+              <span className="text-sm font-medium text-gray-700">比赛记录</span>
+            </Link>
+            <Link href="/growth-reports" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+              <FileText className="w-8 h-8 text-indigo-600 mx-auto mb-2" />
+              <span className="text-sm font-medium text-gray-700">成长档案</span>
+            </Link>
+            <Link href="/interaction" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+              <MessageCircle className="w-8 h-8 text-pink-600 mx-auto mb-2" />
+              <span className="text-sm font-medium text-gray-700">家校互动</span>
+            </Link>
+            <Link href="/analytics" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+              <Sparkles className="w-8 h-8 text-violet-600 mx-auto mb-2" />
+              <span className="text-sm font-medium text-gray-700">智能分析</span>
             </Link>
           </div>
+        </section>
+
+        {/* v4.2 智能分析 标识 */}
+        <section className="mt-8 p-4 bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl border border-violet-100">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="px-2 py-0.5 bg-violet-500 text-white text-xs rounded-full font-medium">v4.2</span>
+            <span className="text-sm font-medium text-gray-700">智能分析功能已上线</span>
+          </div>
+          <p className="text-sm text-gray-500">
+            AI训练建议 · 能力分析报告 · 智能分班推荐
+          </p>
         </section>
       </main>
     </div>

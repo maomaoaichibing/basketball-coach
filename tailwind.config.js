@@ -1,10 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  // 确保所有内容路径都被扫描
   content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  // 确保 Tailwind CSS 正确工作
   theme: {
     extend: {
       colors: {
@@ -24,4 +24,8 @@ module.exports = {
     },
   },
   plugins: [],
+  // 禁用某些可能引起问题的优化
+  corePlugins: {
+    preflight: true,
+  },
 }

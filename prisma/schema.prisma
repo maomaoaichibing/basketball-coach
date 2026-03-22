@@ -19,14 +19,43 @@ model Player {
   name        String
   birthDate   DateTime
   gender      String   @default("male")  // male/female
-  
+
   // 分组
   group       String   @default("U10")   // U6/U8/U10/U12/U14
-  
+
   // 身体数据（随时间变化）
   height      Float?   // cm
   weight      Float?   // kg
-  
+
+  // 学员状态
+  status      String   @default("training")  // trial/training/vacation/suspended/graduated
+
+  // 基础信息
+  school      String?  // 所在学校
+  position    String?  // 场上位置 guard/forward/center
+
+  // 伤病记录
+  injuries    String   @default("[]")  // JSON array
+
+  // 所属校区
+  campusId    String?
+  campus      Campus?  @relation(fields: [campusId], references: [id])
+
+  // 所属球队
+  teamId      String?
+  team        Team?    @relation(fields: [teamId], references: [id])
+
+  // 家长联系
+  parentName  String?
+  parentPhone String?
+  parentWechat String? // 家长微信
+
+  // 入学日期
+  enrollDate  DateTime @default(now())
+
+  // 标签
+  tags        String   @default("[]")  // JSON: ["elite", "high-priority"]
+
   // 技术能力 (1-10)
   dribbling   Int      @default(5)
   passing     Int      @default(5)
@@ -34,25 +63,19 @@ model Player {
   defending   Int      @default(5)
   physical    Int      @default(5)
   tactical    Int      @default(5)
-  
-  // 伤病记录
-  injuries    String   @default("[]")  // JSON array
-  
-  // 所属球队
-  teamId      String?
-  team        Team?    @relation(fields: [teamId], references: [id])
-  
-  // 家长联系
-  parentName  String?
-  parentPhone String?
-  
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   // 关联
   records     TrainingRecord[]
   assessments PlayerAssessment[]
   goals       PlayerGoal[]
+  guardians   Guardian[]
+  enrollments CourseEnrollment[]
+  bookings    Booking[]
+  orders      Order[]
+  notifications Notification[]
 }
 
 // 球员阶段目标
@@ -99,6 +122,27 @@ model PlayerAssessment {
 }
 
 // ============================================
+// 监护人相关模型
+// ============================================
+
+// 监护人
+model Guardian {
+  id          String   @id @default(uuid())
+  playerId    String
+  player      Player   @relation(fields: [playerId], references: [id])
+
+  name        String
+  relation    String   // 父亲/母亲/爷爷/奶奶/其他
+  mobile      String
+  wechat      String?
+  email       String?
+  isPrimary   Boolean  @default(false)  // 主要联系人
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ============================================
 // 球队相关模型
 // ============================================
 
@@ -106,19 +150,24 @@ model Team {
   id          String   @id @default(uuid())
   name        String
   group       String   @default("U10")   // U6/U8/U10/U12/U14
-  
+
+  // 校区关联
+  campusId    String?
+  campus      Campus?  @relation(fields: [campusId], references: [id])
+
   coachName   String?
   coachPhone  String?
-  
+
   location    String?  // 训练地点
   trainingTime String? // 训练时间
-  
+
   players     Player[]
-  
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   trainingPlans TrainingPlan[]
+  schedules    Schedule[]
 }
 
 // ============================================
@@ -181,29 +230,46 @@ model TrainingPlan {
 // 训练记录（课后填写）
 model TrainingRecord {
   id          String   @id @default(uuid())
-  
+
   planId      String
   plan        TrainingPlan @relation(fields: [planId], references: [id])
-  
+
   playerId    String?
   player      Player?  @relation(fields: [playerId], references: [id])
-  
+
+  // 教练ID
+  coachId     String?
+  coachName   String?  // 冗余存储方便查询
+
   // 出席情况
   attendance  String   @default("present")  // present/absent/late
-  
+  signInTime  DateTime?
+  signOutTime DateTime?
+
   // 表现评价
   performance Int?    // 1-10
   effort      Int?    // 1-10
   attitude    Int?    // 1-10
-  
-  // 特别记录
+
+  // 详细反馈
+  feedback    String?  // 教练详细反馈文本
   highlights  String?  // 亮点
   issues      String?  // 问题
   improvements String? // 改进建议
-  
+
+  // 技能评分 (1-10)
+  skillScores String?  // JSON: {"dribbling": 7, "shooting": 8}
+
   // 课后作业
   homework    String?
-  
+
+  // 媒体文件
+  mediaUrls   String?  // JSON: ["url1", "url2"]
+
+  // 教练确认
+  coachConfirmed Boolean @default(false)
+  parentViewed   Boolean @default(false)
+
   recordedAt  DateTime @default(now())
   createdAt   DateTime @default(now())
 }
@@ -258,6 +324,854 @@ model TrainingActivity {
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// ============================================
+// 课时管理相关模型
+// ============================================
+
+// 课程包
+model Course {
+  id          String   @id @default(uuid())
+
+  name        String   // 课程包名称，如"48课时半年卡"
+  type        String   @default("package")  // package:课时包, monthly:月卡, season:赛季卡
+
+  // 课时信息
+  totalHours  Int      @default(0)   // 总课时数
+  price       Float    @default(0)   // 价格
+  validDays   Int      @default(365) // 有效期(天)
+
+  // 适用分组
+  groups      String   @default("[]")  // JSON: ["U6","U8","U10"]
+
+  // 描述
+  description String?
+  notes       String?
+
+  // 状态
+  status      String   @default("active")  // active/inactive
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  enrollments CourseEnrollment[]
+
+  @@index([status])
+}
+
+// 学员课程购买记录
+model CourseEnrollment {
+  id          String   @id @default(uuid())
+
+  playerId    String
+  player      Player   @relation(fields: [playerId], references: [id])
+
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id])
+
+  // 购买信息
+  purchaseDate DateTime @default(now())
+  startDate   DateTime?  // 开始使用日期
+  expireDate  DateTime? // 过期日期
+
+  // 课时信息
+  totalHours  Int      // 购买时的总课时
+  usedHours   Float    @default(0)   // 已使用课时
+  remainingHours Float  @default(0)  // 剩余课时
+
+  // 状态
+  status      String   @default("active")  // active:使用中, completed:已用完, expired:已过期, cancelled:已取消
+
+  // 关联的训练记录
+  recordIds   String   @default("[]")  // JSON: 关联的训练记录IDs
+
+  notes       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ============================================
+// 排课管理相关模型
+// ============================================
+
+// 课程安排（排课）
+model Schedule {
+  id          String   @id @default(uuid())
+
+  // 课程基本信息
+  title       String   // 如"U10 周六训练课"
+  group       String   // U6/U8/U10/U12/U14
+  teamId      String?
+  team        Team?    @relation(fields: [teamId], references: [id])
+
+  // 时间安排
+  dayOfWeek   Int      // 0=周日, 1=周一, ..., 6=周六
+  startTime   String   // "09:00"
+  endTime     String   // "10:30"
+  duration    Int      // 分钟
+
+  // 地点
+  location    String   // 训练场地
+
+  // 教练
+  coachId     String?
+  coachName   String?
+
+  // 容量
+  maxPlayers  Int      @default(20)  // 最大人数
+  currentCount Int     @default(0)   // 当前报名人数
+
+  // 状态
+  status      String   @default("active")  // active/paused/cancelled
+  isRecurring  Boolean @default(true)  // 是否周期性重复
+
+  // 适用课程包类型
+  applicableCourses String @default("[]")  // JSON: ["package","monthly"]
+
+  // 备注
+  notes       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bookings    Booking[]
+
+  @@index([dayOfWeek])
+  @@index([status])
+}
+
+// 课程预约
+model Booking {
+  id          String   @id @default(uuid())
+
+  scheduleId  String
+  schedule    Schedule @relation(fields: [scheduleId], references: [id])
+
+  playerId    String
+  player      Player   @relation(fields: [playerId], references: [id])
+
+  // 预约日期（具体哪一天）
+  bookingDate DateTime
+
+  // 预约状态
+  status      String   @default("confirmed")  // confirmed/cancelled/no-show
+
+  // 预约来源
+  source      String   @default("online")  // online:线上预约, offline:线下报名
+
+  // 取消原因
+  cancelReason String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([scheduleId, playerId, bookingDate])  // 同一课程同一人同一天不能重复预约
+  @@index([bookingDate])
+  @@index([status])
+}
+
+// ============================================
+// 订单相关模型
+// ============================================
+
+// 订单
+model Order {
+  id          String   @id @default(uuid())
+
+  // 订单基本信息
+  orderNo     String   @unique  // 订单号
+  type        String   @default("course")  // course:课程购买, equipment:器材, uniform:服装, other:其他
+
+  // 客户信息
+  playerId    String?
+  player      Player?  @relation(fields: [playerId], references: [id])
+  customerName String?  // 客户姓名
+  customerPhone String? // 客户电话
+
+  // 金额信息
+  totalAmount Float    @default(0)   // 订单总金额
+  discountAmount Float @default(0)  // 优惠金额
+  paidAmount   Float    @default(0) // 已支付金额
+  pendingAmount Float   @default(0) // 待支付金额
+
+  // 订单状态
+  status      String   @default("pending")  // pending:待支付, partially_paid:部分支付, paid:已支付, cancelled:已取消, refunded:已退款
+
+  // 支付方式
+  paymentMethod String?  // wechat:微信, alipay:支付宝, cash:现金, bank:银行转账, other:其他
+
+  // 订单来源
+  source      String   @default("offline")  // offline:线下, online:线上, wechat:微信公众号, miniapp:小程序
+
+  // 备注
+  notes       String?
+
+  // 有效期（用于课程订单）
+  validFrom   DateTime?
+  validUntil  DateTime?
+
+  // 关联
+  items       OrderItem[]
+  payments    Payment[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  cancelledAt DateTime?
+  cancelledBy String?
+
+  @@index([orderNo])
+  @@index([status])
+  @@index([playerId])
+  @@index([createdAt])
+}
+
+// 订单项
+model OrderItem {
+  id          String   @id @default(uuid())
+
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+
+  // 商品信息
+  itemType    String   // course:课程包, equipment:器材, uniform:服装
+  itemId      String?  // 关联的课程包/商品ID
+
+  name        String   // 商品名称
+  quantity    Int      @default(1)  // 数量
+  unitPrice   Float    @default(0)  // 单价
+  subtotal    Float    @default(0) // 小计
+
+  // 课程包特有信息
+  courseId    String?  // 关联的课程包
+  hours       Int?     // 课时数
+  validDays   Int?     // 有效期天数
+
+  notes       String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([orderId])
+}
+
+// 支付记录
+model Payment {
+  id          String   @id @default(uuid())
+
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+
+  // 支付信息
+  amount      Float    // 支付金额
+  paymentMethod String  // wechat:微信, alipay:支付宝, cash:现金, bank:银行转账, other:其他
+
+  // 支付状态
+  status      String   @default("pending")  // pending:待确认, completed:已完成, failed:失败, refunded:已退款
+
+  // 支付时间
+  paidAt      DateTime?
+
+  // 交易信息
+  transactionNo String? // 第三方交易号
+  proofUrl    String?  // 支付凭证图片URL
+
+  // 操作信息
+  operator    String?  // 操作人
+  operatorName String? // 操作人姓名
+
+  notes       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([status])
+}
+
+// ============================================
+// 通知相关模型
+// ============================================
+
+// 通知模板
+model NotificationTemplate {
+  id          String   @id @default(uuid())
+
+  // 模板基本信息
+  code        String   @unique  // 模板代码: course_expiring, hours_low, birthday, etc.
+  name        String   // 模板名称
+  category    String   @default("system")  // system:系统, course:课程, reminder:提醒, marketing:营销
+
+  // 模板内容
+  title       String   // 通知标题
+  content     String   // 通知内容（支持变量替换）
+
+  // 变量说明
+  variables   String   @default("[]")  // JSON: ["playerName", "courseName", "remainingHours"]
+
+  // 发送设置
+  isActive    Boolean  @default(true)
+  isAutomated Boolean  @default(false)  // 是否自动触发
+
+  // 优先级
+  priority    String   @default("normal")  // low:低, normal:普通, high:高, urgent:紧急
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  notifications Notification[]
+
+  @@index([code])
+  @@index([isActive])
+}
+
+// 通知记录
+model Notification {
+  id          String   @id @default(uuid())
+
+  // 关联
+  templateId  String?
+  template    NotificationTemplate? @relation(fields: [templateId], references: [id])
+
+  // 接收人
+  playerId    String?
+  player      Player?  @relation(fields: [playerId], references: [id])
+  guardianId  String?  // 监护人ID
+  guardianName String? // 监护人姓名
+
+  // 通知内容
+  title       String
+  content     String
+  type        String   @default("system")  // system:系统, course:课程, reminder:提醒, marketing:营销
+
+  // 发送状态
+  status      String   @default("pending")  // pending:待发送, sent:已发送, failed:发送失败, read:已读
+
+  // 发送渠道
+  channel     String   @default("in_app")  // in_app:站内, sms:短信, wechat:微信
+
+  // 发送时间
+  scheduledAt DateTime? // 计划发送时间
+  sentAt      DateTime? // 实际发送时间
+  readAt      DateTime? // 阅读时间
+
+  // 关联业务
+  relatedType String?  // order, enrollment, booking, etc.
+  relatedId   String?
+
+  // 发送结果
+  errorMessage String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([playerId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([createdAt])
+}
+
+// ============================================
+// 多校区管理
+// ============================================
+
+// 校区
+model Campus {
+  id          String   @id @default(uuid())
+
+  // 基本信息
+  name        String   // 校区名称
+  code        String   @unique  // 校区代码
+  address     String?  // 地址
+  phone       String?  // 联系电话
+  managerName String?  // 负责人姓名
+
+  // 位置信息
+  latitude    Float?   // 纬度
+  longitude   Float?   // 经度
+
+  // 营业时间
+  openTime    String?  // "09:00"
+  closeTime   String?  // "21:00"
+
+  // 状态
+  status      String   @default("active")  // active:营业中, paused:暂停, closed:已关闭
+
+  // 描述
+  description String?
+
+  // 关联
+  players     Player[]
+  teams       Team[]
+  coaches     Coach[]
+  courts      Court[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+}
+
+// 场地（球场）
+model Court {
+  id          String   @id @default(uuid())
+
+  // 基本信息
+  name        String   // 场地名称，如"1号场"
+  campusId    String
+  campus      Campus   @relation(fields: [campusId], references: [id])
+
+  // 类型
+  type        String   @default("indoor")  // indoor:室内, outdoor:室外
+
+  // 容纳人数
+  capacity    Int      @default(20)
+
+  // 状态
+  status      String   @default("active")  // active:可用, maintenance:维护中, disabled:不可用
+
+  // 描述
+  description String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([campusId])
+}
+
+// 教练
+model Coach {
+  id          String   @id @default(uuid())
+
+  // 基本信息
+  name        String
+  phone       String   @unique
+  email       String?
+
+  // 校区关联
+  campusId    String?
+  campus      Campus?  @relation(fields: [campusId], references: [id])
+
+  // 专长
+  specialties String   @default("[]")  // JSON: ["dribbling", "shooting"]
+
+  // 状态
+  status      String   @default("active")  // active:在职, on_vacation:休假中, left:已离职
+
+  // 入职日期
+  hireDate    DateTime?
+
+  // 备注
+  notes       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([campusId])
+}
+
+// ============================================
+// 比赛记录相关模型
+// ============================================
+
+// 比赛记录
+model Match {
+  id          String   @id @default(uuid())
+
+  // 比赛基本信息
+  title       String   // 比赛标题，如"2024年春季联赛第三轮"
+  matchType   String   @default("league")  // league:联赛, cup:杯赛, friendly:友谊赛, practice:内部赛
+  group       String   // U6/U8/U10/U12/U14
+
+  // 时间地点
+  matchDate   DateTime
+  location    String   // 比赛地点
+
+  // 主队信息
+  teamId      String?  // 我方球队
+  teamName    String?  // 我方球队名称（冗余存储）
+  homeScore   Int      @default(0)  // 我方得分
+
+  // 客队信息
+  opponent    String   // 对手名称
+  opponentScore Int    @default(0)  // 对手得分
+
+  // 比分详情（每节比分）
+  quarterScores String @default("[]")  // JSON: [{"quarter": 1, "home": 15, "away": 12}, ...]
+
+  // 比赛结果
+  result      String   @default("pending")  // pending:待开始, win:胜, lose:负, draw:平
+
+  // 主客场
+  isHome      Boolean  @default(true)
+
+  // 天气
+  weather     String?
+
+  // 参赛球员
+  players     String   @default("[]")  // JSON: [playerId1, playerId2, ...]
+  playerStats String   @default("[]")  // JSON: [{playerId, minutes, points, rebounds, assists, ...}]
+
+  // 教练
+  coachId     String?
+  coachName   String?
+
+  // 备注
+  notes       String?
+
+  // 状态
+  status      String   @default("completed")  // scheduled:未开始, completed:已完成, cancelled:已取消
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  events      MatchEvent[]
+
+  @@index([matchDate])
+  @@index([teamId])
+  @@index([group])
+  @@index([result])
+}
+
+// 比赛事件（进球、助攻、犯规等）
+model MatchEvent {
+  id          String   @id @default(uuid())
+
+  matchId     String
+  match       Match    @relation(fields: [matchId], references: [id])
+
+  // 事件时间
+  eventTime   String   // "12:34" 比赛第12分34秒
+  quarter     Int?     // 第几节
+
+  // 球员信息
+  playerId    String?
+  playerName  String?
+
+  // 事件类型
+  eventType   String   // score:得分, rebound:篮板, assist:助攻, steal:抢断, block:盖帽, foul:犯规, turnover:失误, substitution:换人
+
+  // 事件详情
+  description String?  // 事件描述
+  points      Int?     // 得分分值（1/2/3分）
+
+  // 相关球员（助攻、抢断等涉及双方）
+  relatedPlayerId   String?
+  relatedPlayerName String?
+
+  // 位置
+  courtZone   String?  // 场上区域
+
+  createdAt   DateTime @default(now())
+
+  @@index([matchId])
+  @@index([playerId])
+  @@index([eventType])
+}
+
+// ============================================
+// 成长档案报告
+// ============================================
+
+// 成长报告
+model GrowthReport {
+  id          String   @id @default(uuid())
+
+  // 基本信息
+  playerId    String
+  playerName  String   // 冗余存储
+
+  // 报告周期
+  title       String   // 报告标题，如"2024年第一季度成长报告"
+  periodStart DateTime // 报告开始日期
+  periodEnd   DateTime // 报告结束日期
+
+  // 报告类型
+  reportType  String   @default("quarterly")  // monthly:月度, quarterly:季度, yearly:年度, milestone:里程碑
+
+  // 能力数据
+  abilities   String   @default("{}")  // JSON: {"dribbling": 7, "shooting": 8, ...}
+
+  // 训练统计
+  trainingStats String @default("{}")  // JSON: {"totalSessions": 12, "attendance": 90, "avgPerformance": 8.5}
+
+  // 比赛数据
+  matchStats   String  @default("{}")  // JSON: {"totalMatches": 5, "wins": 3, "avgPoints": 12.5}
+
+  // 成长分析
+  strengths    String  @default("[]")  // JSON: ["运球能力提升明显", "团队配合意识增强"]
+  improvements  String  @default("[]")  // JSON: ["需要加强投篮稳定性", "体能训练需增加"]
+  goals         String  @default("[]")  // JSON: ["下一阶段目标列表"]
+
+  // 总体评价
+  overallRating Int?   // 1-10
+  summary       String? // 教练综合评语
+
+  // 教练信息
+  coachId       String?
+  coachName     String?
+
+  // 状态
+  status        String  @default("draft")  // draft:草稿, published:已发布, viewed:已查看
+
+  // 查看记录
+  viewedAt      DateTime?
+  viewedBy      String?  // 查看者
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  publishedAt   DateTime?
+
+  @@index([playerId])
+  @@index([periodStart])
+  @@index([status])
+}
+
+// ============================================
+// 家校互动
+// ============================================
+
+// 请假申请
+model Leave {
+  id          String   @id @default(uuid())
+
+  // 基本信息
+  playerId    String
+  playerName  String   // 冗余存储
+  guardianId  String?
+  guardianName String?
+
+  // 请假信息
+  leaveType   String   @default("absence")  // absence:请假, late:迟到, early:早退
+  reason      String?  // 请假原因
+  dates       String   // JSON: [{"date": "2024-03-20", "scheduleId": "xxx"}]
+  totalHours  Int      @default(0)  // 请假课时数
+
+  // 审批状态
+  status      String   @default("pending")  // pending:待审批, approved:已批准, rejected:已拒绝, cancelled:已取消
+  approverId  String?
+  approverName String? // 审批人
+  approvedAt   DateTime?
+  reply       String?  // 审批回复
+
+  // 关联的训练安排
+  scheduleIds String   @default("[]")  // JSON: 关联的排课IDs
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([playerId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// 训练打卡
+model CheckIn {
+  id          String   @id @default(uuid())
+
+  // 基本信息
+  playerId    String
+  playerName  String
+  guardianId  String?
+
+  // 打卡信息
+  checkInType String   @default("training")  // training:训练打卡, homework:作业打卡, exercise:自主锻炼
+  date        DateTime // 打卡日期
+  duration    Int      @default(0)  // 时长（分钟）
+
+  // 打卡内容
+  content     String?  // 打卡描述
+  mediaUrls   String   @default("[]")  // JSON: 图片或视频URL
+  location    String?  // 打卡地点
+
+  // 教练反馈
+  coachFeedback String?
+  coachId     String?
+  coachName   String?
+  feedbackAt  DateTime?
+
+  // 点赞数
+  likes       Int      @default(0)
+
+  // 关联的训练记录
+  trainingRecordId String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([playerId])
+  @@index([date])
+  @@index([checkInType])
+}
+
+// 打卡点赞
+model CheckInLike {
+  id          String   @id @default(uuid())
+  checkInId   String
+  userId      String   // 点赞者ID（教练或家长）
+  userName    String
+  userType    String   // coach/guardian
+  createdAt   DateTime @default(now())
+
+  @@unique([checkInId, userId])
+}
+
+// 互动消息
+model Message {
+  id          String   @id @default(uuid())
+
+  // 基本信息
+  senderId    String
+  senderName  String
+  senderType  String   // coach/guardian/admin
+  senderAvatar String?
+
+  // 消息内容
+  content     String
+  messageType String   @default("text")  // text/text/image/system
+
+  // 关联
+  playerId    String?  // 可选：关联的学员
+  relatedType String?  // checkin/leave/assessment
+  relatedId   String?
+
+  // 阅读状态
+  isRead      Boolean  @default(false)
+  readAt      DateTime?
+
+  createdAt   DateTime @default(now())
+
+  // 接收者
+  receiverId  String?
+  receiverName String?
+
+  @@index([senderId])
+  @@index([playerId])
+  @@index([createdAt])
+}
+
+// ============================================
+// 智能分析与推荐
+// ============================================
+
+// 智能训练推荐
+model TrainingRecommend {
+  id          String   @id @default(uuid())
+
+  // 推荐类型
+  recommendType String @default("training")  // training:训练建议, class:分班建议, match:比赛推荐, skill:技能提升
+
+  // 关联的学员
+  playerId    String
+  playerName  String
+
+  // 推荐内容
+  title       String   // 推荐标题
+  content     String   // 推荐内容
+  reason      String?  // 推荐理由
+
+  // 推荐的具体项目
+  targetType  String?  // course/schedule/ability
+  targetId    String?
+  targetName  String?
+
+  // 优先级和状态
+  priority    Int      @default(3)  // 1-5，1最高
+  status      String   @default("pending")  // pending:待处理, accepted:已接受, rejected:已拒绝, completed:已完成
+
+  // 效果追踪
+  effectiveness Int?  // 效果评分 1-10
+  feedback    String?  // 学员/家长反馈
+
+  // 教练信息
+  coachId     String?
+  coachName   String?
+  isAuto      Boolean  @default(true)  // 是否自动生成
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  expiresAt   DateTime? // 推荐过期时间
+
+  @@index([playerId])
+  @@index([recommendType])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// 智能分班推荐
+model TeamRecommendation {
+  id          String   @id @default(uuid())
+
+  playerId    String
+  playerName  String
+
+  // 当前班级
+  currentTeamId   String?
+  currentTeamName String?
+
+  // 推荐班级
+  recommendedTeamId   String
+  recommendedTeamName String
+  recommendedGroup    String  // U6/U8/U10/U12/U14
+
+  // 推荐理由
+  reason      String   // 推荐理由分析
+
+  // 能力匹配度
+  abilityMatch Int     // 匹配度 0-100%
+
+  // 预期效果
+  expectedImprovement String?  // 预期提升
+
+  // 状态
+  status      String   @default("pending")  // pending:待确认, accepted:已接受, rejected:已拒绝
+  handledBy   String?
+  handledAt   DateTime?
+
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime? // 30天内有效
+
+  @@index([playerId])
+  @@index([status])
+}
+
+// 学员能力分析
+model AbilityAnalysis {
+  id          String   @id @default(uuid())
+
+  playerId    String
+  playerName  String
+
+  // 分析周期
+  periodStart DateTime
+  periodEnd   DateTime
+
+  // 能力评分（0-100）
+  overallScore Int     // 综合评分
+
+  // 各维度评分
+  dimensions   String  @default("{}")  // JSON: {dribbling: 85, shooting: 72, ...}
+
+  // 进步情况
+  progress     String  @default("{}")  // JSON: {dribbling: "+5", shooting: "-2", ...}
+
+  // 分析结果
+  strengths    String  @default("[]")  // 强项
+  weaknesses   String  @default("[]")  // 弱项
+  potential    String? // 潜力分析
+
+  // 训练建议
+  trainingSuggestions String @default("[]")  // JSON: 训练建议列表
+
+  // 分析方法
+  method       String  @default("auto")  // auto:自动分析, manual:手动评估
+  analystId    String?
+  analystName  String?
+
+  createdAt    DateTime @default(now())
+
+  @@index([playerId])
+  @@index([periodStart])
 }
 
 // ============================================
