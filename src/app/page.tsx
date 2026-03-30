@@ -136,11 +136,17 @@ export default function Home() {
                 <Dumbbell className="w-7 h-7" />
               </div>
               <div>
-                <h1 className="text-xl font-bold">篮球青训教案系统</h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl font-bold">篮球青训教案系统</h1>
+                  <span className="px-2 py-0.5 bg-white/20 text-white text-xs rounded-full font-medium">v4.2</span>
+                </div>
                 <p className="text-orange-100 text-sm">智能教案生成 · 球员成长追踪</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Link href="/version" className="px-3 py-1.5 text-sm hover:bg-white/10 rounded-lg flex items-center gap-1">
+                <span>版本管理</span>
+              </Link>
               <Link href="/settings" className="p-2 hover:bg-white/10 rounded-lg">
                 <Settings className="w-5 h-5" />
               </Link>
