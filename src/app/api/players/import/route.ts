@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import * as XLSX from 'xlsx'
 
 // 学员数据接口
 interface PlayerRow {
@@ -82,7 +83,7 @@ function parseDate(value: string): Date | null {
   return null
 }
 
-// POST /api/players/import - 批量导入学员
+// POST /api/players/import - 批量导入学员（支持 CSV 和 XLSX）
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
@@ -95,19 +96,54 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 读取文件内容
-    const text = await file.text()
-    const lines = text.trim().split('\n')
+    // 检测文件类型
+    const fileName = file.name.toLowerCase()
+    const isXlsx = fileName.endsWith('.xlsx') || fileName.endsWith('.xls')
+    
+    let headers: string[] = []
+    let rows: any[][] = []
 
-    if (lines.length < 2) {
-      return NextResponse.json(
-        { success: false, error: '文件内容为空或格式不正确' },
-        { status: 400 }
-      )
+    if (isXlsx) {
+      // 解析 XLSX 文件
+      const buffer = await file.arrayBuffer()
+      const workbook = XLSX.read(buffer, { type: 'array' })
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]]
+      const data = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' }) as any[][]
+      
+      if (data.length < 2) {
+        return NextResponse.json(
+          { success: false, error: '文件内容为空或格式不正确' },
+          { status: 400 }
+        )
+      }
+      
+      headers = data[0].map((h: any) => String(h || '').trim())
+      rows = data.slice(1).filter(row => row && row.some((cell: any) => cell !== ''))
+    } else {
+      // 解析 CSV 文件
+      const text = await file.text()
+      const lines = text.trim().split('\n')
+      
+      if (lines.length < 2) {
+        return NextResponse.json(
+          { success: false, error: '文件内容为空或格式不正确' },
+          { status: 400 }
+        )
+      }
+      
+      // 解析表头
+      headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''))
+      
+      // 解析数据行
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim()
+        if (!line) continue
+        
+        // 处理CSV引号
+        const values = line.split(',').map(v => v.trim().replace(/"/g, ''))
+        rows.push(values)
+      }
     }
-
-    // 解析表头
-    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''))
 
     // 验证必要字段
     const requiredIndexes: Record<string, number> = {
@@ -137,37 +173,34 @@ export async function POST(request: NextRequest) {
     const players: PlayerRow[] = []
     const errors: { row: number; message: string }[] = []
 
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].trim()
-      if (!line) continue
+    for (let i = 0; i < rows.length; i++) {
+      const values = rows[i]
+      if (!values || values.every(v => !v)) continue
 
-      // 处理CSV引号
-      const values = line.split(',').map(v => v.trim().replace(/"/g, ''))
-
-      const name = values[requiredIndexes.name]?.trim()
-      const birthDateStr = values[requiredIndexes.birthDate]?.trim()
+      const name = String(values[requiredIndexes.name] || '').trim()
+      const birthDateStr = String(values[requiredIndexes.birthDate] || '').trim()
 
       if (!name) {
-        errors.push({ row: i + 1, message: '姓名为空' })
+        errors.push({ row: i + 2, message: '姓名为空' })
         continue
       }
 
       const birthDate = parseDate(birthDateStr)
       if (!birthDate) {
-        errors.push({ row: i + 1, message: `出生日期"${birthDateStr}"格式不正确` })
+        errors.push({ row: i + 2, message: `出生日期"${birthDateStr}"格式不正确` })
         continue
       }
 
       players.push({
         name,
-        gender: fieldIndexes.gender !== -1 ? parseGender(values[fieldIndexes.gender]) : 'male',
+        gender: fieldIndexes.gender !== -1 ? parseGender(String(values[fieldIndexes.gender] || '')) : 'male',
         birthDate: birthDate.toISOString().split('T')[0],
-        group: fieldIndexes.group !== -1 ? parseGroup(values[fieldIndexes.group]) : 'U10',
-        status: fieldIndexes.status !== -1 ? parseStatus(values[fieldIndexes.status]) : 'training',
-        school: fieldIndexes.school !== -1 ? values[fieldIndexes.school]?.trim() : undefined,
-        parentName: fieldIndexes.parentName !== -1 ? values[fieldIndexes.parentName]?.trim() : undefined,
-        parentPhone: fieldIndexes.parentPhone !== -1 ? values[fieldIndexes.parentPhone]?.trim() : undefined,
-        parentWechat: fieldIndexes.parentWechat !== -1 ? values[fieldIndexes.parentWechat]?.trim() : undefined,
+        group: fieldIndexes.group !== -1 ? parseGroup(String(values[fieldIndexes.group] || '')) : 'U10',
+        status: fieldIndexes.status !== -1 ? parseStatus(String(values[fieldIndexes.status] || '')) : 'training',
+        school: fieldIndexes.school !== -1 ? String(values[fieldIndexes.school] || '').trim() : undefined,
+        parentName: fieldIndexes.parentName !== -1 ? String(values[fieldIndexes.parentName] || '').trim() : undefined,
+        parentPhone: fieldIndexes.parentPhone !== -1 ? String(values[fieldIndexes.parentPhone] || '').trim() : undefined,
+        parentWechat: fieldIndexes.parentWechat !== -1 ? String(values[fieldIndexes.parentWechat] || '').trim() : undefined,
       })
     }
 

@@ -674,8 +674,8 @@ export default function PlayersPage() {
                       <div className="flex items-center gap-3">
                         <FileSpreadsheet className="w-8 h-8 text-green-600" />
                         <div>
-                          <p className="font-medium text-gray-900">学员导入模板.csv</p>
-                          <p className="text-sm text-gray-500">支持 CSV 格式，必填项：姓名、出生日期</p>
+                          <p className="font-medium text-gray-900">学员导入模板</p>
+                          <p className="text-sm text-gray-500">支持 CSV、XLSX 格式，必填项：姓名、出生日期</p>
                         </div>
                       </div>
                       <a
@@ -707,12 +707,12 @@ export default function PlayersPage() {
                   >
                     <Upload className={`w-12 h-12 mx-auto mb-3 ${dragActive ? 'text-green-500' : 'text-gray-400'}`} />
                     <p className="text-gray-700 mb-2">
-                      拖拽 CSV 文件到此处，或
+                      拖拽 CSV/XLSX 文件到此处，或
                       <label className="text-green-600 hover:text-green-700 cursor-pointer mx-1">
                         点击选择文件
                         <input
                           type="file"
-                          accept=".csv,.txt"
+                          accept=".csv,.txt,.xlsx,.xls"
                           className="hidden"
                           onChange={e => {
                             const file = e.target.files?.[0]
@@ -721,14 +721,14 @@ export default function PlayersPage() {
                         />
                       </label>
                     </p>
-                    <p className="text-sm text-gray-500">支持 .csv 格式</p>
+                    <p className="text-sm text-gray-500">支持 .csv, .xlsx, .xls 格式</p>
                   </div>
 
                   {/* 导入说明 */}
                   <div className="mt-4 p-4 bg-blue-50 rounded-lg">
                     <h4 className="font-medium text-blue-900 mb-2">导入说明</h4>
                     <ul className="text-sm text-blue-700 space-y-1">
-                      <li>• 文件格式：CSV（逗号分隔值）</li>
+                      <li>• 文件格式：CSV（逗号分隔值）或 Excel（.xlsx/.xls）</li>
                       <li>• 必填字段：姓名、出生日期</li>
                       <li>• 可选字段：性别（男/女）、分组（U6/U8/U10/U12/U14）、状态、学校、家长姓名、联系电话、微信</li>
                       <li>• 出生日期格式：YYYY-MM-DD（如 2018-05-01）</li>
