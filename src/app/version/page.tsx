@@ -1,59 +1,38 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowLeft, Github, Calendar, Tag, Zap, Plus, CheckCircle, AlertCircle, Info } from 'lucide-react'
+import { ArrowLeft, Tag, Zap, Github, Calendar, Plus, CheckCircle, AlertCircle, Info } from 'lucide-react'
 
 // 版本历史记录
 const versions = [
   {
+    version: 'v4.3',
+    date: '2026-03-30',
+    title: '版本管理 + UI 优化',
+    description: '增加版本管理功能，优化教案生成 UI',
+    features: [
+      { type: 'feature', text: '左上角显示当前版本号 v4.3' },
+      { type: 'feature', text: '右上角导航增加版本管理入口' },
+      { type: 'feature', text: '版本管理页面展示完整历史记录' },
+      { type: 'feature', text: '教案头部显示技能水平 + 训练强度双标签' },
+    ],
+    fixes: [
+      { type: 'fix', text: '修复技能水平标签显示问题' },
+    ]
+  },
+  {
     version: 'v4.2',
     date: '2026-03-30',
     title: 'AI 教案生成优化 + 智能分析',
-    description: '重构教案生成逻辑，增加智能分析和版本管理',
+    description: '重构教案生成逻辑，增加智能分析',
     features: [
       { type: 'feature', text: '三段式教案结构（每30分钟一节）' },
       { type: 'feature', text: 'U10 基础/进阶/精英 三级版本' },
       { type: 'feature', text: '去掉教练引导语，只保留动作描述' },
-      { type: 'feature', text: '教案头部显示技能水平 + 训练强度双标签' },
       { type: 'feature', text: '批量导入学员（CSV表格）' },
-      { type: 'feature', text: '左上角显示当前版本号' },
-      { type: 'feature', text: '右上角增加版本管理入口' },
     ],
     fixes: [
       { type: 'fix', text: '修复教练API缺少password字段的TypeScript错误' },
-    ]
-  },
-  {
-    version: 'v4.1',
-    date: '2026-03-24',
-    title: '智能教案生成 2.0',
-    description: 'AI 驱动的智能教案生成系统，支持技能短板分析',
-    features: [
-      { type: 'feature', text: 'RAG 案例库集成，检索相似教学案例' },
-      { type: 'feature', text: '学员技能短板自动分析' },
-      { type: 'feature', text: '针对性训练方案推荐' },
-      { type: 'feature', text: '支持 AI 生成和规则生成双模式' },
-    ],
-    fixes: [
-      { type: 'fix', text: '修复分数计算 bug（从5分制改为50分制）' },
-      { type: 'fix', text: '优化技能等级阈值，适应不同年龄段' },
-    ]
-  },
-  {
-    version: 'v4.0',
-    date: '2026-03-20',
-    title: '全面重构升级',
-    description: 'Next.js + TypeScript + Tailwind CSS 技术栈重构',
-    features: [
-      { type: 'feature', text: '全新 UI 设计，响应式布局' },
-      { type: 'feature', text: '完整的学员管理系统' },
-      { type: 'feature', text: '训练计划管理' },
-      { type: 'feature', text: '课后反馈与评估' },
-      { type: 'feature', text: '数据统计与分析' },
-    ],
-    fixes: [
-      { type: 'fix', text: '修复开发模式样式丢失问题' },
-      { type: 'fix', text: '优化生产环境构建流程' },
     ]
   },
 ]
