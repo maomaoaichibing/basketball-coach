@@ -461,13 +461,26 @@ export default function NewPlanPage() {
                         {plan.weather && ` · ${plan.weather}`}
                       </p>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      plan.intensity === 'high' ? 'bg-red-500' :
-                      plan.intensity === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-                    } text-white`}>
-                      {plan.intensity === 'high' ? '高强度' : 
-                       plan.intensity === 'medium' ? '中等强度' : '低强度'}
-                    </span>
+                    <div className="flex flex-col gap-2">
+                      {/* 技能水平标签 */}
+                      {useAI && (
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          aiConfig.skillLevel === 'advanced' ? 'bg-red-500' :
+                          aiConfig.skillLevel === 'intermediate' ? 'bg-yellow-500' : 'bg-green-500'
+                        } text-white`}>
+                          {aiConfig.skillLevel === 'advanced' ? '高级水平' : 
+                           aiConfig.skillLevel === 'intermediate' ? '中级水平' : '初级水平'}
+                        </span>
+                      )}
+                      {/* 训练强度标签 */}
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        plan.intensity === 'high' ? 'bg-red-600' :
+                        plan.intensity === 'medium' ? 'bg-yellow-600' : 'bg-green-600'
+                      } text-white`}>
+                        {plan.intensity === 'high' ? '高强度' : 
+                         plan.intensity === 'medium' ? '中等强度' : '低强度'}
+                      </span>
+                    </div>
                   </div>
                   
                   {/* 重点技能标签 */}

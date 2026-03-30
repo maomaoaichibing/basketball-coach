@@ -33,13 +33,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, phone, email, campusId, specialties, hireDate, notes } = body
+    const { name, phone, email, campusId, specialties, hireDate, notes, password } = body
 
     const coach = await prisma.coach.create({
       data: {
         name,
         phone,
         email,
+        password: password || '123456', // 默认密码，生产环境应该要求必填
         campusId,
         specialties: JSON.stringify(specialties || []),
         hireDate: hireDate ? new Date(hireDate) : null,
