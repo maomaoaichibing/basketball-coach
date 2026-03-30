@@ -46,29 +46,36 @@ export async function GET(request: NextRequest) {
     })
 
     // 转换数据格式
-    const formattedPlayers = players.map(p => ({
-      id: p.id,
-      name: p.name,
-      birthDate: p.birthDate,
-      gender: p.gender,
-      group: p.group,
-      height: p.height,
-      weight: p.weight,
-      status: p.status,
-      school: p.school,
-      position: p.position,
-      parentName: p.parentName,
-      parentPhone: p.parentPhone,
-      parentWechat: p.parentWechat,
-      enrollDate: p.enrollDate,
-      tags: JSON.parse(p.tags || '[]'),
-      injuries: JSON.parse(p.injuries || '[]'),
-      team: p.team,
-      guardians: p.guardians,
-      trainingCount: p._count.records,
-      assessmentCount: p._count.assessments,
-      createdAt: p.createdAt
-    }))
+    const formattedPlayers = players.map(p => {
+      // 计算年龄
+      const birth = new Date(p.birthDate)
+      const age = Math.floor((Date.now() - birth.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+
+      return {
+        id: p.id,
+        name: p.name,
+        birthDate: p.birthDate,
+        gender: p.gender || 'male', // 确保有默认值
+        group: p.group,
+        height: p.height,
+        weight: p.weight,
+        status: p.status,
+        school: p.school || '', // 确保有默认值
+        position: p.position,
+        parentName: p.parentName || '', // 确保有默认值
+        parentPhone: p.parentPhone || '', // 确保有默认值
+        parentWechat: p.parentWechat || '', // 确保有默认值
+        enrollDate: p.enrollDate,
+        tags: JSON.parse(p.tags || '[]'),
+        injuries: JSON.parse(p.injuries || '[]'),
+        team: p.team || null, // 确保有默认值
+        guardians: p.guardians || [], // 确保有默认值
+        trainingCount: p._count.records,
+        assessmentCount: p._count.assessments,
+        createdAt: p.createdAt,
+        age // 添加年龄字段
+      }
+    })
 
     return NextResponse.json({
       success: true,

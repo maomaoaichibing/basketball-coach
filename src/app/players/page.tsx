@@ -11,14 +11,14 @@ type Player = {
   group: string
   gender: string
   birthDate: string
-  age?: number
+  age: number
   status: string
-  school?: string
-  parentName?: string
-  parentPhone?: string
-  parentWechat?: string
-  team?: { id: string; name: string }
-  guardians?: Guardian[]
+  school: string
+  parentName: string
+  parentPhone: string
+  parentWechat: string
+  team: { id: string; name: string } | null
+  guardians: Guardian[]
   trainingCount: number
   assessmentCount: number
 }
@@ -238,8 +238,10 @@ export default function PlayersPage() {
 
   // 处理文件上传
   const handleFileUpload = async (file: File) => {
-    if (!file.name.endsWith('.csv') && !file.name.endsWith('.txt')) {
-      alert('请上传 CSV 格式的文件')
+    const fileName = file.name.toLowerCase()
+    if (!fileName.endsWith('.csv') && !fileName.endsWith('.txt') && 
+        !fileName.endsWith('.xlsx') && !fileName.endsWith('.xls')) {
+      alert('请上传 CSV 或 Excel 格式的文件')
       return
     }
 
@@ -419,27 +421,27 @@ export default function PlayersPage() {
                       </div>
 
                       <div className="flex items-center gap-4 text-sm text-gray-500">
-                        {player.gender === 'male' ? '男' : '女'}
-                        {player.age && <span>{player.age}岁</span>}
-                        {player.school && <span>{player.school}</span>}
-                        {player.team && <span className="text-orange-600">{player.team.name}</span>}
+                        <span>{player.gender === 'male' ? '男' : '女'}</span>
+                        <span>{player.age}岁</span>
+                        {player.school ? <span>{player.school}</span> : null}
+                        {player.team ? <span className="text-orange-600">{player.team.name}</span> : null}
                       </div>
 
                       {/* 家长信息 */}
-                      {(player.parentName || player.parentPhone) && (
+                      {(player.parentName?.trim() || player.parentPhone?.trim()) && (
                         <div className="flex items-center gap-3 mt-2 text-sm text-gray-500">
-                          {player.parentName && (
+                          {player.parentName?.trim() ? (
                             <span className="flex items-center gap-1">
                               <span className="text-gray-400">家长:</span>
                               {player.parentName}
                             </span>
-                          )}
-                          {player.parentPhone && (
+                          ) : null}
+                          {player.parentPhone?.trim() ? (
                             <span className="flex items-center gap-1">
                               <Phone className="w-3 h-3" />
                               {player.parentPhone}
                             </span>
-                          )}
+                          ) : null}
                         </div>
                       )}
 
