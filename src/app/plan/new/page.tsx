@@ -462,8 +462,8 @@ export default function NewPlanPage() {
                       </p>
                     </div>
                     <div className="flex flex-col gap-2">
-                      {/* 技能水平标签 */}
-                      {useAI && (
+                      {/* 技能水平标签（只要选了技能水平就显示，无论AI还是规则） */}
+                      {aiConfig.skillLevel && (
                         <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                           aiConfig.skillLevel === 'advanced' ? 'bg-red-500' :
                           aiConfig.skillLevel === 'intermediate' ? 'bg-yellow-500' : 'bg-green-500'
