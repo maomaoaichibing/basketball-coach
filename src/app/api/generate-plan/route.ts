@@ -19,7 +19,48 @@ interface AIPlanParams {
   debug?: boolean
 }
 
-// AI生成提示词
+// ============================================================
+// 三段式教案结构（按用户要求：每30分钟一节）
+// 第一节（30分钟）：准备热身部分
+// 第二节（duration-60分钟）：正式训练部分
+// 第三节（30分钟）：对抗比赛 + 放松
+// ============================================================
+
+function generateSegmentStructure(duration: number): Array<{ name: string; minutes: number; categories: string[]; description: string }> {
+  const first = 30
+  const last = 30
+  const middle = Math.max(30, duration - first - last)
+
+  return [
+    {
+      name: '第一节',
+      minutes: first,
+      categories: ['etiquette', 'warmup', 'ball_familiarity'],
+      description: '准备热身：课前礼仪 → 慢跑热身 → 球性熟悉/柔韧拉伸'
+    },
+    {
+      name: '第二节',
+      minutes: middle,
+      categories: ['technical', 'physical', 'tactical'],
+      description: '正式训练：技术训练 → 体能训练 → 战术训练（根据skillLevel调整难度）'
+    },
+    {
+      name: '第三节',
+      minutes: last,
+      categories: ['game', 'cooldown'],
+      description: '对抗比赛 + 放松总结'
+    }
+  ]
+}
+
+// U10三级版说明
+const u10LevelGuide: Record<string, string> = {
+  '基础': '初次接触篮球，动作以模仿为主，难度最低，对抗少',
+  '进阶': '有一定篮球基础，可进行标准动作训练，有少量对抗',
+  '精英': '技术较成熟，可进行组合动作训练，有正式对抗比赛'
+}
+
+// 生成Prompt
 function generatePrompt(params: AIPlanParams, cases: any[]): string {
   const ageGroupInfo: Record<string, string> = {
     'U6': '4-6岁幼儿班，以游戏为主，培养球性和兴趣',
@@ -29,74 +70,94 @@ function generatePrompt(params: AIPlanParams, cases: any[]): string {
     'U14': '13-14岁初中，综合提升，中考体育'
   }
 
-  // 将案例格式化为参考文本
-  const casesText = cases.length > 0
-    ? `
-
-## 参考案例（来自真实教学数据）
-${cases.map((c, i) => `
-案例${i + 1} [${c.age_group} ${c.class_level} ${c.month}]:
-- 环节: ${c.section || '训练部分'}-${c.part || c.tech_type}
-- 训练方法: ${c.method}
-- 教练引导: ${c.coach_guide}
-- 要点: ${c.key_points}
-`).join('\n')}`
+  const segments = generateSegmentStructure(params.duration)
+  const isU10 = params.group === 'U10'
+  const levelLabel = isU10 && params.skillLevel
+    ? (params.skillLevel === 'beginner' ? '基础' : params.skillLevel === 'intermediate' ? '进阶' : '精英')
     : ''
 
-  return `你是一位专业的篮球青训教练，请为以下学员生成一份详细的篮球训练教案：
+  // RAG 案例整理
+  const casesText = cases.length > 0
+    ? cases.map((c, i) => `案例${i + 1} [${c.age_group} ${c.class_level} ${c.month}] ${c.section}-${c.part}: ${c.method}（要点：${c.key_points}）`).join('\n')
+    : ''
+
+  // 难度级别描述（U10三级版）
+  const levelDesc = isU10
+    ? `\n## U10级别说明（${levelLabel}）\n${u10LevelGuide[levelLabel] || ''}\n`
+    : ''
+
+  // 训练节次结构
+  const segmentDesc = segments.map(s =>
+    `- ${s.name}（${s.minutes}分钟）：${s.description}`
+  ).join('\n')
+
+  return `你是一位专业的篮球青训教练，请根据以下要求生成篮球训练教案。
 
 ## 学员信息
-- 年龄段：${params.group} (${ageGroupInfo[params.group] || ''})
-- 训练时长：${params.duration}分钟
+- 年龄段：${params.group}（${ageGroupInfo[params.group] || ''}）
+- 训练时长：${params.duration}分钟（分为三节：前30分钟准备热身，中间正式训练，后30分钟对抗比赛）
 - 训练场地：${params.location}
 - 天气：${params.weather || '未指定'}
-- 学员人数：${params.playerCount || '8-12'}人
-- 技能水平：${params.skillLevel || 'intermediate'}
+- 学员人数：${params.playerCount || '8-12'}人${levelDesc}
+
+## 训练节次结构
+${segmentDesc}
 
 ## 训练要求
 - 训练主题：${params.theme || '根据年龄段特点自动确定'}
 - 重点训练技能：${params.focusSkills?.join('、') || '根据年龄段特点自动确定'}
-${params.additionalNotes ? `- 其他要求：${params.additionalNotes}` : ''}
-${params.previousTraining?.length ? `- 最近训练内容：${params.previousTraining.join('、')}（请避免重复或进行进阶训练）` : ''}
+- 技能水平：${isU10 ? levelLabel + '（' + u10LevelGuide[levelLabel] + '）' : (params.skillLevel || 'intermediate')}
+${params.previousTraining?.length ? `- 最近训练内容：${params.previousTraining.join('、')}（避免重复或进阶）` : ''}
 
-## 输出要求
-请按照以下JSON格式输出教案，确保JSON格式正确，不要包含任何其他文字：
+${casesText ? `## 参考案例（来自真实教学数据）\n${casesText}\n` : ''}
 
+## 输出格式（严格JSON）
 {
-  "title": "教案标题",
+  "title": "教案标题（包含年龄段、主题、级别）",
   "theme": "训练主题",
   "objective": "训练目标（1-2句话）",
-  "intensity": "训练强度（low/medium/high）",
-  "sections": [
+  "level": "${isU10 ? levelLabel : 'N/A'}",
+  "intensity": "low/medium/high",
+  "segments": [
     {
-      "name": "环节名称",
-      "category": "环节类别（etiquette/warmup/ball_familiarity/technical/physical/tactical/game/cooldown）",
-      "duration": 10,
+      "name": "第一节",
+      "duration": 30,
       "activities": [
         {
           "name": "活动名称",
           "duration": 5,
-          "description": "详细训练步骤，格式：【队形】+【学员位置】+【具体动作】。例如：\"【排面】所有学员在中场线站好，教练与学员相对而站。【动作】双手放在肩膀上，向前绕环走到另一侧底线，然后向后绕环回到起点。\"",
-          "keyPoints": ["要点1：具体说明要点", "要点2：具体说明要点", "要点3：具体说明要点"],
-          "equipment": ["所需器材"],
-          "form": "组织形式（集体/分组/Z型/排面/依次进行等）",
-          "coachGuide": "教练员引导语，包含：1）开始前的说明话术；2）进行中的鼓励话术；3）结束后的点评话术。例如：\"XX小朋友们，今天我们来做XX游戏，首先...加油！...很好！...最后我们...\""
+          "form": "组织形式（集体/分组/排面/依次）",
+          "description": "【队形】【位置】【具体动作】，用简洁专业的中文描述。不要教练引导语，只要动作本身。例如：\"【排面】所有学员在中场线排好。【位置】教练在前方示范。【动作】双手放肩膀上，向前绕环走到对面底线，再向后绕环返回起点。\"",
+          "keyPoints": ["要点1", "要点2"],
+          "equipment": ["器材（如有）"]
         }
       ],
-      "points": ["环节整体要点1", "环节整体要点2"]
+      "points": ["本节要点1", "本节要点2"]
+    },
+    {
+      "name": "第二节",
+      "duration": ${segments[1].minutes},
+      "activities": [...],
+      "points": [...]
+    },
+    {
+      "name": "第三节",
+      "duration": 30,
+      "activities": [...],
+      "points": [...]
     }
   ],
-  "notes": "注意事项和提醒"
+  "notes": "安全注意事项"
 }
 
-## 注意事项
-1. 训练时长严格按照${params.duration}分钟分配
-2. 活动要适合该年龄段，${params.group === 'U6' ? '以游戏和趣味性为主' : params.group === 'U8' ? '注重基础技能培养' : '可以增加技术难度和对抗强度'}
-3. 每个环节2-4个活动
-4. 活动描述必须包含【队形】【位置】【具体动作】三个要素，格式参考案例库
-5. ${params.location === '室外' ? '如为雨天，建议调整适合室内或遮蔽场地的内容' : ''}
-6. ${params.weather === '晴天' ? '注意安排休息和补水' : params.weather === '雨天' ? '避免滑倒，安全第一' : ''}
-${cases.length > 0 ? `7. 严格参考案例库的训练方法格式，生成类似的详细步骤` : ''}`
+## 关键要求
+1. 严格按三节结构生成：第一节准备热身（礼仪+热身+球性）、第二节正式训练（技术+体能+战术）、第三节对抗比赛+放松
+2. ${isU10 ? `必须根据【${levelLabel}】级别调整难度：基础版动作简单、无对抗；进阶版有标准动作和少量对抗；精英版有组合动作和正式对抗` : '根据年龄段调整技术难度和对抗强度'}
+3. 活动描述只写【队形】【位置】【具体动作】，不要教练引导语
+4. 每节包含2-4个活动，总时长严格=${params.duration}分钟
+5. 队形描述使用：排面/列队/分组/圆形/菱形/方形等
+6. ${params.location === '室外' && params.weather === '雨天' ? '雨天室外注意安全，可改为室内或减少对抗环节' : ''}
+${casesText ? '7. 参考案例库的训练方法格式' : ''}`
 }
 
 // 调用 AI API（通用函数，支持 Kimi 和 MiniMax）
@@ -223,7 +284,15 @@ export async function POST(request: NextRequest) {
           theme: aiResult.theme,
           focusSkills: params.focusSkills || [],
           intensity: aiResult.intensity,
-          sections: aiResult.sections,
+          // 兼容 segments（新三段式）和 sections（旧格式）
+          sections: (aiResult.segments || aiResult.sections || []).map((seg: any) => ({
+            ...seg,
+            // 移除 coachGuide 字段（不再展示）
+            activities: seg.activities?.map((act: any) => {
+              const { coachGuide, ...rest } = act
+              return rest
+            })
+          })),
           notes: aiResult.notes
         }
 
@@ -233,9 +302,7 @@ export async function POST(request: NextRequest) {
         // 如果是调试模式，返回检索到的案例
         if (params.debug) {
           response.debug = {
-            // 获取总数据量
             totalPlansInDb: allPlans.length,
-            // 各年龄组分布
             ageGroupCounts: {
               U6: allPlans.filter(p => p.age_group === 'U6').length,
               U8: allPlans.filter(p => p.age_group === 'U8').length,
@@ -243,7 +310,6 @@ export async function POST(request: NextRequest) {
               U12: allPlans.filter(p => p.age_group === 'U12').length,
               U14: allPlans.filter(p => p.age_group === 'U14').length,
             },
-            // 检索到的案例
             retrievedCases: similarCases.map(c => ({
               age_group: c.age_group,
               class_level: c.class_level,
@@ -291,7 +357,15 @@ export async function POST(request: NextRequest) {
           theme: aiResult.theme,
           focusSkills: params.focusSkills || [],
           intensity: aiResult.intensity,
-          sections: aiResult.sections,
+          // 兼容 segments（新三段式）和 sections（旧格式）
+          sections: (aiResult.segments || aiResult.sections || []).map((seg: any) => ({
+            ...seg,
+            // 移除 coachGuide 字段（不再展示）
+            activities: seg.activities?.map((act: any) => {
+              const { coachGuide, ...rest } = act
+              return rest
+            })
+          })),
           notes: aiResult.notes
         }
 
