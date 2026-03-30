@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Plus, Search, Users, TrendingUp, Star, Filter, X, ChevronRight, Phone, Edit2, Trash2, Download } from 'lucide-react'
+import { ArrowLeft, Plus, Search, Users, TrendingUp, Star, Filter, X, ChevronRight, Phone, Edit2, Trash2, Download, Upload, FileSpreadsheet, CheckCircle, AlertCircle } from 'lucide-react'
 
 // 学员类型
 type Player = {
@@ -65,6 +65,17 @@ export default function PlayersPage() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null)
+  const [showImportModal, setShowImportModal] = useState(false)
+  const [importResult, setImportResult] = useState<{
+    success: boolean
+    total?: number
+    created?: number
+    failed?: number
+    message?: string
+    errors?: { row: number; message?: string; name?: string; error?: string; type?: string }[]
+  } | null>(null)
+  const [importing, setImporting] = useState(false)
+  const [dragActive, setDragActive] = useState(false)
 
   // 新建/编辑表单
   const [formData, setFormData] = useState({
@@ -225,6 +236,43 @@ export default function PlayersPage() {
     }
   }
 
+  // 处理文件上传
+  const handleFileUpload = async (file: File) => {
+    if (!file.name.endsWith('.csv') && !file.name.endsWith('.txt')) {
+      alert('请上传 CSV 格式的文件')
+      return
+    }
+
+    setImporting(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/players/import', {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+      setImportResult(data)
+
+      if (!data.success) {
+        alert(data.error || '导入失败')
+      }
+    } catch (error) {
+      console.error('导入失败:', error)
+      setImportResult({
+        success: false,
+        total: 0,
+        created: 0,
+        failed: 0,
+        message: '导入过程出错，请重试'
+      })
+    } finally {
+      setImporting(false)
+    }
+  }
+
   // 计算统计数据
   const stats = useMemo(() => {
     return {
@@ -280,6 +328,16 @@ export default function PlayersPage() {
               <Download className="w-4 h-4" />
               导出
             </a>
+            <button
+              onClick={() => {
+                setShowImportModal(true)
+                setImportResult(null)
+              }}
+              className="flex items-center gap-2 px-4 py-2 border border-green-300 hover:bg-green-50 text-green-700 rounded-lg"
+            >
+              <Upload className="w-4 h-4" />
+              批量导入
+            </button>
           </div>
         </div>
       </header>
@@ -585,6 +643,161 @@ export default function PlayersPage() {
                   {editingPlayer ? '保存修改' : '添加学员'}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 批量导入弹窗 */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 sticky top-0 bg-white">
+              <h2 className="text-lg font-bold text-gray-900">批量导入学员</h2>
+              <button
+                onClick={() => {
+                  setShowImportModal(false)
+                  setImportResult(null)
+                }}
+                className="p-1 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <div className="p-4">
+              {!importResult ? (
+                <>
+                  {/* 下载模板 */}
+                  <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <FileSpreadsheet className="w-8 h-8 text-green-600" />
+                        <div>
+                          <p className="font-medium text-gray-900">学员导入模板.csv</p>
+                          <p className="text-sm text-gray-500">支持 CSV 格式，必填项：姓名、出生日期</p>
+                        </div>
+                      </div>
+                      <a
+                        href="/api/players/import"
+                        download="学员导入模板.csv"
+                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm"
+                      >
+                        下载模板
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* 文件上传 */}
+                  <div
+                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                      dragActive ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-green-400'
+                    }`}
+                    onDragOver={e => {
+                      e.preventDefault()
+                      setDragActive(true)
+                    }}
+                    onDragLeave={() => setDragActive(false)}
+                    onDrop={async e => {
+                      e.preventDefault()
+                      setDragActive(false)
+                      const file = e.dataTransfer.files[0]
+                      if (file) await handleFileUpload(file)
+                    }}
+                  >
+                    <Upload className={`w-12 h-12 mx-auto mb-3 ${dragActive ? 'text-green-500' : 'text-gray-400'}`} />
+                    <p className="text-gray-700 mb-2">
+                      拖拽 CSV 文件到此处，或
+                      <label className="text-green-600 hover:text-green-700 cursor-pointer mx-1">
+                        点击选择文件
+                        <input
+                          type="file"
+                          accept=".csv,.txt"
+                          className="hidden"
+                          onChange={e => {
+                            const file = e.target.files?.[0]
+                            if (file) handleFileUpload(file)
+                          }}
+                        />
+                      </label>
+                    </p>
+                    <p className="text-sm text-gray-500">支持 .csv 格式</p>
+                  </div>
+
+                  {/* 导入说明 */}
+                  <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium text-blue-900 mb-2">导入说明</h4>
+                    <ul className="text-sm text-blue-700 space-y-1">
+                      <li>• 文件格式：CSV（逗号分隔值）</li>
+                      <li>• 必填字段：姓名、出生日期</li>
+                      <li>• 可选字段：性别（男/女）、分组（U6/U8/U10/U12/U14）、状态、学校、家长姓名、联系电话、微信</li>
+                      <li>• 出生日期格式：YYYY-MM-DD（如 2018-05-01）</li>
+                      <li>• 分组和状态会自动转换，如"在训"→"training"</li>
+                    </ul>
+                  </div>
+                </>
+              ) : (
+                /* 导入结果 */
+                <div className="space-y-4">
+                  {/* 结果摘要 */}
+                  <div className={`p-4 rounded-lg ${importResult.success ? 'bg-green-50' : 'bg-red-50'}`}>
+                    <div className="flex items-center gap-3">
+                      {importResult.success ? (
+                        <CheckCircle className="w-8 h-8 text-green-600" />
+                      ) : (
+                        <AlertCircle className="w-8 h-8 text-red-600" />
+                      )}
+                      <div>
+                        <p className={`font-medium ${importResult.success ? 'text-green-900' : 'text-red-900'}`}>
+                          {importResult.message || (importResult.success ? `成功导入 ${importResult.created} 名学员` : '导入失败')}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          总计 {importResult.total} 行，成功 {importResult.created} 行，失败 {importResult.failed} 行
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 失败详情 */}
+                  {importResult.errors && importResult.errors.length > 0 && (
+                    <div className="p-4 border border-gray-200 rounded-lg">
+                      <h4 className="font-medium text-gray-900 mb-3">失败详情</h4>
+                      <div className="max-h-48 overflow-y-auto space-y-2">
+                        {importResult.errors.map((err, idx) => (
+                          <div key={idx} className="flex items-start gap-2 text-sm">
+                            <span className="text-gray-400">第{err.row}行:</span>
+                            <span className="text-red-600">
+                              {err.name && `${err.name} - `}{err.message || err.error}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 操作按钮 */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setImportResult(null)
+                      }}
+                      className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                    >
+                      继续导入
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowImportModal(false)
+                        setImportResult(null)
+                        fetchPlayers()
+                      }}
+                      className="flex-1 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg"
+                    >
+                      完成
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
