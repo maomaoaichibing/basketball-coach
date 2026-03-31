@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 检查邮箱是否已存在
-    const existingUser = await prisma.coach.findUnique({
+    const existingUser = await prisma.coach.findFirst({
       where: { email }
     })
 
