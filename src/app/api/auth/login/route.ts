@@ -34,7 +34,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 验证密码
+    // 验证密码（处理password可能为null的情况）
+    if (!coach.password) {
+      return NextResponse.json(
+        { success: false, message: '账号未设置密码，请联系管理员' },
+        { status: 401 }
+      )
+    }
+
     const isValidPassword = await bcrypt.compare(password, coach.password)
 
     if (!isValidPassword) {
