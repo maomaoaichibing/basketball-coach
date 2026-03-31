@@ -6,11 +6,9 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Dumbbell, Mail, Lock, Eye, EyeOff, User, Phone } from 'lucide-react'
-import { useAuth } from '@/components/AuthProvider'
 
 export default function RegisterPage() {
   const router = useRouter()
-  const { login } = useAuth()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -67,25 +65,8 @@ export default function RegisterPage() {
         return
       }
 
-      // 注册成功后自动登录
-      const loginResponse = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
-      })
-
-      const loginData = await loginResponse.json()
-
-      if (loginData.success) {
-        login(loginData.data.user, loginData.data.token)
-        router.push('/')
-      } else {
-        // 注册成功但登录失败，跳转到登录页
-        router.push('/login')
-      }
+      // 注册成功，跳转到首页（后续可能需要优化为自动登录）
+      router.push('/')
     } catch (err) {
       setError('网络错误，请重试')
       setLoading(false)

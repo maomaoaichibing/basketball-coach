@@ -6,11 +6,9 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Dumbbell, Mail, Lock, Eye, EyeOff } from 'lucide-react'
-import { useAuth } from '@/components/AuthProvider'
 
 export default function LoginPage() {
   const router = useRouter()
-  const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -37,10 +35,7 @@ export default function LoginPage() {
         return
       }
 
-      // 使用 AuthProvider 的 login 方法更新状态
-      login(data.data.user, data.data.token)
-
-      // 跳转到首页
+      // 登录成功，跳转到首页
       router.push('/')
     } catch (err) {
       setError('网络错误，请重试')
