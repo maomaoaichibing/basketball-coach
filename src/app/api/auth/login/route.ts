@@ -22,8 +22,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 查找用户
-    const coach = await prisma.coach.findUnique({
+    // 查找用户（使用 findFirst 因为 email 可能不是唯一索引）
+    const coach = await prisma.coach.findFirst({
       where: { email }
     })
 
