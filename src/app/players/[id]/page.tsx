@@ -157,7 +157,14 @@ export default function PlayerDetailPage() {
     parentWechat: '',
     position: '',
     height: '',
-    weight: ''
+    weight: '',
+    // 技术能力字段
+    dribbling: 5,
+    passing: 5,
+    shooting: 5,
+    defending: 5,
+    physical: 5,
+    tactical: 5
   })
 
   useEffect(() => {
@@ -204,7 +211,14 @@ export default function PlayerDetailPage() {
       parentWechat: player.parentWechat || '',
       position: player.position || '',
       height: player.height?.toString() || '',
-      weight: player.weight?.toString() || ''
+      weight: player.weight?.toString() || '',
+      // 技术能力字段
+      dribbling: player.dribbling || 5,
+      passing: player.passing || 5,
+      shooting: player.shooting || 5,
+      defending: player.defending || 5,
+      physical: player.physical || 5,
+      tactical: player.tactical || 5
     })
     setShowEditModal(true)
   }
@@ -229,7 +243,14 @@ export default function PlayerDetailPage() {
           parentWechat: editForm.parentWechat,
           position: editForm.position,
           height: editForm.height ? parseFloat(editForm.height) : undefined,
-          weight: editForm.weight ? parseFloat(editForm.weight) : undefined
+          weight: editForm.weight ? parseFloat(editForm.weight) : undefined,
+          // 技术能力字段
+          dribbling: editForm.dribbling,
+          passing: editForm.passing,
+          shooting: editForm.shooting,
+          defending: editForm.defending,
+          physical: editForm.physical,
+          tactical: editForm.tactical
         })
       })
 
@@ -753,6 +774,79 @@ export default function PlayerDetailPage() {
                     onChange={(e) => setEditForm({...editForm, parentWechat: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
+                </div>
+
+                {/* 技术能力评分 */}
+                <div className="pt-2">
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">技术能力评分 (1-10分)</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">运球</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={editForm.dribbling}
+                        onChange={(e) => setEditForm({...editForm, dribbling: parseInt(e.target.value) || 5})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">传球</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={editForm.passing}
+                        onChange={(e) => setEditForm({...editForm, passing: parseInt(e.target.value) || 5})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">投篮</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={editForm.shooting}
+                        onChange={(e) => setEditForm({...editForm, shooting: parseInt(e.target.value) || 5})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">防守</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={editForm.defending}
+                        onChange={(e) => setEditForm({...editForm, defending: parseInt(e.target.value) || 5})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">体能</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={editForm.physical}
+                        onChange={(e) => setEditForm({...editForm, physical: parseInt(e.target.value) || 5})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">战术</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={editForm.tactical}
+                        onChange={(e) => setEditForm({...editForm, tactical: parseInt(e.target.value) || 5})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex gap-3 pt-4">
