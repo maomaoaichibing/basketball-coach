@@ -144,6 +144,7 @@ export default function PlayerDetailPage() {
   const [player, setPlayer] = useState<Player | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'records' | 'assessments' | 'goals'>('records')
+  const [showEditModal, setShowEditModal] = useState(false)
 
   useEffect(() => {
     if (params.id) {
@@ -229,7 +230,10 @@ export default function PlayerDetailPage() {
                 </div>
               </div>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg">
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg"
+            >
               <Edit2 className="w-4 h-4" />
               编辑
             </button>

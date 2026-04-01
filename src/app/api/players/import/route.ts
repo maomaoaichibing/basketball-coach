@@ -13,6 +13,12 @@ interface PlayerRow {
   parentName?: string
   parentPhone?: string
   parentWechat?: string
+  dribbling?: number
+  passing?: number
+  shooting?: number
+  defending?: number
+  physical?: number
+  tactical?: number
 }
 
 // 验证性别
@@ -167,6 +173,13 @@ export async function POST(request: NextRequest) {
       parentName: headers.findIndex(h => ['家长姓名', 'parentName', '监护人'].includes(h)),
       parentPhone: headers.findIndex(h => ['联系电话', 'parentPhone', '电话', '手机'].includes(h)),
       parentWechat: headers.findIndex(h => ['微信', 'wechat', 'Wechat'].includes(h)),
+      // 技术能力字段
+      dribbling: headers.findIndex(h => ['运球', 'dribbling'].includes(h)),
+      passing: headers.findIndex(h => ['传球', 'passing'].includes(h)),
+      shooting: headers.findIndex(h => ['投篮', 'shooting'].includes(h)),
+      defending: headers.findIndex(h => ['防守', 'defending'].includes(h)),
+      physical: headers.findIndex(h => ['体能', 'physical'].includes(h)),
+      tactical: headers.findIndex(h => ['战术', 'tactical'].includes(h)),
     }
 
     // 解析数据行
@@ -191,6 +204,13 @@ export async function POST(request: NextRequest) {
         continue
       }
 
+      // 解析技术能力字段（1-10分）
+      const parseAbility = (value: string): number => {
+        const num = parseInt(value)
+        if (isNaN(num)) return 5 // 默认5分
+        return Math.max(1, Math.min(10, num)) // 限制在1-10之间
+      }
+
       players.push({
         name,
         gender: fieldIndexes.gender !== -1 ? parseGender(String(values[fieldIndexes.gender] || '')) : 'male',
@@ -201,6 +221,13 @@ export async function POST(request: NextRequest) {
         parentName: fieldIndexes.parentName !== -1 ? String(values[fieldIndexes.parentName] || '').trim() : undefined,
         parentPhone: fieldIndexes.parentPhone !== -1 ? String(values[fieldIndexes.parentPhone] || '').trim() : undefined,
         parentWechat: fieldIndexes.parentWechat !== -1 ? String(values[fieldIndexes.parentWechat] || '').trim() : undefined,
+        // 技术能力字段
+        dribbling: fieldIndexes.dribbling !== -1 ? parseAbility(String(values[fieldIndexes.dribbling] || '')) : 5,
+        passing: fieldIndexes.passing !== -1 ? parseAbility(String(values[fieldIndexes.passing] || '')) : 5,
+        shooting: fieldIndexes.shooting !== -1 ? parseAbility(String(values[fieldIndexes.shooting] || '')) : 5,
+        defending: fieldIndexes.defending !== -1 ? parseAbility(String(values[fieldIndexes.defending] || '')) : 5,
+        physical: fieldIndexes.physical !== -1 ? parseAbility(String(values[fieldIndexes.physical] || '')) : 5,
+        tactical: fieldIndexes.tactical !== -1 ? parseAbility(String(values[fieldIndexes.tactical] || '')) : 5,
       })
     }
 
@@ -231,12 +258,13 @@ export async function POST(request: NextRequest) {
             parentWechat: player.parentWechat,
             tags: '[]',
             injuries: '[]',
-            dribbling: 5,
-            passing: 5,
-            shooting: 5,
-            defending: 5,
-            physical: 5,
-            tactical: 5
+            // 技术能力字段（使用CSV中的值或默认值5）
+            dribbling: player.dribbling || 5,
+            passing: player.passing || 5,
+            shooting: player.shooting || 5,
+            defending: player.defending || 5,
+            physical: player.physical || 5,
+            tactical: player.tactical || 5
           } as any
         })
         created.push(player.name)
@@ -269,10 +297,10 @@ export async function POST(request: NextRequest) {
 
 // GET /api/players/import/template - 下载导入模板
 export async function GET() {
-  const template = `姓名*,出生日期*,性别,分组,状态,学校,家长姓名,联系电话,微信
-张三,2018-05-01,男,U10,在训,第一小学,张爸,13800138001,wx_zhangsan
-李四,2017-08-15,女,U12,在训,第二小学,李妈,13900139002,wx_lisi
-王五,2019-03-20,男,U8,试听,幼儿园大班,王爸,13700137003,wx_wangwu`
+  const template = `姓名*,出生日期*,性别,分组,状态,学校,家长姓名,联系电话,微信,运球,传球,投篮,防守,体能,战术
+张三,2018-05-01,男,U10,在训,第一小学,张爸,13800138001,wx_zhangsan,5,5,5,5,5,5
+李四,2017-08-15,女,U12,在训,第二小学,李妈,13900139002,wx_lisi,7,6,8,6,7,5
+王五,2019-03-20,男,U8,试听,幼儿园大班,王爸,13700137003,wx_wangwu,3,4,3,4,5,3`
 
   return new NextResponse(template, {
     headers: {
