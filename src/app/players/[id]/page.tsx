@@ -145,6 +145,20 @@ export default function PlayerDetailPage() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'records' | 'assessments' | 'goals'>('records')
   const [showEditModal, setShowEditModal] = useState(false)
+  const [editForm, setEditForm] = useState({
+    name: '',
+    gender: 'male',
+    birthDate: '',
+    group: 'U10',
+    status: 'training',
+    school: '',
+    parentName: '',
+    parentPhone: '',
+    parentWechat: '',
+    position: '',
+    height: '',
+    weight: ''
+  })
 
   useEffect(() => {
     if (params.id) {
@@ -173,6 +187,66 @@ export default function PlayerDetailPage() {
     if (score >= 6) return 'bg-blue-500'
     if (score >= 4) return 'bg-yellow-500'
     return 'bg-gray-400'
+  }
+
+  const handleEditClick = () => {
+    if (!player) return
+    
+    setEditForm({
+      name: player.name || '',
+      gender: player.gender || 'male',
+      birthDate: player.birthDate || '',
+      group: player.group || 'U10',
+      status: player.status || 'training',
+      school: player.school || '',
+      parentName: player.parentName || '',
+      parentPhone: player.parentPhone || '',
+      parentWechat: player.parentWechat || '',
+      position: player.position || '',
+      height: player.height?.toString() || '',
+      weight: player.weight?.toString() || ''
+    })
+    setShowEditModal(true)
+  }
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!player) return
+
+    try {
+      const response = await fetch(`/api/players/${player.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editForm.name,
+          gender: editForm.gender,
+          birthDate: editForm.birthDate,
+          group: editForm.group,
+          status: editForm.status,
+          school: editForm.school,
+          parentName: editForm.parentName,
+          parentPhone: editForm.parentPhone,
+          parentWechat: editForm.parentWechat,
+          position: editForm.position,
+          height: editForm.height ? parseFloat(editForm.height) : undefined,
+          weight: editForm.weight ? parseFloat(editForm.weight) : undefined
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // 更新本地数据
+        setPlayer({ ...player, ...data.player })
+        setShowEditModal(false)
+        alert('学员信息更新成功！')
+      } else {
+        alert('更新失败：' + (data.message || '未知错误'))
+      }
+    } catch (error) {
+      console.error('更新学员信息失败:', error)
+      alert('更新失败，请稍后重试')
+    }
   }
 
   if (loading) {
@@ -231,7 +305,7 @@ export default function PlayerDetailPage() {
               </div>
             </div>
             <button
-              onClick={() => setShowEditModal(true)}
+              onClick={handleEditClick}
               className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg"
             >
               <Edit2 className="w-4 h-4" />
@@ -530,6 +604,173 @@ export default function PlayerDetailPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* 编辑弹窗 */}
+        {showEditModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">编辑学员信息</h3>
+              
+              <form onSubmit={handleEditSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">姓名 *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editForm.name}
+                    onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">性别</label>
+                  <select
+                    value={editForm.gender}
+                    onChange={(e) => setEditForm({...editForm, gender: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value="male">男</option>
+                    <option value="female">女</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">出生日期 *</label>
+                  <input
+                    type="date"
+                    required
+                    value={editForm.birthDate}
+                    onChange={(e) => setEditForm({...editForm, birthDate: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">分组</label>
+                  <select
+                    value={editForm.group}
+                    onChange={(e) => setEditForm({...editForm, group: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value="U6">U6 (4-6岁)</option>
+                    <option value="U8">U8 (6-8岁)</option>
+                    <option value="U10">U10 (8-10岁)</option>
+                    <option value="U12">U12 (10-12岁)</option>
+                    <option value="U14">U14 (12-14岁)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">状态</label>
+                  <select
+                    value={editForm.status}
+                    onChange={(e) => setEditForm({...editForm, status: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value="training">在训</option>
+                    <option value="trial">试听</option>
+                    <option value="suspended">暂停</option>
+                    <option value="graduated">毕业</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">学校</label>
+                  <input
+                    type="text"
+                    value={editForm.school}
+                    onChange={(e) => setEditForm({...editForm, school: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">位置</label>
+                  <select
+                    value={editForm.position}
+                    onChange={(e) => setEditForm({...editForm, position: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value="">未设置</option>
+                    <option value="point-guard">控球后卫</option>
+                    <option value="shooting-guard">得分后卫</option>
+                    <option value="small-forward">小前锋</option>
+                    <option value="power-forward">大前锋</option>
+                    <option value="center">中锋</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">身高 (cm)</label>
+                    <input
+                      type="number"
+                      value={editForm.height}
+                      onChange={(e) => setEditForm({...editForm, height: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">体重 (kg)</label>
+                    <input
+                      type="number"
+                      value={editForm.weight}
+                      onChange={(e) => setEditForm({...editForm, weight: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">家长姓名</label>
+                  <input
+                    type="text"
+                    value={editForm.parentName}
+                    onChange={(e) => setEditForm({...editForm, parentName: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">联系电话</label>
+                  <input
+                    type="tel"
+                    value={editForm.parentPhone}
+                    onChange={(e) => setEditForm({...editForm, parentPhone: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">微信</label>
+                  <input
+                    type="text"
+                    value={editForm.parentWechat}
+                    onChange={(e) => setEditForm({...editForm, parentWechat: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium"
+                  >
+                    保存
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowEditModal(false)}
+                    className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium"
+                  >
+                    取消
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}
