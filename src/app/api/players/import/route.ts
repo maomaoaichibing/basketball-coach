@@ -238,13 +238,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 批量创建学员
+    // 批量创建学员（检查重复）
     const created: string[] = []
+    const skipped: string[] = []
     const failed: { row: number; name: string; error: string }[] = []
 
     for (let i = 0; i < players.length; i++) {
       const player = players[i]
       try {
+        // 检查是否已存在相同姓名和家长电话的学员
+        const existingPlayer = await prisma.player.findFirst({
+          where: {
+            name: player.name,
+            parentPhone: player.parentPhone || '',
+          }
+        })
+
+        if (existingPlayer) {
+          // 如果已存在，跳过（不创建也不更新）
+          skipped.push(player.name)
+          continue
+        }
+
+        // 创建新学员
         await prisma.player.create({
           data: {
             name: player.name,
@@ -281,10 +297,12 @@ export async function POST(request: NextRequest) {
       success: true,
       total: players.length,
       created: created.length,
+      skipped: skipped.length,
       failed: failed.length,
       createdNames: created,
+      skippedNames: skipped,
       errors: [...errors.map(e => ({ ...e, type: 'parse' })), ...failed.map(f => ({ ...f, type: 'create' }))],
-      message: `成功导入 ${created.length} 名学员${failed.length > 0 ? `，${failed.length} 名失败` : ''}`
+      message: `成功导入 ${created.length} 名学员${skipped.length > 0 ? `，跳过 ${skipped.length} 名重复学员` : ''}${failed.length > 0 ? `，${failed.length} 名失败` : ''}`
     })
   } catch (error) {
     console.error('批量导入学员失败:', error)
