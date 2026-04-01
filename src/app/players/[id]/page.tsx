@@ -235,7 +235,7 @@ export default function PlayerDetailPage() {
 
     try {
       const response = await fetch(`/api/players/${player.id}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: editForm.name,
