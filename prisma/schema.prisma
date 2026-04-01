@@ -64,6 +64,9 @@ model Player {
   physical    Int      @default(5)
   tactical    Int      @default(5)
 
+  // 整体评估
+  overallAssessment String?
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
