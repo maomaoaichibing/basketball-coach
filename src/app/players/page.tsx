@@ -682,7 +682,7 @@ export default function PlayersPage() {
                       </div>
                       <a
                         href="/api/players/import"
-                        download="学员导入模板.csv"
+                        download="player_import_template.csv"
                         className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm"
                       >
                         下载模板

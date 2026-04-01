@@ -277,7 +277,7 @@ export async function GET() {
   return new NextResponse(template, {
     headers: {
       'Content-Type': 'text/csv;charset=utf-8',
-      'Content-Disposition': 'attachment; filename="学员导入模板.csv"'
+      'Content-Disposition': 'attachment; filename="player_import_template.csv"'
     }
   })
 }
