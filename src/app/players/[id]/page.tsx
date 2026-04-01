@@ -47,6 +47,8 @@ type Player = {
   physical: number
   tactical: number
   avgAbility: string
+  // 整体评估
+  overallAssessment?: string
   // 统计
   totalTrainings: number
   attendanceRate: number
@@ -164,7 +166,9 @@ export default function PlayerDetailPage() {
     shooting: 5,
     defending: 5,
     physical: 5,
-    tactical: 5
+    tactical: 5,
+    // 整体评估
+    overallAssessment: ''
   })
 
   useEffect(() => {
@@ -218,7 +222,9 @@ export default function PlayerDetailPage() {
       shooting: player.shooting || 5,
       defending: player.defending || 5,
       physical: player.physical || 5,
-      tactical: player.tactical || 5
+      tactical: player.tactical || 5,
+      // 整体评估
+      overallAssessment: player.overallAssessment || ''
     })
     setShowEditModal(true)
   }
@@ -250,7 +256,9 @@ export default function PlayerDetailPage() {
           shooting: editForm.shooting,
           defending: editForm.defending,
           physical: editForm.physical,
-          tactical: editForm.tactical
+          tactical: editForm.tactical,
+          // 整体评估
+          overallAssessment: editForm.overallAssessment
         })
       })
 
@@ -393,6 +401,14 @@ export default function PlayerDetailPage() {
               )
             })}
           </div>
+          
+          {/* 整体评估 */}
+          {player.overallAssessment && (
+            <div className="mt-6 p-4 bg-orange-50 rounded-lg">
+              <h3 className="text-sm font-semibold text-orange-900 mb-2">整体评估</h3>
+              <p className="text-sm text-orange-800 whitespace-pre-wrap">{player.overallAssessment}</p>
+            </div>
+          )}
         </div>
 
         {/* 出勤统计 */}
@@ -773,6 +789,18 @@ export default function PlayerDetailPage() {
                     value={editForm.parentWechat}
                     onChange={(e) => setEditForm({...editForm, parentWechat: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+
+                {/* 整体评估 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">整体评估</label>
+                  <textarea
+                    value={editForm.overallAssessment}
+                    onChange={(e) => setEditForm({...editForm, overallAssessment: e.target.value})}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    placeholder="输入综述性的评估文字..."
                   />
                 </div>
 

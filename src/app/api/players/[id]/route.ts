@@ -127,7 +127,8 @@ export async function PUT(
       shooting,
       defending,
       physical,
-      tactical
+      tactical,
+      overallAssessment
     } = body
 
     // 检查学员是否存在
@@ -164,6 +165,8 @@ export async function PUT(
     if (defending !== undefined) updateData.defending = defending
     if (physical !== undefined) updateData.physical = physical
     if (tactical !== undefined) updateData.tactical = tactical
+    // 整体评估
+    if (overallAssessment !== undefined) updateData.overallAssessment = overallAssessment
 
     const player = await prisma.player.update({
       where: { id },
