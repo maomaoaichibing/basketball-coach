@@ -1,37 +1,43 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+
+import prisma from '@/lib/db';
 
 // GET 获取能力分析详情
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params
+    const { id } = params;
     const analysis = await prisma.abilityAnalysis.findUnique({
-      where: { id }
-    })
+      where: { id },
+    });
 
     if (!analysis) {
-      return NextResponse.json({ error: '分析不存在' }, { status: 404 })
+      return NextResponse.json({ error: '分析不存在' }, { status: 404 });
     }
 
-    return NextResponse.json(analysis)
+    return NextResponse.json(analysis);
   } catch (error) {
-    console.error('获取能力分析详情失败:', error)
-    return NextResponse.json({ error: '获取能力分析详情失败' }, { status: 500 })
+    console.error('获取能力分析详情失败:', error);
+    return NextResponse.json({ error: '获取能力分析详情失败' }, { status: 500 });
   }
 }
 
 // PUT 更新能力分析
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params
-    const body = await request.json()
-    const { overallScore, dimensions, progress, strengths, weaknesses, potential, trainingSuggestions, method, analystId, analystName } = body
+    const { id } = params;
+    const body = await request.json();
+    const {
+      overallScore,
+      dimensions,
+      progress,
+      strengths,
+      weaknesses,
+      potential,
+      trainingSuggestions,
+      method,
+      analystId,
+      analystName,
+    } = body;
 
     const analysis = await prisma.abilityAnalysis.update({
       where: { id },
@@ -45,31 +51,28 @@ export async function PUT(
         trainingSuggestions: trainingSuggestions ? JSON.stringify(trainingSuggestions) : undefined,
         method: method || undefined,
         analystId,
-        analystName
-      }
-    })
+        analystName,
+      },
+    });
 
-    return NextResponse.json(analysis)
+    return NextResponse.json(analysis);
   } catch (error) {
-    console.error('更新能力分析失败:', error)
-    return NextResponse.json({ error: '更新能力分析失败' }, { status: 500 })
+    console.error('更新能力分析失败:', error);
+    return NextResponse.json({ error: '更新能力分析失败' }, { status: 500 });
   }
 }
 
 // DELETE 删除能力分析
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params
+    const { id } = params;
     await prisma.abilityAnalysis.delete({
-      where: { id }
-    })
+      where: { id },
+    });
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('删除能力分析失败:', error)
-    return NextResponse.json({ error: '删除能力分析失败' }, { status: 500 })
+    console.error('删除能力分析失败:', error);
+    return NextResponse.json({ error: '删除能力分析失败' }, { status: 500 });
   }
 }

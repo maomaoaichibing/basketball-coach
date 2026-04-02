@@ -1,47 +1,60 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient, Prisma } from '@prisma/client';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 // GET /api/bookings - 获取预约列表
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const scheduleId = searchParams.get('scheduleId')
-    const playerId = searchParams.get('playerId')
-    const date = searchParams.get('date')
-    const status = searchParams.get('status')
+    const { searchParams } = new URL(request.url);
+    const scheduleId = searchParams.get('scheduleId');
+    const playerId = searchParams.get('playerId');
+    const date = searchParams.get('date');
+    const status = searchParams.get('status');
 
-    const where: any = {}
-    if (scheduleId) where.scheduleId = scheduleId
-    if (playerId) where.playerId = playerId
-    if (date) where.bookingDate = new Date(date)
-    if (status && status !== 'all') where.status = status
+    const where: Prisma.BookingWhereInput = {};
+    if (scheduleId) where.scheduleId = scheduleId;
+    if (playerId) where.playerId = playerId;
+    if (date) where.bookingDate = new Date(date);
+    if (status && status !== 'all') where.status = status;
 
     const bookings = await prisma.booking.findMany({
       where,
       include: {
-        schedule: { select: { id: true, title: true, startTime: true, endTime: true, location: true, group: true } },
-        player: { select: { id: true, name: true, group: true } }
+        schedule: {
+          select: {
+            id: true,
+            title: true,
+            startTime: true,
+            endTime: true,
+            location: true,
+            group: true,
+          },
+        },
+        player: { select: { id: true, name: true, group: true } },
       },
-      orderBy: { bookingDate: 'desc' }
-    })
+      orderBy: { bookingDate: 'desc' },
+    });
 
-    return NextResponse.json({ success: true, bookings, total: bookings.length })
+    return NextResponse.json({
+      success: true,
+      bookings,
+      total: bookings.length,
+    });
   } catch (error) {
-    console.error('获取预约失败:', error)
-    return NextResponse.json({ success: false, error: '获取失败' }, { status: 500 })
+    console.error('获取预约失败:', error);
+    return NextResponse.json({ success: false, error: '获取失败' }, { status: 500 });
   }
 }
 
 // POST /api/bookings - 创建预约
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { scheduleId, playerId, bookingDate, source } = body
+    const body = await request.json();
+    const { scheduleId, playerId, bookingDate, source } = body;
 
     if (!scheduleId || !playerId || !bookingDate) {
-      return NextResponse.json({ success: false, error: '请填写完整信息' }, { status: 400 })
+      return NextResponse.json({ success: false, error: '请填写完整信息' }, { status: 400 });
     }
 
     // 检查是否已存在相同预约
@@ -49,26 +62,32 @@ export async function POST(request: NextRequest) {
       where: {
         scheduleId,
         playerId,
-        bookingDate: new Date(bookingDate)
-      }
-    })
+        bookingDate: new Date(bookingDate),
+      },
+    });
 
     if (existing) {
-      return NextResponse.json({ success: false, error: '该学员已预约此课程' }, { status: 400 })
+      return NextResponse.json({ success: false, error: '该学员已预约此课程' }, { status: 400 });
     }
 
     // 检查容量
-    const schedule = await prisma.schedule.findUnique({ where: { id: scheduleId } })
+    const schedule = await prisma.schedule.findUnique({
+      where: { id: scheduleId },
+    });
     if (!schedule) {
-      return NextResponse.json({ success: false, error: '课程不存在' }, { status: 404 })
+      return NextResponse.json({ success: false, error: '课程不存在' }, { status: 404 });
     }
 
     const todayBookings = await prisma.booking.count({
-      where: { scheduleId, bookingDate: new Date(bookingDate), status: 'confirmed' }
-    })
+      where: {
+        scheduleId,
+        bookingDate: new Date(bookingDate),
+        status: 'confirmed',
+      },
+    });
 
     if (todayBookings >= schedule.maxPlayers) {
-      return NextResponse.json({ success: false, error: '课程已满员' }, { status: 400 })
+      return NextResponse.json({ success: false, error: '课程已满员' }, { status: 400 });
     }
 
     const booking = await prisma.booking.create({
@@ -76,19 +95,19 @@ export async function POST(request: NextRequest) {
         scheduleId,
         playerId,
         bookingDate: new Date(bookingDate),
-        source: source || 'online'
-      }
-    })
+        source: source || 'online',
+      },
+    });
 
     // 更新课程当前报名人数
     await prisma.schedule.update({
       where: { id: scheduleId },
-      data: { currentCount: { increment: 1 } }
-    })
+      data: { currentCount: { increment: 1 } },
+    });
 
-    return NextResponse.json({ success: true, booking })
+    return NextResponse.json({ success: true, booking });
   } catch (error) {
-    console.error('创建预约失败:', error)
-    return NextResponse.json({ success: false, error: '创建失败' }, { status: 500 })
+    console.error('创建预约失败:', error);
+    return NextResponse.json({ success: false, error: '创建失败' }, { status: 500 });
   }
 }

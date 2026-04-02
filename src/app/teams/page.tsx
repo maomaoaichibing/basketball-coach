@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   ArrowLeft,
   Plus,
@@ -14,39 +14,39 @@ import {
   Clock,
   ChevronRight,
   X,
-  User
-} from 'lucide-react'
+  User,
+} from 'lucide-react';
 
 // 球队类型
 type Team = {
-  id: string
-  name: string
-  group: string
-  coachName?: string
-  coachPhone?: string
-  location?: string
-  trainingTime?: string
-  playerCount: number
-  createdAt: string
-}
+  id: string;
+  name: string;
+  group: string;
+  coachName?: string;
+  coachPhone?: string;
+  location?: string;
+  trainingTime?: string;
+  playerCount: number;
+  createdAt: string;
+};
 
-const groups = ['all', 'U6', 'U8', 'U10', 'U12', 'U14']
+const groups = ['all', 'U6', 'U8', 'U10', 'U12', 'U14'];
 
 const groupColors: Record<string, string> = {
   U6: 'bg-red-100 text-red-700',
   U8: 'bg-orange-100 text-orange-700',
   U10: 'bg-yellow-100 text-yellow-700',
   U12: 'bg-green-100 text-green-700',
-  U14: 'bg-blue-100 text-blue-700'
-}
+  U14: 'bg-blue-100 text-blue-700',
+};
 
 export default function TeamsPage() {
-  const [teams, setTeams] = useState<Team[]>([])
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
-  const [groupFilter, setGroupFilter] = useState('all')
-  const [showAddModal, setShowAddModal] = useState(false)
-  const [editingTeam, setEditingTeam] = useState<Team | null>(null)
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [groupFilter, setGroupFilter] = useState('all');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingTeam, setEditingTeam] = useState<Team | null>(null);
 
   // 新建/编辑表单
   const [formData, setFormData] = useState({
@@ -55,81 +55,79 @@ export default function TeamsPage() {
     coachName: '',
     coachPhone: '',
     location: '',
-    trainingTime: ''
-  })
+    trainingTime: '',
+  });
 
   useEffect(() => {
-    fetchTeams()
-  }, [groupFilter])
+    fetchTeams();
+  }, [groupFilter]);
 
   async function fetchTeams() {
     try {
-      setLoading(true)
-      const params = new URLSearchParams()
-      if (groupFilter !== 'all') params.set('group', groupFilter)
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (groupFilter !== 'all') params.set('group', groupFilter);
 
-      const response = await fetch(`/api/teams?${params}`)
-      const data = await response.json()
+      const response = await fetch(`/api/teams?${params}`);
+      const data = await response.json();
 
       if (data.success) {
-        setTeams(data.teams)
+        setTeams(data.teams);
       }
     } catch (error) {
-      console.error('获取球队列表失败:', error)
+      console.error('获取球队列表失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+    e.preventDefault();
 
     try {
-      const url = editingTeam
-        ? `/api/teams/${editingTeam.id}`
-        : '/api/teams'
-      const method = editingTeam ? 'PUT' : 'POST'
+      const url = editingTeam ? `/api/teams/${editingTeam.id}` : '/api/teams';
+      const method = editingTeam ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
+        body: JSON.stringify(formData),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
-        setShowAddModal(false)
-        setEditingTeam(null)
-        resetForm()
-        fetchTeams()
+        setShowAddModal(false);
+        setEditingTeam(null);
+        resetForm();
+        fetchTeams();
       } else {
-        alert(data.error || '操作失败')
+        alert(data.error || '操作失败');
       }
     } catch (error) {
-      console.error('操作失败:', error)
-      alert('操作失败')
+      console.error('操作失败:', error);
+      alert('操作失败');
     }
   }
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`确定要删除球队「${name}」吗？`)) return
+    if (!confirm(`确定要删除球队「${name}」吗？`)) return;
 
     try {
       const response = await fetch(`/api/teams/${id}`, {
-        method: 'DELETE'
-      })
+        method: 'DELETE',
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
-        fetchTeams()
+        fetchTeams();
       } else {
-        alert(data.error || '删除失败')
+        alert(data.error || '删除失败');
       }
     } catch (error) {
-      console.error('删除失败:', error)
-      alert('删除失败')
+      console.error('删除失败:', error);
+      alert('删除失败');
     }
   }
 
@@ -140,31 +138,34 @@ export default function TeamsPage() {
       coachName: '',
       coachPhone: '',
       location: '',
-      trainingTime: ''
-    })
+      trainingTime: '',
+    });
   }
 
   function openEditModal(team: Team) {
-    setEditingTeam(team)
+    setEditingTeam(team);
     setFormData({
       name: team.name,
       group: team.group,
       coachName: team.coachName || '',
       coachPhone: team.coachPhone || '',
       location: team.location || '',
-      trainingTime: team.trainingTime || ''
-    })
-    setShowAddModal(true)
+      trainingTime: team.trainingTime || '',
+    });
+    setShowAddModal(true);
   }
 
   // 过滤球队
   const filteredTeams = teams.filter(team => {
-    if (search && !team.name.toLowerCase().includes(search.toLowerCase()) &&
-        !team.coachName?.toLowerCase().includes(search.toLowerCase())) {
-      return false
+    if (
+      search &&
+      !team.name.toLowerCase().includes(search.toLowerCase()) &&
+      !team.coachName?.toLowerCase().includes(search.toLowerCase())
+    ) {
+      return false;
     }
-    return true
-  })
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -180,9 +181,9 @@ export default function TeamsPage() {
             </div>
             <button
               onClick={() => {
-                resetForm()
-                setEditingTeam(null)
-                setShowAddModal(true)
+                resetForm();
+                setEditingTeam(null);
+                setShowAddModal(true);
               }}
               className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
             >
@@ -251,7 +252,9 @@ export default function TeamsPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold text-gray-900">{team.name}</h3>
-                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${groupColors[team.group] || 'bg-gray-100 text-gray-700'}`}>
+                      <span
+                        className={`px-2 py-0.5 rounded text-xs font-medium ${groupColors[team.group] || 'bg-gray-100 text-gray-700'}`}
+                      >
                         {team.group}
                       </span>
                     </div>
@@ -312,14 +315,12 @@ export default function TeamsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl w-full max-w-md">
             <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-lg font-semibold">
-                {editingTeam ? '编辑球队' : '新建球队'}
-              </h2>
+              <h2 className="text-lg font-semibold">{editingTeam ? '编辑球队' : '新建球队'}</h2>
               <button
                 onClick={() => {
-                  setShowAddModal(false)
-                  setEditingTeam(null)
-                  resetForm()
+                  setShowAddModal(false);
+                  setEditingTeam(null);
+                  resetForm();
                 }}
                 className="p-1 hover:bg-gray-100 rounded"
               >
@@ -329,9 +330,7 @@ export default function TeamsPage() {
 
             <form onSubmit={handleSubmit} className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  球队名称 *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">球队名称 *</label>
                 <input
                   type="text"
                   required
@@ -343,24 +342,24 @@ export default function TeamsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  年龄组 *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">年龄组 *</label>
                 <select
                   value={formData.group}
                   onChange={e => setFormData({ ...formData, group: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                 >
-                  {groups.filter(g => g !== 'all').map(g => (
-                    <option key={g} value={g}>{g}</option>
-                  ))}
+                  {groups
+                    .filter(g => g !== 'all')
+                    .map(g => (
+                      <option key={g} value={g}>
+                        {g}
+                      </option>
+                    ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  教练姓名
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">教练姓名</label>
                 <input
                   type="text"
                   value={formData.coachName}
@@ -371,9 +370,7 @@ export default function TeamsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  教练电话
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">教练电话</label>
                 <input
                   type="tel"
                   value={formData.coachPhone}
@@ -384,9 +381,7 @@ export default function TeamsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  训练地点
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">训练地点</label>
                 <input
                   type="text"
                   value={formData.location}
@@ -397,9 +392,7 @@ export default function TeamsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  训练时间
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">训练时间</label>
                 <input
                   type="text"
                   value={formData.trainingTime}
@@ -413,9 +406,9 @@ export default function TeamsPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    setShowAddModal(false)
-                    setEditingTeam(null)
-                    resetForm()
+                    setShowAddModal(false);
+                    setEditingTeam(null);
+                    resetForm();
                   }}
                   className="flex-1 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50"
                 >
@@ -433,5 +426,5 @@ export default function TeamsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import { ArrowLeft, Settings, Bell, Moon, Globe } from 'lucide-react'
+import Link from 'next/link';
+import { ArrowLeft, Settings, Bell, Moon, Globe } from 'lucide-react';
 
 export default function SettingsPage() {
   return (
@@ -46,5 +46,5 @@ export default function SettingsPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

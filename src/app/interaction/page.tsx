@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   MessageCircle,
   Calendar,
@@ -12,72 +12,72 @@ import {
   XCircle,
   AlertCircle,
   Heart,
-  Clock
-} from 'lucide-react'
+  Clock,
+} from 'lucide-react';
 
 type Leave = {
-  id: string
-  playerName: string
-  leaveType: string
-  dates: string[]
-  reason: string
-  status: string
-  createdAt: string
-}
+  id: string;
+  playerName: string;
+  leaveType: string;
+  dates: string[];
+  reason: string;
+  status: string;
+  createdAt: string;
+};
 
 type CheckIn = {
-  id: string
-  playerName: string
-  checkInType: string
-  duration: number
-  content: string
-  coachFeedback: string
-  likes: number
-  date: string
-}
+  id: string;
+  playerName: string;
+  checkInType: string;
+  duration: number;
+  content: string;
+  coachFeedback: string;
+  likes: number;
+  date: string;
+};
 
 type Message = {
-  id: string
-  senderName: string
-  senderType: string
-  content: string
-  playerId: string
-  isRead: boolean
-  createdAt: string
-}
+  id: string;
+  senderName: string;
+  senderType: string;
+  content: string;
+  playerId: string;
+  isRead: boolean;
+  createdAt: string;
+};
 
 export default function InteractionPage() {
-  const [leaves, setLeaves] = useState<Leave[]>([])
-  const [checkins, setCheckins] = useState<CheckIn[]>([])
-  const [messages, setMessages] = useState<Message[]>([])
-  const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('leaves')
+  const [leaves, setLeaves] = useState<Leave[]>([]);
+  const [checkins, setCheckins] = useState<CheckIn[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('leaves');
 
   useEffect(() => {
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   async function fetchData() {
     try {
       const [leavesRes, checkinsRes, messagesRes] = await Promise.all([
         fetch('/api/leaves?status=pending'),
         fetch('/api/checkins?limit=20'),
-        fetch('/api/messages?isRead=false')
-      ])
+        fetch('/api/messages?isRead=false'),
+      ]);
 
       const [leavesData, checkinsData, messagesData] = await Promise.all([
         leavesRes.json(),
         checkinsRes.json(),
-        messagesRes.json()
-      ])
+        messagesRes.json(),
+      ]);
 
-      if (leavesData.success) setLeaves(leavesData.leaves)
-      if (checkinsData.success) setCheckins(checkinsData.checkins)
-      if (messagesData.success) setMessages(messagesData.messages)
+      if (leavesData.success) setLeaves(leavesData.leaves);
+      if (checkinsData.success) setCheckins(checkinsData.checkins);
+      if (messagesData.success) setMessages(messagesData.messages);
     } catch (error) {
-      console.error('获取数据失败:', error)
+      console.error('获取数据失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -90,15 +90,15 @@ export default function InteractionPage() {
           status: approved ? 'approved' : 'rejected',
           approverId: 'coach_001',
           approverName: '教练',
-          reply: approved ? '已批准' : '请注意训练安排'
-        })
-      })
+          reply: approved ? '已批准' : '请注意训练安排',
+        }),
+      });
 
       if (response.ok) {
-        fetchData()
+        fetchData();
       }
     } catch (error) {
-      console.error('审批失败:', error)
+      console.error('审批失败:', error);
     }
   }
 
@@ -111,21 +111,21 @@ export default function InteractionPage() {
           coachFeedback: feedback,
           coachId: 'coach_001',
           coachName: '教练',
-          feedbackAt: new Date().toISOString()
-        })
-      })
+          feedbackAt: new Date().toISOString(),
+        }),
+      });
 
       if (response.ok) {
-        fetchData()
+        fetchData();
       }
     } catch (error) {
-      console.error('反馈失败:', error)
+      console.error('反馈失败:', error);
     }
   }
 
-  const pendingLeaves = leaves.filter(l => l.status === 'pending').length
-  const unreadMessages = messages.filter(m => !m.isRead).length
-  const recentCheckins = checkins.filter(c => !c.coachFeedback).length
+  const pendingLeaves = leaves.filter(l => l.status === 'pending').length;
+  const unreadMessages = messages.filter(m => !m.isRead).length;
+  const recentCheckins = checkins.filter(c => !c.coachFeedback).length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -230,62 +230,65 @@ export default function InteractionPage() {
                 {activeTab === 'leaves' && (
                   <div className="space-y-4">
                     {leaves.filter(l => l.status === 'pending').length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        暂无待审批的请假申请
-                      </div>
+                      <div className="text-center py-8 text-gray-500">暂无待审批的请假申请</div>
                     ) : (
-                      leaves.filter(l => l.status === 'pending').map((leave) => (
-                        <div key={leave.id} className="border border-gray-100 rounded-xl p-4">
-                          <div className="flex items-start justify-between mb-3">
-                            <div>
-                              <div className="font-medium text-gray-900">{leave.playerName}</div>
-                              <div className="text-sm text-gray-500 flex items-center gap-2 mt-1">
-                                <Clock className="w-3 h-3" />
-                                {new Date(leave.createdAt).toLocaleDateString('zh-CN')}
+                      leaves
+                        .filter(l => l.status === 'pending')
+                        .map(leave => (
+                          <div key={leave.id} className="border border-gray-100 rounded-xl p-4">
+                            <div className="flex items-start justify-between mb-3">
+                              <div>
+                                <div className="font-medium text-gray-900">{leave.playerName}</div>
+                                <div className="text-sm text-gray-500 flex items-center gap-2 mt-1">
+                                  <Clock className="w-3 h-3" />
+                                  {new Date(leave.createdAt).toLocaleDateString('zh-CN')}
+                                </div>
+                              </div>
+                              <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full flex items-center gap-1">
+                                <AlertCircle className="w-3 h-3" />
+                                待审批
+                              </span>
+                            </div>
+
+                            <div className="mb-3">
+                              <div className="text-sm text-gray-500 mb-1">请假日期</div>
+                              <div className="flex flex-wrap gap-2">
+                                {leave.dates.map((date, index) => (
+                                  <span
+                                    key={index}
+                                    className="px-2 py-1 bg-orange-50 text-orange-700 text-xs rounded"
+                                  >
+                                    {date}
+                                  </span>
+                                ))}
                               </div>
                             </div>
-                            <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full flex items-center gap-1">
-                              <AlertCircle className="w-3 h-3" />
-                              待审批
-                            </span>
-                          </div>
 
-                          <div className="mb-3">
-                            <div className="text-sm text-gray-500 mb-1">请假日期</div>
-                            <div className="flex flex-wrap gap-2">
-                              {leave.dates.map((date, index) => (
-                                <span key={index} className="px-2 py-1 bg-orange-50 text-orange-700 text-xs rounded">
-                                  {date}
-                                </span>
-                              ))}
+                            {leave.reason && (
+                              <div className="mb-3">
+                                <div className="text-sm text-gray-500 mb-1">请假原因</div>
+                                <p className="text-sm text-gray-700">{leave.reason}</p>
+                              </div>
+                            )}
+
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleApproveLeave(leave.id, true)}
+                                className="flex-1 px-3 py-2 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-1"
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                                批准
+                              </button>
+                              <button
+                                onClick={() => handleApproveLeave(leave.id, false)}
+                                className="flex-1 px-3 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-1"
+                              >
+                                <XCircle className="w-4 h-4" />
+                                拒绝
+                              </button>
                             </div>
                           </div>
-
-                          {leave.reason && (
-                            <div className="mb-3">
-                              <div className="text-sm text-gray-500 mb-1">请假原因</div>
-                              <p className="text-sm text-gray-700">{leave.reason}</p>
-                            </div>
-                          )}
-
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleApproveLeave(leave.id, true)}
-                              className="flex-1 px-3 py-2 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-1"
-                            >
-                              <CheckCircle className="w-4 h-4" />
-                              批准
-                            </button>
-                            <button
-                              onClick={() => handleApproveLeave(leave.id, false)}
-                              className="flex-1 px-3 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-1"
-                            >
-                              <XCircle className="w-4 h-4" />
-                              拒绝
-                            </button>
-                          </div>
-                        </div>
-                      ))
+                        ))
                     )}
                   </div>
                 )}
@@ -294,23 +297,33 @@ export default function InteractionPage() {
                 {activeTab === 'checkins' && (
                   <div className="space-y-4">
                     {checkins.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        暂无训练打卡记录
-                      </div>
+                      <div className="text-center py-8 text-gray-500">暂无训练打卡记录</div>
                     ) : (
-                      checkins.map((checkin) => (
-                        <div key={checkin.id} className="border border-gray-100 rounded-xl overflow-hidden">
+                      checkins.map(checkin => (
+                        <div
+                          key={checkin.id}
+                          className="border border-gray-100 rounded-xl overflow-hidden"
+                        >
                           <div className="p-4">
                             <div className="flex items-start justify-between mb-2">
                               <div className="flex items-center gap-2">
-                                <span className="font-medium text-gray-900">{checkin.playerName}</span>
-                                <span className={`px-2 py-0.5 text-xs rounded-full ${
-                                  checkin.checkInType === 'training' ? 'bg-orange-100 text-orange-700' :
-                                  checkin.checkInType === 'homework' ? 'bg-blue-100 text-blue-700' :
-                                  'bg-green-100 text-green-700'
-                                }`}>
-                                  {checkin.checkInType === 'training' ? '训练' :
-                                   checkin.checkInType === 'homework' ? '作业' : '自主'}
+                                <span className="font-medium text-gray-900">
+                                  {checkin.playerName}
+                                </span>
+                                <span
+                                  className={`px-2 py-0.5 text-xs rounded-full ${
+                                    checkin.checkInType === 'training'
+                                      ? 'bg-orange-100 text-orange-700'
+                                      : checkin.checkInType === 'homework'
+                                        ? 'bg-blue-100 text-blue-700'
+                                        : 'bg-green-100 text-green-700'
+                                  }`}
+                                >
+                                  {checkin.checkInType === 'training'
+                                    ? '训练'
+                                    : checkin.checkInType === 'homework'
+                                      ? '作业'
+                                      : '自主'}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2 text-sm text-gray-400">
@@ -344,17 +357,22 @@ export default function InteractionPage() {
                                   type="text"
                                   placeholder="添加点评..."
                                   className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                  onKeyPress={(e) => {
+                                  onKeyPress={e => {
                                     if (e.key === 'Enter') {
-                                      handleFeedback(checkin.id, (e.target as HTMLInputElement).value)
+                                      handleFeedback(
+                                        checkin.id,
+                                        (e.target as HTMLInputElement).value
+                                      );
                                     }
                                   }}
                                 />
                                 <button
-                                  onClick={(e) => {
-                                    const input = (e.target as HTMLButtonElement).parentElement?.querySelector('input')
+                                  onClick={e => {
+                                    const input = (
+                                      e.target as HTMLButtonElement
+                                    ).parentElement?.querySelector('input');
                                     if (input?.value) {
-                                      handleFeedback(checkin.id, input.value)
+                                      handleFeedback(checkin.id, input.value);
                                     }
                                   }}
                                   className="px-4 py-2 bg-orange-500 text-white text-sm rounded-lg hover:bg-orange-600"
@@ -374,18 +392,22 @@ export default function InteractionPage() {
                 {activeTab === 'messages' && (
                   <div className="space-y-4">
                     {messages.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        暂无未读消息
-                      </div>
+                      <div className="text-center py-8 text-gray-500">暂无未读消息</div>
                     ) : (
-                      messages.map((message) => (
+                      messages.map(message => (
                         <div key={message.id} className="border border-gray-100 rounded-xl p-4">
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex items-center gap-2">
-                              <span className="font-medium text-gray-900">{message.senderName}</span>
-                              <span className={`px-2 py-0.5 text-xs rounded-full ${
-                                message.senderType === 'guardian' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
-                              }`}>
+                              <span className="font-medium text-gray-900">
+                                {message.senderName}
+                              </span>
+                              <span
+                                className={`px-2 py-0.5 text-xs rounded-full ${
+                                  message.senderType === 'guardian'
+                                    ? 'bg-blue-100 text-blue-700'
+                                    : 'bg-gray-100 text-gray-700'
+                                }`}
+                              >
                                 {message.senderType === 'guardian' ? '家长' : '其他'}
                               </span>
                             </div>
@@ -405,5 +427,5 @@ export default function InteractionPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

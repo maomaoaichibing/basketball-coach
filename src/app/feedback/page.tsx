@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   ArrowLeft,
   Plus,
@@ -17,68 +17,83 @@ import {
   XCircle,
   AlertCircle,
   Save,
-  Eye
-} from 'lucide-react'
+  Eye,
+} from 'lucide-react';
 
 // 类型定义
 type Plan = {
-  id: string
-  title: string
-  date: string
-  group: string
-  theme?: string
-  duration: number
-  status: string
-}
+  id: string;
+  title: string;
+  date: string;
+  group: string;
+  theme?: string;
+  duration: number;
+  status: string;
+};
 
 type Player = {
-  id: string
-  name: string
-  group: string
-}
+  id: string;
+  name: string;
+  group: string;
+};
 
 type FeedbackRecord = {
-  id: string
-  playerId: string
-  playerName: string
-  playerGroup: string
-  planId: string
-  planTitle: string
-  planDate: string
-  planGroup: string
-  planTheme: string
-  coachName?: string
-  attendance: string
-  performance?: number
-  effort?: number
-  attitude?: number
-  feedback?: string
-  highlights?: string
-  issues?: string
-  improvements?: string
-  homework?: string
-  coachConfirmed: boolean
-  recordedAt: string
-}
+  id: string;
+  playerId: string;
+  playerName: string;
+  playerGroup: string;
+  planId: string;
+  planTitle: string;
+  planDate: string;
+  planGroup: string;
+  planTheme: string;
+  coachName?: string;
+  attendance: string;
+  performance?: number;
+  effort?: number;
+  attitude?: number;
+  feedback?: string;
+  highlights?: string;
+  issues?: string;
+  improvements?: string;
+  homework?: string;
+  coachConfirmed: boolean;
+  recordedAt: string;
+};
 
 const attendanceOptions = [
-  { value: 'present', label: '出勤', icon: CheckCircle, color: 'text-green-600 bg-green-50' },
-  { value: 'absent', label: '缺勤', icon: XCircle, color: 'text-red-600 bg-red-50' },
-  { value: 'late', label: '迟到', icon: AlertCircle, color: 'text-yellow-600 bg-yellow-50' }
-]
+  {
+    value: 'present',
+    label: '出勤',
+    icon: CheckCircle,
+    color: 'text-green-600 bg-green-50',
+  },
+  {
+    value: 'absent',
+    label: '缺勤',
+    icon: XCircle,
+    color: 'text-red-600 bg-red-50',
+  },
+  {
+    value: 'late',
+    label: '迟到',
+    icon: AlertCircle,
+    color: 'text-yellow-600 bg-yellow-50',
+  },
+];
 
 export default function FeedbackPage() {
-  const [plans, setPlans] = useState<Plan[]>([])
-  const [players, setPlayers] = useState<Player[]>([])
-  const [records, setRecords] = useState<FeedbackRecord[]>([])
-  const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
-  const [viewMode, setViewMode] = useState<'list' | 'form'>('list')
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [records, setRecords] = useState<FeedbackRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'form'>('list');
 
   // 表单状态
-  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
-  const [selectedPlayers, setSelectedPlayers] = useState<string[]>([])
-  const [coachName, setCoachName] = useState('')
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
+  const [coachName, setCoachName] = useState('');
   const [formData, setFormData] = useState({
     attendance: 'present',
     performance: 7,
@@ -88,74 +103,72 @@ export default function FeedbackPage() {
     highlights: '',
     issues: '',
     improvements: '',
-    homework: ''
-  })
+    homework: '',
+  });
 
   useEffect(() => {
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   async function fetchData() {
     try {
-      setLoading(true)
+      setLoading(true);
 
       // 获取教案列表
-      const plansRes = await fetch('/api/plans?limit=100')
-      const plansData = await plansRes.json()
+      const plansRes = await fetch('/api/plans?limit=100');
+      const plansData = await plansRes.json();
       if (plansData.success) {
         // 只显示已发布的教案
-        setPlans(plansData.plans.filter((p: Plan) => p.status === 'published' || !p.status))
+        setPlans(plansData.plans.filter((p: Plan) => p.status === 'published' || !p.status));
       }
 
       // 获取学员列表
-      const playersRes = await fetch('/api/players?status=training')
-      const playersData = await playersRes.json()
+      const playersRes = await fetch('/api/players?status=training');
+      const playersData = await playersRes.json();
       if (playersData.success) {
-        setPlayers(playersData.players)
+        setPlayers(playersData.players);
       }
 
       // 获取训练记录
-      const recordsRes = await fetch('/api/records?limit=50')
-      const recordsData = await recordsRes.json()
+      const recordsRes = await fetch('/api/records?limit=50');
+      const recordsData = await recordsRes.json();
       if (recordsData.success) {
-        setRecords(recordsData.records)
+        setRecords(recordsData.records);
       }
     } catch (error) {
-      console.error('获取数据失败:', error)
+      console.error('获取数据失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   const handleSelectPlan = (plan: Plan) => {
-    setSelectedPlan(plan)
-  }
+    setSelectedPlan(plan);
+  };
 
   const handleSelectPlayer = (playerId: string) => {
     setSelectedPlayers(prev =>
-      prev.includes(playerId)
-        ? prev.filter(id => id !== playerId)
-        : [...prev, playerId]
-    )
-  }
+      prev.includes(playerId) ? prev.filter(id => id !== playerId) : [...prev, playerId]
+    );
+  };
 
   const handleSelectAll = () => {
     if (selectedPlayers.length === players.length) {
-      setSelectedPlayers([])
+      setSelectedPlayers([]);
     } else {
-      setSelectedPlayers(players.map(p => p.id))
+      setSelectedPlayers(players.map(p => p.id));
     }
-  }
+  };
 
   const handleSubmit = async () => {
     if (!selectedPlan) {
-      alert('请选择教案')
-      return
+      alert('请选择教案');
+      return;
     }
 
     if (selectedPlayers.length === 0) {
-      alert('请选择学员')
-      return
+      alert('请选择学员');
+      return;
     }
 
     try {
@@ -167,15 +180,15 @@ export default function FeedbackPage() {
             planId: selectedPlan.id,
             playerId,
             coachName,
-            ...formData
-          })
-        })
+            ...formData,
+          }),
+        });
       }
 
-      alert('反馈提交成功！')
-      setShowForm(false)
-      setSelectedPlan(null)
-      setSelectedPlayers([])
+      alert('反馈提交成功！');
+      setShowForm(false);
+      setSelectedPlan(null);
+      setSelectedPlayers([]);
       setFormData({
         attendance: 'present',
         performance: 7,
@@ -185,26 +198,29 @@ export default function FeedbackPage() {
         highlights: '',
         issues: '',
         improvements: '',
-        homework: ''
-      })
-      fetchData()
+        homework: '',
+      });
+      fetchData();
     } catch (error) {
-      console.error('提交失败:', error)
-      alert('提交失败')
+      console.error('提交失败:', error);
+      alert('提交失败');
     }
-  }
+  };
 
   const getAttendanceInfo = (attendance: string) => {
-    return attendanceOptions.find(a => a.value === attendance) || attendanceOptions[0]
-  }
+    return attendanceOptions.find(a => a.value === attendance) || attendanceOptions[0];
+  };
 
   // 按日期分组记录
-  const groupedRecords = records.reduce((acc, record) => {
-    const date = record.planDate.split('T')[0]
-    if (!acc[date]) acc[date] = []
-    acc[date].push(record)
-    return acc
-  }, {} as Record<string, FeedbackRecord[]>)
+  const groupedRecords = records.reduce(
+    (acc, record) => {
+      const date = record.planDate.split('T')[0];
+      if (!acc[date]) acc[date] = [];
+      acc[date].push(record);
+      return acc;
+    },
+    {} as Record<string, FeedbackRecord[]>
+  );
 
   if (loading) {
     return (
@@ -214,7 +230,7 @@ export default function FeedbackPage() {
           <p className="mt-2 text-gray-500">加载中...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -229,9 +245,7 @@ export default function FeedbackPage() {
               </Link>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">课后反馈</h1>
-                <p className="text-sm text-gray-500">
-                  共 {records.length} 条反馈记录
-                </p>
+                <p className="text-sm text-gray-500">共 {records.length} 条反馈记录</p>
               </div>
             </div>
             <button
@@ -330,9 +344,7 @@ export default function FeedbackPage() {
 
               {/* 教练姓名 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  教练姓名
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">教练姓名</label>
                 <input
                   type="text"
                   value={coachName}
@@ -344,12 +356,10 @@ export default function FeedbackPage() {
 
               {/* 出勤 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  出勤情况
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">出勤情况</label>
                 <div className="grid grid-cols-3 gap-3">
                   {attendanceOptions.map(option => {
-                    const Icon = option.icon
+                    const Icon = option.icon;
                     return (
                       <button
                         key={option.value}
@@ -363,21 +373,19 @@ export default function FeedbackPage() {
                         <Icon className="w-5 h-5" />
                         <span className="font-medium">{option.label}</span>
                       </button>
-                    )
+                    );
                   })}
                 </div>
               </div>
 
               {/* 评分 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  评分 (1-10)
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-3">评分 (1-10)</label>
                 <div className="grid grid-cols-3 gap-4">
                   {[
                     { key: 'performance', label: '表现' },
                     { key: 'effort', label: '努力程度' },
-                    { key: 'attitude', label: '态度' }
+                    { key: 'attitude', label: '态度' },
                   ].map(item => (
                     <div key={item.key}>
                       <div className="flex items-center justify-between mb-1">
@@ -391,7 +399,12 @@ export default function FeedbackPage() {
                         min="1"
                         max="10"
                         value={formData[item.key as keyof typeof formData] as number}
-                        onChange={e => setFormData({ ...formData, [item.key]: parseInt(e.target.value) })}
+                        onChange={e =>
+                          setFormData({
+                            ...formData,
+                            [item.key]: parseInt(e.target.value),
+                          })
+                        }
                         className="w-full accent-orange-500"
                       />
                     </div>
@@ -402,9 +415,7 @@ export default function FeedbackPage() {
               {/* 反馈内容 */}
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    综合评价
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">综合评价</label>
                   <textarea
                     value={formData.feedback}
                     onChange={e => setFormData({ ...formData, feedback: e.target.value })}
@@ -415,9 +426,7 @@ export default function FeedbackPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    亮点
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">亮点</label>
                   <textarea
                     value={formData.highlights}
                     onChange={e => setFormData({ ...formData, highlights: e.target.value })}
@@ -428,9 +437,7 @@ export default function FeedbackPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    问题
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">问题</label>
                   <textarea
                     value={formData.issues}
                     onChange={e => setFormData({ ...formData, issues: e.target.value })}
@@ -441,9 +448,7 @@ export default function FeedbackPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    课后作业
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">课后作业</label>
                   <textarea
                     value={formData.homework}
                     onChange={e => setFormData({ ...formData, homework: e.target.value })}
@@ -488,13 +493,13 @@ export default function FeedbackPage() {
                     {new Date(date).toLocaleDateString('zh-CN', {
                       weekday: 'long',
                       month: 'long',
-                      day: 'numeric'
+                      day: 'numeric',
                     })}
                   </h3>
                   <div className="space-y-3">
                     {dayRecords.map(record => {
-                      const attendance = getAttendanceInfo(record.attendance)
-                      const AttendanceIcon = attendance.icon
+                      const attendance = getAttendanceInfo(record.attendance);
+                      const AttendanceIcon = attendance.icon;
                       return (
                         <div
                           key={record.id}
@@ -549,12 +554,12 @@ export default function FeedbackPage() {
                               {record.coachName && <div>{record.coachName}</div>}
                               {new Date(record.recordedAt).toLocaleTimeString('zh-CN', {
                                 hour: '2-digit',
-                                minute: '2-digit'
+                                minute: '2-digit',
                               })}
                             </div>
                           </div>
                         </div>
-                      )
+                      );
                     })}
                   </div>
                 </div>
@@ -564,5 +569,5 @@ export default function FeedbackPage() {
         )}
       </main>
     </div>
-  )
+  );
 }

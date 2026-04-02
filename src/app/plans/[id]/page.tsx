@@ -1,66 +1,78 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { ArrowLeft, Clock, MapPin, Users, Target, Play, CheckCircle2, Download, Edit, Sparkles, Copy } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import {
+  ArrowLeft,
+  Clock,
+  MapPin,
+  Users,
+  Target,
+  Play,
+  CheckCircle2,
+  Download,
+  Edit,
+  Sparkles,
+  Copy,
+} from 'lucide-react';
 
 // 教案类型
 type TrainingPlan = {
-  id: string
-  title: string
-  group: string
-  date: string
-  duration: number
-  location: string
-  weather?: string
-  theme?: string
-  objective?: string
-  intensity?: string
-  status?: string
-  generatedBy?: string
-  sections?: any[]
-  notes?: string
-  focusSkills?: string
-}
+  id: string;
+  title: string;
+  group: string;
+  date: string;
+  duration: number;
+  location: string;
+  weather?: string;
+  theme?: string;
+  objective?: string;
+  intensity?: string;
+  status?: string;
+  generatedBy?: string;
+  sections?: any[];
+  notes?: string;
+  focusSkills?: string;
+};
 
 export default function PlanDetailPage({ params }: { params: { id: string } }) {
-  const [plan, setPlan] = useState<TrainingPlan | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [copying, setCopying] = useState(false)
+  const [plan, setPlan] = useState<TrainingPlan | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [copying, setCopying] = useState(false);
 
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
-    fetchPlan()
-  }, [params.id])
+    fetchPlan();
+  }, [params.id]);
 
   async function fetchPlan() {
     try {
-      setLoading(true)
-      const response = await fetch(`/api/plans/${params.id}`)
-      const data = await response.json()
+      setLoading(true);
+      const response = await fetch(`/api/plans/${params.id}`);
+      const data = await response.json();
 
       if (data.success) {
         const parsedPlan = {
           ...data.plan,
-          sections: data.plan.sections ? JSON.parse(data.plan.sections) : []
-        }
-        setPlan(parsedPlan)
+          sections: data.plan.sections ? JSON.parse(data.plan.sections) : [],
+        };
+        setPlan(parsedPlan);
       }
     } catch (error) {
-      console.error('获取教案详情失败:', error)
+      console.error('获取教案详情失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   // 复制教案
   async function handleCopyPlan() {
-    if (!plan) return
+    if (!plan) return;
 
     try {
-      setCopying(true)
+      setCopying(true);
       const response = await fetch('/api/plans', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -76,22 +88,22 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
           intensity: plan.intensity || 'medium',
           sections: plan.sections || [],
           notes: plan.notes,
-          generatedBy: plan.generatedBy
-        })
-      })
+          generatedBy: plan.generatedBy,
+        }),
+      });
 
-      const result = await response.json()
+      const result = await response.json();
       if (result.success) {
-        alert('教案复制成功！')
-        router.push(`/plans/${result.id}`)
+        alert('教案复制成功！');
+        router.push(`/plans/${result.id}`);
       } else {
-        alert('复制失败: ' + result.error)
+        alert('复制失败: ' + result.error);
       }
     } catch (error) {
-      console.error('复制教案失败:', error)
-      alert('复制失败')
+      console.error('复制教案失败:', error);
+      alert('复制失败');
     } finally {
-      setCopying(false)
+      setCopying(false);
     }
   }
 
@@ -100,7 +112,7 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
       </div>
-    )
+    );
   }
 
   if (!plan) {
@@ -108,30 +120,41 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-bold text-gray-900 mb-2">教案不存在</h2>
-          <Link href="/plans" className="text-orange-600 hover:text-orange-700">返回教案库</Link>
+          <Link href="/plans" className="text-orange-600 hover:text-orange-700">
+            返回教案库
+          </Link>
         </div>
       </div>
-    )
+    );
   }
 
   // 计算总时长和内容数量
-  const totalTime = plan.duration
-  const activityCount = plan.sections?.length || 0
+  const totalTime = plan.duration;
+  const activityCount = plan.sections?.length || 0;
 
   // 获取环节颜色
   const getSectionColor = (category: string) => {
-    switch(category) {
-      case 'warmup': return 'bg-blue-100 text-blue-700'
-      case 'ball_familiarity': return 'bg-amber-100 text-amber-700'
-      case 'technical': return 'bg-orange-100 text-orange-700'
-      case 'physical': return 'bg-red-100 text-red-700'
-      case 'tactical': return 'bg-purple-100 text-purple-700'
-      case 'game': return 'bg-green-100 text-green-700'
-      case 'cooldown': return 'bg-gray-100 text-gray-700'
-      case 'etiquette': return 'bg-pink-100 text-pink-700'
-      default: return 'bg-gray-100 text-gray-700'
+    switch (category) {
+      case 'warmup':
+        return 'bg-blue-100 text-blue-700';
+      case 'ball_familiarity':
+        return 'bg-amber-100 text-amber-700';
+      case 'technical':
+        return 'bg-orange-100 text-orange-700';
+      case 'physical':
+        return 'bg-red-100 text-red-700';
+      case 'tactical':
+        return 'bg-purple-100 text-purple-700';
+      case 'game':
+        return 'bg-green-100 text-green-700';
+      case 'cooldown':
+        return 'bg-gray-100 text-gray-700';
+      case 'etiquette':
+        return 'bg-pink-100 text-pink-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
     }
-  }
+  };
 
   const getSectionLabel = (category: string) => {
     const labels: Record<string, string> = {
@@ -142,10 +165,10 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
       tactical: '战术',
       game: '对抗',
       cooldown: '放松',
-      etiquette: '礼仪'
-    }
-    return labels[category] || category
-  }
+      etiquette: '礼仪',
+    };
+    return labels[category] || category;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -169,8 +192,14 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                 </div>
                 <div className="flex items-center gap-3 text-sm text-gray-500">
                   <span>{plan.date}</span>
-                  <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded-full">{plan.group}</span>
-                  {plan.theme && <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">{plan.theme}</span>}
+                  <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded-full">
+                    {plan.group}
+                  </span>
+                  {plan.theme && (
+                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                      {plan.theme}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -260,7 +289,9 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${getSectionColor(section.category)}`}>
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${getSectionColor(section.category)}`}
+                  >
                     {index + 1}
                   </div>
                   <div>
@@ -268,7 +299,9 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                     <span className="text-sm text-gray-500 flex items-center gap-2">
                       <Clock className="w-3 h-3" />
                       {section.duration}分钟
-                      <span className={`px-2 py-0.5 text-xs rounded-full ${getSectionColor(section.category)}`}>
+                      <span
+                        className={`px-2 py-0.5 text-xs rounded-full ${getSectionColor(section.category)}`}
+                      >
                         {getSectionLabel(section.category)}
                       </span>
                     </span>
@@ -299,7 +332,10 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                     {activity.keyPoints && activity.keyPoints.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
                         {activity.keyPoints.map((point: string, pIdx: number) => (
-                          <span key={pIdx} className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
+                          <span
+                            key={pIdx}
+                            className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded"
+                          >
                             {point}
                           </span>
                         ))}
@@ -335,5 +371,5 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
         )}
       </main>
     </div>
-  )
+  );
 }

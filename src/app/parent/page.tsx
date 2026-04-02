@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import Link from 'next/link'
+import { useState } from 'react';
+import Link from 'next/link';
 import {
   ArrowLeft,
   Search,
@@ -15,139 +15,142 @@ import {
   ChevronRight,
   Phone,
   User,
-  GraduationCap
-} from 'lucide-react'
+  GraduationCap,
+} from 'lucide-react';
 
 // 类型定义
 type Player = {
-  id: string
-  name: string
-  group: string
-  school?: string
-  team?: { name: string; coachName: string }
-  guardians: { name: string; relation: string }[]
-  dribbling: number
-  passing: number
-  shooting: number
-  defending: number
-  physical: number
-  tactical: number
-  records: TrainingRecord[]
-  latestAssessment: PlayerAssessment | null
-  activeGoals: PlayerGoal[]
-  enrollments: CourseEnrollment[]
-}
+  id: string;
+  name: string;
+  group: string;
+  school?: string;
+  team?: { name: string; coachName: string };
+  guardians: { name: string; relation: string }[];
+  dribbling: number;
+  passing: number;
+  shooting: number;
+  defending: number;
+  physical: number;
+  tactical: number;
+  records: TrainingRecord[];
+  latestAssessment: PlayerAssessment | null;
+  activeGoals: PlayerGoal[];
+  enrollments: CourseEnrollment[];
+};
 
 // 训练记录类型
 interface TrainingRecord {
-  id: string
-  playerId: string
-  playerName: string
-  type: string
-  content: string
-  rating?: number
-  feedback?: string
-  attendance: string
-  createdAt: string
-  plan?: { title: string; date: string; duration: number }
-  recordedAt?: string
+  id: string;
+  playerId: string;
+  playerName: string;
+  type: string;
+  content: string;
+  rating?: number;
+  feedback?: string;
+  attendance: string;
+  createdAt: string;
+  plan?: { title: string; date: string; duration: number };
+  recordedAt?: string;
 }
 
 // 评估记录类型
 interface PlayerAssessment {
-  id: string
-  playerId: string
-  playerName: string
-  assessedAt: string
-  dribbling: number
-  passing: number
-  shooting: number
-  defending: number
-  physical: number
-  tactical: number
-  overallRating?: number
-  notes?: string
-  createdAt: string
+  id: string;
+  playerId: string;
+  playerName: string;
+  assessedAt: string;
+  dribbling: number;
+  passing: number;
+  shooting: number;
+  defending: number;
+  physical: number;
+  tactical: number;
+  overallRating?: number;
+  notes?: string;
+  createdAt: string;
 }
 
 // 阶段目标类型
 interface PlayerGoal {
-  id: string
-  playerId: string
-  skillType: string
-  targetScore: number
-  currentScore: number
-  status: string
-  targetDate?: string
-  achievedAt?: string
-  createdAt: string
+  id: string;
+  playerId: string;
+  skillType: string;
+  targetScore: number;
+  currentScore: number;
+  status: string;
+  targetDate?: string;
+  achievedAt?: string;
+  createdAt: string;
 }
 
 // 课程报名类型
 interface CourseEnrollment {
-  id: string
-  playerId: string
-  courseId: string
-  courseName: string
-  startDate: string
-  endDate: string
-  status: string
-  remainingHours: number
-  totalHours: number
-  createdAt: string
+  id: string;
+  playerId: string;
+  courseId: string;
+  courseName: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+  remainingHours: number;
+  totalHours: number;
+  createdAt: string;
 }
 
 export default function ParentPage() {
-  const [phone, setPhone] = useState('')
-  const [players, setPlayers] = useState<Player[]>([])
-  const [loading, setLoading] = useState(false)
-  const [searched, setSearched] = useState(false)
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null)
+  const [phone, setPhone] = useState('');
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
   async function handleSearch() {
     if (!phone.trim()) {
-      alert('请输入手机号')
-      return
+      alert('请输入手机号');
+      return;
     }
 
-    setLoading(true)
-    setSearched(true)
+    setLoading(true);
+    setSearched(true);
     try {
-      const response = await fetch(`/api/parent?phone=${encodeURIComponent(phone)}`)
-      const data = await response.json()
+      const response = await fetch(`/api/parent?phone=${encodeURIComponent(phone)}`);
+      const data = await response.json();
       if (data.success) {
-        setPlayers(data.players)
+        setPlayers(data.players);
         if (data.players.length > 0) {
-          setSelectedPlayer(data.players[0])
+          setSelectedPlayer(data.players[0]);
         } else {
-          setSelectedPlayer(null)
+          setSelectedPlayer(null);
         }
       } else {
-        alert(data.error)
+        alert(data.error);
       }
     } catch (error) {
-      alert('查询失败')
+      alert('查询失败');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   function getAttendanceStats(records: TrainingRecord[]) {
-    const total = records.length
-    const present = records.filter(r => r.attendance === 'present').length
-    const late = records.filter(r => r.attendance === 'late').length
-    const absent = records.filter(r => r.attendance === 'absent').length
-    return { total, present, late, absent }
+    const total = records.length;
+    const present = records.filter(r => r.attendance === 'present').length;
+    const late = records.filter(r => r.attendance === 'late').length;
+    const absent = records.filter(r => r.attendance === 'absent').length;
+    return { total, present, late, absent };
   }
 
   function AttendanceBadge({ status }: { status: string }) {
     const config: Record<string, { label: string; color: string }> = {
       present: { label: '出勤', color: 'bg-green-100 text-green-700' },
       late: { label: '迟到', color: 'bg-yellow-100 text-yellow-700' },
-      absent: { label: '缺勤', color: 'bg-red-100 text-red-700' }
-    }
-    const { label, color } = config[status] || { label: status, color: 'bg-gray-100 text-gray-700' }
-    return <span className={`px-2 py-0.5 text-xs rounded-full ${color}`}>{label}</span>
+      absent: { label: '缺勤', color: 'bg-red-100 text-red-700' },
+    };
+    const { label, color } = config[status] || {
+      label: status,
+      color: 'bg-gray-100 text-gray-700',
+    };
+    return <span className={`px-2 py-0.5 text-xs rounded-full ${color}`}>{label}</span>;
   }
 
   if (!searched) {
@@ -206,7 +209,7 @@ export default function ParentPage() {
           </div>
         </main>
       </div>
-    )
+    );
   }
 
   if (players.length === 0) {
@@ -229,7 +232,10 @@ export default function ParentPage() {
             <h2 className="text-lg font-semibold text-gray-900 mb-2">未找到关联学员</h2>
             <p className="text-gray-500 mb-6">该手机号未关联任何学员信息</p>
             <button
-              onClick={() => { setSearched(false); setPhone('') }}
+              onClick={() => {
+                setSearched(false);
+                setPhone('');
+              }}
               className="px-6 py-2 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600"
             >
               重新输入
@@ -237,7 +243,7 @@ export default function ParentPage() {
           </div>
         </main>
       </div>
-    )
+    );
   }
 
   return (
@@ -252,7 +258,11 @@ export default function ParentPage() {
               <h1 className="text-xl font-bold text-gray-900">家长端</h1>
             </div>
             <button
-              onClick={() => { setSearched(false); setPlayers([]); setSelectedPlayer(null) }}
+              onClick={() => {
+                setSearched(false);
+                setPlayers([]);
+                setSelectedPlayer(null);
+              }}
               className="text-sm text-orange-500 hover:text-orange-600"
             >
               切换账号
@@ -304,7 +314,9 @@ export default function ParentPage() {
                       </div>
                       <div>
                         <h2 className="text-xl font-bold text-gray-900">{selectedPlayer.name}</h2>
-                        <p className="text-gray-500">{selectedPlayer.group} · {selectedPlayer.school || '未填写学校'}</p>
+                        <p className="text-gray-500">
+                          {selectedPlayer.group} · {selectedPlayer.school || '未填写学校'}
+                        </p>
                       </div>
                     </div>
                     <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
@@ -328,7 +340,8 @@ export default function ParentPage() {
                           <span className="font-medium text-green-800">剩余课时</span>
                         </div>
                         <span className="text-2xl font-bold text-green-700">
-                          {selectedPlayer.enrollments.filter(e => e.status === 'active')[0]?.remainingHours || 0}
+                          {selectedPlayer.enrollments.filter(e => e.status === 'active')[0]
+                            ?.remainingHours || 0}
                         </span>
                       </div>
                     </div>
@@ -347,20 +360,48 @@ export default function ParentPage() {
                     </h3>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                       {[
-                        { key: 'dribbling', label: '运球', value: selectedPlayer.latestAssessment.dribbling },
-                        { key: 'passing', label: '传球', value: selectedPlayer.latestAssessment.passing },
-                        { key: 'shooting', label: '投篮', value: selectedPlayer.latestAssessment.shooting },
-                        { key: 'defending', label: '防守', value: selectedPlayer.latestAssessment.defending },
-                        { key: 'physical', label: '体能', value: selectedPlayer.latestAssessment.physical },
-                        { key: 'tactical', label: '战术', value: selectedPlayer.latestAssessment.tactical },
+                        {
+                          key: 'dribbling',
+                          label: '运球',
+                          value: selectedPlayer.latestAssessment.dribbling,
+                        },
+                        {
+                          key: 'passing',
+                          label: '传球',
+                          value: selectedPlayer.latestAssessment.passing,
+                        },
+                        {
+                          key: 'shooting',
+                          label: '投篮',
+                          value: selectedPlayer.latestAssessment.shooting,
+                        },
+                        {
+                          key: 'defending',
+                          label: '防守',
+                          value: selectedPlayer.latestAssessment.defending,
+                        },
+                        {
+                          key: 'physical',
+                          label: '体能',
+                          value: selectedPlayer.latestAssessment.physical,
+                        },
+                        {
+                          key: 'tactical',
+                          label: '战术',
+                          value: selectedPlayer.latestAssessment.tactical,
+                        },
                       ].map(item => (
                         <div key={item.key} className="text-center">
-                          <div className="text-2xl font-bold text-orange-600">{item.value || '-'}</div>
+                          <div className="text-2xl font-bold text-orange-600">
+                            {item.value || '-'}
+                          </div>
                           <div className="text-sm text-gray-500">{item.label}</div>
                           <div className="mt-1 h-2 bg-gray-100 rounded-full overflow-hidden">
                             <div
                               className="h-full bg-orange-500 rounded-full transition-all"
-                              style={{ width: `${((item.value || 0) / 10) * 100}%` }}
+                              style={{
+                                width: `${((item.value || 0) / 10) * 100}%`,
+                              }}
                             />
                           </div>
                         </div>
@@ -384,10 +425,17 @@ export default function ParentPage() {
                     <div className="space-y-3">
                       {selectedPlayer.activeGoals.map((goal: PlayerGoal) => {
                         const skillLabels: Record<string, string> = {
-                          dribbling: '运球', passing: '传球', shooting: '投篮',
-                          defending: '防守', physical: '体能', tactical: '战术'
-                        }
-                        const progress = Math.min(100, Math.round((goal.currentScore / goal.targetScore) * 100))
+                          dribbling: '运球',
+                          passing: '传球',
+                          shooting: '投篮',
+                          defending: '防守',
+                          physical: '体能',
+                          tactical: '战术',
+                        };
+                        const progress = Math.min(
+                          100,
+                          Math.round((goal.currentScore / goal.targetScore) * 100)
+                        );
                         return (
                           <div key={goal.id} className="p-3 bg-gray-50 rounded-lg">
                             <div className="flex justify-between items-center mb-2">
@@ -407,7 +455,7 @@ export default function ParentPage() {
                               />
                             </div>
                           </div>
-                        )
+                        );
                       })}
                     </div>
                   </div>
@@ -422,11 +470,13 @@ export default function ParentPage() {
                   {selectedPlayer.records.length > 0 ? (
                     <div className="space-y-3">
                       {(() => {
-                        const stats = getAttendanceStats(selectedPlayer.records)
+                        const stats = getAttendanceStats(selectedPlayer.records);
                         return (
                           <div className="grid grid-cols-4 gap-2 mb-4">
                             <div className="text-center p-2 bg-green-50 rounded-lg">
-                              <div className="text-lg font-bold text-green-600">{stats.present}</div>
+                              <div className="text-lg font-bold text-green-600">
+                                {stats.present}
+                              </div>
                               <div className="text-xs text-green-600">出勤</div>
                             </div>
                             <div className="text-center p-2 bg-yellow-50 rounded-lg">
@@ -442,15 +492,23 @@ export default function ParentPage() {
                               <div className="text-xs text-gray-600">总计</div>
                             </div>
                           </div>
-                        )
+                        );
                       })()}
 
                       {selectedPlayer.records.map((record: TrainingRecord) => (
-                        <div key={record.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div
+                          key={record.id}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                        >
                           <div>
-                            <div className="font-medium text-gray-900">{record.plan?.title || '训练课'}</div>
+                            <div className="font-medium text-gray-900">
+                              {record.plan?.title || '训练课'}
+                            </div>
                             <div className="text-sm text-gray-500">
-                              {new Date(record.plan?.date || record.recordedAt || new Date()).toLocaleDateString()} · {record.plan?.duration || 0}分钟
+                              {new Date(
+                                record.plan?.date || record.recordedAt || new Date()
+                              ).toLocaleDateString()}{' '}
+                              · {record.plan?.duration || 0}分钟
                             </div>
                           </div>
                           <AttendanceBadge status={record.attendance} />
@@ -470,5 +528,5 @@ export default function ParentPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   ChevronRight,
   Plus,
@@ -10,69 +10,69 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  AlertCircle
-} from 'lucide-react'
+  AlertCircle,
+} from 'lucide-react';
 
 type Leave = {
-  id: string
-  playerId: string
-  playerName: string
-  leaveType: string
-  reason: string
-  dates: string[]
-  totalHours: number
-  status: string
-  reply: string
-  createdAt: string
-}
+  id: string;
+  playerId: string;
+  playerName: string;
+  leaveType: string;
+  reason: string;
+  dates: string[];
+  totalHours: number;
+  status: string;
+  reply: string;
+  createdAt: string;
+};
 
 type Player = {
-  id: string
-  name: string
-  group: string
-}
+  id: string;
+  name: string;
+  group: string;
+};
 
 export default function ParentLeavePage() {
-  const router = useRouter()
-  const [player, setPlayer] = useState<Player | null>(null)
-  const [leaves, setLeaves] = useState<Leave[]>([])
-  const [loading, setLoading] = useState(true)
-  const [showCreateModal, setShowCreateModal] = useState(false)
+  const router = useRouter();
+  const [player, setPlayer] = useState<Player | null>(null);
+  const [leaves, setLeaves] = useState<Leave[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const [createForm, setCreateForm] = useState({
     leaveType: 'absence',
     reason: '',
     dates: [] as string[],
-    totalHours: 0
-  })
+    totalHours: 0,
+  });
 
   useEffect(() => {
-    const stored = localStorage.getItem('parentPlayer')
+    const stored = localStorage.getItem('parentPlayer');
     if (stored) {
-      const playerData = JSON.parse(stored)
-      setPlayer(playerData)
-      fetchLeaves(playerData.id)
+      const playerData = JSON.parse(stored);
+      setPlayer(playerData);
+      fetchLeaves(playerData.id);
     } else {
-      router.push('/parent')
+      router.push('/parent');
     }
-  }, [])
+  }, []);
 
   async function fetchLeaves(playerId: string) {
     try {
-      const response = await fetch(`/api/leaves?playerId=${playerId}`)
-      const data = await response.json()
+      const response = await fetch(`/api/leaves?playerId=${playerId}`);
+      const data = await response.json();
       if (data.success) {
-        setLeaves(data.leaves)
+        setLeaves(data.leaves);
       }
     } catch (error) {
-      console.error('获取请假记录失败:', error)
+      console.error('获取请假记录失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function handleCreateLeave() {
-    if (!player || createForm.dates.length === 0) return
+    if (!player || createForm.dates.length === 0) return;
 
     try {
       const response = await fetch('/api/leaves', {
@@ -86,48 +86,64 @@ export default function ParentLeavePage() {
           leaveType: createForm.leaveType,
           reason: createForm.reason,
           dates: JSON.stringify(createForm.dates),
-          totalHours: createForm.totalHours
-        })
-      })
+          totalHours: createForm.totalHours,
+        }),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
       if (data.success) {
-        setShowCreateModal(false)
+        setShowCreateModal(false);
         setCreateForm({
           leaveType: 'absence',
           reason: '',
           dates: [],
-          totalHours: 0
-        })
-        fetchLeaves(player.id)
+          totalHours: 0,
+        });
+        fetchLeaves(player.id);
       }
     } catch (error) {
-      console.error('创建请假失败:', error)
+      console.error('创建请假失败:', error);
     }
   }
 
   function addDate() {
-    const newDate = prompt('请输入请假日期 (格式: 2024-03-20)')
+    const newDate = prompt('请输入请假日期 (格式: 2024-03-20)');
     if (newDate && !createForm.dates.includes(newDate)) {
       setCreateForm({
         ...createForm,
-        dates: [...createForm.dates, newDate]
-      })
+        dates: [...createForm.dates, newDate],
+      });
     }
   }
 
   const statusConfig: Record<string, { color: string; icon: any; label: string }> = {
-    pending: { color: 'bg-yellow-100 text-yellow-700', icon: AlertCircle, label: '待审批' },
-    approved: { color: 'bg-green-100 text-green-700', icon: CheckCircle, label: '已批准' },
-    rejected: { color: 'bg-red-100 text-red-700', icon: XCircle, label: '已拒绝' },
-    cancelled: { color: 'bg-gray-100 text-gray-700', icon: XCircle, label: '已取消' }
-  }
+    pending: {
+      color: 'bg-yellow-100 text-yellow-700',
+      icon: AlertCircle,
+      label: '待审批',
+    },
+    approved: {
+      color: 'bg-green-100 text-green-700',
+      icon: CheckCircle,
+      label: '已批准',
+    },
+    rejected: {
+      color: 'bg-red-100 text-red-700',
+      icon: XCircle,
+      label: '已拒绝',
+    },
+    cancelled: {
+      color: 'bg-gray-100 text-gray-700',
+      icon: XCircle,
+      label: '已取消',
+    },
+  };
 
   const leaveTypeLabels: Record<string, string> = {
     absence: '请假',
     late: '迟到',
-    early: '早退'
-  }
+    early: '早退',
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -185,16 +201,21 @@ export default function ParentLeavePage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {leaves.map((leave) => {
-              const config = statusConfig[leave.status] || statusConfig.pending
-              const StatusIcon = config.icon
+            {leaves.map(leave => {
+              const config = statusConfig[leave.status] || statusConfig.pending;
+              const StatusIcon = config.icon;
 
               return (
-                <div key={leave.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div
+                  key={leave.id}
+                  className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+                >
                   <div className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <span className={`px-2 py-1 text-xs rounded-full ${config.color} flex items-center gap-1`}>
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full ${config.color} flex items-center gap-1`}
+                        >
                           <StatusIcon className="w-3 h-3" />
                           {config.label}
                         </span>
@@ -212,7 +233,10 @@ export default function ParentLeavePage() {
                       <div className="text-sm text-gray-500 mb-1">请假日期</div>
                       <div className="flex flex-wrap gap-2">
                         {leave.dates.map((date, index) => (
-                          <span key={index} className="px-3 py-1 bg-orange-50 text-orange-700 text-sm rounded-lg">
+                          <span
+                            key={index}
+                            className="px-3 py-1 bg-orange-50 text-orange-700 text-sm rounded-lg"
+                          >
                             {date}
                           </span>
                         ))}
@@ -236,7 +260,7 @@ export default function ParentLeavePage() {
                     )}
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         )}
@@ -260,12 +284,10 @@ export default function ParentLeavePage() {
 
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  请假类型
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">请假类型</label>
                 <select
                   value={createForm.leaveType}
-                  onChange={(e) => setCreateForm({ ...createForm, leaveType: e.target.value })}
+                  onChange={e => setCreateForm({ ...createForm, leaveType: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 >
                   <option value="absence">请假</option>
@@ -275,9 +297,7 @@ export default function ParentLeavePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  请假日期
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">请假日期</label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {createForm.dates.map((date, index) => (
                     <span
@@ -286,10 +306,12 @@ export default function ParentLeavePage() {
                     >
                       {date}
                       <button
-                        onClick={() => setCreateForm({
-                          ...createForm,
-                          dates: createForm.dates.filter((_, i) => i !== index)
-                        })}
+                        onClick={() =>
+                          setCreateForm({
+                            ...createForm,
+                            dates: createForm.dates.filter((_, i) => i !== index),
+                          })
+                        }
                         className="text-orange-500 hover:text-orange-700"
                       >
                         ×
@@ -306,12 +328,10 @@ export default function ParentLeavePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  请假原因
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">请假原因</label>
                 <textarea
                   value={createForm.reason}
-                  onChange={(e) => setCreateForm({ ...createForm, reason: e.target.value })}
+                  onChange={e => setCreateForm({ ...createForm, reason: e.target.value })}
                   placeholder="请输入请假原因..."
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -344,5 +364,5 @@ export default function ParentLeavePage() {
         </div>
       )}
     </div>
-  )
+  );
 }

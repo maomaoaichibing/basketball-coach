@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import {
   ArrowLeft,
   Edit2,
@@ -16,99 +16,100 @@ import {
   Target,
   ChevronRight,
   Star,
-  Clock
-} from 'lucide-react'
+  Clock,
+  X,
+} from 'lucide-react';
 
 // 类型定义
 type Player = {
-  id: string
-  name: string
-  gender: string
-  birthDate: string
-  age: number
-  group: string
-  status: string
-  school?: string
-  height?: number
-  weight?: number
-  position?: string
-  parentName?: string
-  parentPhone?: string
-  parentWechat?: string
-  enrollDate: string
-  tags: string[]
-  team?: { id: string; name: string }
-  guardians: Guardian[]
+  id: string;
+  name: string;
+  gender: string;
+  birthDate: string;
+  age: number;
+  group: string;
+  status: string;
+  school?: string;
+  height?: number;
+  weight?: number;
+  position?: string;
+  parentName?: string;
+  parentPhone?: string;
+  parentWechat?: string;
+  enrollDate: string;
+  tags: string[];
+  team?: { id: string; name: string };
+  guardians: Guardian[];
   // 技术能力
-  dribbling: number
-  passing: number
-  shooting: number
-  defending: number
-  physical: number
-  tactical: number
-  avgAbility: string
+  dribbling: number;
+  passing: number;
+  shooting: number;
+  defending: number;
+  physical: number;
+  tactical: number;
+  avgAbility: string;
   // 整体评估
-  overallAssessment?: string
+  overallAssessment?: string;
   // 统计
-  totalTrainings: number
-  attendanceRate: number
-  presentCount: number
-  absentCount: number
-  lateCount: number
+  totalTrainings: number;
+  attendanceRate: number;
+  presentCount: number;
+  absentCount: number;
+  lateCount: number;
   // 关联
-  records: TrainingRecord[]
-  assessments: Assessment[]
-  goals: Goal[]
-}
+  records: TrainingRecord[];
+  assessments: Assessment[];
+  goals: Goal[];
+};
 
 type Guardian = {
-  id: string
-  name: string
-  relation: string
-  mobile: string
-  wechat?: string
-  email?: string
-  isPrimary: boolean
-}
+  id: string;
+  name: string;
+  relation: string;
+  mobile: string;
+  wechat?: string;
+  email?: string;
+  isPrimary: boolean;
+};
 
 type TrainingRecord = {
-  id: string
-  attendance: string
-  performance?: number
-  effort?: number
-  attitude?: number
-  feedback?: string
-  highlights?: string
-  recordedAt: string
+  id: string;
+  attendance: string;
+  performance?: number;
+  effort?: number;
+  attitude?: number;
+  feedback?: string;
+  highlights?: string;
+  recordedAt: string;
   plan: {
-    id: string
-    title: string
-    date: string
-    theme?: string
-  }
-}
+    id: string;
+    title: string;
+    date: string;
+    theme?: string;
+  };
+};
 
 type Assessment = {
-  id: string
-  dribbling?: number
-  passing?: number
-  shooting?: number
-  defending?: number
-  physical?: number
-  tactical?: number
-  overall?: number
-  notes?: string
-  assessedAt: string
-}
+  id: string;
+  dribbling?: number;
+  passing?: number;
+  shooting?: number;
+  defending?: number;
+  physical?: number;
+  tactical?: number;
+  overall?: number;
+  notes?: string;
+  assessedAt: string;
+};
 
 type Goal = {
-  id: string
-  skillType: string
-  targetScore: number
-  currentScore: number
-  status: string
-  targetDate?: string
-}
+  id: string;
+  skillType: string;
+  targetScore: number;
+  currentScore: number;
+  status: string;
+  targetDate?: string;
+};
 
 const skillLabels: Record<string, string> = {
   dribbling: '运球',
@@ -116,37 +117,37 @@ const skillLabels: Record<string, string> = {
   shooting: '投篮',
   defending: '防守',
   physical: '体能',
-  tactical: '战术'
-}
+  tactical: '战术',
+};
 
 const statusColors: Record<string, string> = {
   trial: 'bg-purple-100 text-purple-700',
   training: 'bg-green-100 text-green-700',
   vacation: 'bg-yellow-100 text-yellow-700',
   suspended: 'bg-gray-100 text-gray-700',
-  graduated: 'bg-blue-100 text-blue-700'
-}
+  graduated: 'bg-blue-100 text-blue-700',
+};
 
 const statusLabels: Record<string, string> = {
   trial: '试听',
   training: '在训',
   vacation: '请假',
   suspended: '停课',
-  graduated: '结业'
-}
+  graduated: '结业',
+};
 
 const attendanceLabels: Record<string, { label: string; color: string }> = {
   present: { label: '出勤', color: 'text-green-600 bg-green-50' },
   absent: { label: '缺勤', color: 'text-red-600 bg-red-50' },
-  late: { label: '迟到', color: 'text-yellow-600 bg-yellow-50' }
-}
+  late: { label: '迟到', color: 'text-yellow-600 bg-yellow-50' },
+};
 
 export default function PlayerDetailPage() {
-  const params = useParams()
-  const [player, setPlayer] = useState<Player | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'records' | 'assessments' | 'goals'>('records')
-  const [showEditModal, setShowEditModal] = useState(false)
+  const params = useParams();
+  const [player, setPlayer] = useState<Player | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'records' | 'assessments' | 'goals'>('records');
+  const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState({
     name: '',
     gender: 'male',
@@ -168,41 +169,41 @@ export default function PlayerDetailPage() {
     physical: 5,
     tactical: 5,
     // 整体评估
-    overallAssessment: ''
-  })
+    overallAssessment: '',
+  });
 
   useEffect(() => {
     if (params.id) {
-      fetchPlayer(params.id as string)
+      fetchPlayer(params.id as string);
     }
-  }, [params.id])
+  }, [params.id]);
 
   async function fetchPlayer(id: string) {
     try {
-      setLoading(true)
-      const response = await fetch(`/api/players/${id}`)
-      const data = await response.json()
+      setLoading(true);
+      const response = await fetch(`/api/players/${id}`);
+      const data = await response.json();
 
       if (data.success) {
-        setPlayer(data.player)
+        setPlayer(data.player);
       }
     } catch (error) {
-      console.error('获取学员详情失败:', error)
+      console.error('获取学员详情失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   const getAbilityColor = (score: number) => {
-    if (score >= 8) return 'bg-green-500'
-    if (score >= 6) return 'bg-blue-500'
-    if (score >= 4) return 'bg-yellow-500'
-    return 'bg-gray-400'
-  }
+    if (score >= 8) return 'bg-green-500';
+    if (score >= 6) return 'bg-blue-500';
+    if (score >= 4) return 'bg-yellow-500';
+    return 'bg-gray-400';
+  };
 
   const handleEditClick = () => {
-    if (!player) return
-    
+    if (!player) return;
+
     setEditForm({
       name: player.name || '',
       gender: player.gender || 'male',
@@ -224,14 +225,14 @@ export default function PlayerDetailPage() {
       physical: player.physical || 5,
       tactical: player.tactical || 5,
       // 整体评估
-      overallAssessment: player.overallAssessment || ''
-    })
-    setShowEditModal(true)
-  }
+      overallAssessment: player.overallAssessment || '',
+    });
+    setShowEditModal(true);
+  };
 
   const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!player) return
+    e.preventDefault();
+    if (!player) return;
 
     try {
       const response = await fetch(`/api/players/${player.id}`, {
@@ -258,25 +259,25 @@ export default function PlayerDetailPage() {
           physical: editForm.physical,
           tactical: editForm.tactical,
           // 整体评估
-          overallAssessment: editForm.overallAssessment
-        })
-      })
+          overallAssessment: editForm.overallAssessment,
+        }),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
         // 更新本地数据
-        setPlayer({ ...player, ...data.player })
-        setShowEditModal(false)
-        alert('学员信息更新成功！')
+        setPlayer({ ...player, ...data.player });
+        setShowEditModal(false);
+        alert('学员信息更新成功！');
       } else {
-        alert('更新失败：' + (data.message || '未知错误'))
+        alert('更新失败：' + (data.message || '未知错误'));
       }
     } catch (error) {
-      console.error('更新学员信息失败:', error)
-      alert('更新失败，请稍后重试')
+      console.error('更新学员信息失败:', error);
+      alert('更新失败，请稍后重试');
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -286,7 +287,7 @@ export default function PlayerDetailPage() {
           <p className="mt-2 text-gray-500">加载中...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (!player) {
@@ -300,7 +301,7 @@ export default function PlayerDetailPage() {
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -315,14 +316,14 @@ export default function PlayerDetailPage() {
               </Link>
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                  <span className="text-xl font-bold text-orange-600">
-                    {player.name.charAt(0)}
-                  </span>
+                  <span className="text-xl font-bold text-orange-600">{player.name.charAt(0)}</span>
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-gray-900">{player.name}</h1>
                   <div className="flex items-center gap-2 text-sm">
-                    <span className={`px-2 py-0.5 text-xs rounded-full ${statusColors[player.status]}`}>
+                    <span
+                      className={`px-2 py-0.5 text-xs rounded-full ${statusColors[player.status]}`}
+                    >
                       {statusLabels[player.status]}
                     </span>
                     <span className="text-gray-500">{player.group}</span>
@@ -344,10 +345,10 @@ export default function PlayerDetailPage() {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-6">
-        {/* 基本信息卡片 */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <main className="max-w-4xl mx-auto px-4 py-4 sm:py-6">
+        {/* 基本信息卡片 - 移动端优化为单列 */}
+        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100 mb-4 sm:mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
             {/* 综合评分 */}
             <div className="text-center">
               <div className="text-3xl font-bold text-orange-600">{player.avgAbility}</div>
@@ -369,7 +370,10 @@ export default function PlayerDetailPage() {
             {/* 入训时间 */}
             <div className="text-center">
               <div className="text-lg font-bold text-gray-700">
-                {new Date(player.enrollDate).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
+                {new Date(player.enrollDate).toLocaleDateString('zh-CN', {
+                  month: 'short',
+                  day: 'numeric',
+                })}
               </div>
               <div className="text-sm text-gray-500">入训日期</div>
             </div>
@@ -377,14 +381,16 @@ export default function PlayerDetailPage() {
         </div>
 
         {/* 能力雷达 */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100 mb-4 sm:mb-6">
           <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-orange-500" />
             能力评估
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {(['dribbling', 'passing', 'shooting', 'defending', 'physical', 'tactical'] as const).map(skill => {
-              const score = player[skill]
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {(
+              ['dribbling', 'passing', 'shooting', 'defending', 'physical', 'tactical'] as const
+            ).map(skill => {
+              const score = player[skill];
               return (
                 <div key={skill} className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
@@ -398,26 +404,28 @@ export default function PlayerDetailPage() {
                     />
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
-          
+
           {/* 整体评估 */}
           {player.overallAssessment && (
             <div className="mt-6 p-4 bg-orange-50 rounded-lg">
               <h3 className="text-sm font-semibold text-orange-900 mb-2">整体评估</h3>
-              <p className="text-sm text-orange-800 whitespace-pre-wrap">{player.overallAssessment}</p>
+              <p className="text-sm text-orange-800 whitespace-pre-wrap">
+                {player.overallAssessment}
+              </p>
             </div>
           )}
         </div>
 
         {/* 出勤统计 */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100 mb-4 sm:mb-6">
           <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
             <Calendar className="w-5 h-5 text-orange-500" />
             出勤统计
           </h2>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <div className="text-center p-4 bg-green-50 rounded-lg">
               <div className="text-2xl font-bold text-green-600">{player.presentCount}</div>
               <div className="text-sm text-green-700">出勤</div>
@@ -475,14 +483,16 @@ export default function PlayerDetailPage() {
             {activeTab === 'records' && (
               <div className="space-y-3">
                 {player.records.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    暂无训练记录
-                  </div>
+                  <div className="text-center py-8 text-gray-500">暂无训练记录</div>
                 ) : (
                   player.records.map(record => {
-                    const attendance = attendanceLabels[record.attendance] || attendanceLabels.present
+                    const attendance =
+                      attendanceLabels[record.attendance] || attendanceLabels.present;
                     return (
-                      <div key={record.id} className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+                      <div
+                        key={record.id}
+                        className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg"
+                      >
                         <div className={`px-2 py-1 text-xs rounded ${attendance.color}`}>
                           {attendance.label}
                         </div>
@@ -502,7 +512,9 @@ export default function PlayerDetailPage() {
                           {record.performance && (
                             <div className="text-sm">
                               <span className="text-gray-500">表现</span>
-                              <span className="ml-1 font-semibold text-orange-600">{record.performance}/10</span>
+                              <span className="ml-1 font-semibold text-orange-600">
+                                {record.performance}/10
+                              </span>
                             </div>
                           )}
                           <div className="text-xs text-gray-400 mt-1">
@@ -510,7 +522,7 @@ export default function PlayerDetailPage() {
                           </div>
                         </div>
                       </div>
-                    )
+                    );
                   })
                 )}
               </div>
@@ -520,9 +532,7 @@ export default function PlayerDetailPage() {
             {activeTab === 'assessments' && (
               <div className="space-y-3">
                 {player.assessments.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    暂无评估记录
-                  </div>
+                  <div className="text-center py-8 text-gray-500">暂无评估记录</div>
                 ) : (
                   player.assessments.map(assessment => (
                     <div key={assessment.id} className="p-4 bg-gray-50 rounded-lg">
@@ -537,15 +547,24 @@ export default function PlayerDetailPage() {
                         )}
                       </div>
                       <div className="grid grid-cols-3 gap-2">
-                        {(['dribbling', 'passing', 'shooting', 'defending', 'physical', 'tactical'] as const).map(skill => {
-                          const score = assessment[skill]
-                          if (!score) return null
+                        {(
+                          [
+                            'dribbling',
+                            'passing',
+                            'shooting',
+                            'defending',
+                            'physical',
+                            'tactical',
+                          ] as const
+                        ).map(skill => {
+                          const score = assessment[skill];
+                          if (!score) return null;
                           return (
                             <div key={skill} className="flex items-center gap-2 text-sm">
                               <span className="text-gray-500">{skillLabels[skill]}</span>
                               <span className="font-semibold">{score}</span>
                             </div>
-                          )
+                          );
                         })}
                       </div>
                       {assessment.notes && (
@@ -561,9 +580,7 @@ export default function PlayerDetailPage() {
             {activeTab === 'goals' && (
               <div className="space-y-3">
                 {player.goals.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    暂无阶段目标
-                  </div>
+                  <div className="text-center py-8 text-gray-500">暂无阶段目标</div>
                 ) : (
                   player.goals.map(goal => (
                     <div key={goal.id} className="p-4 bg-gray-50 rounded-lg">
@@ -574,12 +591,20 @@ export default function PlayerDetailPage() {
                             {skillLabels[goal.skillType] || goal.skillType}
                           </span>
                         </div>
-                        <span className={`px-2 py-0.5 text-xs rounded ${
-                          goal.status === 'achieved' ? 'bg-green-100 text-green-700' :
-                          goal.status === 'active' ? 'bg-blue-100 text-blue-700' :
-                          'bg-gray-100 text-gray-700'
-                        }`}>
-                          {goal.status === 'achieved' ? '已达成' : goal.status === 'active' ? '进行中' : '已放弃'}
+                        <span
+                          className={`px-2 py-0.5 text-xs rounded ${
+                            goal.status === 'achieved'
+                              ? 'bg-green-100 text-green-700'
+                              : goal.status === 'active'
+                                ? 'bg-blue-100 text-blue-700'
+                                : 'bg-gray-100 text-gray-700'
+                          }`}
+                        >
+                          {goal.status === 'achieved'
+                            ? '已达成'
+                            : goal.status === 'active'
+                              ? '进行中'
+                              : '已放弃'}
                         </span>
                       </div>
                       <div className="flex items-center gap-4">
@@ -618,7 +643,10 @@ export default function PlayerDetailPage() {
             </h2>
             <div className="space-y-3">
               {player.guardians?.map(guardian => (
-                <div key={guardian.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                <div
+                  key={guardian.id}
+                  className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg"
+                >
                   <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
                     <span className="text-sm font-semibold text-orange-600">
                       {guardian.name.charAt(0)}
@@ -647,256 +675,297 @@ export default function PlayerDetailPage() {
 
         {/* 编辑弹窗 */}
         {showEditModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">编辑学员信息</h3>
-              
-              <form onSubmit={handleEditSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">姓名 *</label>
-                  <input
-                    type="text"
-                    required
-                    value={editForm.name}
-                    onChange={(e) => setEditForm({...editForm, name: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                </div>
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50">
+            {/* 移动端全屏，桌面端居中 */}
+            <div className="h-full w-full sm:h-auto sm:min-h-0 bg-white sm:rounded-xl sm:m-4 sm:max-w-md mx-auto flex flex-col">
+              {/* 固定头部 */}
+              <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
+                <h3 className="text-lg font-bold text-gray-900">编辑学员信息</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg active:bg-gray-200 transition-colors min-h-10 min-w-10 flex items-center justify-center"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">性别</label>
-                  <select
-                    value={editForm.gender}
-                    onChange={(e) => setEditForm({...editForm, gender: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  >
-                    <option value="male">男</option>
-                    <option value="female">女</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">出生日期 *</label>
-                  <input
-                    type="date"
-                    required
-                    value={editForm.birthDate}
-                    onChange={(e) => setEditForm({...editForm, birthDate: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">分组</label>
-                  <select
-                    value={editForm.group}
-                    onChange={(e) => setEditForm({...editForm, group: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  >
-                    <option value="U6">U6 (4-6岁)</option>
-                    <option value="U8">U8 (6-8岁)</option>
-                    <option value="U10">U10 (8-10岁)</option>
-                    <option value="U12">U12 (10-12岁)</option>
-                    <option value="U14">U14 (12-14岁)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">状态</label>
-                  <select
-                    value={editForm.status}
-                    onChange={(e) => setEditForm({...editForm, status: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  >
-                    <option value="training">在训</option>
-                    <option value="trial">试听</option>
-                    <option value="suspended">暂停</option>
-                    <option value="graduated">毕业</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">学校</label>
-                  <input
-                    type="text"
-                    value={editForm.school}
-                    onChange={(e) => setEditForm({...editForm, school: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">位置</label>
-                  <select
-                    value={editForm.position}
-                    onChange={(e) => setEditForm({...editForm, position: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  >
-                    <option value="">未设置</option>
-                    <option value="point-guard">控球后卫</option>
-                    <option value="shooting-guard">得分后卫</option>
-                    <option value="small-forward">小前锋</option>
-                    <option value="power-forward">大前锋</option>
-                    <option value="center">中锋</option>
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
+              {/* 可滚动内容 */}
+              <div className="flex-1 overflow-y-auto p-4">
+                <form id="editForm" onSubmit={handleEditSubmit} className="space-y-4">
+                  {/* 表单字段 */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">身高 (cm)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">姓名 *</label>
                     <input
-                      type="number"
-                      value={editForm.height}
-                      onChange={(e) => setEditForm({...editForm, height: e.target.value})}
+                      type="text"
+                      required
+                      value={editForm.name}
+                      onChange={e => setEditForm({ ...editForm, name: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">体重 (kg)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">性别</label>
+                    <select
+                      value={editForm.gender}
+                      onChange={e => setEditForm({ ...editForm, gender: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    >
+                      <option value="male">男</option>
+                      <option value="female">女</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      出生日期 *
+                    </label>
                     <input
-                      type="number"
-                      value={editForm.weight}
-                      onChange={(e) => setEditForm({...editForm, weight: e.target.value})}
+                      type="date"
+                      required
+                      value={editForm.birthDate}
+                      onChange={e => setEditForm({ ...editForm, birthDate: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">家长姓名</label>
-                  <input
-                    type="text"
-                    value={editForm.parentName}
-                    onChange={(e) => setEditForm({...editForm, parentName: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">分组</label>
+                    <select
+                      value={editForm.group}
+                      onChange={e => setEditForm({ ...editForm, group: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    >
+                      <option value="U6">U6 (4-6岁)</option>
+                      <option value="U8">U8 (6-8岁)</option>
+                      <option value="U10">U10 (8-10岁)</option>
+                      <option value="U12">U12 (10-12岁)</option>
+                      <option value="U14">U14 (12-14岁)</option>
+                    </select>
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">联系电话</label>
-                  <input
-                    type="tel"
-                    value={editForm.parentPhone}
-                    onChange={(e) => setEditForm({...editForm, parentPhone: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">状态</label>
+                    <select
+                      value={editForm.status}
+                      onChange={e => setEditForm({ ...editForm, status: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    >
+                      <option value="training">在训</option>
+                      <option value="trial">试听</option>
+                      <option value="suspended">暂停</option>
+                      <option value="graduated">毕业</option>
+                    </select>
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">微信</label>
-                  <input
-                    type="text"
-                    value={editForm.parentWechat}
-                    onChange={(e) => setEditForm({...editForm, parentWechat: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">学校</label>
+                    <input
+                      type="text"
+                      value={editForm.school}
+                      onChange={e => setEditForm({ ...editForm, school: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
 
-                {/* 整体评估 */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">整体评估</label>
-                  <textarea
-                    value={editForm.overallAssessment}
-                    onChange={(e) => setEditForm({...editForm, overallAssessment: e.target.value})}
-                    rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    placeholder="输入综述性的评估文字..."
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">位置</label>
+                    <select
+                      value={editForm.position}
+                      onChange={e => setEditForm({ ...editForm, position: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    >
+                      <option value="">未设置</option>
+                      <option value="point-guard">控球后卫</option>
+                      <option value="shooting-guard">得分后卫</option>
+                      <option value="small-forward">小前锋</option>
+                      <option value="power-forward">大前锋</option>
+                      <option value="center">中锋</option>
+                    </select>
+                  </div>
 
-                {/* 技术能力评分 */}
-                <div className="pt-2">
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">技术能力评分 (1-10分)</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">运球</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        身高 (cm)
+                      </label>
                       <input
                         type="number"
-                        min="1"
-                        max="10"
-                        value={editForm.dribbling}
-                        onChange={(e) => setEditForm({...editForm, dribbling: parseInt(e.target.value) || 5})}
+                        value={editForm.height}
+                        onChange={e => setEditForm({ ...editForm, height: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">传球</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        体重 (kg)
+                      </label>
                       <input
                         type="number"
-                        min="1"
-                        max="10"
-                        value={editForm.passing}
-                        onChange={(e) => setEditForm({...editForm, passing: parseInt(e.target.value) || 5})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">投篮</label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="10"
-                        value={editForm.shooting}
-                        onChange={(e) => setEditForm({...editForm, shooting: parseInt(e.target.value) || 5})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">防守</label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="10"
-                        value={editForm.defending}
-                        onChange={(e) => setEditForm({...editForm, defending: parseInt(e.target.value) || 5})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">体能</label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="10"
-                        value={editForm.physical}
-                        onChange={(e) => setEditForm({...editForm, physical: parseInt(e.target.value) || 5})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">战术</label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="10"
-                        value={editForm.tactical}
-                        onChange={(e) => setEditForm({...editForm, tactical: parseInt(e.target.value) || 5})}
+                        value={editForm.weight}
+                        onChange={e => setEditForm({ ...editForm, weight: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                       />
                     </div>
                   </div>
-                </div>
 
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="submit"
-                    className="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium"
-                  >
-                    保存
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowEditModal(false)}
-                    className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium"
-                  >
-                    取消
-                  </button>
-                </div>
-              </form>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">家长姓名</label>
+                    <input
+                      type="text"
+                      value={editForm.parentName}
+                      onChange={e => setEditForm({ ...editForm, parentName: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">联系电话</label>
+                    <input
+                      type="tel"
+                      value={editForm.parentPhone}
+                      onChange={e => setEditForm({ ...editForm, parentPhone: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">微信</label>
+                    <input
+                      type="text"
+                      value={editForm.parentWechat}
+                      onChange={e => setEditForm({ ...editForm, parentWechat: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+
+                  {/* 整体评估 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">整体评估</label>
+                    <textarea
+                      value={editForm.overallAssessment}
+                      onChange={e =>
+                        setEditForm({ ...editForm, overallAssessment: e.target.value })
+                      }
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      placeholder="输入综述性的评估文字..."
+                    />
+                  </div>
+
+                  {/* 技术能力评分 */}
+                  <div className="pt-2">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">
+                      技术能力评分 (1-10分)
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">运球</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="10"
+                          value={editForm.dribbling}
+                          onChange={e =>
+                            setEditForm({ ...editForm, dribbling: parseInt(e.target.value) || 5 })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">传球</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="10"
+                          value={editForm.passing}
+                          onChange={e =>
+                            setEditForm({ ...editForm, passing: parseInt(e.target.value) || 5 })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">投篮</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="10"
+                          value={editForm.shooting}
+                          onChange={e =>
+                            setEditForm({ ...editForm, shooting: parseInt(e.target.value) || 5 })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">防守</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="10"
+                          value={editForm.defending}
+                          onChange={e =>
+                            setEditForm({ ...editForm, defending: parseInt(e.target.value) || 5 })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">体能</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="10"
+                          value={editForm.physical}
+                          onChange={e =>
+                            setEditForm({ ...editForm, physical: parseInt(e.target.value) || 5 })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">战术</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="10"
+                          value={editForm.tactical}
+                          onChange={e =>
+                            setEditForm({ ...editForm, tactical: parseInt(e.target.value) || 5 })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 固定底部操作栏 */}
+                  <div className="border-t border-gray-200 p-4 bg-white flex-shrink-0 mt-4">
+                    <div className="flex gap-3">
+                      <button
+                        type="submit"
+                        form="editForm"
+                        className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium min-h-12"
+                      >
+                        保存
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowEditModal(false)}
+                        className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium min-h-12"
+                      >
+                        取消
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         )}
       </main>
     </div>
-  )
+  );
 }

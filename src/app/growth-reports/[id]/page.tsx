@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   FileText,
   ChevronRight,
@@ -17,95 +17,95 @@ import {
   Save,
   X,
   CheckCircle,
-  AlertCircle
-} from 'lucide-react'
+  AlertCircle,
+} from 'lucide-react';
 
 type GrowthReport = {
-  id: string
-  playerId: string
-  playerName: string
-  title: string
-  periodStart: string
-  periodEnd: string
-  reportType: string
-  abilities: AbilityDimensions
-  trainingStats: any
-  matchStats: any
-  strengths: string[]
-  improvements: string[]
-  goals: string[]
-  overallRating: number
-  summary: string
-  coachName: string
-  status: string
-  createdAt: string
-  publishedAt: string
-}
+  id: string;
+  playerId: string;
+  playerName: string;
+  title: string;
+  periodStart: string;
+  periodEnd: string;
+  reportType: string;
+  abilities: AbilityDimensions;
+  trainingStats: any;
+  matchStats: any;
+  strengths: string[];
+  improvements: string[];
+  goals: string[];
+  overallRating: number;
+  summary: string;
+  coachName: string;
+  status: string;
+  createdAt: string;
+  publishedAt: string;
+};
 
 type AbilityDimensions = {
-  dribbling: number
-  passing: number
-  shooting: number
-  defending: number
-  physical: number
-  tactical: number
-}
+  dribbling: number;
+  passing: number;
+  shooting: number;
+  defending: number;
+  physical: number;
+  tactical: number;
+};
 
 type MatchStats = {
-  totalMatches: number
-  wins: number
-  losses: number
-  draws: number
-  avgScore: string
-}
+  totalMatches: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  avgScore: string;
+};
 
 export default function GrowthReportDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const router = useRouter()
-  const [report, setReport] = useState<GrowthReport | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [isEditing, setIsEditing] = useState(false)
-  const [reportId, setReportId] = useState<string>('')
+  const router = useRouter();
+  const [report, setReport] = useState<GrowthReport | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [reportId, setReportId] = useState<string>('');
 
   const [editForm, setEditForm] = useState({
     summary: '',
     strengths: [] as string[],
     improvements: [] as string[],
     goals: [] as string[],
-    overallRating: 0
-  })
+    overallRating: 0,
+  });
 
   useEffect(() => {
     params.then(p => {
-      setReportId(p.id)
-      fetchReport(p.id)
-    })
-  }, [params])
+      setReportId(p.id);
+      fetchReport(p.id);
+    });
+  }, [params]);
 
   async function fetchReport(id: string) {
     try {
-      setLoading(true)
-      const response = await fetch(`/api/growth-reports/${id}`)
-      const data = await response.json()
+      setLoading(true);
+      const response = await fetch(`/api/growth-reports/${id}`);
+      const data = await response.json();
 
       if (data.success) {
-        setReport(data.report)
+        setReport(data.report);
         setEditForm({
           summary: data.report.summary || '',
           strengths: data.report.strengths || [],
           improvements: data.report.improvements || [],
           goals: data.report.goals || [],
-          overallRating: data.report.overallRating || 0
-        })
+          overallRating: data.report.overallRating || 0,
+        });
       }
     } catch (error) {
-      console.error('获取报告详情失败:', error)
+      console.error('获取报告详情失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function handleSave() {
-    if (!report) return
+    if (!report) return;
 
     try {
       const response = await fetch(`/api/growth-reports/${report.id}`, {
@@ -117,36 +117,38 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
           improvements: editForm.improvements,
           goals: editForm.goals,
           overallRating: editForm.overallRating,
-          status: 'published'
-        })
-      })
+          status: 'published',
+        }),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
       if (data.success) {
-        setIsEditing(false)
-        fetchReport(reportId)
+        setIsEditing(false);
+        fetchReport(reportId);
       }
     } catch (error) {
-      console.error('保存失败:', error)
+      console.error('保存失败:', error);
     }
   }
 
   async function handleDelete() {
-    if (!report || !confirm('确定要删除这份报告吗？')) return
+    if (!report || !confirm('确定要删除这份报告吗？')) return;
 
     try {
-      const response = await fetch(`/api/growth-reports/${report.id}`, { method: 'DELETE' })
+      const response = await fetch(`/api/growth-reports/${report.id}`, {
+        method: 'DELETE',
+      });
       if (response.ok) {
-        router.push('/growth-reports')
+        router.push('/growth-reports');
       }
     } catch (error) {
-      console.error('删除失败:', error)
+      console.error('删除失败:', error);
     }
   }
 
   function handleExport() {
     // 简单的打印功能，可以导出PDF
-    window.print()
+    window.print();
   }
 
   const abilityLabels: Record<string, string> = {
@@ -155,8 +157,8 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
     shooting: '投篮',
     defending: '防守',
     physical: '体能',
-    tactical: '战术'
-  }
+    tactical: '战术',
+  };
 
   const abilityColors = [
     'from-blue-500 to-blue-600',
@@ -164,15 +166,15 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
     'from-orange-500 to-orange-600',
     'from-red-500 to-red-600',
     'from-purple-500 to-purple-600',
-    'from-yellow-500 to-yellow-600'
-  ]
+    'from-yellow-500 to-yellow-600',
+  ];
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
       </div>
-    )
+    );
   }
 
   if (!report) {
@@ -185,7 +187,7 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -200,12 +202,20 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
               </Link>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className={`px-2 py-0.5 text-xs rounded ${
-                    report.status === 'published' ? 'bg-green-100 text-green-700' :
-                    report.status === 'viewed' ? 'bg-blue-100 text-blue-700' :
-                    'bg-gray-100 text-gray-700'
-                  }`}>
-                    {report.status === 'published' ? '已发布' : report.status === 'viewed' ? '已查看' : '草稿'}
+                  <span
+                    className={`px-2 py-0.5 text-xs rounded ${
+                      report.status === 'published'
+                        ? 'bg-green-100 text-green-700'
+                        : report.status === 'viewed'
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-gray-100 text-gray-700'
+                    }`}
+                  >
+                    {report.status === 'published'
+                      ? '已发布'
+                      : report.status === 'viewed'
+                        ? '已查看'
+                        : '草稿'}
                   </span>
                 </div>
                 <h1 className="text-lg font-bold text-gray-900 mt-1">{report.title}</h1>
@@ -271,7 +281,8 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
                   </span>
                   <span className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />
-                    {new Date(report.periodStart).toLocaleDateString('zh-CN')} - {new Date(report.periodEnd).toLocaleDateString('zh-CN')}
+                    {new Date(report.periodStart).toLocaleDateString('zh-CN')} -{' '}
+                    {new Date(report.periodEnd).toLocaleDateString('zh-CN')}
                   </span>
                 </div>
               </div>
@@ -293,20 +304,23 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
               能力评估
             </h3>
             <div className="space-y-4">
-              {report.abilities && Object.entries(report.abilities).map(([key, value]: [string, any], index) => (
-                <div key={key}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium text-gray-700">{abilityLabels[key] || key}</span>
-                    <span className="text-sm font-bold text-gray-900">{value}/10</span>
+              {report.abilities &&
+                Object.entries(report.abilities).map(([key, value]: [string, any], index) => (
+                  <div key={key}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-medium text-gray-700">
+                        {abilityLabels[key] || key}
+                      </span>
+                      <span className="text-sm font-bold text-gray-900">{value}/10</span>
+                    </div>
+                    <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full bg-gradient-to-r ${abilityColors[index % abilityColors.length]} rounded-full transition-all`}
+                        style={{ width: `${value * 10}%` }}
+                      ></div>
+                    </div>
                   </div>
-                  <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full bg-gradient-to-r ${abilityColors[index % abilityColors.length]} rounded-full transition-all`}
-                      style={{ width: `${value * 10}%` }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
 
@@ -318,19 +332,27 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-blue-50 rounded-lg p-4 text-center">
-                <div className="text-3xl font-bold text-blue-600">{report.trainingStats?.totalSessions || 0}</div>
+                <div className="text-3xl font-bold text-blue-600">
+                  {report.trainingStats?.totalSessions || 0}
+                </div>
                 <div className="text-sm text-gray-500">训练次数</div>
               </div>
               <div className="bg-green-50 rounded-lg p-4 text-center">
-                <div className="text-3xl font-bold text-green-600">{report.trainingStats?.attendanceRate || 0}%</div>
+                <div className="text-3xl font-bold text-green-600">
+                  {report.trainingStats?.attendanceRate || 0}%
+                </div>
                 <div className="text-sm text-gray-500">出勤率</div>
               </div>
               <div className="bg-orange-50 rounded-lg p-4 text-center">
-                <div className="text-3xl font-bold text-orange-600">{report.trainingStats?.avgPerformance || 0}</div>
+                <div className="text-3xl font-bold text-orange-600">
+                  {report.trainingStats?.avgPerformance || 0}
+                </div>
                 <div className="text-sm text-gray-500">平均表现</div>
               </div>
               <div className="bg-purple-50 rounded-lg p-4 text-center">
-                <div className="text-3xl font-bold text-purple-600">{report.trainingStats?.totalHours || 0}</div>
+                <div className="text-3xl font-bold text-purple-600">
+                  {report.trainingStats?.totalHours || 0}
+                </div>
                 <div className="text-sm text-gray-500">训练时长(h)</div>
               </div>
             </div>
@@ -376,15 +398,20 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
                     <input
                       type="text"
                       value={s}
-                      onChange={(e) => {
-                        const newStrengths = [...editForm.strengths]
-                        newStrengths[i] = e.target.value
-                        setEditForm({ ...editForm, strengths: newStrengths })
+                      onChange={e => {
+                        const newStrengths = [...editForm.strengths];
+                        newStrengths[i] = e.target.value;
+                        setEditForm({ ...editForm, strengths: newStrengths });
                       }}
                       className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     />
                     <button
-                      onClick={() => setEditForm({ ...editForm, strengths: editForm.strengths.filter((_, idx) => idx !== i) })}
+                      onClick={() =>
+                        setEditForm({
+                          ...editForm,
+                          strengths: editForm.strengths.filter((_, idx) => idx !== i),
+                        })
+                      }
                       className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
                     >
                       <X className="w-4 h-4" />
@@ -392,7 +419,12 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
                   </div>
                 ))}
                 <button
-                  onClick={() => setEditForm({ ...editForm, strengths: [...editForm.strengths, ''] })}
+                  onClick={() =>
+                    setEditForm({
+                      ...editForm,
+                      strengths: [...editForm.strengths, ''],
+                    })
+                  }
                   className="text-sm text-green-600 hover:text-green-700"
                 >
                   + 添加强项
@@ -427,15 +459,23 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
                     <input
                       type="text"
                       value={s}
-                      onChange={(e) => {
-                        const newImprovements = [...editForm.improvements]
-                        newImprovements[i] = e.target.value
-                        setEditForm({ ...editForm, improvements: newImprovements })
+                      onChange={e => {
+                        const newImprovements = [...editForm.improvements];
+                        newImprovements[i] = e.target.value;
+                        setEditForm({
+                          ...editForm,
+                          improvements: newImprovements,
+                        });
                       }}
                       className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                     <button
-                      onClick={() => setEditForm({ ...editForm, improvements: editForm.improvements.filter((_, idx) => idx !== i) })}
+                      onClick={() =>
+                        setEditForm({
+                          ...editForm,
+                          improvements: editForm.improvements.filter((_, idx) => idx !== i),
+                        })
+                      }
                       className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
                     >
                       <X className="w-4 h-4" />
@@ -443,7 +483,12 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
                   </div>
                 ))}
                 <button
-                  onClick={() => setEditForm({ ...editForm, improvements: [...editForm.improvements, ''] })}
+                  onClick={() =>
+                    setEditForm({
+                      ...editForm,
+                      improvements: [...editForm.improvements, ''],
+                    })
+                  }
                   className="text-sm text-orange-600 hover:text-orange-700"
                 >
                   + 添加改进项
@@ -479,15 +524,20 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
                   <input
                     type="text"
                     value={g}
-                    onChange={(e) => {
-                      const newGoals = [...editForm.goals]
-                      newGoals[i] = e.target.value
-                      setEditForm({ ...editForm, goals: newGoals })
+                    onChange={e => {
+                      const newGoals = [...editForm.goals];
+                      newGoals[i] = e.target.value;
+                      setEditForm({ ...editForm, goals: newGoals });
                     }}
                     className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   />
                   <button
-                    onClick={() => setEditForm({ ...editForm, goals: editForm.goals.filter((_, idx) => idx !== i) })}
+                    onClick={() =>
+                      setEditForm({
+                        ...editForm,
+                        goals: editForm.goals.filter((_, idx) => idx !== i),
+                      })
+                    }
                     className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
                   >
                     <X className="w-4 h-4" />
@@ -528,18 +578,16 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
           {isEditing ? (
             <textarea
               value={editForm.summary}
-              onChange={(e) => setEditForm({ ...editForm, summary: e.target.value })}
+              onChange={e => setEditForm({ ...editForm, summary: e.target.value })}
               placeholder="请输入教练评语..."
               rows={4}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           ) : (
-            <p className="text-gray-700 leading-relaxed">
-              {report.summary || '暂无评语'}
-            </p>
+            <p className="text-gray-700 leading-relaxed">{report.summary || '暂无评语'}</p>
           )}
         </div>
       </main>
     </div>
-  )
+  );
 }

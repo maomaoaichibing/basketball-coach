@@ -1,76 +1,76 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import {
-  ClipboardList,
-  Users,
-  Target,
-  TrendingUp,
-  Calendar,
-  Settings,
-  Plus,
-  ChevronRight,
-  Dumbbell,
-  Trophy,
-  Sparkles,
   Activity,
-  Play,
-  Package,
-  User,
-  CalendarDays,
-  Ticket,
-  Receipt,
+  BarChart3,
   Bell,
   Building2,
-  Lightbulb,
-  BarChart3,
-  Medal,
+  Calendar,
+  CalendarCheck,
+  CalendarDays,
+  ChevronRight,
+  ClipboardList,
+  Dumbbell,
   FileText,
+  Lightbulb,
+  Medal,
   MessageCircle,
-  CalendarCheck
-} from 'lucide-react'
+  Package,
+  Play,
+  Plus,
+  Receipt,
+  Settings,
+  Sparkles,
+  Target,
+  Ticket,
+  Trophy,
+  TrendingUp,
+  User,
+  Users,
+} from 'lucide-react';
 
 // 统计数据类型
 type Stats = {
-  totalPlayers: number
-  totalPlans: number
-  totalFeedback: number
-  totalAssessments: number
-}
+  totalPlayers: number;
+  totalPlans: number;
+  totalFeedback: number;
+  totalAssessments: number;
+};
 
 // 教案类型
 type TrainingPlan = {
-  id: string
-  title: string
-  date: string
-  duration: number
-  group: string
-  location: string
-  weather?: string
-  theme?: string
-  focusSkills?: string[]
-  intensity?: string
-  status?: string
-  generatedBy?: string
-  sections?: any[]
-}
+  id: string;
+  title: string;
+  date: string;
+  duration: number;
+  group: string;
+  location: string;
+  weather?: string;
+  theme?: string;
+  focusSkills?: string[];
+  intensity?: string;
+  status?: string;
+  generatedBy?: string;
+  sections?: unknown[];
+};
 
 export default function Home() {
-  const [selectedGroup, setSelectedGroup] = useState('U10')
-  const [recentPlans, setRecentPlans] = useState<TrainingPlan[]>([])
-  const [loadingPlans, setLoadingPlans] = useState(false)
+  const [selectedGroup, setSelectedGroup] = useState('U10');
+  const [recentPlans, setRecentPlans] = useState<TrainingPlan[]>([]);
+  const [loadingPlans, setLoadingPlans] = useState(false);
   const [stats, setStats] = useState<Stats>({
     totalPlayers: 0,
     totalPlans: 0,
     totalFeedback: 0,
-    totalAssessments: 0
-  })
+    totalAssessments: 0,
+  });
 
   useEffect(() => {
-    fetchRecentPlans()
-    fetchStats()
-  }, [])
+    fetchRecentPlans();
+    fetchStats();
+  }, []);
 
   async function fetchStats() {
     try {
@@ -78,42 +78,45 @@ export default function Home() {
         fetch('/api/players'),
         fetch('/api/plans'),
         fetch('/api/records'),
-        fetch('/api/assessments')
-      ])
-      const playersData = await playersRes.json()
-      const plansData = await plansRes.json()
-      const recordsData = await recordsRes.json()
-      const assessmentsData = await assessmentsRes.json()
+        fetch('/api/assessments'),
+      ]);
+      const playersData = await playersRes.json();
+      const plansData = await plansRes.json();
+      const recordsData = await recordsRes.json();
+      const assessmentsData = await assessmentsRes.json();
 
       setStats({
         totalPlayers: playersData.total || 0,
         totalPlans: plansData.total || 0,
         totalFeedback: recordsData.total || 0,
-        totalAssessments: assessmentsData.total || 0
-      })
+        totalAssessments: assessmentsData.total || 0,
+      });
     } catch (error) {
-      console.error('获取统计数据失败:', error)
+      console.error('获取统计数据失败:', error);
     }
   }
 
   async function fetchRecentPlans() {
     try {
-      setLoadingPlans(true)
-      const response = await fetch('/api/plans?limit=6')
-      const data = await response.json()
+      setLoadingPlans(true);
+      const response = await fetch('/api/plans?limit=6');
+      const data = await response.json();
 
       if (data.success) {
-        const parsedPlans = data.plans.map((plan: any) => ({
-          ...plan,
-          focusSkills: plan.focusSkills ? JSON.parse(plan.focusSkills) : [],
-          sections: plan.sections ? JSON.parse(plan.sections) : []
-        }))
-        setRecentPlans(parsedPlans)
+        const parsedPlans = data.plans.map((plan: unknown) => {
+          const p = plan as Record<string, unknown>;
+          return {
+            ...p,
+            focusSkills: p.focusSkills ? JSON.parse(String(p.focusSkills)) : [],
+            sections: p.sections ? JSON.parse(String(p.sections)) : [],
+          } as TrainingPlan;
+        });
+        setRecentPlans(parsedPlans);
       }
     } catch (error) {
-      console.error('获取最近教案失败:', error)
+      console.error('获取最近教案失败:', error);
     } finally {
-      setLoadingPlans(false)
+      setLoadingPlans(false);
     }
   }
 
@@ -123,7 +126,7 @@ export default function Home() {
     { id: 'U10', name: 'U10', age: '9-10岁', desc: '发展阶段' },
     { id: 'U12', name: 'U12', age: '11-12岁', desc: '提高阶段' },
     { id: 'U14', name: 'U14', age: '13-14岁', desc: '青少年阶段' },
-  ]
+  ];
 
   return (
     <div className="min-h-screen">
@@ -138,13 +141,18 @@ export default function Home() {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-xl font-bold">篮球青训教案系统</h1>
-                  <span className="px-2 py-0.5 bg-white/20 text-white text-xs rounded-full font-medium">v4.3</span>
+                  <span className="px-2 py-0.5 bg-white/20 text-white text-xs rounded-full font-medium">
+                    v4.3
+                  </span>
                 </div>
                 <p className="text-orange-100 text-sm">智能教案生成 · 球员成长追踪</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Link href="/version" className="px-3 py-1.5 text-sm hover:bg-white/10 rounded-lg flex items-center gap-1">
+              <Link
+                href="/version"
+                className="px-3 py-1.5 text-sm hover:bg-white/10 rounded-lg flex items-center gap-1"
+              >
                 <span>版本管理</span>
               </Link>
               <Link href="/settings" className="p-2 hover:bg-white/10 rounded-lg">
@@ -206,7 +214,10 @@ export default function Home() {
 
         {/* 快速操作 */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Link href="/plan/new" className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 group">
+          <Link
+            href="/plan/new"
+            className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 group"
+          >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center group-hover:bg-orange-500 transition-colors">
                 <Plus className="w-6 h-6 text-orange-600 group-hover:text-white" />
@@ -218,7 +229,10 @@ export default function Home() {
             </div>
           </Link>
 
-          <Link href="/training" className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 group">
+          <Link
+            href="/training"
+            className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 group"
+          >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center group-hover:bg-red-500 transition-colors">
                 <Play className="w-6 h-6 text-red-600 group-hover:text-white" />
@@ -230,7 +244,10 @@ export default function Home() {
             </div>
           </Link>
 
-          <Link href="/players" className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 group">
+          <Link
+            href="/players"
+            className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 group"
+          >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-500 transition-colors">
                 <Users className="w-6 h-6 text-blue-600 group-hover:text-white" />
@@ -242,7 +259,10 @@ export default function Home() {
             </div>
           </Link>
 
-          <Link href="/assessment" className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 group">
+          <Link
+            href="/assessment"
+            className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 group"
+          >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-500 transition-colors">
                 <Trophy className="w-6 h-6 text-purple-600 group-hover:text-white" />
@@ -259,7 +279,7 @@ export default function Home() {
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">选择训练年龄段</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            {groups.map((group) => (
+            {groups.map(group => (
               <button
                 key={group.id}
                 onClick={() => setSelectedGroup(group.id)}
@@ -269,13 +289,19 @@ export default function Home() {
                     : 'bg-white border border-gray-200 hover:border-orange-300'
                 }`}
               >
-                <div className={`font-bold text-lg ${selectedGroup === group.id ? 'text-white' : 'text-gray-900'}`}>
+                <div
+                  className={`font-bold text-lg ${selectedGroup === group.id ? 'text-white' : 'text-gray-900'}`}
+                >
                   {group.name}
                 </div>
-                <div className={`text-sm ${selectedGroup === group.id ? 'text-orange-100' : 'text-gray-500'}`}>
+                <div
+                  className={`text-sm ${selectedGroup === group.id ? 'text-orange-100' : 'text-gray-500'}`}
+                >
                   {group.age}
                 </div>
-                <div className={`text-xs mt-1 ${selectedGroup === group.id ? 'text-orange-200' : 'text-gray-400'}`}>
+                <div
+                  className={`text-xs mt-1 ${selectedGroup === group.id ? 'text-orange-200' : 'text-gray-400'}`}
+                >
                   {group.desc}
                 </div>
               </button>
@@ -287,7 +313,10 @@ export default function Home() {
         <section className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">最近教案</h2>
-            <Link href="/plans" className="text-orange-600 hover:text-orange-700 text-sm flex items-center gap-1">
+            <Link
+              href="/plans"
+              className="text-orange-600 hover:text-orange-700 text-sm flex items-center gap-1"
+            >
               查看全部 <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
@@ -306,7 +335,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {recentPlans.slice(0, 3).map((plan) => (
+              {recentPlans.slice(0, 3).map(plan => (
                 <Link
                   key={plan.id}
                   href={`/plans/${plan.id}`}
@@ -316,7 +345,10 @@ export default function Home() {
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-gray-400" />
                       <span className="text-sm text-gray-500">
-                        {new Date(plan.date).toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' })}
+                        {new Date(plan.date).toLocaleDateString('zh-CN', {
+                          month: 'long',
+                          day: 'numeric',
+                        })}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -326,16 +358,14 @@ export default function Home() {
                           AI
                         </span>
                       )}
-                      <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full">{plan.group}</span>
+                      <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full">
+                        {plan.group}
+                      </span>
                     </div>
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                    {plan.title}
-                  </h3>
+                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{plan.title}</h3>
                   {plan.theme && (
-                    <p className="text-sm text-gray-500 mb-3 line-clamp-1">
-                      {plan.theme}
-                    </p>
+                    <p className="text-sm text-gray-500 mb-3 line-clamp-1">{plan.theme}</p>
                   )}
                   <div className="flex items-center gap-4 text-xs text-gray-400">
                     <span>{plan.duration}分钟</span>
@@ -354,83 +384,143 @@ export default function Home() {
         <section>
           <h2 className="text-lg font-semibold text-gray-900 mb-4">快捷功能</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            <Link href="/checkin" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/checkin"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <Activity className="w-8 h-8 text-green-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">签到点名</span>
             </Link>
-            <Link href="/training" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/training"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <Play className="w-8 h-8 text-red-500 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">训练执行</span>
             </Link>
-            <Link href="/goals" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/goals"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <Target className="w-8 h-8 text-orange-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">阶段目标</span>
             </Link>
-            <Link href="/growth" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/growth"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <TrendingUp className="w-8 h-8 text-purple-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">成长追踪</span>
             </Link>
-            <Link href="/assessment" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/assessment"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <Trophy className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">球员评估</span>
             </Link>
-            <Link href="/feedback" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/feedback"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <ClipboardList className="w-8 h-8 text-red-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">课后反馈</span>
             </Link>
-            <Link href="/courses" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/courses"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <Package className="w-8 h-8 text-cyan-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">课时管理</span>
             </Link>
-            <Link href="/schedule" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/schedule"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <CalendarDays className="w-8 h-8 text-indigo-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">课程安排</span>
             </Link>
-            <Link href="/booking" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/booking"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <Ticket className="w-8 h-8 text-pink-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">课程预约</span>
             </Link>
-            <Link href="/parent" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/parent"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <User className="w-8 h-8 text-teal-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">家长端</span>
             </Link>
-            <Link href="/orders" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/orders"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <Receipt className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">订单管理</span>
             </Link>
-            <Link href="/notifications" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/notifications"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <Bell className="w-8 h-8 text-amber-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">通知管理</span>
             </Link>
-            <Link href="/campuses" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/campuses"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <Building2 className="w-8 h-8 text-violet-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">多校区管理</span>
             </Link>
-            <Link href="/recommendations" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/recommendations"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <Lightbulb className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">智能推荐</span>
             </Link>
-            <Link href="/stats" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/stats"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <BarChart3 className="w-8 h-8 text-cyan-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">数据统计</span>
             </Link>
-            <Link href="/training-analysis" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/training-analysis"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <Activity className="w-8 h-8 text-teal-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">训练分析</span>
             </Link>
-            <Link href="/matches" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/matches"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <Medal className="w-8 h-8 text-amber-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">比赛记录</span>
             </Link>
-            <Link href="/growth-reports" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/growth-reports"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <FileText className="w-8 h-8 text-indigo-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">成长档案</span>
             </Link>
-            <Link href="/interaction" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/interaction"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <MessageCircle className="w-8 h-8 text-pink-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">家校互动</span>
             </Link>
-            <Link href="/analytics" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+            <Link
+              href="/analytics"
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"
+            >
               <Sparkles className="w-8 h-8 text-violet-600 mx-auto mb-2" />
               <span className="text-sm font-medium text-gray-700">智能分析</span>
             </Link>
@@ -440,14 +530,14 @@ export default function Home() {
         {/* v4.2 智能分析 标识 */}
         <section className="mt-8 p-4 bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl border border-violet-100">
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2 py-0.5 bg-violet-500 text-white text-xs rounded-full font-medium">v4.2</span>
+            <span className="px-2 py-0.5 bg-violet-500 text-white text-xs rounded-full font-medium">
+              v4.2
+            </span>
             <span className="text-sm font-medium text-gray-700">智能分析功能已上线</span>
           </div>
-          <p className="text-sm text-gray-500">
-            AI训练建议 · 能力分析报告 · 智能分班推荐
-          </p>
+          <p className="text-sm text-gray-500">AI训练建议 · 能力分析报告 · 智能分班推荐</p>
         </section>
       </main>
     </div>
-  )
+  );
 }

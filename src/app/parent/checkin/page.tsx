@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   ChevronRight,
   Plus,
@@ -12,72 +12,72 @@ import {
   Heart,
   MessageCircle,
   Award,
-  Calendar
-} from 'lucide-react'
+  Calendar,
+} from 'lucide-react';
 
 type CheckIn = {
-  id: string
-  playerId: string
-  playerName: string
-  checkInType: string
-  date: string
-  duration: number
-  content: string
-  mediaUrls: string[]
-  location: string
-  coachFeedback: string
-  coachName: string
-  likes: number
-  createdAt: string
-}
+  id: string;
+  playerId: string;
+  playerName: string;
+  checkInType: string;
+  date: string;
+  duration: number;
+  content: string;
+  mediaUrls: string[];
+  location: string;
+  coachFeedback: string;
+  coachName: string;
+  likes: number;
+  createdAt: string;
+};
 
 type Player = {
-  id: string
-  name: string
-  group: string
-}
+  id: string;
+  name: string;
+  group: string;
+};
 
 export default function ParentCheckInPage() {
-  const router = useRouter()
-  const [player, setPlayer] = useState<Player | null>(null)
-  const [checkins, setCheckins] = useState<CheckIn[]>([])
-  const [loading, setLoading] = useState(true)
-  const [showCreateModal, setShowCreateModal] = useState(false)
+  const router = useRouter();
+  const [player, setPlayer] = useState<Player | null>(null);
+  const [checkins, setCheckins] = useState<CheckIn[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const [createForm, setCreateForm] = useState({
     checkInType: 'training',
     content: '',
     duration: 60,
-    location: ''
-  })
+    location: '',
+  });
 
   useEffect(() => {
-    const stored = localStorage.getItem('parentPlayer')
+    const stored = localStorage.getItem('parentPlayer');
     if (stored) {
-      const playerData = JSON.parse(stored)
-      setPlayer(playerData)
-      fetchCheckins(playerData.id)
+      const playerData = JSON.parse(stored);
+      setPlayer(playerData);
+      fetchCheckins(playerData.id);
     } else {
-      router.push('/parent')
+      router.push('/parent');
     }
-  }, [])
+  }, []);
 
   async function fetchCheckins(playerId: string) {
     try {
-      const response = await fetch(`/api/checkins?playerId=${playerId}&limit=20`)
-      const data = await response.json()
+      const response = await fetch(`/api/checkins?playerId=${playerId}&limit=20`);
+      const data = await response.json();
       if (data.success) {
-        setCheckins(data.checkins)
+        setCheckins(data.checkins);
       }
     } catch (error) {
-      console.error('获取打卡记录失败:', error)
+      console.error('获取打卡记录失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function handleCreateCheckIn() {
-    if (!player) return
+    if (!player) return;
 
     try {
       const response = await fetch('/api/checkins', {
@@ -91,37 +91,37 @@ export default function ParentCheckInPage() {
           date: new Date().toISOString(),
           content: createForm.content,
           duration: createForm.duration,
-          location: createForm.location
-        })
-      })
+          location: createForm.location,
+        }),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
       if (data.success) {
-        setShowCreateModal(false)
+        setShowCreateModal(false);
         setCreateForm({
           checkInType: 'training',
           content: '',
           duration: 60,
-          location: ''
-        })
-        fetchCheckins(player.id)
+          location: '',
+        });
+        fetchCheckins(player.id);
       }
     } catch (error) {
-      console.error('创建打卡失败:', error)
+      console.error('创建打卡失败:', error);
     }
   }
 
   const checkInTypeLabels: Record<string, string> = {
     training: '训练打卡',
     homework: '作业打卡',
-    exercise: '自主锻炼'
-  }
+    exercise: '自主锻炼',
+  };
 
   const checkInTypeColors: Record<string, string> = {
     training: 'bg-orange-100 text-orange-700',
     homework: 'bg-blue-100 text-blue-700',
-    exercise: 'bg-green-100 text-green-700'
-  }
+    exercise: 'bg-green-100 text-green-700',
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -200,13 +200,18 @@ export default function ParentCheckInPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {checkins.map((checkin) => (
-              <div key={checkin.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            {checkins.map(checkin => (
+              <div
+                key={checkin.id}
+                className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+              >
                 {/* 打卡头部 */}
                 <div className="p-4 border-b border-gray-100">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <span className={`px-2 py-1 text-xs rounded-full ${checkInTypeColors[checkin.checkInType]}`}>
+                      <span
+                        className={`px-2 py-1 text-xs rounded-full ${checkInTypeColors[checkin.checkInType]}`}
+                      >
                         {checkInTypeLabels[checkin.checkInType]}
                       </span>
                       <span className="text-sm text-gray-500 flex items-center gap-1">
@@ -220,9 +225,7 @@ export default function ParentCheckInPage() {
                   </div>
 
                   {/* 打卡内容 */}
-                  {checkin.content && (
-                    <p className="text-gray-700 mb-2">{checkin.content}</p>
-                  )}
+                  {checkin.content && <p className="text-gray-700 mb-2">{checkin.content}</p>}
 
                   {/* 打卡地点 */}
                   {checkin.location && (
@@ -283,12 +286,15 @@ export default function ParentCheckInPage() {
 
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  打卡类型
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">打卡类型</label>
                 <select
                   value={createForm.checkInType}
-                  onChange={(e) => setCreateForm({ ...createForm, checkInType: e.target.value })}
+                  onChange={e =>
+                    setCreateForm({
+                      ...createForm,
+                      checkInType: e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 >
                   <option value="training">训练打卡</option>
@@ -304,18 +310,21 @@ export default function ParentCheckInPage() {
                 <input
                   type="number"
                   value={createForm.duration}
-                  onChange={(e) => setCreateForm({ ...createForm, duration: parseInt(e.target.value) || 0 })}
+                  onChange={e =>
+                    setCreateForm({
+                      ...createForm,
+                      duration: parseInt(e.target.value) || 0,
+                    })
+                  }
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  打卡描述
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">打卡描述</label>
                 <textarea
                   value={createForm.content}
-                  onChange={(e) => setCreateForm({ ...createForm, content: e.target.value })}
+                  onChange={e => setCreateForm({ ...createForm, content: e.target.value })}
                   placeholder="记录训练内容..."
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -323,13 +332,11 @@ export default function ParentCheckInPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  训练地点
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">训练地点</label>
                 <input
                   type="text"
                   value={createForm.location}
-                  onChange={(e) => setCreateForm({ ...createForm, location: e.target.value })}
+                  onChange={e => setCreateForm({ ...createForm, location: e.target.value })}
                   placeholder="如: 篮球馆"
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
@@ -365,5 +372,5 @@ export default function ParentCheckInPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import {
   Users,
   TrendingUp,
@@ -11,63 +11,63 @@ import {
   UserPlus,
   Activity,
   BarChart3,
-  PieChart
-} from 'lucide-react'
+  PieChart,
+} from 'lucide-react';
 
 interface Stats {
-  period: string
+  period: string;
   overview: {
-    totalPlayers: number
-    activePlayers: number
-    trialPlayers: number
-    newPlayersThisPeriod: number
-    totalIncome: number
-    monthIncome: number
-    totalOrders: number
-    pendingOrders: number
-    paidOrders: number
-    ordersThisPeriod: number
-    totalRecords: number
-    recordsThisPeriod: number
-    attendanceRate: number
-    totalHoursRemaining: number
-    totalHoursUsed: number
-  }
-  playersByGroup: { group: string; _count: number }[]
-  incomeTrend: { date: string; amount: number }[]
-  courseSales: { name: string; _count: number; _sum: { subtotal: number } }[]
+    totalPlayers: number;
+    activePlayers: number;
+    trialPlayers: number;
+    newPlayersThisPeriod: number;
+    totalIncome: number;
+    monthIncome: number;
+    totalOrders: number;
+    pendingOrders: number;
+    paidOrders: number;
+    ordersThisPeriod: number;
+    totalRecords: number;
+    recordsThisPeriod: number;
+    attendanceRate: number;
+    totalHoursRemaining: number;
+    totalHoursUsed: number;
+  };
+  playersByGroup: { group: string; _count: number }[];
+  incomeTrend: { date: string; amount: number }[];
+  courseSales: { name: string; _count: number; _sum: { subtotal: number } }[];
 }
 
 export default function StatsPage() {
-  const [stats, setStats] = useState<Stats | null>(null)
-  const [period, setPeriod] = useState('month')
-  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [period, setPeriod] = useState('month');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchStats()
-  }, [period])
+    fetchStats();
+  }, [period]);
 
   const fetchStats = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const res = await fetch(`/api/stats?period=${period}`)
-      const data = await res.json()
-      setStats(data)
+      const res = await fetch(`/api/stats?period=${period}`);
+      const data = await res.json();
+      setStats(data);
     } catch (error) {
-      console.error('获取统计数据失败:', error)
+      console.error('获取统计数据失败:', error);
     }
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('zh-CN', {
       style: 'currency',
       currency: 'CNY',
       minimumFractionDigits: 0,
-    }).format(amount)
-  }
+    }).format(amount);
+  };
 
-  const maxIncome = stats?.incomeTrend?.reduce((max, item) => Math.max(max, item.amount), 0) || 1
+  const maxIncome = stats?.incomeTrend?.reduce((max, item) => Math.max(max, item.amount), 0) || 1;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -86,7 +86,7 @@ export default function StatsPage() {
             </div>
             <select
               value={period}
-              onChange={(e) => setPeriod(e.target.value)}
+              onChange={e => setPeriod(e.target.value)}
               className="px-4 py-2 border rounded-lg"
             >
               <option value="day">今日</option>
@@ -126,7 +126,9 @@ export default function StatsPage() {
                 </div>
                 <span className="text-sm text-gray-500">总收入</span>
               </div>
-              <div className="text-2xl font-bold text-gray-900">{formatCurrency(stats.overview.totalIncome)}</div>
+              <div className="text-2xl font-bold text-gray-900">
+                {formatCurrency(stats.overview.totalIncome)}
+              </div>
               <div className="text-xs text-gray-500 mt-1">
                 本月 {formatCurrency(stats.overview.monthIncome)}
               </div>
@@ -171,11 +173,15 @@ export default function StatsPage() {
             </div>
             <div className="bg-white rounded-xl shadow p-4">
               <div className="text-sm text-gray-500 mb-1">出勤率</div>
-              <div className="text-xl font-bold text-green-600">{stats.overview.attendanceRate}%</div>
+              <div className="text-xl font-bold text-green-600">
+                {stats.overview.attendanceRate}%
+              </div>
             </div>
             <div className="bg-white rounded-xl shadow p-4">
               <div className="text-sm text-gray-500 mb-1">剩余课时</div>
-              <div className="text-xl font-bold text-purple-600">{stats.overview.totalHoursRemaining}</div>
+              <div className="text-xl font-bold text-purple-600">
+                {stats.overview.totalHoursRemaining}
+              </div>
             </div>
           </div>
 
@@ -190,9 +196,12 @@ export default function StatsPage() {
               <div className="h-48 flex items-end justify-between gap-2">
                 {stats.incomeTrend.map((item, index) => (
                   <div key={index} className="flex-1 flex flex-col items-center">
-                    <div className="w-full bg-gradient-to-t from-blue-500 to-blue-300 rounded-t-lg transition-all hover:from-blue-600 hover:to-blue-400"
-                         style={{ height: `${Math.max((item.amount / maxIncome) * 160, item.amount > 0 ? 8 : 0)}px` }}>
-                    </div>
+                    <div
+                      className="w-full bg-gradient-to-t from-blue-500 to-blue-300 rounded-t-lg transition-all hover:from-blue-600 hover:to-blue-400"
+                      style={{
+                        height: `${Math.max((item.amount / maxIncome) * 160, item.amount > 0 ? 8 : 0)}px`,
+                      }}
+                    ></div>
                     <span className="text-xs text-gray-500 mt-2">{item.date}</span>
                     <span className="text-xs text-gray-400">
                       {item.amount > 0 ? `¥${item.amount}` : '-'}
@@ -209,20 +218,23 @@ export default function StatsPage() {
                 <PieChart className="w-5 h-5 text-gray-400" />
               </div>
               <div className="space-y-3">
-                {stats.playersByGroup.map((item) => {
-                  const percentage = stats.overview.totalPlayers > 0
-                    ? (item._count / stats.overview.totalPlayers * 100).toFixed(1)
-                    : 0
+                {stats.playersByGroup.map(item => {
+                  const percentage =
+                    stats.overview.totalPlayers > 0
+                      ? ((item._count / stats.overview.totalPlayers) * 100).toFixed(1)
+                      : 0;
                   const colors: Record<string, string> = {
-                    'U6': 'bg-yellow-400',
-                    'U8': 'bg-orange-400',
-                    'U10': 'bg-blue-400',
-                    'U12': 'bg-green-400',
-                    'U14': 'bg-purple-400',
-                  }
+                    U6: 'bg-yellow-400',
+                    U8: 'bg-orange-400',
+                    U10: 'bg-blue-400',
+                    U12: 'bg-green-400',
+                    U14: 'bg-purple-400',
+                  };
                   return (
                     <div key={item.group} className="flex items-center gap-3">
-                      <div className={`w-3 h-3 rounded-full ${colors[item.group] || 'bg-gray-400'}`}></div>
+                      <div
+                        className={`w-3 h-3 rounded-full ${colors[item.group] || 'bg-gray-400'}`}
+                      ></div>
                       <span className="text-sm text-gray-600 w-12">{item.group}</span>
                       <div className="flex-1 bg-gray-100 rounded-full h-2">
                         <div
@@ -233,11 +245,9 @@ export default function StatsPage() {
                       <span className="text-sm font-medium text-gray-900 w-12 text-right">
                         {item._count}人
                       </span>
-                      <span className="text-xs text-gray-400 w-12 text-right">
-                        {percentage}%
-                      </span>
+                      <span className="text-xs text-gray-400 w-12 text-right">{percentage}%</span>
                     </div>
-                  )
+                  );
                 })}
               </div>
             </div>
@@ -262,12 +272,17 @@ export default function StatsPage() {
                 {stats.courseSales.map((item, index) => (
                   <tr key={item.name} className="border-b last:border-0">
                     <td className="py-3">
-                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-                        index === 0 ? 'bg-yellow-100 text-yellow-700' :
-                        index === 1 ? 'bg-gray-100 text-gray-700' :
-                        index === 2 ? 'bg-orange-100 text-orange-700' :
-                        'bg-gray-50 text-gray-500'
-                      }`}>
+                      <span
+                        className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                          index === 0
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : index === 1
+                              ? 'bg-gray-100 text-gray-700'
+                              : index === 2
+                                ? 'bg-orange-100 text-orange-700'
+                                : 'bg-gray-50 text-gray-500'
+                        }`}
+                      >
                         {index + 1}
                       </span>
                     </td>
@@ -288,5 +303,5 @@ export default function StatsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

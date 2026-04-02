@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   Sparkles,
@@ -14,47 +14,47 @@ import {
   AlertTriangle,
   CheckCircle,
   Loader2,
-  Zap
-} from 'lucide-react'
+  Zap,
+} from 'lucide-react';
 
 type SkillScore = {
-  skill: string
-  label: string
-  avgScore: number
-  playerCount: number
-}
+  skill: string;
+  label: string;
+  avgScore: number;
+  playerCount: number;
+};
 
 type PlayerInsight = {
-  id: string
-  name: string
-  group: string
-  weakestSkill: string
-  strongestSkill: string
-  attendanceRate: number
-  totalTrainings: number
-  suggestion: string
-}
+  id: string;
+  name: string;
+  group: string;
+  weakestSkill: string;
+  strongestSkill: string;
+  attendanceRate: number;
+  totalTrainings: number;
+  suggestion: string;
+};
 
 type SmartPlanData = {
   skillAnalysis: {
-    scores: SkillScore[]
-    weakestSkills: SkillScore[]
-    recommendation: string
-  }
+    scores: SkillScore[];
+    weakestSkills: SkillScore[];
+    recommendation: string;
+  };
   planParams: {
-    group: string
-    duration: number
-    location: string
-    theme: string
-    focusSkills: string[]
-    playerCount: number
-    skillLevel: string
-    previousTraining: string[]
-  }
-  reasons: string[]
-  playerInsights: PlayerInsight[]
-  suggestedActivities: string[]
-}
+    group: string;
+    duration: number;
+    location: string;
+    theme: string;
+    focusSkills: string[];
+    playerCount: number;
+    skillLevel: string;
+    previousTraining: string[];
+  };
+  reasons: string[];
+  playerInsights: PlayerInsight[];
+  suggestedActivities: string[];
+};
 
 const skillLabels: Record<string, string> = {
   dribbling: '运球',
@@ -62,8 +62,8 @@ const skillLabels: Record<string, string> = {
   shooting: '投篮',
   defending: '防守',
   physical: '体能',
-  tactical: '战术'
-}
+  tactical: '战术',
+};
 
 const skillColors: Record<string, string> = {
   dribbling: 'bg-blue-500',
@@ -71,24 +71,24 @@ const skillColors: Record<string, string> = {
   shooting: 'bg-orange-500',
   defending: 'bg-purple-500',
   physical: 'bg-red-500',
-  tactical: 'bg-indigo-500'
-}
+  tactical: 'bg-indigo-500',
+};
 
 export default function SmartPlanPage() {
-  const router = useRouter()
-  const [groups, setGroups] = useState<string[]>([])
-  const [selectedGroup, setSelectedGroup] = useState('U10')
-  const [loading, setLoading] = useState(false)
-  const [generating, setGenerating] = useState(false)
-  const [data, setData] = useState<SmartPlanData | null>(null)
-  const [step, setStep] = useState<'select' | 'analysis' | 'generating'>('select')
+  const router = useRouter();
+  const [groups, setGroups] = useState<string[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState('U10');
+  const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [data, setData] = useState<SmartPlanData | null>(null);
+  const [step, setStep] = useState<'select' | 'analysis' | 'generating'>('select');
 
   useEffect(() => {
-    setGroups(['U6', 'U8', 'U10', 'U12', 'U14'])
-  }, [])
+    setGroups(['U6', 'U8', 'U10', 'U12', 'U14']);
+  }, []);
 
   async function analyze() {
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await fetch('/api/smart-plan', {
         method: 'POST',
@@ -96,28 +96,28 @@ export default function SmartPlanPage() {
         body: JSON.stringify({
           group: selectedGroup,
           duration: 90,
-          location: '室内'
-        })
-      })
+          location: '室内',
+        }),
+      });
 
-      const result = await response.json()
+      const result = await response.json();
       if (result.success) {
-        setData(result.data)
-        setStep('analysis')
+        setData(result.data);
+        setStep('analysis');
       } else {
-        alert(result.message || '分析失败')
+        alert(result.message || '分析失败');
       }
     } catch {
-      alert('请求失败')
+      alert('请求失败');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function generatePlan() {
-    if (!data) return
-    setGenerating(true)
-    setStep('generating')
+    if (!data) return;
+    setGenerating(true);
+    setStep('generating');
 
     try {
       // 跳转到教案生成页面，携带智能推荐参数
@@ -128,13 +128,13 @@ export default function SmartPlanPage() {
         theme: data.planParams.theme,
         focusSkills: data.planParams.focusSkills.join(','),
         skillLevel: data.planParams.skillLevel,
-        smart: 'true'
-      })
+        smart: 'true',
+      });
 
-      router.push(`/plan/new?${params.toString()}`)
+      router.push(`/plan/new?${params.toString()}`);
     } catch {
-      setGenerating(false)
-      setStep('analysis')
+      setGenerating(false);
+      setStep('analysis');
     }
   }
 
@@ -175,7 +175,9 @@ export default function SmartPlanPage() {
                         : 'bg-gray-50 border border-gray-200 hover:border-orange-300'
                     }`}
                   >
-                    <div className={`font-bold text-lg ${selectedGroup === group ? 'text-white' : 'text-gray-900'}`}>
+                    <div
+                      className={`font-bold text-lg ${selectedGroup === group ? 'text-white' : 'text-gray-900'}`}
+                    >
                       {group}
                     </div>
                   </button>
@@ -244,9 +246,7 @@ export default function SmartPlanPage() {
                       <span className="text-gray-600">{skill.label}</span>
                       <div className="flex items-center gap-2">
                         <span className="font-semibold">{skill.avgScore}</span>
-                        {skill.avgScore < 6 && (
-                          <AlertTriangle className="w-3 h-3 text-red-500" />
-                        )}
+                        {skill.avgScore < 6 && <AlertTriangle className="w-3 h-3 text-red-500" />}
                       </div>
                     </div>
                     <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
@@ -300,7 +300,8 @@ export default function SmartPlanPage() {
                   <div key={insight.id} className="px-6 py-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <div className="font-medium text-gray-900">{insight.name}
+                        <div className="font-medium text-gray-900">
+                          {insight.name}
                           <span className="text-xs text-gray-400 ml-2">{insight.group}</span>
                         </div>
                         <div className="text-xs text-gray-500 mt-1">
@@ -350,5 +351,5 @@ export default function SmartPlanPage() {
         )}
       </main>
     </div>
-  )
+  );
 }

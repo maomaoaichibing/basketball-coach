@@ -1,7 +1,8 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { TrainingRecord } from '@/types';
 import {
   Calendar,
   Users,
@@ -14,126 +15,144 @@ import {
   Dumbbell,
   Star,
   Bell,
-  RefreshCw
-} from 'lucide-react'
+  RefreshCw,
+} from 'lucide-react';
 
 type TodaySchedule = {
-  id: string
-  title: string
-  group: string
-  startTime: string
-  endTime: string
-  location: string
-  maxPlayers: number
-  currentCount: number
-}
+  id: string;
+  title: string;
+  group: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+  maxPlayers: number;
+  currentCount: number;
+};
 
 type PlayerAlert = {
-  id: string
-  name: string
-  group: string
-  type: 'low_hours' | 'absent_3' | 'assessment_due' | 'expiring'
-  message: string
-  severity: 'high' | 'medium' | 'low'
-}
+  id: string;
+  name: string;
+  group: string;
+  type: 'low_hours' | 'absent_3' | 'assessment_due' | 'expiring';
+  message: string;
+  severity: 'high' | 'medium' | 'low';
+};
 
 type RecentFeedback = {
-  id: string
-  playerName: string
-  planTitle: string
-  date: string
-  performance?: number
-}
+  id: string;
+  playerName: string;
+  planTitle: string;
+  date: string;
+  performance?: number;
+};
 
 type WeeklyStats = {
-  totalTrainings: number
-  totalStudents: number
-  avgAttendance: number
-  avgPerformance: number
-  newStudents: number
-  upcomingMatches: number
-}
+  totalTrainings: number;
+  totalStudents: number;
+  avgAttendance: number;
+  avgPerformance: number;
+  newStudents: number;
+  upcomingMatches: number;
+};
 
 const severityStyles = {
   high: 'bg-red-50 border-red-200 text-red-700',
   medium: 'bg-yellow-50 border-yellow-200 text-yellow-700',
-  low: 'bg-blue-50 border-blue-200 text-blue-700'
-}
+  low: 'bg-blue-50 border-blue-200 text-blue-700',
+};
 
 const severityIcons = {
   high: AlertCircle,
   medium: AlertCircle,
-  low: Bell
-}
+  low: Bell,
+};
 
-const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
 export default function DashboardPage() {
-  const [schedules, setSchedules] = useState<TodaySchedule[]>([])
-  const [alerts, setAlerts] = useState<PlayerAlert[]>([])
-  const [feedbacks, setFeedbacks] = useState<RecentFeedback[]>([])
+  const [schedules, setSchedules] = useState<TodaySchedule[]>([]);
+  const [alerts, setAlerts] = useState<PlayerAlert[]>([]);
+  const [feedbacks, setFeedbacks] = useState<RecentFeedback[]>([]);
   const [stats, setStats] = useState<WeeklyStats>({
     totalTrainings: 0,
     totalStudents: 0,
     avgAttendance: 0,
     avgPerformance: 0,
     newStudents: 0,
-    upcomingMatches: 0
-  })
-  const [loading, setLoading] = useState(true)
-  const [todayName, setTodayName] = useState('')
-  const [todayDate, setTodayDate] = useState('')
+    upcomingMatches: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [todayName, setTodayName] = useState('');
+  const [todayDate, setTodayDate] = useState('');
 
   useEffect(() => {
-    const now = new Date()
-    setTodayName(dayNames[now.getDay()])
-    setTodayDate(now.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' }))
-    fetchDashboard()
-  }, [])
+    const now = new Date();
+    setTodayName(dayNames[now.getDay()]);
+    setTodayDate(
+      now.toLocaleDateString('zh-CN', {
+        month: 'long',
+        day: 'numeric',
+        weekday: 'long',
+      })
+    );
+    fetchDashboard();
+  }, []);
 
   async function fetchDashboard() {
     try {
-      setLoading(true)
+      setLoading(true);
       const [scheduleRes, playersRes, recordsRes, plansRes, matchesRes] = await Promise.all([
         fetch('/api/schedules'),
         fetch('/api/players'),
         fetch('/api/records'),
         fetch('/api/plans'),
-        fetch('/api/matches')
-      ])
+        fetch('/api/matches'),
+      ]);
 
-      const scheduleData = await scheduleRes.json()
-      const playersData = await playersRes.json()
-      const recordsData = await recordsRes.json()
-      const plansData = await plansRes.json()
-      const matchesData = await matchesRes.json()
+      const scheduleData = await scheduleRes.json();
+      const playersData = await playersRes.json();
+      const recordsData = await recordsRes.json();
+      const plansData = await plansRes.json();
+      const matchesData = await matchesRes.json();
 
       // 今天的排课
-      const dayOfWeek = new Date().getDay()
+      const dayOfWeek = new Date().getDay();
       const todaySchedules = (scheduleData.schedules || [])
-        .filter((s: { dayOfWeek: number; status: string }) => s.dayOfWeek === dayOfWeek && s.status === 'active')
-        .slice(0, 5)
-      setSchedules(todaySchedules)
+        .filter(
+          (s: { dayOfWeek: number; status: string }) =>
+            s.dayOfWeek === dayOfWeek && s.status === 'active'
+        )
+        .slice(0, 5);
+      setSchedules(todaySchedules);
 
       // 生成告警
-      const playerAlerts: PlayerAlert[] = []
-      const players = playersData.players || []
+      const playerAlerts: PlayerAlert[] = [];
+      const players = playersData.players || [];
 
-      players.forEach((p: { id: string; name: string; group: string; enrollments?: { remainingHours: number; status: string }[] }) => {
-        // 课时不足
-        const activeEnrollment = p.enrollments?.find((e: { status: string }) => e.status === 'active')
-        if (activeEnrollment && activeEnrollment.remainingHours <= 4) {
-          playerAlerts.push({
-            id: `${p.id}-hours`,
-            name: p.name,
-            group: p.group,
-            type: 'low_hours',
-            message: `剩余课时仅 ${activeEnrollment.remainingHours} 节`,
-            severity: 'high'
-          })
+      players.forEach(
+        (p: {
+          id: string;
+          name: string;
+          group: string;
+          enrollments?: { remainingHours: number; status: string }[];
+        }) => {
+          // 课时不足
+          const activeEnrollment = p.enrollments?.find(
+            (e: { status: string }) => e.status === 'active'
+          );
+          if (activeEnrollment && activeEnrollment.remainingHours <= 4) {
+            playerAlerts.push({
+              id: `${p.id}-hours`,
+              name: p.name,
+              group: p.group,
+              type: 'low_hours',
+              message: `剩余课时仅 ${activeEnrollment.remainingHours} 节`,
+              severity: 'high',
+            });
+          }
         }
-      })
-      setAlerts(playerAlerts.slice(0, 6))
+      );
+      setAlerts(playerAlerts.slice(0, 6));
 
       // 最近反馈（训练记录）
       const recentRecords = (recordsData.records || []).slice(0, 5).map((r: any) => ({
@@ -141,18 +160,18 @@ export default function DashboardPage() {
         playerName: r.playerName || '未知',
         planTitle: r.plan?.title || '训练课',
         date: r.recordedAt,
-        performance: r.performance
-      }))
-      setFeedbacks(recentRecords)
+        performance: r.performance,
+      }));
+      setFeedbacks(recentRecords);
 
       // 周统计
-      const weekStart = new Date()
-      weekStart.setDate(weekStart.getDate() - weekStart.getDay())
-      weekStart.setHours(0, 0, 0, 0)
+      const weekStart = new Date();
+      weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+      weekStart.setHours(0, 0, 0, 0);
 
-      const weekRecords = (recordsData.records || []).filter((r: any) =>
-        new Date(r.recordedAt) >= weekStart
-      )
+      const weekRecords = (recordsData.records || []).filter(
+        (r: any) => new Date(r.recordedAt) >= weekStart
+      );
 
       setStats({
         totalTrainings: (plansData.plans || []).length,
@@ -160,17 +179,17 @@ export default function DashboardPage() {
         avgAttendance: players.length > 0 ? 85 : 0,
         avgPerformance: 7.5,
         newStudents: players.filter((p: any) => {
-          const enrollDate = new Date(p.enrollDate)
-          return enrollDate >= weekStart
+          const enrollDate = new Date(p.enrollDate);
+          return enrollDate >= weekStart;
         }).length,
-        upcomingMatches: (matchesData.matches || []).filter((m: any) =>
-          m.status === 'scheduled' && new Date(m.matchDate) >= new Date()
-        ).length
-      })
+        upcomingMatches: (matchesData.matches || []).filter(
+          (m: any) => m.status === 'scheduled' && new Date(m.matchDate) >= new Date()
+        ).length,
+      });
     } catch (error) {
-      console.error('获取工作台数据失败:', error)
+      console.error('获取工作台数据失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -182,7 +201,7 @@ export default function DashboardPage() {
           <p className="mt-2 text-gray-500">加载工作台...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -225,25 +244,37 @@ export default function DashboardPage() {
 
         {/* 快捷操作 */}
         <div className="grid grid-cols-4 gap-3">
-          <Link href="/checkin" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col items-center gap-2 hover:shadow-md transition-shadow">
+          <Link
+            href="/checkin"
+            className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col items-center gap-2 hover:shadow-md transition-shadow"
+          >
             <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
               <CheckCircle2 className="w-5 h-5 text-green-600" />
             </div>
             <span className="text-xs font-medium text-gray-700">签到点名</span>
           </Link>
-          <Link href="/plan/new" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col items-center gap-2 hover:shadow-md transition-shadow">
+          <Link
+            href="/plan/new"
+            className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col items-center gap-2 hover:shadow-md transition-shadow"
+          >
             <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
               <ClipboardList className="w-5 h-5 text-orange-600" />
             </div>
             <span className="text-xs font-medium text-gray-700">生成教案</span>
           </Link>
-          <Link href="/assessment" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col items-center gap-2 hover:shadow-md transition-shadow">
+          <Link
+            href="/assessment"
+            className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col items-center gap-2 hover:shadow-md transition-shadow"
+          >
             <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
               <Star className="w-5 h-5 text-purple-600" />
             </div>
             <span className="text-xs font-medium text-gray-700">球员评估</span>
           </Link>
-          <Link href="/feedback" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col items-center gap-2 hover:shadow-md transition-shadow">
+          <Link
+            href="/feedback"
+            className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col items-center gap-2 hover:shadow-md transition-shadow"
+          >
             <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
               <TrendingUp className="w-5 h-5 text-blue-600" />
             </div>
@@ -273,8 +304,11 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {schedules.map((schedule) => (
-                  <div key={schedule.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                {schedules.map(schedule => (
+                  <div
+                    key={schedule.id}
+                    className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg"
+                  >
                     <div className="text-center min-w-[60px]">
                       <div className="text-lg font-bold text-orange-600">{schedule.startTime}</div>
                       <div className="text-xs text-gray-400">至 {schedule.endTime}</div>
@@ -282,7 +316,8 @@ export default function DashboardPage() {
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-gray-900 truncate">{schedule.title}</div>
                       <div className="text-xs text-gray-500 mt-0.5">
-                        {schedule.location} · {schedule.group} · {schedule.currentCount}/{schedule.maxPlayers}人
+                        {schedule.location} · {schedule.group} · {schedule.currentCount}/
+                        {schedule.maxPlayers}人
                       </div>
                     </div>
                     <Link
@@ -309,8 +344,8 @@ export default function DashboardPage() {
               <span className="text-xs text-gray-400">{alerts.length} 条</span>
             </div>
             <div className="p-4 space-y-2">
-              {alerts.map((alert) => {
-                const Icon = severityIcons[alert.severity]
+              {alerts.map(alert => {
+                const Icon = severityIcons[alert.severity];
                 return (
                   <div
                     key={alert.id}
@@ -325,15 +360,12 @@ export default function DashboardPage() {
                       <div className="text-xs mt-0.5 opacity-80">{alert.message}</div>
                     </div>
                     {alert.type === 'low_hours' && (
-                      <Link
-                        href="/orders"
-                        className="text-xs font-medium shrink-0 hover:underline"
-                      >
+                      <Link href="/orders" className="text-xs font-medium shrink-0 hover:underline">
                         处理 →
                       </Link>
                     )}
                   </div>
-                )
+                );
               })}
             </div>
           </div>
@@ -358,19 +390,25 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {feedbacks.map((fb) => (
+                {feedbacks.map(fb => (
                   <div key={fb.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                     <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
                       <Users className="w-4 h-4 text-blue-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm text-gray-900 truncate">{fb.playerName}</div>
-                      <div className="text-xs text-gray-500 truncate">{fb.planTitle} · {new Date(fb.date).toLocaleDateString('zh-CN')}</div>
+                      <div className="font-medium text-sm text-gray-900 truncate">
+                        {fb.playerName}
+                      </div>
+                      <div className="text-xs text-gray-500 truncate">
+                        {fb.planTitle} · {new Date(fb.date).toLocaleDateString('zh-CN')}
+                      </div>
                     </div>
                     {fb.performance && (
                       <div className="flex items-center gap-1 shrink-0">
                         <Star className="w-3 h-3 text-yellow-400" />
-                        <span className="text-sm font-semibold text-gray-700">{fb.performance}</span>
+                        <span className="text-sm font-semibold text-gray-700">
+                          {fb.performance}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -409,5 +447,5 @@ export default function DashboardPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

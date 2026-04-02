@@ -1,81 +1,111 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useMemo } from 'react'
-import Link from 'next/link'
-import { ArrowLeft, Plus, Search, Users, TrendingUp, Star, Filter, X, ChevronRight, Phone, Edit2, Trash2, Download, Upload, FileSpreadsheet, CheckCircle, AlertCircle } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle,
+  ChevronRight,
+  Download,
+  Edit2,
+  FileSpreadsheet,
+  Filter,
+  MapPin,
+  MoreVertical,
+  Phone,
+  Plus,
+  Search,
+  Star,
+  Trash2,
+  TrendingUp,
+  Upload,
+  Users,
+  X,
+} from 'lucide-react';
+
+// 长按功能使用原生事件实现，不再需要 @use-gesture/react
 
 // 学员类型
 type Player = {
-  id: string
-  name: string
-  group: string
-  gender: string
-  birthDate: string
-  age: number
-  status: string
-  school: string
-  parentName: string
-  parentPhone: string
-  parentWechat: string
-  team: { id: string; name: string } | null
-  guardians: Guardian[]
-  trainingCount: number
-  assessmentCount: number
-}
+  id: string;
+  name: string;
+  group: string;
+  gender: string;
+  birthDate: string;
+  age: number;
+  status: string;
+  school: string;
+  parentName: string;
+  parentPhone: string;
+  parentWechat: string;
+  team: { id: string; name: string } | null;
+  guardians: Guardian[];
+  trainingCount: number;
+  assessmentCount: number;
+};
 
 type Guardian = {
-  id: string
-  name: string
-  relation: string
-  mobile: string
-  isPrimary: boolean
-}
+  id: string;
+  name: string;
+  relation: string;
+  mobile: string;
+  isPrimary: boolean;
+};
 
-const groups = ['all', 'U6', 'U8', 'U10', 'U12', 'U14']
+const groups = ['all', 'U6', 'U8', 'U10', 'U12', 'U14'];
 const statuses = [
   { value: 'all', label: '全部状态' },
   { value: 'trial', label: '试听中' },
   { value: 'training', label: '在训' },
   { value: 'vacation', label: '请假' },
   { value: 'suspended', label: '停课' },
-  { value: 'graduated', label: '结业' }
-]
+  { value: 'graduated', label: '结业' },
+];
 
 const statusColors: Record<string, string> = {
   trial: 'bg-purple-100 text-purple-700',
   training: 'bg-green-100 text-green-700',
   vacation: 'bg-yellow-100 text-yellow-700',
   suspended: 'bg-gray-100 text-gray-700',
-  graduated: 'bg-blue-100 text-blue-700'
-}
+  graduated: 'bg-blue-100 text-blue-700',
+};
 
 const statusLabels: Record<string, string> = {
   trial: '试听',
   training: '在训',
   vacation: '请假',
   suspended: '停课',
-  graduated: '结业'
-}
+  graduated: '结业',
+};
 
 export default function PlayersPage() {
-  const [players, setPlayers] = useState<Player[]>([])
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
-  const [groupFilter, setGroupFilter] = useState('all')
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [showAddModal, setShowAddModal] = useState(false)
-  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null)
-  const [showImportModal, setShowImportModal] = useState(false)
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [groupFilter, setGroupFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [importResult, setImportResult] = useState<{
-    success: boolean
-    total?: number
-    created?: number
-    failed?: number
-    message?: string
-    errors?: { row: number; message?: string; name?: string; error?: string; type?: string }[]
-  } | null>(null)
-  const [importing, setImporting] = useState(false)
-  const [dragActive, setDragActive] = useState(false)
+    success: boolean;
+    total?: number;
+    created?: number;
+    failed?: number;
+    message?: string;
+    errors?: { row: number; message?: string; name?: string; error?: string; type?: string }[];
+  } | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+
+  // 长按快捷菜单
+  const [longPressMenu, setLongPressMenu] = useState<{
+    show: boolean;
+    x: number;
+    y: number;
+    player: Player | null;
+  }>({ show: false, x: 0, y: 0, player: null });
 
   // 新建/编辑表单
   const [formData, setFormData] = useState({
@@ -87,59 +117,59 @@ export default function PlayersPage() {
     school: '',
     parentName: '',
     parentPhone: '',
-    parentWechat: ''
-  })
+    parentWechat: '',
+  });
 
   useEffect(() => {
-    fetchPlayers()
-  }, [])
+    fetchPlayers();
+  }, []);
 
   async function fetchPlayers() {
     try {
-      setLoading(true)
-      const params = new URLSearchParams()
-      if (groupFilter !== 'all') params.set('group', groupFilter)
-      if (statusFilter !== 'all') params.set('status', statusFilter)
-      if (search) params.set('search', search)
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (groupFilter !== 'all') params.set('group', groupFilter);
+      if (statusFilter !== 'all') params.set('status', statusFilter);
+      if (search) params.set('search', search);
 
-      const response = await fetch(`/api/players?${params}`)
-      const data = await response.json()
+      const response = await fetch(`/api/players?${params}`);
+      const data = await response.json();
 
       if (data.success) {
-        setPlayers(data.players)
+        setPlayers(data.players);
       }
     } catch (error) {
-      console.error('获取学员列表失败:', error)
+      console.error('获取学员列表失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   useEffect(() => {
-    fetchPlayers()
-  }, [groupFilter, statusFilter])
+    fetchPlayers();
+  }, [groupFilter, statusFilter]);
 
   const handleSearch = () => {
-    fetchPlayers()
-  }
+    fetchPlayers();
+  };
 
   const handleAddPlayer = async () => {
     if (!formData.name || !formData.birthDate) {
-      alert('请填写姓名和出生日期')
-      return
+      alert('请填写姓名和出生日期');
+      return;
     }
 
     try {
       const response = await fetch('/api/players', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
+        body: JSON.stringify(formData),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
-        setShowAddModal(false)
+        setShowAddModal(false);
         setFormData({
           name: '',
           gender: 'male',
@@ -149,20 +179,20 @@ export default function PlayersPage() {
           school: '',
           parentName: '',
           parentPhone: '',
-          parentWechat: ''
-        })
-        fetchPlayers()
+          parentWechat: '',
+        });
+        fetchPlayers();
       } else {
-        alert(data.error || '创建失败')
+        alert(data.error || '创建失败');
       }
     } catch (error) {
-      console.error('创建学员失败:', error)
-      alert('创建学员失败')
+      console.error('创建学员失败:', error);
+      alert('创建学员失败');
     }
-  }
+  };
 
   const handleEditPlayer = (player: Player) => {
-    setEditingPlayer(player)
+    setEditingPlayer(player);
     setFormData({
       name: player.name,
       gender: player.gender,
@@ -172,29 +202,29 @@ export default function PlayersPage() {
       school: player.school || '',
       parentName: player.parentName || '',
       parentPhone: player.parentPhone || '',
-      parentWechat: player.parentWechat || ''
-    })
-    setShowAddModal(true)
-  }
+      parentWechat: player.parentWechat || '',
+    });
+    setShowAddModal(true);
+  };
 
   const handleUpdatePlayer = async () => {
     if (!editingPlayer || !formData.name || !formData.birthDate) {
-      alert('请填写姓名和出生日期')
-      return
+      alert('请填写姓名和出生日期');
+      return;
     }
 
     try {
       const response = await fetch(`/api/players/${editingPlayer.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
+        body: JSON.stringify(formData),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
-        setShowAddModal(false)
-        setEditingPlayer(null)
+        setShowAddModal(false);
+        setEditingPlayer(null);
         setFormData({
           name: '',
           gender: 'male',
@@ -204,85 +234,89 @@ export default function PlayersPage() {
           school: '',
           parentName: '',
           parentPhone: '',
-          parentWechat: ''
-        })
-        fetchPlayers()
+          parentWechat: '',
+        });
+        fetchPlayers();
       } else {
-        alert(data.error || '更新失败')
+        alert(data.error || '更新失败');
       }
     } catch (error) {
-      console.error('更新学员失败:', error)
-      alert('更新学员失败')
+      console.error('更新学员失败:', error);
+      alert('更新学员失败');
     }
-  }
+  };
 
   const handleDeletePlayer = async (id: string, name: string) => {
     if (!confirm(`确定要删除学员「${name}」吗？此操作不可恢复。`)) {
-      return
+      return;
     }
 
     try {
-      const response = await fetch(`/api/players/${id}`, { method: 'DELETE' })
-      const data = await response.json()
+      const response = await fetch(`/api/players/${id}`, { method: 'DELETE' });
+      const data = await response.json();
 
       if (data.success) {
-        fetchPlayers()
+        fetchPlayers();
       } else {
-        alert(data.error || '删除失败')
+        alert(data.error || '删除失败');
       }
     } catch (error) {
-      console.error('删除学员失败:', error)
-      alert('删除学员失败')
+      console.error('删除学员失败:', error);
+      alert('删除学员失败');
     }
-  }
+  };
 
   // 处理文件上传
   const handleFileUpload = async (file: File) => {
-    const fileName = file.name.toLowerCase()
-    if (!fileName.endsWith('.csv') && !fileName.endsWith('.txt') && 
-        !fileName.endsWith('.xlsx') && !fileName.endsWith('.xls')) {
-      alert('请上传 CSV 或 Excel 格式的文件')
-      return
+    const fileName = file.name.toLowerCase();
+    if (
+      !fileName.endsWith('.csv') &&
+      !fileName.endsWith('.txt') &&
+      !fileName.endsWith('.xlsx') &&
+      !fileName.endsWith('.xls')
+    ) {
+      alert('请上传 CSV 或 Excel 格式的文件');
+      return;
     }
 
-    setImporting(true)
+    setImporting(true);
     try {
-      const formData = new FormData()
-      formData.append('file', file)
+      const formData = new FormData();
+      formData.append('file', file);
 
       const response = await fetch('/api/players/import', {
         method: 'POST',
-        body: formData
-      })
+        body: formData,
+      });
 
-      const data = await response.json()
-      setImportResult(data)
+      const data = await response.json();
+      setImportResult(data);
 
       if (!data.success) {
-        alert(data.error || '导入失败')
+        alert(data.error || '导入失败');
       }
     } catch (error) {
-      console.error('导入失败:', error)
+      console.error('导入失败:', error);
       setImportResult({
         success: false,
         total: 0,
         created: 0,
         failed: 0,
-        message: '导入过程出错，请重试'
-      })
+        message: '导入过程出错，请重试',
+      });
     } finally {
-      setImporting(false)
+      setImporting(false);
     }
-  }
+  };
 
   // 计算统计数据
   const stats = useMemo(() => {
     return {
       total: players.length,
       training: players.filter(p => p.status === 'training').length,
-      trial: players.filter(p => p.status === 'trial').length
-    }
-  }, [players])
+      trial: players.filter(p => p.status === 'trial').length,
+    };
+  }, [players]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -303,7 +337,7 @@ export default function PlayersPage() {
             </div>
             <button
               onClick={() => {
-                setEditingPlayer(null)
+                setEditingPlayer(null);
                 setFormData({
                   name: '',
                   gender: 'male',
@@ -313,9 +347,9 @@ export default function PlayersPage() {
                   school: '',
                   parentName: '',
                   parentPhone: '',
-                  parentWechat: ''
-                })
-                setShowAddModal(true)
+                  parentWechat: '',
+                });
+                setShowAddModal(true);
               }}
               className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg"
             >
@@ -332,8 +366,8 @@ export default function PlayersPage() {
             </a>
             <button
               onClick={() => {
-                setShowImportModal(true)
-                setImportResult(null)
+                setShowImportModal(true);
+                setImportResult(null);
               }}
               className="flex items-center gap-2 px-4 py-2 border border-green-300 hover:bg-green-50 text-green-700 rounded-lg"
             >
@@ -344,40 +378,48 @@ export default function PlayersPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* 搜索和筛选 */}
-        <div className="flex flex-wrap gap-4 mb-6">
-          <div className="flex-1 min-w-[200px] relative">
+      <main className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
+        {/* 搜索和筛选 - 移动端优化 */}
+        <div className="space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-4 mb-4 sm:mb-6">
+          {/* 搜索框 */}
+          <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="搜索学员姓名、家长姓名或电话..."
+              placeholder="搜索学员姓名..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm sm:text-base min-h-12"
             />
           </div>
 
-          <select
-            value={groupFilter}
-            onChange={e => setGroupFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg"
-          >
-            {groups.map(g => (
-              <option key={g} value={g}>{g === 'all' ? '全部分组' : g}</option>
-            ))}
-          </select>
+          {/* 筛选条件 - 移动端横向滚动 */}
+          <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
+            <select
+              value={groupFilter}
+              onChange={e => setGroupFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm min-h-10 bg-white whitespace-nowrap"
+            >
+              {groups.map(g => (
+                <option key={g} value={g}>
+                  {g === 'all' ? '全部分组' : g}
+                </option>
+              ))}
+            </select>
 
-          <select
-            value={statusFilter}
-            onChange={e => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg"
-          >
-            {statuses.map(s => (
-              <option key={s.value} value={s.value}>{s.label}</option>
-            ))}
-          </select>
+            <select
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm min-h-10 bg-white whitespace-nowrap"
+            >
+              {statuses.map(s => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* 学员列表 */}
@@ -395,94 +437,324 @@ export default function PlayersPage() {
         ) : (
           <div className="space-y-3">
             {players.map(player => (
-              <div
+              <PlayerCard
                 key={player.id}
-                className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4">
-                    {/* 头像 */}
-                    <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                      <span className="text-xl font-bold text-orange-600">
-                        {player.name.charAt(0)}
-                      </span>
-                    </div>
-
-                    {/* 基本信息 */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-bold text-lg text-gray-900">{player.name}</h3>
-                        <span className={`px-2 py-0.5 text-xs rounded-full ${statusColors[player.status]}`}>
-                          {statusLabels[player.status]}
-                        </span>
-                        <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
-                          {player.group}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <span>{player.gender === 'male' ? '男' : '女'}</span>
-                        <span>{player.age}岁</span>
-                        {player.school ? <span>{player.school}</span> : null}
-                        {player.team ? <span className="text-orange-600">{player.team.name}</span> : null}
-                      </div>
-
-                      {/* 家长信息 */}
-                      {(player.parentName?.trim() || player.parentPhone?.trim()) && (
-                        <div className="flex items-center gap-3 mt-2 text-sm text-gray-500">
-                          {player.parentName?.trim() ? (
-                            <span className="flex items-center gap-1">
-                              <span className="text-gray-400">家长:</span>
-                              {player.parentName}
-                            </span>
-                          ) : null}
-                          {player.parentPhone?.trim() ? (
-                            <span className="flex items-center gap-1">
-                              <Phone className="w-3 h-3" />
-                              {player.parentPhone}
-                            </span>
-                          ) : null}
-                        </div>
-                      )}
-
-                      {/* 统计 */}
-                      <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
-                        <span>训练 {player.trainingCount} 次</span>
-                        <span>评估 {player.assessmentCount} 次</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 操作按钮 */}
-                  <div className="flex items-center gap-2">
-                    <Link
-                      href={`/players/${player.id}`}
-                      className="p-2 hover:bg-gray-100 rounded-lg text-orange-600"
-                      title="查看详情"
-                    >
-                      <ChevronRight className="w-5 h-5" />
-                    </Link>
-                    <button
-                      onClick={() => handleEditPlayer(player)}
-                      className="p-2 hover:bg-gray-100 rounded-lg text-gray-400"
-                      title="编辑"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDeletePlayer(player.id, player.name)}
-                      className="p-2 hover:bg-gray-100 rounded-lg text-red-400"
-                      title="删除"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
+                player={player}
+                onLongPress={(x, y, p) => {
+                  setLongPressMenu({
+                    show: true,
+                    x,
+                    y,
+                    player: p,
+                  });
+                }}
+                onEdit={handleEditPlayer}
+                onDelete={handleDeletePlayer}
+              />
             ))}
           </div>
         )}
       </main>
+
+      <PageModals
+        longPressMenu={longPressMenu}
+        setLongPressMenu={setLongPressMenu}
+        showAddModal={showAddModal}
+        setShowAddModal={setShowAddModal}
+        editingPlayer={editingPlayer}
+        setEditingPlayer={setEditingPlayer}
+        formData={formData}
+        setFormData={setFormData}
+        handleUpdatePlayer={handleUpdatePlayer}
+        handleAddPlayer={handleAddPlayer}
+        handleEditPlayer={handleEditPlayer}
+        handleDeletePlayer={handleDeletePlayer}
+        showImportModal={showImportModal}
+        setShowImportModal={setShowImportModal}
+        importResult={importResult}
+        setImportResult={setImportResult}
+        dragActive={dragActive}
+        setDragActive={setDragActive}
+        handleFileUpload={handleFileUpload}
+        fetchPlayers={fetchPlayers}
+      />
+    </div>
+  );
+}
+
+interface PlayerCardProps {
+  player: Player;
+  onLongPress: (clientX: number, clientY: number, player: Player) => void;
+  onEdit: (player: Player) => void;
+  onDelete: (id: string, name: string) => void;
+}
+
+function PlayerCard({ player, onLongPress, onEdit, onDelete }: PlayerCardProps) {
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches?.[0];
+    if (!touch) return;
+    longPressTimer.current = setTimeout(() => {
+      onLongPress(touch.clientX, touch.clientY, player);
+    }, 500);
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onLongPress(e.clientX, e.clientY, player);
+  };
+
+  return (
+    <div
+      className="bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all active:scale-95 cursor-pointer select-none"
+      onClick={() => (window.location.href = `/players/${player.id}`)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchMove={handleTouchEnd}
+      onContextMenu={handleContextMenu}
+    >
+      {/* 移动端优化：头像 + 姓名 + 分组（一行） */}
+      <div className="flex items-center gap-3 mb-3">
+        {/* 头像 */}
+        <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+          <span className="text-xl sm:text-lg font-bold text-orange-600">
+            {player.name.charAt(0)}
+          </span>
+        </div>
+
+        {/* 姓名和标签 */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="font-semibold text-gray-900 truncate text-base">{player.name}</h3>
+            <span className={`text-xs px-2 py-0.5 rounded-full ${statusColors[player.status]}`}>
+              {statusLabels[player.status]}
+            </span>
+            <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">
+              {player.group}
+            </span>
+          </div>
+
+          {/* 性别和年龄 */}
+          <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
+            <span>{player.gender === 'male' ? '男' : '女'}</span>
+            <span>{player.age}岁</span>
+            {player.team && <span className="text-orange-600 text-xs">{player.team.name}</span>}
+          </div>
+        </div>
+
+        {/* 右侧：查看详情按钮 */}
+        <Link
+          href={`/players/${player.id}`}
+          className="p-3 sm:p-2 hover:bg-gray-100 rounded-lg text-orange-600 active:bg-gray-200 transition-colors min-h-12 min-w-12 flex items-center justify-center flex-shrink-0"
+          title="查看详情"
+          onClick={e => e.stopPropagation()}
+        >
+          <ChevronRight className="w-5 h-5" />
+        </Link>
+      </div>
+
+      {/* 次要信息：学校、家长电话 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-500 mb-3">
+        {player.school && (
+          <div className="flex items-center gap-1">
+            <MapPin className="w-3 h-3 flex-shrink-0" />
+            <span className="truncate">{player.school}</span>
+          </div>
+        )}
+        {player.parentPhone?.trim() && (
+          <div className="flex items-center gap-1">
+            <Phone className="w-3 h-3 flex-shrink-0" />
+            <span>{player.parentPhone}</span>
+          </div>
+        )}
+      </div>
+
+      {/* 统计信息和操作按钮 */}
+      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+        <div className="flex items-center gap-4 text-xs text-gray-400">
+          <span>训练 {player.trainingCount} 次</span>
+          <span>评估 {player.assessmentCount} 次</span>
+        </div>
+
+        {/* 移动端：编辑和删除按钮 */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={e => {
+              e.stopPropagation();
+              onEdit(player);
+            }}
+            className="p-3 sm:p-2 hover:bg-gray-100 rounded-lg text-gray-400 active:bg-gray-200 transition-colors min-h-12 min-w-12 flex items-center justify-center"
+            title="编辑"
+          >
+            <Edit2 className="w-4 h-4" />
+          </button>
+          <button
+            onClick={e => {
+              e.stopPropagation();
+              onDelete(player.id, player.name);
+            }}
+            className="p-3 sm:p-2 hover:bg-gray-100 rounded-lg text-red-400 active:bg-gray-200 transition-colors min-h-12 min-w-12 flex items-center justify-center"
+            title="删除"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 将页面级的弹窗和菜单逻辑提取为内联组件
+function PageModals({
+  longPressMenu,
+  setLongPressMenu,
+  showAddModal,
+  setShowAddModal,
+  editingPlayer,
+  setEditingPlayer,
+  formData,
+  setFormData,
+  handleUpdatePlayer,
+  handleAddPlayer,
+  handleEditPlayer,
+  handleDeletePlayer,
+  showImportModal,
+  setShowImportModal,
+  importResult,
+  setImportResult,
+  dragActive,
+  setDragActive,
+  handleFileUpload,
+  fetchPlayers,
+}: {
+  longPressMenu: {
+    show: boolean;
+    x: number;
+    y: number;
+    player: Player | null;
+  };
+  setLongPressMenu: React.Dispatch<React.SetStateAction<{
+    show: boolean;
+    x: number;
+    y: number;
+    player: Player | null;
+  }>>;
+  showAddModal: boolean;
+  setShowAddModal: (v: boolean) => void;
+  editingPlayer: Player | null;
+  setEditingPlayer: (v: Player | null) => void;
+  formData: {
+    name: string;
+    gender: string;
+    birthDate: string;
+    group: string;
+    status: string;
+    school: string;
+    parentName: string;
+    parentPhone: string;
+    parentWechat: string;
+  };
+  setFormData: React.Dispatch<React.SetStateAction<{
+    name: string;
+    gender: string;
+    birthDate: string;
+    group: string;
+    status: string;
+    school: string;
+    parentName: string;
+    parentPhone: string;
+    parentWechat: string;
+  }>>;
+  handleUpdatePlayer: () => void;
+  handleAddPlayer: () => void;
+  handleEditPlayer: (p: Player) => void;
+  handleDeletePlayer: (id: string, name: string) => void;
+  showImportModal: boolean;
+  setShowImportModal: (v: boolean) => void;
+  importResult: {
+    success: boolean;
+    total?: number;
+    created?: number;
+    failed?: number;
+    message?: string;
+    errors?: { row: number; message?: string; name?: string; error?: string; type?: string }[];
+  } | null;
+  setImportResult: (v: {
+    success: boolean;
+    total?: number;
+    created?: number;
+    failed?: number;
+    message?: string;
+    errors?: { row: number; message?: string; name?: string; error?: string; type?: string }[];
+  } | null) => void;
+  dragActive: boolean;
+  setDragActive: (v: boolean) => void;
+  handleFileUpload: (f: File) => Promise<void>;
+  fetchPlayers: () => void;
+}) {
+  return (
+    <>
+      {/* 长按快捷菜单 */}
+      {longPressMenu.show && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/30 z-40"
+            onClick={() => setLongPressMenu({ show: false, x: 0, y: 0, player: null })}
+          />
+          <div
+            className="fixed bg-white rounded-xl shadow-xl p-2 z-50 min-w-[200px]"
+            style={{
+              left: Math.min(longPressMenu.x, window.innerWidth - 220),
+              top: Math.min(longPressMenu.y, window.innerHeight - 200),
+            }}
+          >
+            <button
+              onClick={() => {
+                if (longPressMenu.player?.parentPhone) {
+                  window.location.href = `tel:${longPressMenu.player.parentPhone}`;
+                }
+                setLongPressMenu({ show: false, x: 0, y: 0, player: null });
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <Phone className="w-4 h-4 text-green-600" />
+              <span className="text-sm">拨打电话</span>
+            </button>
+            <button
+              onClick={() => {
+                if (longPressMenu.player) {
+                  handleEditPlayer(longPressMenu.player);
+                }
+                setLongPressMenu({ show: false, x: 0, y: 0, player: null });
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <Edit2 className="w-4 h-4 text-blue-600" />
+              <span className="text-sm">编辑学员</span>
+            </button>
+            <button
+              onClick={() => {
+                if (longPressMenu.player) {
+                  handleDeletePlayer(longPressMenu.player.id, longPressMenu.player.name);
+                }
+                setLongPressMenu({ show: false, x: 0, y: 0, player: null });
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors text-red-600"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span className="text-sm">删除学员</span>
+            </button>
+          </div>
+        </>
+      )}
 
       {/* 添加/编辑学员弹窗 */}
       {showAddModal && (
@@ -494,8 +766,8 @@ export default function PlayersPage() {
               </h2>
               <button
                 onClick={() => {
-                  setShowAddModal(false)
-                  setEditingPlayer(null)
+                  setShowAddModal(false);
+                  setEditingPlayer(null);
                 }}
                 className="p-1 hover:bg-gray-100 rounded-lg"
               >
@@ -631,8 +903,8 @@ export default function PlayersPage() {
               <div className="flex gap-2 pt-2">
                 <button
                   onClick={() => {
-                    setShowAddModal(false)
-                    setEditingPlayer(null)
+                    setShowAddModal(false);
+                    setEditingPlayer(null);
                   }}
                   className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
                 >
@@ -658,8 +930,8 @@ export default function PlayersPage() {
               <h2 className="text-lg font-bold text-gray-900">批量导入学员</h2>
               <button
                 onClick={() => {
-                  setShowImportModal(false)
-                  setImportResult(null)
+                  setShowImportModal(false);
+                  setImportResult(null);
                 }}
                 className="p-1 hover:bg-gray-100 rounded-lg"
               >
@@ -677,7 +949,9 @@ export default function PlayersPage() {
                         <FileSpreadsheet className="w-8 h-8 text-green-600" />
                         <div>
                           <p className="font-medium text-gray-900">学员导入模板</p>
-                          <p className="text-sm text-gray-500">支持 CSV、XLSX 格式，必填项：姓名、出生日期</p>
+                          <p className="text-sm text-gray-500">
+                            支持 CSV、XLSX 格式，必填项：姓名、出生日期
+                          </p>
                         </div>
                       </div>
                       <a
@@ -693,21 +967,25 @@ export default function PlayersPage() {
                   {/* 文件上传 */}
                   <div
                     className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                      dragActive ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-green-400'
+                      dragActive
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-gray-300 hover:border-green-400'
                     }`}
                     onDragOver={e => {
-                      e.preventDefault()
-                      setDragActive(true)
+                      e.preventDefault();
+                      setDragActive(true);
                     }}
                     onDragLeave={() => setDragActive(false)}
                     onDrop={async e => {
-                      e.preventDefault()
-                      setDragActive(false)
-                      const file = e.dataTransfer.files[0]
-                      if (file) await handleFileUpload(file)
+                      e.preventDefault();
+                      setDragActive(false);
+                      const file = e.dataTransfer.files[0];
+                      if (file) await handleFileUpload(file);
                     }}
                   >
-                    <Upload className={`w-12 h-12 mx-auto mb-3 ${dragActive ? 'text-green-500' : 'text-gray-400'}`} />
+                    <Upload
+                      className={`w-12 h-12 mx-auto mb-3 ${dragActive ? 'text-green-500' : 'text-gray-400'}`}
+                    />
                     <p className="text-gray-700 mb-2">
                       拖拽 CSV/XLSX 文件到此处，或
                       <label className="text-green-600 hover:text-green-700 cursor-pointer mx-1">
@@ -717,8 +995,8 @@ export default function PlayersPage() {
                           accept=".csv,.txt,.xlsx,.xls"
                           className="hidden"
                           onChange={e => {
-                            const file = e.target.files?.[0]
-                            if (file) handleFileUpload(file)
+                            const file = e.target.files?.[0];
+                            if (file) handleFileUpload(file);
                           }}
                         />
                       </label>
@@ -732,7 +1010,10 @@ export default function PlayersPage() {
                     <ul className="text-sm text-blue-700 space-y-1">
                       <li>• 文件格式：CSV（逗号分隔值）或 Excel（.xlsx/.xls）</li>
                       <li>• 必填字段：姓名、出生日期</li>
-                      <li>• 可选字段：性别（男/女）、分组（U6/U8/U10/U12/U14）、状态、学校、家长姓名、联系电话、微信</li>
+                      <li>
+                        •
+                        可选字段：性别（男/女）、分组（U6/U8/U10/U12/U14）、状态、学校、家长姓名、联系电话、微信
+                      </li>
                       <li>• 出生日期格式：YYYY-MM-DD（如 2018-05-01）</li>
                       <li>• 分组和状态会自动转换，如"在训"→"training"</li>
                     </ul>
@@ -742,7 +1023,9 @@ export default function PlayersPage() {
                 /* 导入结果 */
                 <div className="space-y-4">
                   {/* 结果摘要 */}
-                  <div className={`p-4 rounded-lg ${importResult.success ? 'bg-green-50' : 'bg-red-50'}`}>
+                  <div
+                    className={`p-4 rounded-lg ${importResult.success ? 'bg-green-50' : 'bg-red-50'}`}
+                  >
                     <div className="flex items-center gap-3">
                       {importResult.success ? (
                         <CheckCircle className="w-8 h-8 text-green-600" />
@@ -750,11 +1033,17 @@ export default function PlayersPage() {
                         <AlertCircle className="w-8 h-8 text-red-600" />
                       )}
                       <div>
-                        <p className={`font-medium ${importResult.success ? 'text-green-900' : 'text-red-900'}`}>
-                          {importResult.message || (importResult.success ? `成功导入 ${importResult.created} 名学员` : '导入失败')}
+                        <p
+                          className={`font-medium ${importResult.success ? 'text-green-900' : 'text-red-900'}`}
+                        >
+                          {importResult.message ||
+                            (importResult.success
+                              ? `成功导入 ${importResult.created} 名学员`
+                              : '导入失败')}
                         </p>
                         <p className="text-sm text-gray-600">
-                          总计 {importResult.total} 行，成功 {importResult.created} 行，失败 {importResult.failed} 行
+                          总计 {importResult.total} 行，成功 {importResult.created} 行，失败{' '}
+                          {importResult.failed} 行
                         </p>
                       </div>
                     </div>
@@ -769,7 +1058,8 @@ export default function PlayersPage() {
                           <div key={idx} className="flex items-start gap-2 text-sm">
                             <span className="text-gray-400">第{err.row}行:</span>
                             <span className="text-red-600">
-                              {err.name && `${err.name} - `}{err.message || err.error}
+                              {err.name && `${err.name} - `}
+                              {err.message || err.error}
                             </span>
                           </div>
                         ))}
@@ -781,7 +1071,7 @@ export default function PlayersPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => {
-                        setImportResult(null)
+                        setImportResult(null);
                       }}
                       className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
                     >
@@ -789,9 +1079,9 @@ export default function PlayersPage() {
                     </button>
                     <button
                       onClick={() => {
-                        setShowImportModal(false)
-                        setImportResult(null)
-                        fetchPlayers()
+                        setShowImportModal(false);
+                        setImportResult(null);
+                        fetchPlayers();
                       }}
                       className="flex-1 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg"
                     >
@@ -804,6 +1094,6 @@ export default function PlayersPage() {
           </div>
         </div>
       )}
-    </div>
-  )
+    </>
+  );
 }

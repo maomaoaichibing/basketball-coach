@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Trophy,
   ChevronRight,
@@ -16,84 +16,84 @@ import {
   X,
   ArrowLeft,
   Target,
-  TrendingUp
-} from 'lucide-react'
+  TrendingUp,
+} from 'lucide-react';
 
 type QuarterScore = {
-  quarter: string
-  homeScore: number
-  opponentScore: number
-}
+  quarter: string;
+  homeScore: number;
+  opponentScore: number;
+};
 
 type PlayerStat = {
-  playerId: string
-  playerName: string
-  points: number
-  rebounds: number
-  assists: number
-  steals: number
-  blocks: number
-  fouls: number
-  minutes?: number
-}
+  playerId: string;
+  playerName: string;
+  points: number;
+  rebounds: number;
+  assists: number;
+  steals: number;
+  blocks: number;
+  fouls: number;
+  minutes?: number;
+};
 
 type Match = {
-  id: string
-  title: string
-  matchType: string
-  group: string
-  matchDate: string
-  location: string
-  teamName?: string
-  homeScore: number
-  opponent: string
-  opponentScore: number
-  quarterScores: QuarterScore[]
-  result: string
-  isHome: boolean
-  status: string
-  players: string[]
-  playerStats: PlayerStat[]
-  coachName?: string
-  notes?: string
-  events: MatchEvent[]
-}
+  id: string;
+  title: string;
+  matchType: string;
+  group: string;
+  matchDate: string;
+  location: string;
+  teamName?: string;
+  homeScore: number;
+  opponent: string;
+  opponentScore: number;
+  quarterScores: QuarterScore[];
+  result: string;
+  isHome: boolean;
+  status: string;
+  players: string[];
+  playerStats: PlayerStat[];
+  coachName?: string;
+  notes?: string;
+  events: MatchEvent[];
+};
 
 type MatchEvent = {
-  id: string
-  eventTime: string
-  quarter?: number
-  playerId?: string
-  playerName?: string
-  eventType: string
-  description?: string
-  points?: number
-  relatedPlayerId?: string
-  relatedPlayerName?: string
-}
+  id: string;
+  eventTime: string;
+  quarter?: number;
+  playerId?: string;
+  playerName?: string;
+  eventType: string;
+  description?: string;
+  points?: number;
+  relatedPlayerId?: string;
+  relatedPlayerName?: string;
+};
 
 type Player = {
-  id: string
-  name: string
-  group: string
-}
+  id: string;
+  name: string;
+  group: string;
+};
 
 export default function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const router = useRouter()
-  const [match, setMatch] = useState<Match | null>(null)
-  const [players, setPlayers] = useState<Player[]>([])
-  const [loading, setLoading] = useState(true)
-  const [isEditing, setIsEditing] = useState(false)
-  const [showAddEvent, setShowAddEvent] = useState(false)
-  const [matchId, setMatchId] = useState<string>('')
+  const router = useRouter();
+  const [match, setMatch] = useState<Match | null>(null);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [showAddEvent, setShowAddEvent] = useState(false);
+  const [matchId, setMatchId] = useState<string>('');
 
   // 编辑表单
   const [editForm, setEditForm] = useState({
     homeScore: 0,
     opponentScore: 0,
     quarterScores: [] as QuarterScore[],
-    notes: ''
-  })
+    notes: '',
+  });
 
   // 新增事件表单
   const [eventForm, setEventForm] = useState({
@@ -103,56 +103,56 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
     playerName: '',
     eventType: 'score',
     description: '',
-    points: 2
-  })
+    points: 2,
+  });
 
   useEffect(() => {
     params.then(p => {
-      setMatchId(p.id)
-      fetchMatch(p.id)
-    })
-  }, [params])
+      setMatchId(p.id);
+      fetchMatch(p.id);
+    });
+  }, [params]);
 
   useEffect(() => {
-    fetchPlayers()
-  }, [])
+    fetchPlayers();
+  }, []);
 
   async function fetchMatch(id: string) {
     try {
-      setLoading(true)
-      const response = await fetch(`/api/matches/${id}`)
-      const data = await response.json()
+      setLoading(true);
+      const response = await fetch(`/api/matches/${id}`);
+      const data = await response.json();
 
       if (data.success) {
-        setMatch(data.match)
+        setMatch(data.match);
         setEditForm({
           homeScore: data.match.homeScore,
           opponentScore: data.match.opponentScore,
           quarterScores: data.match.quarterScores || [],
-          notes: data.match.notes || ''
-        })
+          notes: data.match.notes || '',
+        });
       }
     } catch (error) {
-      console.error('获取比赛详情失败:', error)
+      console.error('获取比赛详情失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function fetchPlayers() {
     try {
-      const response = await fetch('/api/players?limit=100')
-      const data = await response.json()
+      const response = await fetch('/api/players?limit=100');
+      const data = await response.json();
       if (data.success) {
-        setPlayers(data.players.filter((p: Player) => p.group === match?.group))
+        setPlayers(data.players.filter((p: Player) => p.group === match?.group));
       }
     } catch (error) {
-      console.error('获取球员列表失败:', error)
+      console.error('获取球员列表失败:', error);
     }
   }
 
   async function handleUpdateScore() {
-    if (!match) return
+    if (!match) return;
 
     try {
       const response = await fetch(`/api/matches/${match.id}`, {
@@ -162,25 +162,25 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
           homeScore: editForm.homeScore,
           opponentScore: editForm.opponentScore,
           quarterScores: editForm.quarterScores,
-          notes: editForm.notes
-        })
-      })
+          notes: editForm.notes,
+        }),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
       if (data.success) {
-        setIsEditing(false)
-        fetchMatch(match.id)
+        setIsEditing(false);
+        fetchMatch(match.id);
       }
     } catch (error) {
-      console.error('更新比分失败:', error)
+      console.error('更新比分失败:', error);
     }
   }
 
   async function handleAddEvent() {
-    if (!match) return
+    if (!match) return;
 
     try {
-      const selectedPlayer = players.find(p => p.id === eventForm.playerId)
+      const selectedPlayer = players.find(p => p.id === eventForm.playerId);
 
       const response = await fetch('/api/match-events', {
         method: 'POST',
@@ -188,13 +188,13 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
         body: JSON.stringify({
           matchId: match.id,
           ...eventForm,
-          playerName: selectedPlayer?.name || eventForm.playerName
-        })
-      })
+          playerName: selectedPlayer?.name || eventForm.playerName,
+        }),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
       if (data.success) {
-        setShowAddEvent(false)
+        setShowAddEvent(false);
         setEventForm({
           eventTime: '',
           quarter: 1,
@@ -202,34 +202,36 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
           playerName: '',
           eventType: 'score',
           description: '',
-          points: 2
-        })
-        fetchMatch(match.id)
+          points: 2,
+        });
+        fetchMatch(match.id);
       }
     } catch (error) {
-      console.error('添加事件失败:', error)
+      console.error('添加事件失败:', error);
     }
   }
 
   async function handleDeleteEvent(eventId: string) {
     try {
-      await fetch(`/api/match-events?id=${eventId}`, { method: 'DELETE' })
-      fetchMatch(matchId)
+      await fetch(`/api/match-events?id=${eventId}`, { method: 'DELETE' });
+      fetchMatch(matchId);
     } catch (error) {
-      console.error('删除事件失败:', error)
+      console.error('删除事件失败:', error);
     }
   }
 
   async function handleDeleteMatch() {
-    if (!match || !confirm('确定要删除这场比赛吗？')) return
+    if (!match || !confirm('确定要删除这场比赛吗？')) return;
 
     try {
-      const response = await fetch(`/api/matches/${match.id}`, { method: 'DELETE' })
+      const response = await fetch(`/api/matches/${match.id}`, {
+        method: 'DELETE',
+      });
       if (response.ok) {
-        router.push('/matches')
+        router.push('/matches');
       }
     } catch (error) {
-      console.error('删除比赛失败:', error)
+      console.error('删除比赛失败:', error);
     }
   }
 
@@ -241,8 +243,8 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
     block: '盖帽',
     foul: '犯规',
     turnover: '失误',
-    substitution: '换人'
-  }
+    substitution: '换人',
+  };
 
   const eventTypeColors: Record<string, string> = {
     score: 'bg-orange-100 text-orange-700',
@@ -252,29 +254,29 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
     block: 'bg-purple-100 text-purple-700',
     foul: 'bg-red-100 text-red-700',
     turnover: 'bg-gray-100 text-gray-700',
-    substitution: 'bg-cyan-100 text-cyan-700'
-  }
+    substitution: 'bg-cyan-100 text-cyan-700',
+  };
 
   const resultColors: Record<string, string> = {
     win: 'bg-green-500',
     lose: 'bg-red-500',
     draw: 'bg-gray-500',
-    pending: 'bg-yellow-500'
-  }
+    pending: 'bg-yellow-500',
+  };
 
   const resultLabels: Record<string, string> = {
     win: '胜',
     lose: '负',
     draw: '平',
-    pending: '待定'
-  }
+    pending: '待定',
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
       </div>
-    )
+    );
   }
 
   if (!match) {
@@ -287,11 +289,11 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   // 计算球员统计数据
-  const playerStatsMap: Record<string, any> = {}
+  const playerStatsMap: Record<string, any> = {};
   match.events.forEach(event => {
     if (event.playerId) {
       if (!playerStatsMap[event.playerId]) {
@@ -304,34 +306,34 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
           steals: 0,
           blocks: 0,
           fouls: 0,
-          turnovers: 0
-        }
+          turnovers: 0,
+        };
       }
       switch (event.eventType) {
         case 'score':
-          playerStatsMap[event.playerId].points += event.points || 0
-          break
+          playerStatsMap[event.playerId].points += event.points || 0;
+          break;
         case 'rebound':
-          playerStatsMap[event.playerId].rebounds += 1
-          break
+          playerStatsMap[event.playerId].rebounds += 1;
+          break;
         case 'assist':
-          playerStatsMap[event.playerId].assists += 1
-          break
+          playerStatsMap[event.playerId].assists += 1;
+          break;
         case 'steal':
-          playerStatsMap[event.playerId].steals += 1
-          break
+          playerStatsMap[event.playerId].steals += 1;
+          break;
         case 'block':
-          playerStatsMap[event.playerId].blocks += 1
-          break
+          playerStatsMap[event.playerId].blocks += 1;
+          break;
         case 'foul':
-          playerStatsMap[event.playerId].fouls += 1
-          break
+          playerStatsMap[event.playerId].fouls += 1;
+          break;
         case 'turnover':
-          playerStatsMap[event.playerId].turnovers += 1
-          break
+          playerStatsMap[event.playerId].turnovers += 1;
+          break;
       }
     }
-  })
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -345,7 +347,9 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
               </Link>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className={`px-2 py-0.5 text-xs text-white rounded ${resultColors[match.result]}`}>
+                  <span
+                    className={`px-2 py-0.5 text-xs text-white rounded ${resultColors[match.result]}`}
+                  >
                     {resultLabels[match.result]}
                   </span>
                   <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded">
@@ -387,7 +391,12 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                   <input
                     type="number"
                     value={editForm.homeScore}
-                    onChange={(e) => setEditForm({ ...editForm, homeScore: parseInt(e.target.value) || 0 })}
+                    onChange={e =>
+                      setEditForm({
+                        ...editForm,
+                        homeScore: parseInt(e.target.value) || 0,
+                      })
+                    }
                     className="w-20 text-5xl font-bold text-center bg-white/20 rounded-lg px-2 py-1 outline-none"
                   />
                 ) : (
@@ -411,7 +420,12 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                   <input
                     type="number"
                     value={editForm.opponentScore}
-                    onChange={(e) => setEditForm({ ...editForm, opponentScore: parseInt(e.target.value) || 0 })}
+                    onChange={e =>
+                      setEditForm({
+                        ...editForm,
+                        opponentScore: parseInt(e.target.value) || 0,
+                      })
+                    }
                     className="w-20 text-5xl font-bold text-center bg-white/20 rounded-lg px-2 py-1 outline-none"
                   />
                 ) : (
@@ -474,20 +488,38 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">球员</th>
-                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">得分</th>
-                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">篮板</th>
-                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">助攻</th>
-                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">抢断</th>
-                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">盖帽</th>
-                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">犯规</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      球员
+                    </th>
+                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                      得分
+                    </th>
+                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                      篮板
+                    </th>
+                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                      助攻
+                    </th>
+                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                      抢断
+                    </th>
+                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                      盖帽
+                    </th>
+                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                      犯规
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {Object.values(playerStatsMap).map((stats: PlayerStat) => (
                     <tr key={stats.playerId} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{stats.playerName}</td>
-                      <td className="px-4 py-3 text-center text-sm font-bold text-orange-600">{stats.points}</td>
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                        {stats.playerName}
+                      </td>
+                      <td className="px-4 py-3 text-center text-sm font-bold text-orange-600">
+                        {stats.points}
+                      </td>
                       <td className="px-4 py-3 text-center text-sm">{stats.rebounds}</td>
                       <td className="px-4 py-3 text-center text-sm">{stats.assists}</td>
                       <td className="px-4 py-3 text-center text-sm">{stats.steals}</td>
@@ -498,9 +530,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                 </tbody>
               </table>
             ) : (
-              <div className="p-8 text-center text-gray-500">
-                暂无球员统计数据
-              </div>
+              <div className="p-8 text-center text-gray-500">暂无球员统计数据</div>
             )}
           </div>
         </div>
@@ -523,20 +553,36 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                   {match.events.map((event, index) => (
                     <div key={event.id} className="relative flex items-start gap-4 pl-12">
                       {/* 时间线节点 */}
-                      <div className={`absolute left-4 w-5 h-5 rounded-full border-2 border-white ${eventTypeColors[event.eventType]} z-10 flex items-center justify-center`}>
-                        {event.eventType === 'score' && <div className="w-2 h-2 bg-orange-500 rounded-full"></div>}
-                        {event.eventType === 'rebound' && <div className="w-2 h-2 bg-blue-500 rounded-full"></div>}
-                        {event.eventType === 'assist' && <div className="w-2 h-2 bg-green-500 rounded-full"></div>}
-                        {event.eventType === 'steal' && <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>}
-                        {event.eventType === 'block' && <div className="w-2 h-2 bg-purple-500 rounded-full"></div>}
-                        {event.eventType === 'foul' && <div className="w-2 h-2 bg-red-500 rounded-full"></div>}
+                      <div
+                        className={`absolute left-4 w-5 h-5 rounded-full border-2 border-white ${eventTypeColors[event.eventType]} z-10 flex items-center justify-center`}
+                      >
+                        {event.eventType === 'score' && (
+                          <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                        )}
+                        {event.eventType === 'rebound' && (
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        )}
+                        {event.eventType === 'assist' && (
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        )}
+                        {event.eventType === 'steal' && (
+                          <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                        )}
+                        {event.eventType === 'block' && (
+                          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                        )}
+                        {event.eventType === 'foul' && (
+                          <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                        )}
                       </div>
 
                       {/* 事件内容 */}
                       <div className="flex-1 bg-gray-50 rounded-lg p-3">
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2">
-                            <span className={`px-2 py-0.5 text-xs rounded ${eventTypeColors[event.eventType]}`}>
+                            <span
+                              className={`px-2 py-0.5 text-xs rounded ${eventTypeColors[event.eventType]}`}
+                            >
                               {eventTypeLabels[event.eventType]}
                             </span>
                             {event.quarter && (
@@ -552,9 +598,13 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                           </button>
                         </div>
                         <div className="text-sm">
-                          <span className="font-medium text-gray-900">{event.playerName || '未知球员'}</span>
+                          <span className="font-medium text-gray-900">
+                            {event.playerName || '未知球员'}
+                          </span>
                           {event.eventType === 'score' && event.points && (
-                            <span className="ml-2 text-orange-600 font-bold">+{event.points}分</span>
+                            <span className="ml-2 text-orange-600 font-bold">
+                              +{event.points}分
+                            </span>
                           )}
                           {event.description && (
                             <span className="ml-2 text-gray-500">{event.description}</span>
@@ -571,9 +621,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                暂无比赛事件记录
-              </div>
+              <div className="text-center py-8 text-gray-500">暂无比赛事件记录</div>
             )}
           </div>
         </div>
@@ -601,7 +649,12 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                   <label className="block text-sm font-medium text-gray-700 mb-1">节次</label>
                   <select
                     value={eventForm.quarter}
-                    onChange={(e) => setEventForm({ ...eventForm, quarter: parseInt(e.target.value) })}
+                    onChange={e =>
+                      setEventForm({
+                        ...eventForm,
+                        quarter: parseInt(e.target.value),
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     <option value={1}>第1节</option>
@@ -615,7 +668,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                   <input
                     type="text"
                     value={eventForm.eventTime}
-                    onChange={(e) => setEventForm({ ...eventForm, eventTime: e.target.value })}
+                    onChange={e => setEventForm({ ...eventForm, eventTime: e.target.value })}
                     placeholder="12:34"
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
@@ -624,12 +677,14 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                   <label className="block text-sm font-medium text-gray-700 mb-1">球员</label>
                   <select
                     value={eventForm.playerId}
-                    onChange={(e) => setEventForm({ ...eventForm, playerId: e.target.value })}
+                    onChange={e => setEventForm({ ...eventForm, playerId: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     <option value="">选择球员</option>
                     {players.map(player => (
-                      <option key={player.id} value={player.id}>{player.name}</option>
+                      <option key={player.id} value={player.id}>
+                        {player.name}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -639,7 +694,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                 <label className="block text-sm font-medium text-gray-700 mb-1">事件类型</label>
                 <select
                   value={eventForm.eventType}
-                  onChange={(e) => setEventForm({ ...eventForm, eventType: e.target.value })}
+                  onChange={e => setEventForm({ ...eventForm, eventType: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 >
                   <option value="score">得分</option>
@@ -658,7 +713,12 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                   <label className="block text-sm font-medium text-gray-700 mb-1">得分</label>
                   <select
                     value={eventForm.points}
-                    onChange={(e) => setEventForm({ ...eventForm, points: parseInt(e.target.value) })}
+                    onChange={e =>
+                      setEventForm({
+                        ...eventForm,
+                        points: parseInt(e.target.value),
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     <option value={1}>1分（罚球）</option>
@@ -673,7 +733,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                 <input
                   type="text"
                   value={eventForm.description}
-                  onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })}
+                  onChange={e => setEventForm({ ...eventForm, description: e.target.value })}
                   placeholder="事件描述（可选）"
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
@@ -701,5 +761,5 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
         </div>
       )}
     </div>
-  )
+  );
 }

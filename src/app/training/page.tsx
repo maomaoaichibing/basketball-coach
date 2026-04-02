@@ -1,90 +1,88 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { ArrowLeft, Play, Users, CheckCircle, Clock, ClipboardList } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { ArrowLeft, Play, Users, CheckCircle, Clock, ClipboardList } from 'lucide-react';
 
 // 类型定义
 type TrainingPlan = {
-  id: string
-  title: string
-  date: string
-  duration: number
-  group: string
-  location: string
-  theme?: string
-}
+  id: string;
+  title: string;
+  date: string;
+  duration: number;
+  group: string;
+  location: string;
+  theme?: string;
+};
 
 type Player = {
-  id: string
-  name: string
-  group: string
-}
+  id: string;
+  name: string;
+  group: string;
+};
 
 type AttendanceRecord = {
-  playerId: string
-  attendance: 'present' | 'absent' | 'late'
-  performance?: number
-  effort?: number
-  attitude?: number
-  feedback?: string
-}
+  playerId: string;
+  attendance: 'present' | 'absent' | 'late';
+  performance?: number;
+  effort?: number;
+  attitude?: number;
+  feedback?: string;
+};
 
 export default function TrainingSessionPage() {
-  const [plans, setPlans] = useState<TrainingPlan[]>([])
-  const [players, setPlayers] = useState<Player[]>([])
-  const [selectedPlan, setSelectedPlan] = useState<TrainingPlan | null>(null)
-  const [selectedGroup, setSelectedGroup] = useState<string>('')
-  const [attendance, setAttendance] = useState<Record<string, AttendanceRecord>>({})
-  const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
+  const [plans, setPlans] = useState<TrainingPlan[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [selectedPlan, setSelectedPlan] = useState<TrainingPlan | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<string>('');
+  const [attendance, setAttendance] = useState<Record<string, AttendanceRecord>>({});
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    fetchPlans()
-    fetchPlayers()
-  }, [])
+    fetchPlans();
+    fetchPlayers();
+  }, []);
 
   async function fetchPlans() {
     try {
-      const response = await fetch('/api/plans')
-      const data = await response.json()
+      const response = await fetch('/api/plans');
+      const data = await response.json();
       if (data.success) {
-        const parsedPlans = data.plans.map((plan: any) => ({
+        const parsedPlans = data.plans.map((plan: TrainingPlan & { focusSkills?: string; sections?: string }) => ({
           ...plan,
           focusSkills: plan.focusSkills ? JSON.parse(plan.focusSkills) : [],
-          sections: plan.sections ? JSON.parse(plan.sections) : []
-        }))
-        setPlans(parsedPlans)
+          sections: plan.sections ? JSON.parse(plan.sections) : [],
+        }));
+        setPlans(parsedPlans);
       }
     } catch (error) {
-      console.error('获取教案失败:', error)
+      console.error('获取教案失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function fetchPlayers() {
     try {
-      const response = await fetch('/api/players')
-      const data = await response.json()
+      const response = await fetch('/api/players');
+      const data = await response.json();
       if (data.success) {
-        setPlayers(data.players)
+        setPlayers(data.players);
         // 默认选中第一个分组
         if (data.players.length > 0) {
-          const groups = Array.from(new Set(data.players.map((p: Player) => p.group))) as string[]
-          setSelectedGroup(groups[0] || '')
+          const groups = Array.from(new Set(data.players.map((p: Player) => p.group))) as string[];
+          setSelectedGroup(groups[0] || '');
         }
       }
     } catch (error) {
-      console.error('获取学员失败:', error)
+      console.error('获取学员失败:', error);
     }
   }
 
-  const groups = Array.from(new Set(players.map(p => p.group))).sort()
-  const filteredPlayers = selectedGroup
-    ? players.filter(p => p.group === selectedGroup)
-    : players
+  const groups = Array.from(new Set(players.map(p => p.group))).sort();
+  const filteredPlayers = selectedGroup ? players.filter(p => p.group === selectedGroup) : players;
 
   function handleAttendanceChange(playerId: string, status: 'present' | 'absent' | 'late') {
     setAttendance(prev => ({
@@ -92,20 +90,20 @@ export default function TrainingSessionPage() {
       [playerId]: {
         ...prev[playerId],
         playerId,
-        attendance: status
-      }
-    }))
+        attendance: status,
+      },
+    }));
   }
 
   async function handleSubmit() {
-    if (!selectedPlan) return
+    if (!selectedPlan) return;
 
-    setSubmitting(true)
+    setSubmitting(true);
     try {
-      const records = Object.values(attendance)
+      const records = Object.values(attendance);
       if (records.length === 0) {
-        alert('请至少选择一个学员')
-        return
+        alert('请至少选择一个学员');
+        return;
       }
 
       // 为每个签到学员创建训练记录
@@ -121,20 +119,20 @@ export default function TrainingSessionPage() {
             effort: record.effort,
             attitude: record.attitude,
             feedback: record.feedback,
-            coachName: '教练'
-          })
-        })
+            coachName: '教练',
+          }),
+        });
       }
 
-      setSubmitted(true)
+      setSubmitted(true);
     } catch (error) {
-      alert('提交失败')
+      alert('提交失败');
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
   }
 
-  const presentCount = Object.values(attendance).filter(r => r.attendance === 'present').length
+  const presentCount = Object.values(attendance).filter(r => r.attendance === 'present').length;
 
   if (submitted) {
     return (
@@ -144,20 +142,24 @@ export default function TrainingSessionPage() {
             <CheckCircle className="w-8 h-8 text-green-600" />
           </div>
           <h2 className="text-xl font-bold text-gray-900 mb-2">训练记录已保存</h2>
-          <p className="text-gray-500 mb-6">
-            已为 {presentCount} 名学员创建训练记录
-          </p>
+          <p className="text-gray-500 mb-6">已为 {presentCount} 名学员创建训练记录</p>
           <div className="flex gap-3">
-            <Link href="/feedback" className="flex-1 py-3 bg-orange-500 text-white rounded-xl font-semibold text-center">
+            <Link
+              href="/feedback"
+              className="flex-1 py-3 bg-orange-500 text-white rounded-xl font-semibold text-center"
+            >
               查看课后反馈
             </Link>
-            <Link href="/" className="flex-1 py-3 border border-gray-200 text-gray-700 rounded-xl font-semibold text-center">
+            <Link
+              href="/"
+              className="flex-1 py-3 border border-gray-200 text-gray-700 rounded-xl font-semibold text-center"
+            >
               返回首页
             </Link>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -262,12 +264,13 @@ export default function TrainingSessionPage() {
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                     <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                       <span className="text-gray-700">
-                        已签到: <span className="font-bold text-orange-600">{presentCount}</span> / {filteredPlayers.length}
+                        已签到: <span className="font-bold text-orange-600">{presentCount}</span> /{' '}
+                        {filteredPlayers.length}
                       </span>
                     </div>
                     <div className="divide-y divide-gray-100">
                       {filteredPlayers.map(player => {
-                        const record = attendance[player.id]
+                        const record = attendance[player.id];
                         return (
                           <div key={player.id} className="p-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -309,7 +312,7 @@ export default function TrainingSessionPage() {
                               </button>
                             </div>
                           </div>
-                        )
+                        );
                       })}
                     </div>
                   </div>
@@ -345,5 +348,5 @@ export default function TrainingSessionPage() {
         )}
       </main>
     </div>
-  )
+  );
 }

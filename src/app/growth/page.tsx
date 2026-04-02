@@ -1,87 +1,98 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { ArrowLeft, TrendingUp, TrendingDown, Star, Award, Target, Calendar, Users } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import {
+  ArrowLeft,
+  TrendingUp,
+  TrendingDown,
+  Star,
+  Award,
+  Target,
+  Calendar,
+  Users,
+} from 'lucide-react';
 
 // 类型定义
 type AssessmentHistory = {
-  date: string
-  dribbling?: number
-  passing?: number
-  shooting?: number
-  defending?: number
-  physical?: number
-  tactical?: number
-  overall?: number
-}
+  date: string;
+  dribbling?: number;
+  passing?: number;
+  shooting?: number;
+  defending?: number;
+  physical?: number;
+  tactical?: number;
+  overall?: number;
+};
 
 type Player = {
-  id: string
-  name: string
-  group: string
-  status: string
-  avatar: string
+  id: string;
+  name: string;
+  group: string;
+  status: string;
+  avatar: string;
   abilities: {
-    dribbling: number
-    passing: number
-    shooting: number
-    defending: number
-    physical: number
-    tactical: number
-  }
-  avgAbility: number
-  trend: Record<string, number>
-  lastAssessment: string | null
-  totalTrainings: number
-  attendanceRate: number
-  presentCount: number
-  absentCount: number
-  assessmentHistory: AssessmentHistory[]
-}
+    dribbling: number;
+    passing: number;
+    shooting: number;
+    defending: number;
+    physical: number;
+    tactical: number;
+  };
+  avgAbility: number;
+  trend: Record<string, number>;
+  lastAssessment: string | null;
+  totalTrainings: number;
+  attendanceRate: number;
+  presentCount: number;
+  absentCount: number;
+  assessmentHistory: AssessmentHistory[];
+};
 
 // 雷达图组件
-function RadarChart({ abilities, size = 200 }: { abilities: Player['abilities'], size?: number }) {
-  const labels = ['运球', '传球', '投篮', '防守', '体能', '战术']
-  const keys = ['dribbling', 'passing', 'shooting', 'defending', 'physical', 'tactical']
-  const values = keys.map(k => abilities[k as keyof typeof abilities] || 5)
+function RadarChart({ abilities, size = 200 }: { abilities: Player['abilities']; size?: number }) {
+  const labels = ['运球', '传球', '投篮', '防守', '体能', '战术'];
+  const keys = ['dribbling', 'passing', 'shooting', 'defending', 'physical', 'tactical'];
+  const values = keys.map(k => abilities[k as keyof typeof abilities] || 5);
 
-  const cx = size / 2
-  const cy = size / 2
-  const maxRadius = size / 2 - 20
+  const cx = size / 2;
+  const cy = size / 2;
+  const maxRadius = size / 2 - 20;
 
   // 计算多边形顶点
   const getPoint = (index: number, value: number) => {
-    const angle = (Math.PI * 2 * index) / 6 - Math.PI / 2
-    const radius = (value / 10) * maxRadius
+    const angle = (Math.PI * 2 * index) / 6 - Math.PI / 2;
+    const radius = (value / 10) * maxRadius;
     return {
       x: cx + radius * Math.cos(angle),
-      y: cy + radius * Math.sin(angle)
-    }
-  }
+      y: cy + radius * Math.sin(angle),
+    };
+  };
 
   // 生成网格线
-  const gridLevels = [2, 4, 6, 8, 10]
+  const gridLevels = [2, 4, 6, 8, 10];
 
   // 数据点多边形
-  const dataPoints = values.map((v, i) => getPoint(i, v))
-  const polygonPoints = dataPoints.map(p => `${p.x},${p.y}`).join(' ')
+  const dataPoints = values.map((v, i) => getPoint(i, v));
+  const polygonPoints = dataPoints.map(p => `${p.x},${p.y}`).join(' ');
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="mx-auto">
       {/* 网格线 */}
       {gridLevels.map(level => {
-        const points = keys.map((_, i) => {
-          const p = getPoint(i, level)
-          return `${p.x},${p.y}`
-        }).join(' ')
-        return <polygon key={level} points={points} fill="none" stroke="#e5e7eb" strokeWidth="1" />
+        const points = keys
+          .map((_, i) => {
+            const p = getPoint(i, level);
+            return `${p.x},${p.y}`;
+          })
+          .join(' ');
+        return <polygon key={level} points={points} fill="none" stroke="#e5e7eb" strokeWidth="1" />;
       })}
 
       {/* 轴线 */}
       {keys.map((_, i) => {
-        const p = getPoint(i, 10)
-        return <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#e5e7eb" strokeWidth="1" />
+        const p = getPoint(i, 10);
+        return <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#e5e7eb" strokeWidth="1" />;
       })}
 
       {/* 数据区域 */}
@@ -99,7 +110,7 @@ function RadarChart({ abilities, size = 200 }: { abilities: Player['abilities'],
 
       {/* 标签 */}
       {labels.map((label, i) => {
-        const p = getPoint(i, 10.8)
+        const p = getPoint(i, 10.8);
         return (
           <text
             key={i}
@@ -111,28 +122,34 @@ function RadarChart({ abilities, size = 200 }: { abilities: Player['abilities'],
           >
             {label}
           </text>
-        )
+        );
       })}
     </svg>
-  )
+  );
 }
 
 // 能力条形图组件
-function AbilityBars({ abilities, trend }: { abilities: Player['abilities'], trend: Record<string, number> }) {
+function AbilityBars({
+  abilities,
+  trend,
+}: {
+  abilities: Player['abilities'];
+  trend: Record<string, number>;
+}) {
   const labels: Record<string, string> = {
     dribbling: '运球',
     passing: '传球',
     shooting: '投篮',
     defending: '防守',
     physical: '体能',
-    tactical: '战术'
-  }
+    tactical: '战术',
+  };
 
   return (
     <div className="space-y-3">
       {Object.entries(abilities).map(([key, value]) => {
-        const label = labels[key] || key
-        const change = trend[key] || 0
+        const label = labels[key] || key;
+        const change = trend[key] || 0;
         return (
           <div key={key} className="flex items-center gap-3">
             <span className="w-12 text-sm text-gray-600">{label}</span>
@@ -144,44 +161,49 @@ function AbilityBars({ abilities, trend }: { abilities: Player['abilities'], tre
             </div>
             <span className="w-8 text-sm font-semibold text-gray-900 text-right">{value}</span>
             {change !== 0 && (
-              <span className={`flex items-center gap-0.5 text-xs ${change > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {change > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                {change > 0 ? '+' : ''}{change}
+              <span
+                className={`flex items-center gap-0.5 text-xs ${change > 0 ? 'text-green-600' : 'text-red-600'}`}
+              >
+                {change > 0 ? (
+                  <TrendingUp className="w-3 h-3" />
+                ) : (
+                  <TrendingDown className="w-3 h-3" />
+                )}
+                {change > 0 ? '+' : ''}
+                {change}
               </span>
             )}
           </div>
-        )
+        );
       })}
     </div>
-  )
+  );
 }
 
 export default function GrowthPage() {
-  const [players, setPlayers] = useState<Player[]>([])
-  const [loading, setLoading] = useState(true)
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null)
-  const [selectedGroup, setSelectedGroup] = useState('all')
-  const [viewMode, setViewMode] = useState<'chart' | 'bars'>('chart')
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState('all');
+  const [viewMode, setViewMode] = useState<'chart' | 'bars'>('chart');
 
   useEffect(() => {
-    fetchGrowthData()
-  }, [selectedGroup])
+    fetchGrowthData();
+  }, [selectedGroup]);
 
   async function fetchGrowthData() {
     try {
-      setLoading(true)
-      const url = selectedGroup !== 'all'
-        ? `/api/growth?group=${selectedGroup}`
-        : '/api/growth'
-      const response = await fetch(url)
-      const data = await response.json()
+      setLoading(true);
+      const url = selectedGroup !== 'all' ? `/api/growth?group=${selectedGroup}` : '/api/growth';
+      const response = await fetch(url);
+      const data = await response.json();
       if (data.success) {
-        setPlayers(data.players)
+        setPlayers(data.players);
       }
     } catch (error) {
-      console.error('获取成长数据失败:', error)
+      console.error('获取成长数据失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -191,18 +213,18 @@ export default function GrowthPage() {
     shooting: '投篮',
     defending: '防守',
     physical: '体能',
-    tactical: '战术'
-  }
+    tactical: '战术',
+  };
 
   const statusLabels: Record<string, string> = {
     trial: '试听',
     training: '在训',
     vacation: '请假',
     suspended: '停课',
-    graduated: '结业'
-  }
+    graduated: '结业',
+  };
 
-  const groups = Array.from(new Set(players.map(p => p.group))).sort()
+  const groups = Array.from(new Set(players.map(p => p.group))).sort();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -219,12 +241,14 @@ export default function GrowthPage() {
             {/* 筛选 */}
             <select
               value={selectedGroup}
-              onChange={(e) => setSelectedGroup(e.target.value)}
+              onChange={e => setSelectedGroup(e.target.value)}
               className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <option value="all">全部年龄段</option>
               {groups.map(g => (
-                <option key={g} value={g}>{g}</option>
+                <option key={g} value={g}>
+                  {g}
+                </option>
               ))}
             </select>
           </div>
@@ -248,9 +272,7 @@ export default function GrowthPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* 左侧：学员列表 */}
             <div className="lg:col-span-1 space-y-4">
-              <h2 className="font-semibold text-gray-700">
-                学员 ({players.length})
-              </h2>
+              <h2 className="font-semibold text-gray-700">学员 ({players.length})</h2>
               {players.map(player => (
                 <div
                   key={player.id}
@@ -284,11 +306,19 @@ export default function GrowthPage() {
                       <span
                         key={skill}
                         className={`flex items-center gap-0.5 ${
-                          value > 0 ? 'text-green-600' : value < 0 ? 'text-red-600' : 'text-gray-400'
+                          value > 0
+                            ? 'text-green-600'
+                            : value < 0
+                              ? 'text-red-600'
+                              : 'text-gray-400'
                         }`}
                       >
                         {labels[skill].charAt(0)}
-                        {value > 0 ? <TrendingUp className="w-3 h-3" /> : value < 0 ? <TrendingDown className="w-3 h-3" /> : null}
+                        {value > 0 ? (
+                          <TrendingUp className="w-3 h-3" />
+                        ) : value < 0 ? (
+                          <TrendingDown className="w-3 h-3" />
+                        ) : null}
                       </span>
                     ))}
                   </div>
@@ -315,7 +345,12 @@ export default function GrowthPage() {
                           <span className="text-sm text-gray-500">{selectedPlayer.group}</span>
                         </div>
                         <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
-                          <span>最近评估: {selectedPlayer.lastAssessment ? new Date(selectedPlayer.lastAssessment).toLocaleDateString() : '暂无'}</span>
+                          <span>
+                            最近评估:{' '}
+                            {selectedPlayer.lastAssessment
+                              ? new Date(selectedPlayer.lastAssessment).toLocaleDateString()
+                              : '暂无'}
+                          </span>
                           <span>训练 {selectedPlayer.totalTrainings} 次</span>
                           <span>出勤率 {selectedPlayer.attendanceRate}%</span>
                         </div>
@@ -330,7 +365,9 @@ export default function GrowthPage() {
                           <button
                             onClick={() => setViewMode('chart')}
                             className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                              viewMode === 'chart' ? 'bg-white shadow text-orange-600' : 'text-gray-500'
+                              viewMode === 'chart'
+                                ? 'bg-white shadow text-orange-600'
+                                : 'text-gray-500'
                             }`}
                           >
                             雷达图
@@ -338,7 +375,9 @@ export default function GrowthPage() {
                           <button
                             onClick={() => setViewMode('bars')}
                             className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                              viewMode === 'bars' ? 'bg-white shadow text-orange-600' : 'text-gray-500'
+                              viewMode === 'bars'
+                                ? 'bg-white shadow text-orange-600'
+                                : 'text-gray-500'
                             }`}
                           >
                             柱状图
@@ -351,7 +390,10 @@ export default function GrowthPage() {
                           <RadarChart abilities={selectedPlayer.abilities} size={240} />
                         </div>
                       ) : (
-                        <AbilityBars abilities={selectedPlayer.abilities} trend={selectedPlayer.trend} />
+                        <AbilityBars
+                          abilities={selectedPlayer.abilities}
+                          trend={selectedPlayer.trend}
+                        />
                       )}
                     </div>
                   </div>
@@ -362,20 +404,23 @@ export default function GrowthPage() {
                     {selectedPlayer.assessmentHistory.length > 0 ? (
                       <div className="space-y-3">
                         {selectedPlayer.assessmentHistory.map((assessment, index) => (
-                          <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                          <div
+                            key={index}
+                            className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg"
+                          >
                             <div className="text-sm text-gray-500 w-24">
                               {new Date(assessment.date).toLocaleDateString()}
                             </div>
                             <div className="flex-1 flex items-center gap-4 text-xs">
                               {Object.entries(labels).map(([skill, label]) => {
-                                const value = (assessment as any)[skill]
-                                if (!value) return null
+                                const value = (assessment as any)[skill];
+                                if (!value) return null;
                                 return (
                                   <span key={skill} className="flex items-center gap-1">
                                     <span className="text-gray-400">{label}:</span>
                                     <span className="font-medium">{value}</span>
                                   </span>
-                                )
+                                );
                               })}
                             </div>
                             {assessment.overall && (
@@ -418,5 +463,5 @@ export default function GrowthPage() {
         )}
       </main>
     </div>
-  )
+  );
 }

@@ -1,0 +1,185 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  DEPLOY_PATH: '/var/www/basketball-coach'
+
+jobs:
+  test:
+    name: Test and Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Run TypeScript check
+        run: npm run type-check
+        continue-on-error: true
+
+      - name: Run pre-deploy checks
+        run: |
+          chmod +x ./scripts/pre-deploy-check.sh
+          ./scripts/pre-deploy-check.sh
+
+      - name: Build application
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-files
+          path: |
+            .next
+            public
+            package.json
+            package-lock.json
+            prisma
+            scripts
+            ecosystem.config.js
+
+  deploy:
+    name: Deploy to Server
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-files
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Create deployment script
+        run: |
+          cat > deploy.sh << 'EOF'
+          #!/bin/bash
+          set -e
+          
+          echo "🚀 Starting deployment..."
+          
+          # Create deploy directory if not exists
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "sudo mkdir -p ${{ env.DEPLOY_PATH }}"
+          
+          # Copy files to server
+          echo "📦 Copying files to server..."
+          rsync -avz --delete \
+            -e ssh \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='.next/cache' \
+            . ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:${{ env.DEPLOY_PATH }}
+          
+          # Run deployment commands on server
+          echo "🔧 Running deployment commands..."
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'REMOTE_EOF'
+            cd ${{ env.DEPLOY_PATH }}
+            
+            # Set correct permissions
+            sudo chown -R $USER:$USER .
+            
+            # Install dependencies
+            echo "📦 Installing dependencies..."
+            npm ci --production
+            
+            # Run database migrations if needed
+            echo "🗄️ Running database migrations..."
+            npx prisma migrate deploy
+            npx prisma generate
+            
+            # Build application
+            echo "🔨 Building application..."
+            npm run build
+            
+            # Restart PM2 process
+            echo "🔄 Restarting application..."
+            pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js
+            
+            # Save PM2 configuration
+            pm2 save
+            
+            echo "✅ Deployment completed successfully!"
+REMOTE_EOF
+
+          EOF
+          chmod +x deploy.sh
+
+      - name: Run deployment
+        run: ./deploy.sh
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "✅ Deployment to production server completed successfully!"
+          echo "🌐 Application is available at: http://${{ secrets.SERVER_IP }}:3000"
+
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed!"
+          echo "Please check the logs above for details."
+
+  backup-database:
+    name: Backup Database
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: success()
+    
+    steps:
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Backup database
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            cd ${{ env.DEPLOY_PATH }}
+            
+            # Create backup directory
+            mkdir -p backups
+            
+            # Create backup filename with timestamp
+            BACKUP_FILE="backups/db_backup_$(date +%Y%m%d_%H%M%S).sql"
+            
+            # Backup SQLite database
+            if [ -f "prisma/dev.db" ]; then
+              cp prisma/dev.db "backups/db_backup_$(date +%Y%m%d_%H%M%S).db"
+              echo "✅ Database backed up to $BACKUP_FILE.db"
+            fi
+            
+            # Keep only last 7 backups
+            cd backups
+            ls -t *.db | tail -n +8 | xargs -r rm
+            echo "🧹 Cleaned old backups (keeping last 7)"
+EOF

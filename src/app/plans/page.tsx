@@ -1,73 +1,97 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { ArrowLeft, Plus, Search, Calendar, Clock, MapPin, Target, MoreVertical, Copy, Edit, Trash2, Download, Sparkles } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import {
+  ArrowLeft,
+  Plus,
+  Search,
+  Calendar,
+  Clock,
+  MapPin,
+  Target,
+  MoreVertical,
+  Copy,
+  Edit,
+  Trash2,
+  Download,
+  Sparkles,
+} from 'lucide-react';
 
 // 教案类型
 type TrainingPlan = {
-  id: string
-  title: string
-  date: string
-  duration: number
-  group: string
-  location: string
-  weather?: string
-  theme?: string
-  focusSkills?: string
-  intensity?: string
-  status?: string
-  generatedBy?: string
-  createdAt?: string
-  sections?: string
-}
+  id: string;
+  title: string;
+  date: string;
+  duration: number;
+  group: string;
+  location: string;
+  weather?: string;
+  theme?: string;
+  focusSkills?: string;
+  intensity?: string;
+  status?: string;
+  generatedBy?: string;
+  createdAt?: string;
+  sections?: string;
+};
 
 export default function PlansPage() {
-  const [plans, setPlans] = useState<TrainingPlan[]>([])
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
-  const [groupFilter, setGroupFilter] = useState('all')
-  const [themeFilter, setThemeFilter] = useState('all')
-  const [copyingId, setCopyingId] = useState<string | null>(null)
+  const [plans, setPlans] = useState<TrainingPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [groupFilter, setGroupFilter] = useState('all');
+  const [themeFilter, setThemeFilter] = useState('all');
+  const [copyingId, setCopyingId] = useState<string | null>(null);
 
-  const router = useRouter()
+  const router = useRouter();
 
-  const groups = ['all', 'U6', 'U8', 'U10', 'U12', 'U14']
-  const themes = ['all', '运球基础', '传球技术', '投篮训练', '防守入门', '进攻战术', '体能训练', '综合训练', '对抗比赛']
+  const groups = ['all', 'U6', 'U8', 'U10', 'U12', 'U14'];
+  const themes = [
+    'all',
+    '运球基础',
+    '传球技术',
+    '投篮训练',
+    '防守入门',
+    '进攻战术',
+    '体能训练',
+    '综合训练',
+    '对抗比赛',
+  ];
 
   useEffect(() => {
-    fetchPlans()
-  }, [])
+    fetchPlans();
+  }, []);
 
   async function fetchPlans() {
     try {
-      setLoading(true)
-      const response = await fetch('/api/plans?limit=50')
-      const data = await response.json()
+      setLoading(true);
+      const response = await fetch('/api/plans?limit=50');
+      const data = await response.json();
 
       if (data.success) {
         // 解析 focusSkills
         const parsedPlans = data.plans.map((plan: TrainingPlan) => ({
           ...plan,
-          focusSkills: plan.focusSkills ? JSON.parse(plan.focusSkills) : []
-        }))
-        setPlans(parsedPlans)
+          focusSkills: plan.focusSkills ? JSON.parse(plan.focusSkills) : [],
+        }));
+        setPlans(parsedPlans);
       }
     } catch (error) {
-      console.error('获取教案列表失败:', error)
+      console.error('获取教案列表失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   // 复制教案
   async function handleCopyPlan(plan: TrainingPlan, e: React.MouseEvent) {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
 
     try {
-      setCopyingId(plan.id)
+      setCopyingId(plan.id);
       const response = await fetch('/api/plans', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -83,33 +107,33 @@ export default function PlansPage() {
           intensity: plan.intensity || 'medium',
           sections: plan.sections ? JSON.parse(plan.sections) : [],
           notes: '',
-          generatedBy: plan.generatedBy
-        })
-      })
+          generatedBy: plan.generatedBy,
+        }),
+      });
 
-      const result = await response.json()
+      const result = await response.json();
       if (result.success) {
-        alert('教案复制成功！')
-        fetchPlans()
+        alert('教案复制成功！');
+        fetchPlans();
         // 跳转到新教案详情页
-        router.push(`/plans/${result.id}`)
+        router.push(`/plans/${result.id}`);
       } else {
-        alert('复制失败: ' + result.error)
+        alert('复制失败: ' + result.error);
       }
     } catch (error) {
-      console.error('复制教案失败:', error)
-      alert('复制失败')
+      console.error('复制教案失败:', error);
+      alert('复制失败');
     } finally {
-      setCopyingId(null)
+      setCopyingId(null);
     }
   }
 
   const filteredPlans = plans.filter(p => {
-    if (groupFilter !== 'all' && p.group !== groupFilter) return false
-    if (themeFilter !== 'all' && p.theme !== themeFilter) return false
-    if (search && !p.title.includes(search)) return false
-    return true
-  })
+    if (groupFilter !== 'all' && p.group !== groupFilter) return false;
+    if (themeFilter !== 'all' && p.theme !== themeFilter) return false;
+    if (search && !p.title.includes(search)) return false;
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -133,7 +157,10 @@ export default function PlansPage() {
                 <Download className="w-4 h-4" />
                 导出
               </a>
-              <Link href="/plan/new" className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg">
+              <Link
+                href="/plan/new"
+                className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg"
+              >
                 <Plus className="w-4 h-4" />
                 新建教案
               </Link>
@@ -155,14 +182,16 @@ export default function PlansPage() {
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             />
           </div>
-          
+
           <select
             value={groupFilter}
             onChange={e => setGroupFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg"
           >
             {groups.map(g => (
-              <option key={g} value={g}>{g === 'all' ? '全部分组' : g}</option>
+              <option key={g} value={g}>
+                {g === 'all' ? '全部分组' : g}
+              </option>
             ))}
           </select>
 
@@ -172,7 +201,9 @@ export default function PlansPage() {
             className="px-3 py-2 border border-gray-300 rounded-lg"
           >
             {themes.map(t => (
-              <option key={t} value={t}>{t === 'all' ? '全部主题' : t}</option>
+              <option key={t} value={t}>
+                {t === 'all' ? '全部主题' : t}
+              </option>
             ))}
           </select>
         </div>
@@ -189,8 +220,12 @@ export default function PlansPage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="font-bold text-lg text-gray-900">{plan.title}</h3>
-                    <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded-full">{plan.group}</span>
-                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">{plan.theme}</span>
+                    <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded-full">
+                      {plan.group}
+                    </span>
+                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                      {plan.theme}
+                    </span>
                   </div>
 
                   <div className="flex items-center gap-4 text-sm text-gray-500">
@@ -216,7 +251,7 @@ export default function PlansPage() {
                 {/* 操作按钮 */}
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={(e) => handleCopyPlan(plan, e)}
+                    onClick={e => handleCopyPlan(plan, e)}
                     disabled={copyingId === plan.id}
                     className="p-2 hover:bg-gray-100 rounded-lg disabled:opacity-50"
                     title="复制"
@@ -228,21 +263,21 @@ export default function PlansPage() {
                     )}
                   </button>
                   <button
-                    onClick={(e) => e.preventDefault()}
+                    onClick={e => e.preventDefault()}
                     className="p-2 hover:bg-gray-100 rounded-lg"
                     title="编辑"
                   >
                     <Edit className="w-4 h-4 text-gray-400" />
                   </button>
                   <button
-                    onClick={(e) => e.preventDefault()}
+                    onClick={e => e.preventDefault()}
                     className="p-2 hover:bg-gray-100 rounded-lg"
                     title="导出"
                   >
                     <Download className="w-4 h-4 text-gray-400" />
                   </button>
                   <button
-                    onClick={(e) => e.preventDefault()}
+                    onClick={e => e.preventDefault()}
                     className="p-2 hover:bg-gray-100 rounded-lg"
                     title="更多"
                   >
@@ -265,5 +300,5 @@ export default function PlansPage() {
         )}
       </main>
     </div>
-  )
+  );
 }

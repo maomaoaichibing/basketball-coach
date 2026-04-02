@@ -1,35 +1,35 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 // 生成订单号
 function generateOrderNo(): string {
-  const date = new Date()
-  const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '')
-  const random = Math.random().toString(36).substring(2, 8).toUpperCase()
-  return `ORD${dateStr}${random}`
+  const date = new Date();
+  const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+  return `ORD${dateStr}${random}`;
 }
 
 // GET /api/orders - 获取订单列表
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const status = searchParams.get('status')
-    const playerId = searchParams.get('playerId')
-    const type = searchParams.get('type')
-    const search = searchParams.get('search')
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get('status');
+    const playerId = searchParams.get('playerId');
+    const type = searchParams.get('type');
+    const search = searchParams.get('search');
 
-    const where: any = {}
-    if (status) where.status = status
-    if (playerId) where.playerId = playerId
-    if (type) where.type = type
+    const where: any = {};
+    if (status) where.status = status;
+    if (playerId) where.playerId = playerId;
+    if (type) where.type = type;
     if (search) {
       where.OR = [
         { orderNo: { contains: search } },
         { customerName: { contains: search } },
         { customerPhone: { contains: search } },
-      ]
+      ];
     }
 
     const orders = await prisma.order.findMany({
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
         payments: { orderBy: { createdAt: 'desc' } },
       },
       orderBy: { createdAt: 'desc' },
-    })
+    });
 
     // 计算统计数据
     const stats = {
@@ -51,19 +51,19 @@ export async function GET(request: NextRequest) {
       totalAmount: orders.reduce((sum, o) => sum + o.totalAmount, 0),
       paidAmount: orders.reduce((sum, o) => sum + o.paidAmount, 0),
       pendingAmount: orders.reduce((sum, o) => sum + o.pendingAmount, 0),
-    }
+    };
 
-    return NextResponse.json({ orders, stats })
+    return NextResponse.json({ orders, stats });
   } catch (error) {
-    console.error('获取订单列表失败:', error)
-    return NextResponse.json({ error: '获取订单列表失败' }, { status: 500 })
+    console.error('获取订单列表失败:', error);
+    return NextResponse.json({ error: '获取订单列表失败' }, { status: 500 });
   }
 }
 
 // POST /api/orders - 创建订单
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = await request.json();
     const {
       type = 'course',
       playerId,
@@ -76,10 +76,11 @@ export async function POST(request: NextRequest) {
       validUntil,
       paymentMethod,
       source = 'offline',
-    } = body
+    } = body;
 
     // 计算订单金额
-    const totalAmount = items.reduce((sum: number, item: any) => sum + item.subtotal, 0) - discountAmount
+    const totalAmount =
+      items.reduce((sum: number, item: any) => sum + item.subtotal, 0) - discountAmount;
 
     // 创建订单
     const order = await prisma.order.create({
@@ -118,11 +119,11 @@ export async function POST(request: NextRequest) {
         player: { select: { id: true, name: true } },
         items: true,
       },
-    })
+    });
 
-    return NextResponse.json({ order })
+    return NextResponse.json({ order });
   } catch (error) {
-    console.error('创建订单失败:', error)
-    return NextResponse.json({ error: '创建订单失败' }, { status: 500 })
+    console.error('创建订单失败:', error);
+    return NextResponse.json({ error: '创建订单失败' }, { status: 500 });
   }
 }

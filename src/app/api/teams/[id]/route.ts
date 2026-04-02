@@ -1,63 +1,45 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+
+import prisma from '@/lib/db';
 
 // GET /api/teams/[id] - 获取单个球队详情
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params
+    const { id } = params;
 
     const team = await prisma.team.findUnique({
       where: { id },
       include: {
         players: {
           include: {
-            guardians: true
+            guardians: true,
           },
-          orderBy: { name: 'asc' }
-        }
-      }
-    })
+          orderBy: { name: 'asc' },
+        },
+      },
+    });
 
     if (!team) {
-      return NextResponse.json(
-        { success: false, error: '球队不存在' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: '球队不存在' }, { status: 404 });
     }
 
     return NextResponse.json({
       success: true,
-      team
-    })
+      team,
+    });
   } catch (error) {
-    console.error('获取球队详情失败:', error)
-    return NextResponse.json(
-      { success: false, error: '获取球队详情失败' },
-      { status: 500 }
-    )
+    console.error('获取球队详情失败:', error);
+    return NextResponse.json({ success: false, error: '获取球队详情失败' }, { status: 500 });
   }
 }
 
 // PUT /api/teams/[id] - 更新球队
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params
-    const body = await request.json()
+    const { id } = params;
+    const body = await request.json();
 
-    const {
-      name,
-      group,
-      coachName,
-      coachPhone,
-      location,
-      trainingTime
-    } = body
+    const { name, group, coachName, coachPhone, location, trainingTime } = body;
 
     const team = await prisma.team.update({
       where: { id },
@@ -67,30 +49,24 @@ export async function PUT(
         coachName,
         coachPhone,
         location,
-        trainingTime
-      }
-    })
+        trainingTime,
+      },
+    });
 
     return NextResponse.json({
       success: true,
-      team
-    })
+      team,
+    });
   } catch (error) {
-    console.error('更新球队失败:', error)
-    return NextResponse.json(
-      { success: false, error: '更新球队失败' },
-      { status: 500 }
-    )
+    console.error('更新球队失败:', error);
+    return NextResponse.json({ success: false, error: '更新球队失败' }, { status: 500 });
   }
 }
 
 // DELETE /api/teams/[id] - 删除球队
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params
+    const { id } = params;
 
     // 检查是否有球员关联
     const team = await prisma.team.findUnique({
@@ -98,39 +74,33 @@ export async function DELETE(
       include: {
         _count: {
           select: {
-            players: true
-          }
-        }
-      }
-    })
+            players: true,
+          },
+        },
+      },
+    });
 
     if (!team) {
-      return NextResponse.json(
-        { success: false, error: '球队不存在' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: '球队不存在' }, { status: 404 });
     }
 
     if (team._count.players > 0) {
       return NextResponse.json(
         { success: false, error: '该球队还有球员，无法删除' },
         { status: 400 }
-      )
+      );
     }
 
     await prisma.team.delete({
-      where: { id }
-    })
+      where: { id },
+    });
 
     return NextResponse.json({
       success: true,
-      message: '球队删除成功'
-    })
+      message: '球队删除成功',
+    });
   } catch (error) {
-    console.error('删除球队失败:', error)
-    return NextResponse.json(
-      { success: false, error: '删除球队失败' },
-      { status: 500 }
-    )
+    console.error('删除球队失败:', error);
+    return NextResponse.json({ success: false, error: '删除球队失败' }, { status: 500 });
   }
 }

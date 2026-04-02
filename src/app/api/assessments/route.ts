@@ -1,42 +1,41 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
+
+import prisma from '@/lib/db';
 
 // GET /api/assessments - 获取评估记录
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const playerId = searchParams.get('playerId')
-    const limit = parseInt(searchParams.get('limit') || '50')
+    const { searchParams } = new URL(request.url);
+    const playerId = searchParams.get('playerId');
+    const limit = parseInt(searchParams.get('limit') || '50');
 
-    const where: any = {}
+    const where: Prisma.PlayerAssessmentWhereInput = {};
     if (playerId) {
-      where.playerId = playerId
+      where.playerId = playerId;
     }
 
     const assessments = await prisma.playerAssessment.findMany({
       where,
       orderBy: { assessedAt: 'desc' },
-      take: limit
-    })
+      take: limit,
+    });
 
     return NextResponse.json({
       success: true,
       assessments,
-      total: assessments.length
-    })
+      total: assessments.length,
+    });
   } catch (error) {
-    console.error('获取评估记录失败:', error)
-    return NextResponse.json(
-      { success: false, error: '获取评估记录失败' },
-      { status: 500 }
-    )
+    console.error('获取评估记录失败:', error);
+    return NextResponse.json({ success: false, error: '获取评估记录失败' }, { status: 500 });
   }
 }
 
 // POST /api/assessments - 创建评估记录
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = await request.json();
 
     const {
       playerId,
@@ -48,38 +47,35 @@ export async function POST(request: NextRequest) {
       tactical,
       overall,
       notes,
-      assessor
-    } = body
+      assessor,
+    } = body;
 
     // 验证必填字段
     if (!playerId) {
-      return NextResponse.json(
-        { success: false, error: '学员ID是必填项' },
-        { status: 400 }
-      )
+      return NextResponse.json({ success: false, error: '学员ID是必填项' }, { status: 400 });
     }
 
     // 检查学员是否存在
     const player = await prisma.player.findUnique({
-      where: { id: playerId }
-    })
+      where: { id: playerId },
+    });
 
     if (!player) {
-      return NextResponse.json(
-        { success: false, error: '学员不存在' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: '学员不存在' }, { status: 404 });
     }
 
     // 计算综合评分（如果未提供）
-    const calculatedOverall = overall || Math.round(
-      ((dribbling || player.dribbling) +
-       (passing || player.passing) +
-       (shooting || player.shooting) +
-       (defending || player.defending) +
-       (physical || player.physical) +
-       (tactical || player.tactical)) / 6
-    )
+    const calculatedOverall =
+      overall ||
+      Math.round(
+        ((dribbling || player.dribbling) +
+          (passing || player.passing) +
+          (shooting || player.shooting) +
+          (defending || player.defending) +
+          (physical || player.physical) +
+          (tactical || player.tactical)) /
+          6
+      );
 
     const assessment = await prisma.playerAssessment.create({
       data: {
@@ -92,19 +88,16 @@ export async function POST(request: NextRequest) {
         tactical: tactical ?? player.tactical,
         overall: calculatedOverall,
         notes,
-        assessor
-      }
-    })
+        assessor,
+      },
+    });
 
     return NextResponse.json({
       success: true,
-      assessment
-    })
+      assessment,
+    });
   } catch (error) {
-    console.error('创建评估记录失败:', error)
-    return NextResponse.json(
-      { success: false, error: '创建评估记录失败' },
-      { status: 500 }
-    )
+    console.error('创建评估记录失败:', error);
+    return NextResponse.json({ success: false, error: '创建评估记录失败' }, { status: 500 });
   }
 }

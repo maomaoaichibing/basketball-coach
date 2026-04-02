@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   FileText,
   Plus,
@@ -15,54 +15,54 @@ import {
   TrendingUp,
   Trophy,
   Download,
-  Eye
-} from 'lucide-react'
+  Eye,
+} from 'lucide-react';
 
 type GrowthReport = {
-  id: string
-  playerId: string
-  playerName: string
-  title: string
-  periodStart: string
-  periodEnd: string
-  reportType: string
-  abilities: any
-  trainingStats: any
-  matchStats: any
-  strengths: string[]
-  improvements: string[]
-  overallRating: number
-  summary: string
-  coachName: string
-  status: string
-  createdAt: string
-}
+  id: string;
+  playerId: string;
+  playerName: string;
+  title: string;
+  periodStart: string;
+  periodEnd: string;
+  reportType: string;
+  abilities: any;
+  trainingStats: any;
+  matchStats: any;
+  strengths: string[];
+  improvements: string[];
+  overallRating: number;
+  summary: string;
+  coachName: string;
+  status: string;
+  createdAt: string;
+};
 
 type AbilityDimensions = {
-  dribbling: number
-  passing: number
-  shooting: number
-  defending: number
-  physical: number
-  tactical: number
-}
+  dribbling: number;
+  passing: number;
+  shooting: number;
+  defending: number;
+  physical: number;
+  tactical: number;
+};
 
 type Player = {
-  id: string
-  name: string
-  group: string
-}
+  id: string;
+  name: string;
+  group: string;
+};
 
 export default function GrowthReportsPage() {
-  const router = useRouter()
-  const [reports, setReports] = useState<GrowthReport[]>([])
-  const [players, setPlayers] = useState<Player[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedPlayer, setSelectedPlayer] = useState('')
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [showPreview, setShowPreview] = useState(false)
-  const [previewData, setPreviewData] = useState<any>(null)
+  const router = useRouter();
+  const [reports, setReports] = useState<GrowthReport[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedPlayer, setSelectedPlayer] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewData, setPreviewData] = useState<any>(null);
 
   // 创建表单状态
   const [createForm, setCreateForm] = useState({
@@ -70,78 +70,78 @@ export default function GrowthReportsPage() {
     playerName: '',
     periodStart: '',
     periodEnd: '',
-    reportType: 'quarterly'
-  })
+    reportType: 'quarterly',
+  });
 
   useEffect(() => {
-    fetchReports()
-    fetchPlayers()
-  }, [selectedPlayer])
+    fetchReports();
+    fetchPlayers();
+  }, [selectedPlayer]);
 
   async function fetchReports() {
     try {
-      setLoading(true)
-      const params = new URLSearchParams()
-      if (selectedPlayer) params.set('playerId', selectedPlayer)
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (selectedPlayer) params.set('playerId', selectedPlayer);
 
-      const response = await fetch(`/api/growth-reports?${params.toString()}`)
-      const data = await response.json()
+      const response = await fetch(`/api/growth-reports?${params.toString()}`);
+      const data = await response.json();
 
       if (data.success) {
-        setReports(data.reports)
+        setReports(data.reports);
       }
     } catch (error) {
-      console.error('获取成长报告列表失败:', error)
+      console.error('获取成长报告列表失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function fetchPlayers() {
     try {
-      const response = await fetch('/api/players?limit=100')
-      const data = await response.json()
+      const response = await fetch('/api/players?limit=100');
+      const data = await response.json();
       if (data.success) {
-        setPlayers(data.players)
+        setPlayers(data.players);
       }
     } catch (error) {
-      console.error('获取学员列表失败:', error)
+      console.error('获取学员列表失败:', error);
     }
   }
 
   async function handlePreview() {
     if (!createForm.playerId || !createForm.periodStart || !createForm.periodEnd) {
-      alert('请填写完整信息')
-      return
+      alert('请填写完整信息');
+      return;
     }
 
-    const selected = players.find(p => p.id === createForm.playerId)
+    const selected = players.find(p => p.id === createForm.playerId);
     if (selected) {
-      setCreateForm({ ...createForm, playerName: selected.name })
+      setCreateForm({ ...createForm, playerName: selected.name });
     }
 
     try {
       const response = await fetch('/api/growth-reports/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(createForm)
-      })
-      const data = await response.json()
+        body: JSON.stringify(createForm),
+      });
+      const data = await response.json();
 
       if (data.success) {
-        setPreviewData(data.preview)
-        setShowPreview(true)
+        setPreviewData(data.preview);
+        setShowPreview(true);
       } else {
-        alert(data.error || '生成预览失败')
+        alert(data.error || '生成预览失败');
       }
     } catch (error) {
-      console.error('生成预览失败:', error)
-      alert('生成预览失败')
+      console.error('生成预览失败:', error);
+      alert('生成预览失败');
     }
   }
 
   async function handleCreateReport() {
-    if (!previewData) return
+    if (!previewData) return;
 
     try {
       const response = await fetch('/api/growth-reports', {
@@ -159,58 +159,57 @@ export default function GrowthReportsPage() {
           matchStats: previewData.matchStats,
           strengths: previewData.strengths,
           improvements: previewData.improvements,
-          overallRating: previewData.overallRating
-        })
-      })
+          overallRating: previewData.overallRating,
+        }),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
-        setShowPreview(false)
-        setShowCreateModal(false)
+        setShowPreview(false);
+        setShowCreateModal(false);
         setCreateForm({
           playerId: '',
           playerName: '',
           periodStart: '',
           periodEnd: '',
-          reportType: 'quarterly'
-        })
-        setPreviewData(null)
-        fetchReports()
-        router.push(`/growth-reports/${data.report.id}`)
+          reportType: 'quarterly',
+        });
+        setPreviewData(null);
+        fetchReports();
+        router.push(`/growth-reports/${data.report.id}`);
       }
     } catch (error) {
-      console.error('创建报告失败:', error)
+      console.error('创建报告失败:', error);
     }
   }
 
   const filteredReports = reports.filter(report => {
-    if (!searchTerm) return true
-    const term = searchTerm.toLowerCase()
+    if (!searchTerm) return true;
+    const term = searchTerm.toLowerCase();
     return (
-      report.title.toLowerCase().includes(term) ||
-      report.playerName.toLowerCase().includes(term)
-    )
-  })
+      report.title.toLowerCase().includes(term) || report.playerName.toLowerCase().includes(term)
+    );
+  });
 
   const statusColors: Record<string, string> = {
     draft: 'bg-gray-100 text-gray-700',
     published: 'bg-green-100 text-green-700',
-    viewed: 'bg-blue-100 text-blue-700'
-  }
+    viewed: 'bg-blue-100 text-blue-700',
+  };
 
   const statusLabels: Record<string, string> = {
     draft: '草稿',
     published: '已发布',
-    viewed: '已查看'
-  }
+    viewed: '已查看',
+  };
 
   const reportTypeLabels: Record<string, string> = {
     monthly: '月度',
     quarterly: '季度',
     yearly: '年度',
-    milestone: '里程碑'
-  }
+    milestone: '里程碑',
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -248,18 +247,20 @@ export default function GrowthReportsPage() {
                 type="text"
                 placeholder="搜索报告标题或学员姓名..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
             </div>
             <select
               value={selectedPlayer}
-              onChange={(e) => setSelectedPlayer(e.target.value)}
+              onChange={e => setSelectedPlayer(e.target.value)}
               className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <option value="">全部学员</option>
               {players.map(player => (
-                <option key={player.id} value={player.id}>{player.name}</option>
+                <option key={player.id} value={player.id}>
+                  {player.name}
+                </option>
               ))}
             </select>
           </div>
@@ -284,7 +285,7 @@ export default function GrowthReportsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredReports.map((report) => (
+            {filteredReports.map(report => (
               <Link
                 key={report.id}
                 href={`/growth-reports/${report.id}`}
@@ -299,9 +300,7 @@ export default function GrowthReportsPage() {
                   </span>
                 </div>
 
-                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                  {report.title}
-                </h3>
+                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{report.title}</h3>
 
                 <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
                   <User className="w-4 h-4" />
@@ -311,27 +310,38 @@ export default function GrowthReportsPage() {
                 <div className="flex items-center gap-4 text-xs text-gray-400 mb-4">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    {new Date(report.periodStart).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
+                    {new Date(report.periodStart).toLocaleDateString('zh-CN', {
+                      month: 'short',
+                      day: 'numeric',
+                    })}
                     {' - '}
-                    {new Date(report.periodEnd).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
+                    {new Date(report.periodEnd).toLocaleDateString('zh-CN', {
+                      month: 'short',
+                      day: 'numeric',
+                    })}
                   </span>
                 </div>
 
                 {/* 能力雷达图简化展示 */}
                 <div className="grid grid-cols-3 gap-2 mb-4">
-                  {report.abilities && Object.entries(report.abilities).slice(0, 6).map(([key, value]: [string, any]) => (
-                    <div key={key} className="text-center">
-                      <div className="text-lg font-bold text-orange-600">{value}</div>
-                      <div className="text-xs text-gray-400">{key}</div>
-                    </div>
-                  ))}
+                  {report.abilities &&
+                    Object.entries(report.abilities)
+                      .slice(0, 6)
+                      .map(([key, value]: [string, any]) => (
+                        <div key={key} className="text-center">
+                          <div className="text-lg font-bold text-orange-600">{value}</div>
+                          <div className="text-xs text-gray-400">{key}</div>
+                        </div>
+                      ))}
                 </div>
 
                 {/* 综合评分 */}
                 {report.overallRating && (
                   <div className="flex items-center justify-center gap-2 pt-3 border-t border-gray-100">
                     <Star className="w-4 h-4 text-yellow-500" />
-                    <span className="text-sm font-medium text-gray-700">综合评分: {report.overallRating}/10</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      综合评分: {report.overallRating}/10
+                    </span>
                   </div>
                 )}
               </Link>
@@ -349,9 +359,9 @@ export default function GrowthReportsPage() {
                 <h2 className="text-lg font-bold text-gray-900">生成成长报告</h2>
                 <button
                   onClick={() => {
-                    setShowCreateModal(false)
-                    setShowPreview(false)
-                    setPreviewData(null)
+                    setShowCreateModal(false);
+                    setShowPreview(false);
+                    setPreviewData(null);
                   }}
                   className="text-gray-400 hover:text-gray-600"
                 >
@@ -363,24 +373,24 @@ export default function GrowthReportsPage() {
             {!showPreview ? (
               <div className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    选择学员 *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">选择学员 *</label>
                   <select
                     value={createForm.playerId}
-                    onChange={(e) => {
-                      const selected = players.find(p => p.id === e.target.value)
+                    onChange={e => {
+                      const selected = players.find(p => p.id === e.target.value);
                       setCreateForm({
                         ...createForm,
                         playerId: e.target.value,
-                        playerName: selected?.name || ''
-                      })
+                        playerName: selected?.name || '',
+                      });
                     }}
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     <option value="">选择学员</option>
                     {players.map(player => (
-                      <option key={player.id} value={player.id}>{player.name} ({player.group})</option>
+                      <option key={player.id} value={player.id}>
+                        {player.name} ({player.group})
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -393,7 +403,12 @@ export default function GrowthReportsPage() {
                     <input
                       type="date"
                       value={createForm.periodStart}
-                      onChange={(e) => setCreateForm({ ...createForm, periodStart: e.target.value })}
+                      onChange={e =>
+                        setCreateForm({
+                          ...createForm,
+                          periodStart: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
@@ -404,19 +419,27 @@ export default function GrowthReportsPage() {
                     <input
                       type="date"
                       value={createForm.periodEnd}
-                      onChange={(e) => setCreateForm({ ...createForm, periodEnd: e.target.value })}
+                      onChange={e =>
+                        setCreateForm({
+                          ...createForm,
+                          periodEnd: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    报告类型
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">报告类型</label>
                   <select
                     value={createForm.reportType}
-                    onChange={(e) => setCreateForm({ ...createForm, reportType: e.target.value })}
+                    onChange={e =>
+                      setCreateForm({
+                        ...createForm,
+                        reportType: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     <option value="monthly">月度报告</option>
@@ -427,7 +450,9 @@ export default function GrowthReportsPage() {
                 </div>
 
                 <div className="bg-orange-50 rounded-lg p-4 text-sm text-orange-700">
-                  <p>系统将根据所选时间段内学员的训练记录、比赛数据和能力评估，自动生成成长报告。</p>
+                  <p>
+                    系统将根据所选时间段内学员的训练记录、比赛数据和能力评估，自动生成成长报告。
+                  </p>
                 </div>
               </div>
             ) : (
@@ -438,7 +463,10 @@ export default function GrowthReportsPage() {
                     <p>学员: {previewData?.playerName}</p>
                     <p>训练次数: {previewData?.trainingStats?.totalSessions || 0} 次</p>
                     <p>出勤率: {previewData?.trainingStats?.attendanceRate || 0}%</p>
-                    <p>比赛场次: {previewData?.matchStats?.totalMatches || 0} 场 (胜 {previewData?.matchStats?.wins || 0})</p>
+                    <p>
+                      比赛场次: {previewData?.matchStats?.totalMatches || 0} 场 (胜{' '}
+                      {previewData?.matchStats?.wins || 0})
+                    </p>
                     <p>综合评分: {previewData?.overallRating || 0}/10</p>
                   </div>
                 </div>
@@ -447,12 +475,13 @@ export default function GrowthReportsPage() {
                 <div>
                   <h4 className="text-sm font-medium text-gray-700 mb-2">能力数据</h4>
                   <div className="grid grid-cols-6 gap-2">
-                    {previewData?.abilities && Object.entries(previewData.abilities).map(([key, value]: [string, any]) => (
-                      <div key={key} className="text-center bg-blue-50 rounded-lg p-2">
-                        <div className="text-lg font-bold text-blue-600">{value}</div>
-                        <div className="text-xs text-gray-500">{key}</div>
-                      </div>
-                    ))}
+                    {previewData?.abilities &&
+                      Object.entries(previewData.abilities).map(([key, value]: [string, any]) => (
+                        <div key={key} className="text-center bg-blue-50 rounded-lg p-2">
+                          <div className="text-lg font-bold text-blue-600">{value}</div>
+                          <div className="text-xs text-gray-500">{key}</div>
+                        </div>
+                      ))}
                   </div>
                 </div>
 
@@ -488,9 +517,9 @@ export default function GrowthReportsPage() {
               <div className="flex gap-3">
                 <button
                   onClick={() => {
-                    setShowCreateModal(false)
-                    setShowPreview(false)
-                    setPreviewData(null)
+                    setShowCreateModal(false);
+                    setShowPreview(false);
+                    setPreviewData(null);
                   }}
                   className="flex-1 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                 >
@@ -499,7 +528,9 @@ export default function GrowthReportsPage() {
                 {!showPreview ? (
                   <button
                     onClick={handlePreview}
-                    disabled={!createForm.playerId || !createForm.periodStart || !createForm.periodEnd}
+                    disabled={
+                      !createForm.playerId || !createForm.periodStart || !createForm.periodEnd
+                    }
                     className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     生成预览
@@ -518,5 +549,5 @@ export default function GrowthReportsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

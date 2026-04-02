@@ -1,16 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient, Prisma } from '@prisma/client';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 // GET /api/campuses - 获取校区列表
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const status = searchParams.get('status')
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get('status');
 
-    const where: any = {}
-    if (status) where.status = status
+    const where: Prisma.CampusWhereInput = {};
+    if (status) where.status = status;
 
     const campuses = await prisma.campus.findMany({
       where,
@@ -25,19 +25,19 @@ export async function GET(request: NextRequest) {
         },
       },
       orderBy: { createdAt: 'desc' },
-    })
+    });
 
-    return NextResponse.json({ campuses })
+    return NextResponse.json({ campuses });
   } catch (error) {
-    console.error('获取校区列表失败:', error)
-    return NextResponse.json({ error: '获取校区列表失败' }, { status: 500 })
+    console.error('获取校区列表失败:', error);
+    return NextResponse.json({ error: '获取校区列表失败' }, { status: 500 });
   }
 }
 
 // POST /api/campuses - 创建校区
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = await request.json();
     const {
       name,
       code,
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       openTime,
       closeTime,
       description,
-    } = body
+    } = body;
 
     const campus = await prisma.campus.create({
       data: {
@@ -65,11 +65,11 @@ export async function POST(request: NextRequest) {
         description,
         status: 'active',
       },
-    })
+    });
 
-    return NextResponse.json({ campus })
+    return NextResponse.json({ campus });
   } catch (error) {
-    console.error('创建校区失败:', error)
-    return NextResponse.json({ error: '创建校区失败' }, { status: 500 })
+    console.error('创建校区失败:', error);
+    return NextResponse.json({ error: '创建校区失败' }, { status: 500 });
   }
 }

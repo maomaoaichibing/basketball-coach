@@ -1,69 +1,48 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+
+import prisma from '@/lib/db';
 
 // GET /api/courts/[id] - 获取场地详情
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params
+    const { id } = params;
 
     const court = await prisma.court.findUnique({
       where: { id },
       include: {
-        campus: { select: { id: true, name: true } }
-      }
-    })
+        campus: { select: { id: true, name: true } },
+      },
+    });
 
     if (!court) {
-      return NextResponse.json(
-        { success: false, error: '场地不存在' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: '场地不存在' }, { status: 404 });
     }
 
     return NextResponse.json({
       success: true,
-      court
-    })
+      court,
+    });
   } catch (error) {
-    console.error('获取场地详情失败:', error)
-    return NextResponse.json(
-      { success: false, error: '获取场地详情失败' },
-      { status: 500 }
-    )
+    console.error('获取场地详情失败:', error);
+    return NextResponse.json({ success: false, error: '获取场地详情失败' }, { status: 500 });
   }
 }
 
 // PUT /api/courts/[id] - 更新场地信息
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params
-    const body = await request.json()
+    const { id } = params;
+    const body = await request.json();
 
-    const {
-      name,
-      campusId,
-      type,
-      capacity,
-      status,
-      description
-    } = body
+    const { name, campusId, type, capacity, status, description } = body;
 
     // 检查是否存在
     const existing = await prisma.court.findUnique({
-      where: { id }
-    })
+      where: { id },
+    });
 
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: '场地不存在' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: '场地不存在' }, { status: 404 });
     }
 
     const court = await prisma.court.update({
@@ -74,56 +53,44 @@ export async function PUT(
         type,
         capacity,
         status,
-        description
-      }
-    })
+        description,
+      },
+    });
 
     return NextResponse.json({
       success: true,
-      court
-    })
+      court,
+    });
   } catch (error) {
-    console.error('更新场地失败:', error)
-    return NextResponse.json(
-      { success: false, error: '更新场地失败' },
-      { status: 500 }
-    )
+    console.error('更新场地失败:', error);
+    return NextResponse.json({ success: false, error: '更新场地失败' }, { status: 500 });
   }
 }
 
 // DELETE /api/courts/[id] - 删除场地
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params
+    const { id } = params;
 
     // 检查是否存在
     const existing = await prisma.court.findUnique({
-      where: { id }
-    })
+      where: { id },
+    });
 
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: '场地不存在' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: '场地不存在' }, { status: 404 });
     }
 
     await prisma.court.delete({
-      where: { id }
-    })
+      where: { id },
+    });
 
     return NextResponse.json({
       success: true,
-      message: '场地已删除'
-    })
+      message: '场地已删除',
+    });
   } catch (error) {
-    console.error('删除场地失败:', error)
-    return NextResponse.json(
-      { success: false, error: '删除场地失败' },
-      { status: 500 }
-    )
+    console.error('删除场地失败:', error);
+    return NextResponse.json({ success: false, error: '删除场地失败' }, { status: 500 });
   }
 }

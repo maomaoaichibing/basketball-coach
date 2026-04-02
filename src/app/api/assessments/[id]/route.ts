@@ -1,49 +1,38 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+
+import prisma from '@/lib/db';
 
 // GET /api/assessments/[id] - 获取评估详情
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params
+    const { id } = params;
 
     const assessment = await prisma.playerAssessment.findUnique({
       where: { id },
       include: {
-        player: { select: { id: true, name: true } }
-      }
-    })
+        player: { select: { id: true, name: true } },
+      },
+    });
 
     if (!assessment) {
-      return NextResponse.json(
-        { success: false, error: '评估记录不存在' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: '评估记录不存在' }, { status: 404 });
     }
 
     return NextResponse.json({
       success: true,
-      assessment
-    })
+      assessment,
+    });
   } catch (error) {
-    console.error('获取评估详情失败:', error)
-    return NextResponse.json(
-      { success: false, error: '获取评估详情失败' },
-      { status: 500 }
-    )
+    console.error('获取评估详情失败:', error);
+    return NextResponse.json({ success: false, error: '获取评估详情失败' }, { status: 500 });
   }
 }
 
 // PUT /api/assessments/[id] - 更新评估记录
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params
-    const body = await request.json()
+    const { id } = params;
+    const body = await request.json();
 
     const {
       dribbling,
@@ -54,19 +43,16 @@ export async function PUT(
       tactical,
       overall,
       notes,
-      assessor
-    } = body
+      assessor,
+    } = body;
 
     // 检查是否存在
     const existing = await prisma.playerAssessment.findUnique({
-      where: { id }
-    })
+      where: { id },
+    });
 
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: '评估记录不存在' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: '评估记录不存在' }, { status: 404 });
     }
 
     const assessment = await prisma.playerAssessment.update({
@@ -80,56 +66,44 @@ export async function PUT(
         tactical,
         overall,
         notes,
-        assessor
-      }
-    })
+        assessor,
+      },
+    });
 
     return NextResponse.json({
       success: true,
-      assessment
-    })
+      assessment,
+    });
   } catch (error) {
-    console.error('更新评估失败:', error)
-    return NextResponse.json(
-      { success: false, error: '更新评估失败' },
-      { status: 500 }
-    )
+    console.error('更新评估失败:', error);
+    return NextResponse.json({ success: false, error: '更新评估失败' }, { status: 500 });
   }
 }
 
 // DELETE /api/assessments/[id] - 删除评估记录
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params
+    const { id } = params;
 
     // 检查是否存在
     const existing = await prisma.playerAssessment.findUnique({
-      where: { id }
-    })
+      where: { id },
+    });
 
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: '评估记录不存在' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: '评估记录不存在' }, { status: 404 });
     }
 
     await prisma.playerAssessment.delete({
-      where: { id }
-    })
+      where: { id },
+    });
 
     return NextResponse.json({
       success: true,
-      message: '评估记录已删除'
-    })
+      message: '评估记录已删除',
+    });
   } catch (error) {
-    console.error('删除评估失败:', error)
-    return NextResponse.json(
-      { success: false, error: '删除评估失败' },
-      { status: 500 }
-    )
+    console.error('删除评估失败:', error);
+    return NextResponse.json({ success: false, error: '删除评估失败' }, { status: 500 });
   }
 }

@@ -1,7 +1,17 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import { ArrowLeft, Tag, Zap, Github, Calendar, Plus, CheckCircle, AlertCircle, Info } from 'lucide-react'
+import Link from 'next/link';
+import {
+  ArrowLeft,
+  Tag,
+  Zap,
+  Github,
+  Calendar,
+  Plus,
+  CheckCircle,
+  AlertCircle,
+  Info,
+} from 'lucide-react';
 
 // 版本历史记录
 const versions = [
@@ -16,9 +26,7 @@ const versions = [
       { type: 'feature', text: '版本管理页面展示完整历史记录' },
       { type: 'feature', text: '教案头部显示技能水平 + 训练强度双标签' },
     ],
-    fixes: [
-      { type: 'fix', text: '修复技能水平标签显示问题' },
-    ]
+    fixes: [{ type: 'fix', text: '修复技能水平标签显示问题' }],
   },
   {
     version: 'v4.2',
@@ -31,11 +39,9 @@ const versions = [
       { type: 'feature', text: '去掉教练引导语，只保留动作描述' },
       { type: 'feature', text: '批量导入学员（CSV表格）' },
     ],
-    fixes: [
-      { type: 'fix', text: '修复教练API缺少password字段的TypeScript错误' },
-    ]
+    fixes: [{ type: 'fix', text: '修复教练API缺少password字段的TypeScript错误' }],
   },
-]
+];
 
 export default function VersionPage() {
   return (
@@ -83,7 +89,11 @@ export default function VersionPage() {
             </div>
             <div className="flex items-center gap-1">
               <Github className="w-4 h-4" />
-              <a href="https://github.com/maomaoaichibing/basketball-coach" target="_blank" className="hover:text-gray-700">
+              <a
+                href="https://github.com/maomaoaichibing/basketball-coach"
+                target="_blank"
+                className="hover:text-gray-700"
+              >
                 查看源码
               </a>
             </div>
@@ -161,11 +171,13 @@ export default function VersionPage() {
             <Info className="w-5 h-5 text-blue-600 mt-0.5" />
             <div className="text-sm text-blue-800">
               <p className="font-medium mb-1">版本更新说明</p>
-              <p>系统会持续迭代优化，每个版本都会带来新的功能和改进。建议定期查看版本更新日志，了解最新功能。</p>
+              <p>
+                系统会持续迭代优化，每个版本都会带来新的功能和改进。建议定期查看版本更新日志，了解最新功能。
+              </p>
             </div>
           </div>
         </div>
       </main>
     </div>
-  )
+  );
 }

@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   ArrowLeft,
   Plus,
@@ -12,28 +12,28 @@ import {
   ChevronRight,
   Trash2,
   Edit,
-  Award
-} from 'lucide-react'
+  Award,
+} from 'lucide-react';
 
 // 类型定义
 type Player = {
-  id: string
-  name: string
-  group: string
-}
+  id: string;
+  name: string;
+  group: string;
+};
 
 type Goal = {
-  id: string
-  playerId: string
-  player: Player
-  skillType: string
-  targetScore: number
-  currentScore: number
-  status: string
-  targetDate: string | null
-  achievedAt: string | null
-  createdAt: string
-}
+  id: string;
+  playerId: string;
+  player: Player;
+  skillType: string;
+  targetScore: number;
+  currentScore: number;
+  status: string;
+  targetDate: string | null;
+  achievedAt: string | null;
+  createdAt: string;
+};
 
 const skillLabels: Record<string, string> = {
   dribbling: '运球',
@@ -41,8 +41,8 @@ const skillLabels: Record<string, string> = {
   shooting: '投篮',
   defending: '防守',
   physical: '体能',
-  tactical: '战术'
-}
+  tactical: '战术',
+};
 
 const skillColors: Record<string, string> = {
   dribbling: 'bg-orange-100 text-orange-700',
@@ -50,68 +50,68 @@ const skillColors: Record<string, string> = {
   shooting: 'bg-green-100 text-green-700',
   defending: 'bg-purple-100 text-purple-700',
   physical: 'bg-red-100 text-red-700',
-  tactical: 'bg-yellow-100 text-yellow-700'
-}
+  tactical: 'bg-yellow-100 text-yellow-700',
+};
 
 export default function GoalsPage() {
-  const [goals, setGoals] = useState<Goal[]>([])
-  const [players, setPlayers] = useState<Player[]>([])
-  const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
-  const [editingGoal, setEditingGoal] = useState<Goal | null>(null)
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
 
   // 表单状态
-  const [selectedPlayerId, setSelectedPlayerId] = useState('')
-  const [skillType, setSkillType] = useState('dribbling')
-  const [targetScore, setTargetScore] = useState(8)
-  const [targetDate, setTargetDate] = useState('')
+  const [selectedPlayerId, setSelectedPlayerId] = useState('');
+  const [skillType, setSkillType] = useState('dribbling');
+  const [targetScore, setTargetScore] = useState(8);
+  const [targetDate, setTargetDate] = useState('');
 
   useEffect(() => {
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   async function fetchData() {
     try {
-      setLoading(true)
+      setLoading(true);
       const [goalsRes, playersRes] = await Promise.all([
         fetch('/api/goals'),
-        fetch('/api/players?status=training')
-      ])
+        fetch('/api/players?status=training'),
+      ]);
 
-      const goalsData = await goalsRes.json()
-      const playersData = await playersRes.json()
+      const goalsData = await goalsRes.json();
+      const playersData = await playersRes.json();
 
-      if (goalsData.success) setGoals(goalsData.goals)
-      if (playersData.success) setPlayers(playersData.players)
+      if (goalsData.success) setGoals(goalsData.goals);
+      if (playersData.success) setPlayers(playersData.players);
     } catch (error) {
-      console.error('获取数据失败:', error)
+      console.error('获取数据失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   function openCreateForm() {
-    setSelectedPlayerId('')
-    setSkillType('dribbling')
-    setTargetScore(8)
-    setTargetDate('')
-    setEditingGoal(null)
-    setShowForm(true)
+    setSelectedPlayerId('');
+    setSkillType('dribbling');
+    setTargetScore(8);
+    setTargetDate('');
+    setEditingGoal(null);
+    setShowForm(true);
   }
 
   function openEditForm(goal: Goal) {
-    setSelectedPlayerId(goal.playerId)
-    setSkillType(goal.skillType)
-    setTargetScore(goal.targetScore)
-    setTargetDate(goal.targetDate ? goal.targetDate.split('T')[0] : '')
-    setEditingGoal(goal)
-    setShowForm(true)
+    setSelectedPlayerId(goal.playerId);
+    setSkillType(goal.skillType);
+    setTargetScore(goal.targetScore);
+    setTargetDate(goal.targetDate ? goal.targetDate.split('T')[0] : '');
+    setEditingGoal(goal);
+    setShowForm(true);
   }
 
   async function handleSubmit() {
     if (!selectedPlayerId) {
-      alert('请选择学员')
-      return
+      alert('请选择学员');
+      return;
     }
 
     try {
@@ -122,9 +122,9 @@ export default function GoalsPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             targetScore,
-            targetDate: targetDate || null
-          })
-        })
+            targetDate: targetDate || null,
+          }),
+        });
       } else {
         // 创建
         await fetch('/api/goals', {
@@ -134,16 +134,16 @@ export default function GoalsPage() {
             playerId: selectedPlayerId,
             skillType,
             targetScore,
-            targetDate: targetDate || null
-          })
-        })
+            targetDate: targetDate || null,
+          }),
+        });
       }
 
-      setShowForm(false)
-      fetchData()
+      setShowForm(false);
+      fetchData();
     } catch (error) {
-      console.error('保存失败:', error)
-      alert('保存失败')
+      console.error('保存失败:', error);
+      alert('保存失败');
     }
   }
 
@@ -152,34 +152,34 @@ export default function GoalsPage() {
       await fetch(`/api/goals/${goal.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      })
-      fetchData()
+        body: JSON.stringify({ status: newStatus }),
+      });
+      fetchData();
     } catch (error) {
-      console.error('更新状态失败:', error)
+      console.error('更新状态失败:', error);
     }
   }
 
   async function handleDeleteGoal(goal: Goal) {
-    if (!confirm('确定要删除这个目标吗？')) return
+    if (!confirm('确定要删除这个目标吗？')) return;
 
     try {
       await fetch(`/api/goals/${goal.id}`, {
-        method: 'DELETE'
-      })
-      fetchData()
+        method: 'DELETE',
+      });
+      fetchData();
     } catch (error) {
-      console.error('删除失败:', error)
+      console.error('删除失败:', error);
     }
   }
 
   // 按状态分组
-  const activeGoals = goals.filter(g => g.status === 'active')
-  const achievedGoals = goals.filter(g => g.status === 'achieved')
+  const activeGoals = goals.filter(g => g.status === 'active');
+  const achievedGoals = goals.filter(g => g.status === 'achieved');
 
   const getProgress = (goal: Goal) => {
-    return Math.min(100, Math.round((goal.currentScore / goal.targetScore) * 100))
-  }
+    return Math.min(100, Math.round((goal.currentScore / goal.targetScore) * 100));
+  };
 
   if (loading) {
     return (
@@ -189,7 +189,7 @@ export default function GoalsPage() {
           <p className="mt-2 text-gray-500">加载中...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -294,9 +294,7 @@ export default function GoalsPage() {
 
               {/* 目标日期 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  目标达成日期
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">目标达成日期</label>
                 <input
                   type="date"
                   value={targetDate}
@@ -365,7 +363,9 @@ export default function GoalsPage() {
                               </span>
                             </div>
                             <div className="flex items-center gap-2 mb-2">
-                              <span className={`text-xs px-2 py-0.5 rounded ${skillColors[goal.skillType]}`}>
+                              <span
+                                className={`text-xs px-2 py-0.5 rounded ${skillColors[goal.skillType]}`}
+                              >
                                 {skillLabels[goal.skillType]}
                               </span>
                               <span className="text-sm text-gray-500">
@@ -444,9 +444,7 @@ export default function GoalsPage() {
                             <CheckCircle className="w-5 h-5 text-green-600" />
                           </div>
                           <div>
-                            <div className="font-medium text-gray-900">
-                              {goal.player.name}
-                            </div>
+                            <div className="font-medium text-gray-900">{goal.player.name}</div>
                             <div className="text-xs text-gray-500">
                               {skillLabels[goal.skillType]} · 达成 {goal.targetScore} 分
                             </div>
@@ -468,5 +466,5 @@ export default function GoalsPage() {
         )}
       </main>
     </div>
-  )
+  );
 }

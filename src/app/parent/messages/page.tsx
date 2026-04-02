@@ -1,68 +1,63 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import {
-  ChevronRight,
-  Send,
-  MessageCircle,
-  User
-} from 'lucide-react'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { ChevronRight, Send, MessageCircle, User } from 'lucide-react';
 
 type Message = {
-  id: string
-  senderId: string
-  senderName: string
-  senderType: string
-  content: string
-  messageType: string
-  isRead: boolean
-  createdAt: string
-  receiverId: string
-  receiverName: string
-}
+  id: string;
+  senderId: string;
+  senderName: string;
+  senderType: string;
+  content: string;
+  messageType: string;
+  isRead: boolean;
+  createdAt: string;
+  receiverId: string;
+  receiverName: string;
+};
 
 type Player = {
-  id: string
-  name: string
-  group: string
-}
+  id: string;
+  name: string;
+  group: string;
+};
 
 export default function ParentMessagesPage() {
-  const router = useRouter()
-  const [player, setPlayer] = useState<Player | null>(null)
-  const [messages, setMessages] = useState<Message[]>([])
-  const [loading, setLoading] = useState(true)
-  const [newMessage, setNewMessage] = useState('')
+  const router = useRouter();
+  const [player, setPlayer] = useState<Player | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newMessage, setNewMessage] = useState('');
 
   useEffect(() => {
-    const stored = localStorage.getItem('parentPlayer')
+    const stored = localStorage.getItem('parentPlayer');
     if (stored) {
-      const playerData = JSON.parse(stored)
-      setPlayer(playerData)
-      fetchMessages(playerData.id)
+      const playerData = JSON.parse(stored);
+      setPlayer(playerData);
+      fetchMessages(playerData.id);
     } else {
-      router.push('/parent')
+      router.push('/parent');
     }
-  }, [])
+  }, []);
 
   async function fetchMessages(playerId: string) {
     try {
-      const response = await fetch(`/api/messages?playerId=${playerId}`)
-      const data = await response.json()
+      const response = await fetch(`/api/messages?playerId=${playerId}`);
+      const data = await response.json();
       if (data.success) {
-        setMessages(data.messages)
+        setMessages(data.messages);
       }
     } catch (error) {
-      console.error('获取消息列表失败:', error)
+      console.error('获取消息列表失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function handleSendMessage() {
-    if (!newMessage.trim() || !player) return
+    if (!newMessage.trim() || !player) return;
 
     try {
       const response = await fetch('/api/messages', {
@@ -75,17 +70,17 @@ export default function ParentMessagesPage() {
           content: newMessage,
           playerId: player.id,
           receiverId: 'admin',
-          receiverName: '管理员'
-        })
-      })
+          receiverName: '管理员',
+        }),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
       if (data.success) {
-        setNewMessage('')
-        fetchMessages(player.id)
+        setNewMessage('');
+        fetchMessages(player.id);
       }
     } catch (error) {
-      console.error('发送消息失败:', error)
+      console.error('发送消息失败:', error);
     }
   }
 
@@ -95,14 +90,14 @@ export default function ParentMessagesPage() {
       await fetch(`/api/messages/${messageId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isRead: true })
-      })
+        body: JSON.stringify({ isRead: true }),
+      });
     } catch (error) {
-      console.error('标记已读失败:', error)
+      console.error('标记已读失败:', error);
     }
   }
 
-  const unreadCount = messages.filter(m => !m.isRead && m.receiverId.includes('guardian')).length
+  const unreadCount = messages.filter(m => !m.isRead && m.receiverId.includes('guardian')).length;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -142,8 +137,8 @@ export default function ParentMessagesPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {messages.map((message) => {
-              const isOwn = message.senderType === 'guardian'
+            {messages.map(message => {
+              const isOwn = message.senderType === 'guardian';
 
               return (
                 <div
@@ -180,7 +175,7 @@ export default function ParentMessagesPage() {
                     </div>
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         )}
@@ -193,8 +188,8 @@ export default function ParentMessagesPage() {
             <input
               type="text"
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              onChange={e => setNewMessage(e.target.value)}
+              onKeyPress={e => e.key === 'Enter' && handleSendMessage()}
               placeholder="输入消息..."
               className="flex-1 px-4 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
@@ -210,5 +205,5 @@ export default function ParentMessagesPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

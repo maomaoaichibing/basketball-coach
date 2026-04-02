@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Trophy,
   Plus,
@@ -15,34 +15,34 @@ import {
   Medal,
   Target,
   TrendingUp,
-  Clock
-} from 'lucide-react'
+  Clock,
+} from 'lucide-react';
 
 type Match = {
-  id: string
-  title: string
-  matchType: string
-  group: string
-  matchDate: string
-  location: string
-  teamName?: string
-  homeScore: number
-  opponent: string
-  opponentScore: number
-  result: string
-  isHome: boolean
-  status: string
-  _count?: { events: number }
-}
+  id: string;
+  title: string;
+  matchType: string;
+  group: string;
+  matchDate: string;
+  location: string;
+  teamName?: string;
+  homeScore: number;
+  opponent: string;
+  opponentScore: number;
+  result: string;
+  isHome: boolean;
+  status: string;
+  _count?: { events: number };
+};
 
 export default function MatchesPage() {
-  const router = useRouter()
-  const [matches, setMatches] = useState<Match[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedGroup, setSelectedGroup] = useState('')
-  const [selectedResult, setSelectedResult] = useState('')
-  const [showCreateModal, setShowCreateModal] = useState(false)
+  const router = useRouter();
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedGroup, setSelectedGroup] = useState('');
+  const [selectedResult, setSelectedResult] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   // 创建表单状态
   const [createForm, setCreateForm] = useState({
@@ -53,30 +53,30 @@ export default function MatchesPage() {
     location: '',
     opponent: '',
     teamName: '',
-    isHome: true
-  })
+    isHome: true,
+  });
 
   useEffect(() => {
-    fetchMatches()
-  }, [selectedGroup, selectedResult])
+    fetchMatches();
+  }, [selectedGroup, selectedResult]);
 
   async function fetchMatches() {
     try {
-      setLoading(true)
-      const params = new URLSearchParams()
-      if (selectedGroup) params.set('group', selectedGroup)
-      if (selectedResult) params.set('result', selectedResult)
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (selectedGroup) params.set('group', selectedGroup);
+      if (selectedResult) params.set('result', selectedResult);
 
-      const response = await fetch(`/api/matches?${params.toString()}`)
-      const data = await response.json()
+      const response = await fetch(`/api/matches?${params.toString()}`);
+      const data = await response.json();
 
       if (data.success) {
-        setMatches(data.matches)
+        setMatches(data.matches);
       }
     } catch (error) {
-      console.error('获取比赛列表失败:', error)
+      console.error('获取比赛列表失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -87,14 +87,14 @@ export default function MatchesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...createForm,
-          matchDate: new Date(createForm.matchDate).toISOString()
-        })
-      })
+          matchDate: new Date(createForm.matchDate).toISOString(),
+        }),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
-        setShowCreateModal(false)
+        setShowCreateModal(false);
         setCreateForm({
           title: '',
           matchType: 'league',
@@ -103,54 +103,54 @@ export default function MatchesPage() {
           location: '',
           opponent: '',
           teamName: '',
-          isHome: true
-        })
-        fetchMatches()
-        router.push(`/matches/${data.match.id}`)
+          isHome: true,
+        });
+        fetchMatches();
+        router.push(`/matches/${data.match.id}`);
       }
     } catch (error) {
-      console.error('创建比赛失败:', error)
+      console.error('创建比赛失败:', error);
     }
   }
 
   const filteredMatches = matches.filter(match => {
-    if (!searchTerm) return true
-    const term = searchTerm.toLowerCase()
+    if (!searchTerm) return true;
+    const term = searchTerm.toLowerCase();
     return (
       match.title.toLowerCase().includes(term) ||
       match.opponent.toLowerCase().includes(term) ||
       match.teamName?.toLowerCase().includes(term) ||
       match.location.toLowerCase().includes(term)
-    )
-  })
+    );
+  });
 
   const stats = {
     total: matches.length,
     wins: matches.filter(m => m.result === 'win').length,
     losses: matches.filter(m => m.result === 'lose').length,
-    draws: matches.filter(m => m.result === 'draw').length
-  }
+    draws: matches.filter(m => m.result === 'draw').length,
+  };
 
   const resultColors: Record<string, string> = {
     win: 'bg-green-100 text-green-700',
     lose: 'bg-red-100 text-red-700',
     draw: 'bg-gray-100 text-gray-700',
-    pending: 'bg-yellow-100 text-yellow-700'
-  }
+    pending: 'bg-yellow-100 text-yellow-700',
+  };
 
   const resultLabels: Record<string, string> = {
     win: '胜',
     lose: '负',
     draw: '平',
-    pending: '待定'
-  }
+    pending: '待定',
+  };
 
   const matchTypeLabels: Record<string, string> = {
     league: '联赛',
     cup: '杯赛',
     friendly: '友谊赛',
-    practice: '内部赛'
-  }
+    practice: '内部赛',
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -236,14 +236,14 @@ export default function MatchesPage() {
                 type="text"
                 placeholder="搜索比赛、对手..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
             </div>
             <div className="flex gap-2">
               <select
                 value={selectedGroup}
-                onChange={(e) => setSelectedGroup(e.target.value)}
+                onChange={e => setSelectedGroup(e.target.value)}
                 className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
                 <option value="">全部分组</option>
@@ -255,7 +255,7 @@ export default function MatchesPage() {
               </select>
               <select
                 value={selectedResult}
-                onChange={(e) => setSelectedResult(e.target.value)}
+                onChange={e => setSelectedResult(e.target.value)}
                 className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
                 <option value="">全部结果</option>
@@ -286,7 +286,7 @@ export default function MatchesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredMatches.map((match) => (
+            {filteredMatches.map(match => (
               <Link
                 key={match.id}
                 href={`/matches/${match.id}`}
@@ -294,7 +294,9 @@ export default function MatchesPage() {
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 text-xs rounded-full ${resultColors[match.result]}`}>
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full ${resultColors[match.result]}`}
+                    >
                       {resultLabels[match.result]}
                     </span>
                     <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
@@ -306,9 +308,7 @@ export default function MatchesPage() {
                   </span>
                 </div>
 
-                <h3 className="font-semibold text-gray-900 mb-3 line-clamp-2">
-                  {match.title}
-                </h3>
+                <h3 className="font-semibold text-gray-900 mb-3 line-clamp-2">{match.title}</h3>
 
                 {/* 比分 */}
                 <div className="flex items-center justify-center gap-4 py-3 bg-gray-50 rounded-lg mb-3">
@@ -365,13 +365,11 @@ export default function MatchesPage() {
 
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  比赛标题 *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">比赛标题 *</label>
                 <input
                   type="text"
                   value={createForm.title}
-                  onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })}
+                  onChange={e => setCreateForm({ ...createForm, title: e.target.value })}
                   placeholder="如: 2024年春季联赛第三轮"
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
@@ -379,12 +377,15 @@ export default function MatchesPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    比赛类型
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">比赛类型</label>
                   <select
                     value={createForm.matchType}
-                    onChange={(e) => setCreateForm({ ...createForm, matchType: e.target.value })}
+                    onChange={e =>
+                      setCreateForm({
+                        ...createForm,
+                        matchType: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     <option value="league">联赛</option>
@@ -394,12 +395,10 @@ export default function MatchesPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    分组
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">分组</label>
                   <select
                     value={createForm.group}
-                    onChange={(e) => setCreateForm({ ...createForm, group: e.target.value })}
+                    onChange={e => setCreateForm({ ...createForm, group: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     <option value="U6">U6</option>
@@ -413,24 +412,25 @@ export default function MatchesPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    比赛日期 *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">比赛日期 *</label>
                   <input
                     type="datetime-local"
                     value={createForm.matchDate}
-                    onChange={(e) => setCreateForm({ ...createForm, matchDate: e.target.value })}
+                    onChange={e =>
+                      setCreateForm({
+                        ...createForm,
+                        matchDate: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    比赛地点
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">比赛地点</label>
                   <input
                     type="text"
                     value={createForm.location}
-                    onChange={(e) => setCreateForm({ ...createForm, location: e.target.value })}
+                    onChange={e => setCreateForm({ ...createForm, location: e.target.value })}
                     placeholder="如: 篮球馆"
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
@@ -438,26 +438,22 @@ export default function MatchesPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  对手名称 *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">对手名称 *</label>
                 <input
                   type="text"
                   value={createForm.opponent}
-                  onChange={(e) => setCreateForm({ ...createForm, opponent: e.target.value })}
+                  onChange={e => setCreateForm({ ...createForm, opponent: e.target.value })}
                   placeholder="如: 阳光队"
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  我方球队名称
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">我方球队名称</label>
                 <input
                   type="text"
                   value={createForm.teamName}
-                  onChange={(e) => setCreateForm({ ...createForm, teamName: e.target.value })}
+                  onChange={e => setCreateForm({ ...createForm, teamName: e.target.value })}
                   placeholder="如: 雄鹰队"
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
@@ -468,7 +464,7 @@ export default function MatchesPage() {
                   <input
                     type="checkbox"
                     checked={createForm.isHome}
-                    onChange={(e) => setCreateForm({ ...createForm, isHome: e.target.checked })}
+                    onChange={e => setCreateForm({ ...createForm, isHome: e.target.checked })}
                     className="w-4 h-4 text-orange-500 rounded focus:ring-orange-500"
                   />
                   <span className="text-sm text-gray-700">主场比赛</span>
@@ -497,5 +493,5 @@ export default function MatchesPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

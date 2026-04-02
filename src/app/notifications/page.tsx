@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import {
   Bell,
   Send,
@@ -11,39 +11,39 @@ import {
   Eye,
   Plus,
   Filter,
-  RefreshCw
-} from 'lucide-react'
+  RefreshCw,
+} from 'lucide-react';
 
 interface Notification {
-  id: string
-  title: string
-  content: string
-  type: string
-  status: string
-  channel: string
-  player?: { id: string; name: string }
-  guardianName: string | null
-  template?: { id: string; code: string; name: string }
-  sentAt: string | null
-  readAt: string | null
-  createdAt: string
+  id: string;
+  title: string;
+  content: string;
+  type: string;
+  status: string;
+  channel: string;
+  player?: { id: string; name: string };
+  guardianName: string | null;
+  template?: { id: string; code: string; name: string };
+  sentAt: string | null;
+  readAt: string | null;
+  createdAt: string;
 }
 
 interface Player {
-  id: string
-  name: string
-  parentPhone: string | null
+  id: string;
+  name: string;
+  parentPhone: string | null;
 }
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState<Notification[]>([])
-  const [players, setPlayers] = useState<Player[]>([])
-  const [loading, setLoading] = useState(true)
-  const [unreadCount, setUnreadCount] = useState(0)
-  const [filter, setFilter] = useState({ status: '', type: '', playerId: '' })
-  const [showModal, setShowModal] = useState(false)
-  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
-  const [showDetailModal, setShowDetailModal] = useState(false)
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [filter, setFilter] = useState({ status: '', type: '', playerId: '' });
+  const [showModal, setShowModal] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   // 新建通知表单
   const [newNotification, setNewNotification] = useState({
@@ -52,40 +52,40 @@ export default function NotificationsPage() {
     title: '',
     content: '',
     type: 'system',
-  })
+  });
 
   useEffect(() => {
-    fetchNotifications()
-    fetchPlayers()
-  }, [filter])
+    fetchNotifications();
+    fetchPlayers();
+  }, [filter]);
 
   const fetchNotifications = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const params = new URLSearchParams()
-      if (filter.status) params.set('status', filter.status)
-      if (filter.type) params.set('type', filter.type)
-      if (filter.playerId) params.set('playerId', filter.playerId)
+      const params = new URLSearchParams();
+      if (filter.status) params.set('status', filter.status);
+      if (filter.type) params.set('type', filter.type);
+      if (filter.playerId) params.set('playerId', filter.playerId);
 
-      const res = await fetch(`/api/notifications?${params}`)
-      const data = await res.json()
-      setNotifications(data.notifications || [])
-      setUnreadCount(data.unreadCount || 0)
+      const res = await fetch(`/api/notifications?${params}`);
+      const data = await res.json();
+      setNotifications(data.notifications || []);
+      setUnreadCount(data.unreadCount || 0);
     } catch (error) {
-      console.error('获取通知失败:', error)
+      console.error('获取通知失败:', error);
     }
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   const fetchPlayers = async () => {
     try {
-      const res = await fetch('/api/players?status=training')
-      const data = await res.json()
-      setPlayers(data.players || [])
+      const res = await fetch('/api/players?status=training');
+      const data = await res.json();
+      setPlayers(data.players || []);
     } catch (error) {
-      console.error('获取学员失败:', error)
+      console.error('获取学员失败:', error);
     }
-  }
+  };
 
   const handleCreateNotification = async () => {
     try {
@@ -93,17 +93,17 @@ export default function NotificationsPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newNotification),
-      })
+      });
 
       if (res.ok) {
-        setShowModal(false)
-        resetForm()
-        fetchNotifications()
+        setShowModal(false);
+        resetForm();
+        fetchNotifications();
       }
     } catch (error) {
-      console.error('创建通知失败:', error)
+      console.error('创建通知失败:', error);
     }
-  }
+  };
 
   const resetForm = () => {
     setNewNotification({
@@ -112,55 +112,55 @@ export default function NotificationsPage() {
       title: '',
       content: '',
       type: 'system',
-    })
-  }
+    });
+  };
 
   const handleMarkAsRead = async (notification: Notification) => {
-    if (notification.status === 'read') return
+    if (notification.status === 'read') return;
 
     try {
       await fetch(`/api/notifications/${notification.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'read' }),
-      })
-      fetchNotifications()
+      });
+      fetchNotifications();
     } catch (error) {
-      console.error('标记已读失败:', error)
+      console.error('标记已读失败:', error);
     }
-  }
+  };
 
   const handleDelete = async (notification: Notification) => {
-    if (!confirm('确定要删除该通知吗？')) return
+    if (!confirm('确定要删除该通知吗？')) return;
 
     try {
       await fetch(`/api/notifications/${notification.id}`, {
         method: 'DELETE',
-      })
-      fetchNotifications()
+      });
+      fetchNotifications();
     } catch (error) {
-      console.error('删除通知失败:', error)
+      console.error('删除通知失败:', error);
     }
-  }
+  };
 
   const handleSendReminder = async () => {
     try {
-      const res = await fetch('/api/notifications/check')
-      const data = await res.json()
-      alert(data.summary || '检查完成')
-      fetchNotifications()
+      const res = await fetch('/api/notifications/check');
+      const data = await res.json();
+      alert(data.summary || '检查完成');
+      fetchNotifications();
     } catch (error) {
-      console.error('发送提醒失败:', error)
+      console.error('发送提醒失败:', error);
     }
-  }
+  };
 
   const openDetailModal = (notification: Notification) => {
-    setSelectedNotification(notification)
-    setShowDetailModal(true)
+    setSelectedNotification(notification);
+    setShowDetailModal(true);
     if (notification.status !== 'read') {
-      handleMarkAsRead(notification)
+      handleMarkAsRead(notification);
     }
-  }
+  };
 
   const getStatusBadge = (status: string) => {
     const badges: Record<string, string> = {
@@ -168,19 +168,21 @@ export default function NotificationsPage() {
       sent: 'bg-blue-100 text-blue-800',
       read: 'bg-green-100 text-green-800',
       failed: 'bg-red-100 text-red-800',
-    }
+    };
     const labels: Record<string, string> = {
       pending: '待发送',
       sent: '已发送',
       read: '已读',
       failed: '失败',
-    }
+    };
     return (
-      <span className={`px-2 py-1 rounded text-xs ${badges[status] || 'bg-gray-100 text-gray-800'}`}>
+      <span
+        className={`px-2 py-1 rounded text-xs ${badges[status] || 'bg-gray-100 text-gray-800'}`}
+      >
         {labels[status] || status}
       </span>
-    )
-  }
+    );
+  };
 
   const getTypeBadge = (type: string) => {
     const colors: Record<string, string> = {
@@ -188,19 +190,19 @@ export default function NotificationsPage() {
       course: 'bg-blue-100 text-blue-700',
       reminder: 'bg-orange-100 text-orange-700',
       marketing: 'bg-purple-100 text-purple-700',
-    }
+    };
     const labels: Record<string, string> = {
       system: '系统',
       course: '课程',
       reminder: '提醒',
       marketing: '营销',
-    }
+    };
     return (
       <span className={`px-2 py-1 rounded text-xs ${colors[type] || 'bg-gray-100 text-gray-700'}`}>
         {labels[type] || type}
       </span>
-    )
-  }
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -244,7 +246,7 @@ export default function NotificationsPage() {
         <div className="bg-white rounded-lg shadow p-4 flex flex-wrap gap-4">
           <select
             value={filter.status}
-            onChange={(e) => setFilter({ ...filter, status: e.target.value })}
+            onChange={e => setFilter({ ...filter, status: e.target.value })}
             className="px-3 py-2 border rounded-lg"
           >
             <option value="">全部状态</option>
@@ -254,7 +256,7 @@ export default function NotificationsPage() {
           </select>
           <select
             value={filter.type}
-            onChange={(e) => setFilter({ ...filter, type: e.target.value })}
+            onChange={e => setFilter({ ...filter, type: e.target.value })}
             className="px-3 py-2 border rounded-lg"
           >
             <option value="">全部类型</option>
@@ -265,11 +267,11 @@ export default function NotificationsPage() {
           </select>
           <select
             value={filter.playerId}
-            onChange={(e) => setFilter({ ...filter, playerId: e.target.value })}
+            onChange={e => setFilter({ ...filter, playerId: e.target.value })}
             className="px-3 py-2 border rounded-lg"
           >
             <option value="">全部学员</option>
-            {players.map((player) => (
+            {players.map(player => (
               <option key={player.id} value={player.id}>
                 {player.name}
               </option>
@@ -296,7 +298,7 @@ export default function NotificationsPage() {
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
-              {notifications.map((notification) => (
+              {notifications.map(notification => (
                 <div
                   key={notification.id}
                   className={`p-4 hover:bg-gray-50 transition-colors ${
@@ -325,9 +327,7 @@ export default function NotificationsPage() {
                         {notification.content}
                       </p>
                       <div className="flex items-center gap-4 text-xs text-gray-400">
-                        {notification.player && (
-                          <span>学员: {notification.player.name}</span>
-                        )}
+                        {notification.player && <span>学员: {notification.player.name}</span>}
                         {notification.guardianName && (
                           <span>监护人: {notification.guardianName}</span>
                         )}
@@ -375,11 +375,16 @@ export default function NotificationsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">学员</label>
                 <select
                   value={newNotification.playerId}
-                  onChange={(e) => setNewNotification({ ...newNotification, playerId: e.target.value })}
+                  onChange={e =>
+                    setNewNotification({
+                      ...newNotification,
+                      playerId: e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 border rounded-lg"
                 >
                   <option value="">请选择学员</option>
-                  {players.map((player) => (
+                  {players.map(player => (
                     <option key={player.id} value={player.id}>
                       {player.name} {player.parentPhone ? `(${player.parentPhone})` : ''}
                     </option>
@@ -391,7 +396,12 @@ export default function NotificationsPage() {
                 <input
                   type="text"
                   value={newNotification.guardianName}
-                  onChange={(e) => setNewNotification({ ...newNotification, guardianName: e.target.value })}
+                  onChange={e =>
+                    setNewNotification({
+                      ...newNotification,
+                      guardianName: e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 border rounded-lg"
                   placeholder="输入监护人姓名"
                 />
@@ -400,7 +410,12 @@ export default function NotificationsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">通知类型</label>
                 <select
                   value={newNotification.type}
-                  onChange={(e) => setNewNotification({ ...newNotification, type: e.target.value })}
+                  onChange={e =>
+                    setNewNotification({
+                      ...newNotification,
+                      type: e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 border rounded-lg"
                 >
                   <option value="system">系统通知</option>
@@ -414,7 +429,12 @@ export default function NotificationsPage() {
                 <input
                   type="text"
                   value={newNotification.title}
-                  onChange={(e) => setNewNotification({ ...newNotification, title: e.target.value })}
+                  onChange={e =>
+                    setNewNotification({
+                      ...newNotification,
+                      title: e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 border rounded-lg"
                   placeholder="输入通知标题"
                 />
@@ -423,7 +443,12 @@ export default function NotificationsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">通知内容</label>
                 <textarea
                   value={newNotification.content}
-                  onChange={(e) => setNewNotification({ ...newNotification, content: e.target.value })}
+                  onChange={e =>
+                    setNewNotification({
+                      ...newNotification,
+                      content: e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 border rounded-lg"
                   rows={4}
                   placeholder="输入通知内容"
@@ -524,5 +549,5 @@ export default function NotificationsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,49 +1,49 @@
-'use client'
+'use client';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { Dumbbell, Mail, Lock, Eye, EyeOff, User, Phone } from 'lucide-react'
+import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Dumbbell, Mail, Lock, Eye, EyeOff, User, Phone } from 'lucide-react';
 
 export default function RegisterPage() {
-  const router = useRouter()
+  const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
     name: '',
-    phone: ''
-  })
-  const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+    phone: '',
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
-    })
+      [e.target.name]: e.target.value,
+    });
   }
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setError('');
 
     // 验证密码确认
     if (formData.password !== formData.confirmPassword) {
-      setError('两次输入的密码不一致')
-      return
+      setError('两次输入的密码不一致');
+      return;
     }
 
     // 验证密码长度
     if (formData.password.length < 6) {
-      setError('密码至少需要6个字符')
-      return
+      setError('密码至少需要6个字符');
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     try {
       const response = await fetch('/api/auth/register', {
@@ -53,23 +53,23 @@ export default function RegisterPage() {
           email: formData.email,
           password: formData.password,
           name: formData.name,
-          phone: formData.phone || undefined
-        })
-      })
+          phone: formData.phone || undefined,
+        }),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!data.success) {
-        setError(data.message || '注册失败')
-        setLoading(false)
-        return
+        setError(data.message || '注册失败');
+        setLoading(false);
+        return;
       }
 
       // 注册成功，跳转到首页（后续可能需要优化为自动登录）
-      router.push('/')
+      router.push('/');
     } catch (err) {
-      setError('网络错误，请重试')
-      setLoading(false)
+      setError('网络错误，请重试');
+      setLoading(false);
     }
   }
 
@@ -128,9 +128,7 @@ export default function RegisterPage() {
 
             {/* Phone */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                手机号
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">手机号</label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -166,11 +164,7 @@ export default function RegisterPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
@@ -230,5 +224,5 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

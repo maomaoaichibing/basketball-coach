@@ -8,27 +8,28 @@
  * - 如果环境变量不存在，使用内置的默认数据
  */
 
-import plansData from './lesson_plans_raw.json';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 
+import plansData from './lesson_plans_raw.json';
+
 export interface LessonPlan {
-  class_level: string;    // 班级: "幼儿班", "小班", "中班", "大班"
-  age_group: string;      // 年龄组: "U6", "U8", "U10", "U12", "U14"
-  month: string;          // 月份: "4月", "2024年10月", "2023年暑期"
-  sheet: string;          // Sheet名
-  section: string;        // 部分: "准备部分", "训练部分", "结束部分"
-  category: string;       // 分类: "warmup", "technical", "physical", "game", "cooldown"
-  part: string;           // 具体环节
-  duration: number;       // 时长(分钟)
-  tech_type: string;      // 技术类型: "礼仪", "运球", "投篮", "体能"
-  content: string;        // 主要内容
-  game_name: string;      // 游戏名称
-  form: string;           // 建议形式
-  equipment: string;      // 使用教具
-  method: string;         // 训练方法
-  coach_guide: string;     // 教练员引导语
-  key_points: string;     // 要点目的
+  class_level: string; // 班级: "幼儿班", "小班", "中班", "大班"
+  age_group: string; // 年龄组: "U6", "U8", "U10", "U12", "U14"
+  month: string; // 月份: "4月", "2024年10月", "2023年暑期"
+  sheet: string; // Sheet名
+  section: string; // 部分: "准备部分", "训练部分", "结束部分"
+  category: string; // 分类: "warmup", "technical", "physical", "game", "cooldown"
+  part: string; // 具体环节
+  duration: number; // 时长(分钟)
+  tech_type: string; // 技术类型: "礼仪", "运球", "投篮", "体能"
+  content: string; // 主要内容
+  game_name: string; // 游戏名称
+  form: string; // 建议形式
+  equipment: string; // 使用教具
+  method: string; // 训练方法
+  coach_guide: string; // 教练员引导语
+  key_points: string; // 要点目的
 }
 
 // 转换为数组
@@ -54,7 +55,9 @@ function loadPlans(): LessonPlan[] {
   // 调试：检查第一条 U10 数据的关键词匹配
   const u10Sample = builtIn.find(p => p.age_group === 'U10');
   if (u10Sample) {
-    console.log(`[RAG] U10样本: tech_type="${u10Sample.tech_type}", content前30字="${u10Sample.content?.substring(0, 30)}"`);
+    console.log(
+      `[RAG] U10样本: tech_type="${u10Sample.tech_type}", content前30字="${u10Sample.content?.substring(0, 30)}"`
+    );
   }
 
   return builtIn;
@@ -95,17 +98,13 @@ export function retrieveSimilarCases(params: {
   // 按技术类型筛选
   if (techType) {
     const before = results.length;
-    results = results.filter(p =>
-      p.tech_type.toLowerCase().includes(techType.toLowerCase())
-    );
+    results = results.filter(p => p.tech_type.toLowerCase().includes(techType.toLowerCase()));
     console.log(`[RAG] 技术类型筛选: ${techType}, ${before} -> ${results.length}`);
   }
 
   // 按时长筛选 (误差2分钟)
   if (duration) {
-    results = results.filter(p =>
-      Math.abs(p.duration - duration) <= 2
-    );
+    results = results.filter(p => Math.abs(p.duration - duration) <= 2);
   }
 
   // 按关键词搜索 (content, method, coach_guide)
@@ -115,18 +114,18 @@ export function retrieveSimilarCases(params: {
     const keywords = keyword.toLowerCase().split(/\s+/).filter(Boolean);
     console.log(`[RAG] 关键词列表: ${JSON.stringify(keywords)}`);
     const filtered = results.filter(p => {
-      const searchableText = [
-        p.content,
-        p.method,
-        p.tech_type,
-        p.game_name
-      ].filter(Boolean).join(' ').toLowerCase();
+      const searchableText = [p.content, p.method, p.tech_type, p.game_name]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
       // 只要任意一个关键词匹配即可
       return keywords.some(kw => searchableText.includes(kw));
     });
     console.log(`[RAG] 关键词筛选: "${keyword}", ${before} -> ${filtered.length}`);
     if (filtered.length > 0) {
-      console.log(`[RAG] 匹配样本: tech_type="${filtered[0].tech_type}", method前30字="${filtered[0].method?.substring(0, 30)}"`);
+      console.log(
+        `[RAG] 匹配样本: tech_type="${filtered[0].tech_type}", method前30字="${filtered[0].method?.substring(0, 30)}"`
+      );
     }
     results = filtered;
   }
@@ -183,7 +182,7 @@ export function getStats() {
       game: allPlans.filter(p => p.category === 'game').length,
       cooldown: allPlans.filter(p => p.category === 'cooldown').length,
       other: allPlans.filter(p => p.category === 'other').length,
-    }
+    },
   };
 }
 

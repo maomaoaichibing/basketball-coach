@@ -1,73 +1,73 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react';
 import {
   Building2,
-  MapPin,
-  Phone,
-  Users,
-  UsersRound,
-  MapPinned,
-  Plus,
-  Edit,
-  Trash2,
   ChevronRight,
   Clock,
-  X
-} from 'lucide-react'
+  Edit,
+  MapPin,
+  MapPinned,
+  Phone,
+  Plus,
+  Trash2,
+  Users,
+  UsersRound,
+  X,
+} from 'lucide-react';
 
 interface Campus {
-  id: string
-  name: string
-  code: string
-  address: string | null
-  phone: string | null
-  managerName: string | null
-  latitude: number | null
-  longitude: number | null
-  openTime: string | null
-  closeTime: string | null
-  status: string
-  description: string | null
+  id: string;
+  name: string;
+  code: string;
+  address: string | null;
+  phone: string | null;
+  managerName: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  openTime: string | null;
+  closeTime: string | null;
+  status: string;
+  description: string | null;
   _count: {
-    players: number
-    teams: number
-    coaches: number
-    courts: number
-  }
+    players: number;
+    teams: number;
+    coaches: number;
+    courts: number;
+  };
 }
 
 interface Court {
-  id: string
-  name: string
-  campusId: string
-  type: string
-  capacity: number
-  status: string
-  campus?: { id: string; name: string }
+  id: string;
+  name: string;
+  campusId: string;
+  type: string;
+  capacity: number;
+  status: string;
+  campus?: { id: string; name: string };
 }
 
 interface Coach {
-  id: string
-  name: string
-  phone: string
-  email: string | null
-  campusId: string | null
-  specialties: string
-  status: string
-  hireDate: string | null
-  campus?: { id: string; name: string }
+  id: string;
+  name: string;
+  phone: string;
+  email: string | null;
+  campusId: string | null;
+  specialties: string;
+  status: string;
+  hireDate: string | null;
+  campus?: { id: string; name: string };
 }
 
 export default function CampusesPage() {
-  const [campuses, setCampuses] = useState<Campus[]>([])
-  const [courts, setCourts] = useState<Court[]>([])
-  const [coaches, setCoaches] = useState<Coach[]>([])
-  const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'campuses' | 'courts' | 'coaches'>('campuses')
-  const [showModal, setShowModal] = useState(false)
-  const [modalType, setModalType] = useState<'campus' | 'court' | 'coach'>('campus')
-  const [editingItem, setEditingItem] = useState<any>(null)
+  const [campuses, setCampuses] = useState<Campus[]>([]);
+  const [courts, setCourts] = useState<Court[]>([]);
+  const [coaches, setCoaches] = useState<Coach[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'campuses' | 'courts' | 'coaches'>('campuses');
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState<'campus' | 'court' | 'coach'>('campus');
+  const [editingItem, setEditingItem] = useState<Record<string, unknown> | null>(null);
 
   // 校区表单
   const [campusForm, setCampusForm] = useState({
@@ -79,7 +79,7 @@ export default function CampusesPage() {
     openTime: '',
     closeTime: '',
     description: '',
-  })
+  });
 
   // 场地表单
   const [courtForm, setCourtForm] = useState({
@@ -88,7 +88,7 @@ export default function CampusesPage() {
     type: 'indoor',
     capacity: 20,
     description: '',
-  })
+  });
 
   // 教练表单
   const [coachForm, setCoachForm] = useState({
@@ -99,79 +99,102 @@ export default function CampusesPage() {
     specialties: '',
     hireDate: '',
     notes: '',
-  })
+  });
 
   useEffect(() => {
-    fetchData()
-  }, [activeTab])
+    fetchData();
+  }, [activeTab]);
 
   const fetchData = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       if (activeTab === 'campuses') {
-        const res = await fetch('/api/campuses')
-        const data = await res.json()
-        setCampuses(data.campuses || [])
+        const res = await fetch('/api/campuses');
+        const data = await res.json();
+        setCampuses(data.campuses || []);
       } else if (activeTab === 'courts') {
-        const res = await fetch('/api/courts')
-        const data = await res.json()
-        setCourts(data.courts || [])
+        const res = await fetch('/api/courts');
+        const data = await res.json();
+        setCourts(data.courts || []);
       } else if (activeTab === 'coaches') {
-        const res = await fetch('/api/coaches')
-        const data = await res.json()
-        setCoaches(data.coaches || [])
+        const res = await fetch('/api/coaches');
+        const data = await res.json();
+        setCoaches(data.coaches || []);
       }
     } catch (error) {
-      console.error('获取数据失败:', error)
+      console.error('获取数据失败:', error);
     }
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   const openModal = (type: 'campus' | 'court' | 'coach', item?: any) => {
-    setModalType(type)
-    setEditingItem(item)
+    setModalType(type);
+    setEditingItem(item || null);
     if (item) {
       if (type === 'campus') {
         setCampusForm({
-          name: item.name,
-          code: item.code,
-          address: item.address || '',
-          phone: item.phone || '',
-          managerName: item.managerName || '',
-          openTime: item.openTime || '',
-          closeTime: item.closeTime || '',
-          description: item.description || '',
-        })
+          name: String(item.name || ''),
+          code: String(item.code || ''),
+          address: String(item.address || ''),
+          phone: String(item.phone || ''),
+          managerName: String(item.managerName || ''),
+          openTime: String(item.openTime || ''),
+          closeTime: String(item.closeTime || ''),
+          description: String(item.description || ''),
+        });
       } else if (type === 'court') {
         setCourtForm({
-          name: item.name,
-          campusId: item.campusId,
-          type: item.type,
-          capacity: item.capacity,
-          description: item.description || '',
-        })
+          name: String(item.name || ''),
+          campusId: String(item.campusId || ''),
+          type: String(item.type || ''),
+          capacity: Number(item.capacity || 0),
+          description: String(item.description || ''),
+        });
       } else if (type === 'coach') {
         setCoachForm({
-          name: item.name,
-          phone: item.phone,
-          email: item.email || '',
-          campusId: item.campusId || '',
-          specialties: item.specialties ? JSON.parse(item.specialties).join(', ') : '',
-          hireDate: item.hireDate || '',
-          notes: item.notes || '',
-        })
+          name: String(item.name || ''),
+          phone: String(item.phone || ''),
+          email: String(item.email || ''),
+          campusId: String(item.campusId || ''),
+          specialties: typeof item.specialties === 'string' ? JSON.parse(item.specialties).join(', ') : '',
+          hireDate: String(item.hireDate || ''),
+          notes: String(item.notes || ''),
+        });
       }
     } else {
-      resetForms()
+      resetForms();
     }
-    setShowModal(true)
-  }
+    setShowModal(true);
+  };
 
   const resetForms = () => {
-    setCampusForm({ name: '', code: '', address: '', phone: '', managerName: '', openTime: '', closeTime: '', description: '' })
-    setCourtForm({ name: '', campusId: '', type: 'indoor', capacity: 20, description: '' })
-    setCoachForm({ name: '', phone: '', email: '', campusId: '', specialties: '', hireDate: '', notes: '' })
-  }
+    setCampusForm({
+      name: '',
+      code: '',
+      address: '',
+      phone: '',
+      managerName: '',
+      openTime: '',
+      closeTime: '',
+      description: '',
+    });
+    setCourtForm({
+      name: '',
+      campusId: '',
+      type: 'indoor',
+      capacity: 20,
+      description: '',
+    });
+    setCoachForm({
+      name: '',
+      phone: '',
+      email: '',
+      campusId: '',
+      specialties: '',
+      hireDate: '',
+      notes: '',
+    });
+  };
 
   const handleSubmit = async () => {
     try {
@@ -186,44 +209,47 @@ export default function CampusesPage() {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(campusForm),
-            })
-        if (res.ok) fetchData()
+            });
+        if (res.ok) fetchData();
       } else if (modalType === 'court') {
         const res = await fetch('/api/courts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(courtForm),
-        })
-        if (res.ok) fetchData()
+        });
+        if (res.ok) fetchData();
       } else if (modalType === 'coach') {
         const res = await fetch('/api/coaches', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             ...coachForm,
-            specialties: coachForm.specialties.split(',').map(s => s.trim()).filter(Boolean),
+            specialties: coachForm.specialties
+              .split(',')
+              .map(s => s.trim())
+              .filter(Boolean),
           }),
-        })
-        if (res.ok) fetchData()
+        });
+        if (res.ok) fetchData();
       }
-      setShowModal(false)
-      resetForms()
+      setShowModal(false);
+      resetForms();
     } catch (error) {
-      console.error('提交失败:', error)
+      console.error('提交失败:', error);
     }
-  }
+  };
 
   const handleDelete = async (type: string, id: string) => {
-    if (!confirm('确定要删除吗？')) return
+    if (!confirm('确定要删除吗？')) return;
     try {
       if (type === 'campus') {
-        await fetch(`/api/campuses/${id}`, { method: 'DELETE' })
+        await fetch(`/api/campuses/${id}`, { method: 'DELETE' });
       }
-      fetchData()
+      fetchData();
     } catch (error) {
-      console.error('删除失败:', error)
+      console.error('删除失败:', error);
     }
-  }
+  };
 
   const getStatusBadge = (status: string) => {
     const badges: Record<string, string> = {
@@ -232,20 +258,20 @@ export default function CampusesPage() {
       closed: 'bg-gray-100 text-gray-800',
       maintenance: 'bg-orange-100 text-orange-800',
       disabled: 'bg-red-100 text-red-800',
-    }
+    };
     const labels: Record<string, string> = {
       active: '营业中',
       paused: '暂停',
       closed: '已关闭',
       maintenance: '维护中',
       disabled: '不可用',
-    }
+    };
     return (
       <span className={`px-2 py-1 rounded text-xs ${badges[status] || 'bg-gray-100'}`}>
         {labels[status] || status}
       </span>
-    )
-  }
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -263,11 +289,16 @@ export default function CampusesPage() {
               </div>
             </div>
             <button
-              onClick={() => openModal(activeTab === 'campuses' ? 'campus' : activeTab === 'courts' ? 'court' : 'coach')}
+              onClick={() =>
+                openModal(
+                  activeTab === 'campuses' ? 'campus' : activeTab === 'courts' ? 'court' : 'coach'
+                )
+              }
               className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
-              新建{activeTab === 'campuses' ? '校区' : activeTab === 'courts' ? '场地' : '教练'}
+              新建
+              {activeTab === 'campuses' ? '校区' : activeTab === 'courts' ? '场地' : '教练'}
             </button>
           </div>
         </div>
@@ -328,7 +359,7 @@ export default function CampusesPage() {
                     暂无校区，点击右上角添加
                   </div>
                 ) : (
-                  campuses.map((campus) => (
+                  campuses.map(campus => (
                     <div key={campus.id} className="bg-white rounded-lg shadow p-5">
                       <div className="flex items-start justify-between mb-3">
                         <div>
@@ -359,19 +390,27 @@ export default function CampusesPage() {
                       </div>
                       <div className="mt-4 pt-4 border-t grid grid-cols-4 gap-2 text-center">
                         <div>
-                          <div className="text-lg font-bold text-indigo-600">{campus._count.players}</div>
+                          <div className="text-lg font-bold text-indigo-600">
+                            {campus._count.players}
+                          </div>
                           <div className="text-xs text-gray-500">学员</div>
                         </div>
                         <div>
-                          <div className="text-lg font-bold text-green-600">{campus._count.teams}</div>
+                          <div className="text-lg font-bold text-green-600">
+                            {campus._count.teams}
+                          </div>
                           <div className="text-xs text-gray-500">球队</div>
                         </div>
                         <div>
-                          <div className="text-lg font-bold text-orange-600">{campus._count.coaches}</div>
+                          <div className="text-lg font-bold text-orange-600">
+                            {campus._count.coaches}
+                          </div>
                           <div className="text-xs text-gray-500">教练</div>
                         </div>
                         <div>
-                          <div className="text-lg font-bold text-blue-600">{campus._count.courts}</div>
+                          <div className="text-lg font-bold text-blue-600">
+                            {campus._count.courts}
+                          </div>
                           <div className="text-xs text-gray-500">场地</div>
                         </div>
                       </div>
@@ -401,24 +440,42 @@ export default function CampusesPage() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">场地名称</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">所属校区</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">类型</th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">容量</th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">状态</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        场地名称
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        所属校区
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        类型
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                        容量
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                        状态
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
                     {courts.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-4 py-8 text-center text-gray-500">暂无场地</td>
+                        <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                          暂无场地
+                        </td>
                       </tr>
                     ) : (
-                      courts.map((court) => (
+                      courts.map(court => (
                         <tr key={court.id} className="hover:bg-gray-50">
-                          <td className="px-4 py-3 text-sm font-medium text-gray-900">{court.name}</td>
-                          <td className="px-4 py-3 text-sm text-gray-500">{court.campus?.name || '-'}</td>
-                          <td className="px-4 py-3 text-sm text-gray-500">{court.type === 'indoor' ? '室内' : '室外'}</td>
+                          <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                            {court.name}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-500">
+                            {court.campus?.name || '-'}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-500">
+                            {court.type === 'indoor' ? '室内' : '室外'}
+                          </td>
                           <td className="px-4 py-3 text-sm text-right">{court.capacity}人</td>
                           <td className="px-4 py-3 text-center">{getStatusBadge(court.status)}</td>
                         </tr>
@@ -435,24 +492,40 @@ export default function CampusesPage() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">姓名</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">电话</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">所属校区</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">专长</th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">状态</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        姓名
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        电话
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        所属校区
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        专长
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                        状态
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
                     {coaches.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-4 py-8 text-center text-gray-500">暂无教练</td>
+                        <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                          暂无教练
+                        </td>
                       </tr>
                     ) : (
-                      coaches.map((coach) => (
+                      coaches.map(coach => (
                         <tr key={coach.id} className="hover:bg-gray-50">
-                          <td className="px-4 py-3 text-sm font-medium text-gray-900">{coach.name}</td>
+                          <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                            {coach.name}
+                          </td>
                           <td className="px-4 py-3 text-sm text-gray-500">{coach.phone}</td>
-                          <td className="px-4 py-3 text-sm text-gray-500">{coach.campus?.name || '-'}</td>
+                          <td className="px-4 py-3 text-sm text-gray-500">
+                            {coach.campus?.name || '-'}
+                          </td>
                           <td className="px-4 py-3 text-sm text-gray-500">
                             {coach.specialties ? JSON.parse(coach.specialties).join(', ') : '-'}
                           </td>
@@ -474,9 +547,13 @@ export default function CampusesPage() {
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md m-4">
             <div className="border-b px-6 py-4 flex items-center justify-between">
               <h2 className="text-xl font-bold">
-                {editingItem ? '编辑' : '新建'}{modalType === 'campus' ? '校区' : modalType === 'court' ? '场地' : '教练'}
+                {editingItem ? '编辑' : '新建'}
+                {modalType === 'campus' ? '校区' : modalType === 'court' ? '场地' : '教练'}
               </h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700">
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -485,20 +562,24 @@ export default function CampusesPage() {
               {modalType === 'campus' && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">校区名称 *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      校区名称 *
+                    </label>
                     <input
                       type="text"
                       value={campusForm.name}
-                      onChange={(e) => setCampusForm({ ...campusForm, name: e.target.value })}
+                      onChange={e => setCampusForm({ ...campusForm, name: e.target.value })}
                       className="w-full px-3 py-2 border rounded-lg"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">校区代码 *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      校区代码 *
+                    </label>
                     <input
                       type="text"
                       value={campusForm.code}
-                      onChange={(e) => setCampusForm({ ...campusForm, code: e.target.value })}
+                      onChange={e => setCampusForm({ ...campusForm, code: e.target.value })}
                       className="w-full px-3 py-2 border rounded-lg"
                       disabled={!!editingItem}
                     />
@@ -508,7 +589,12 @@ export default function CampusesPage() {
                     <input
                       type="text"
                       value={campusForm.address}
-                      onChange={(e) => setCampusForm({ ...campusForm, address: e.target.value })}
+                      onChange={e =>
+                        setCampusForm({
+                          ...campusForm,
+                          address: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 border rounded-lg"
                     />
                   </div>
@@ -517,7 +603,7 @@ export default function CampusesPage() {
                     <input
                       type="text"
                       value={campusForm.phone}
-                      onChange={(e) => setCampusForm({ ...campusForm, phone: e.target.value })}
+                      onChange={e => setCampusForm({ ...campusForm, phone: e.target.value })}
                       className="w-full px-3 py-2 border rounded-lg"
                     />
                   </div>
@@ -526,26 +612,45 @@ export default function CampusesPage() {
                     <input
                       type="text"
                       value={campusForm.managerName}
-                      onChange={(e) => setCampusForm({ ...campusForm, managerName: e.target.value })}
+                      onChange={e =>
+                        setCampusForm({
+                          ...campusForm,
+                          managerName: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 border rounded-lg"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">营业时间</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        营业时间
+                      </label>
                       <input
                         type="time"
                         value={campusForm.openTime}
-                        onChange={(e) => setCampusForm({ ...campusForm, openTime: e.target.value })}
+                        onChange={e =>
+                          setCampusForm({
+                            ...campusForm,
+                            openTime: e.target.value,
+                          })
+                        }
                         className="w-full px-3 py-2 border rounded-lg"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">关门时间</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        关门时间
+                      </label>
                       <input
                         type="time"
                         value={campusForm.closeTime}
-                        onChange={(e) => setCampusForm({ ...campusForm, closeTime: e.target.value })}
+                        onChange={e =>
+                          setCampusForm({
+                            ...campusForm,
+                            closeTime: e.target.value,
+                          })
+                        }
                         className="w-full px-3 py-2 border rounded-lg"
                       />
                     </div>
@@ -557,25 +662,31 @@ export default function CampusesPage() {
               {modalType === 'court' && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">场地名称 *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      场地名称 *
+                    </label>
                     <input
                       type="text"
                       value={courtForm.name}
-                      onChange={(e) => setCourtForm({ ...courtForm, name: e.target.value })}
+                      onChange={e => setCourtForm({ ...courtForm, name: e.target.value })}
                       className="w-full px-3 py-2 border rounded-lg"
                       placeholder="如: 1号场"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">所属校区 *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      所属校区 *
+                    </label>
                     <select
                       value={courtForm.campusId}
-                      onChange={(e) => setCourtForm({ ...courtForm, campusId: e.target.value })}
+                      onChange={e => setCourtForm({ ...courtForm, campusId: e.target.value })}
                       className="w-full px-3 py-2 border rounded-lg"
                     >
                       <option value="">请选择校区</option>
-                      {campuses.map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
+                      {campuses.map(c => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -584,7 +695,7 @@ export default function CampusesPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">类型</label>
                       <select
                         value={courtForm.type}
-                        onChange={(e) => setCourtForm({ ...courtForm, type: e.target.value })}
+                        onChange={e => setCourtForm({ ...courtForm, type: e.target.value })}
                         className="w-full px-3 py-2 border rounded-lg"
                       >
                         <option value="indoor">室内</option>
@@ -596,7 +707,12 @@ export default function CampusesPage() {
                       <input
                         type="number"
                         value={courtForm.capacity}
-                        onChange={(e) => setCourtForm({ ...courtForm, capacity: parseInt(e.target.value) || 20 })}
+                        onChange={e =>
+                          setCourtForm({
+                            ...courtForm,
+                            capacity: parseInt(e.target.value) || 20,
+                          })
+                        }
                         className="w-full px-3 py-2 border rounded-lg"
                       />
                     </div>
@@ -612,7 +728,7 @@ export default function CampusesPage() {
                     <input
                       type="text"
                       value={coachForm.name}
-                      onChange={(e) => setCoachForm({ ...coachForm, name: e.target.value })}
+                      onChange={e => setCoachForm({ ...coachForm, name: e.target.value })}
                       className="w-full px-3 py-2 border rounded-lg"
                     />
                   </div>
@@ -621,7 +737,7 @@ export default function CampusesPage() {
                     <input
                       type="text"
                       value={coachForm.phone}
-                      onChange={(e) => setCoachForm({ ...coachForm, phone: e.target.value })}
+                      onChange={e => setCoachForm({ ...coachForm, phone: e.target.value })}
                       className="w-full px-3 py-2 border rounded-lg"
                     />
                   </div>
@@ -629,12 +745,14 @@ export default function CampusesPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">所属校区</label>
                     <select
                       value={coachForm.campusId}
-                      onChange={(e) => setCoachForm({ ...coachForm, campusId: e.target.value })}
+                      onChange={e => setCoachForm({ ...coachForm, campusId: e.target.value })}
                       className="w-full px-3 py-2 border rounded-lg"
                     >
                       <option value="">无</option>
-                      {campuses.map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
+                      {campuses.map(c => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -643,7 +761,12 @@ export default function CampusesPage() {
                     <input
                       type="text"
                       value={coachForm.specialties}
-                      onChange={(e) => setCoachForm({ ...coachForm, specialties: e.target.value })}
+                      onChange={e =>
+                        setCoachForm({
+                          ...coachForm,
+                          specialties: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 border rounded-lg"
                       placeholder="运球,投篮,防守 (逗号分隔)"
                     />
@@ -652,10 +775,16 @@ export default function CampusesPage() {
               )}
             </div>
             <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 border rounded-lg hover:bg-gray-100">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 border rounded-lg hover:bg-gray-100"
+              >
                 取消
               </button>
-              <button onClick={handleSubmit} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+              <button
+                onClick={handleSubmit}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              >
                 确定
               </button>
             </div>
@@ -663,5 +792,5 @@ export default function CampusesPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

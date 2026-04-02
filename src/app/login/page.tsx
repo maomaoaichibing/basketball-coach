@@ -1,45 +1,45 @@
-'use client'
+'use client';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { Dumbbell, Mail, Lock, Eye, EyeOff } from 'lucide-react'
+import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Dumbbell, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      })
+        body: JSON.stringify({ email, password }),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!data.success) {
-        setError(data.message || '登录失败')
-        setLoading(false)
-        return
+        setError(data.message || '登录失败');
+        setLoading(false);
+        return;
       }
 
       // 登录成功，跳转到首页
-      router.push('/')
+      router.push('/');
     } catch (err) {
-      setError('网络错误，请重试')
-      setLoading(false)
+      setError('网络错误，请重试');
+      setLoading(false);
     }
   }
 
@@ -60,15 +60,13 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit}>
             {/* Email */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                邮箱
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">邮箱</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   placeholder="请输入邮箱"
                   required
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
@@ -78,15 +76,13 @@ export default function LoginPage() {
 
             {/* Password */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                密码
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">密码</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={e => setPassword(e.target.value)}
                   placeholder="请输入密码"
                   required
                   className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
@@ -96,11 +92,7 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
@@ -141,5 +133,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,40 +1,40 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { ArrowLeft, Trophy, Star, Save, User } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { ArrowLeft, Trophy, Star, Save, User } from 'lucide-react';
 
 // 类型定义
-type SkillKey = 'dribbling' | 'passing' | 'shooting' | 'defending' | 'physical' | 'tactical'
+type SkillKey = 'dribbling' | 'passing' | 'shooting' | 'defending' | 'physical' | 'tactical';
 
 type Player = {
-  id: string
-  name: string
-  group: string
-  dribbling: number
-  passing: number
-  shooting: number
-  defending: number
-  physical: number
-  tactical: number
-}
+  id: string;
+  name: string;
+  group: string;
+  dribbling: number;
+  passing: number;
+  shooting: number;
+  defending: number;
+  physical: number;
+  tactical: number;
+};
 
-type ScoreRecord = Record<SkillKey, number>
+type ScoreRecord = Record<SkillKey, number>;
 
 type Assessment = {
-  id: string
-  playerId: string
-  dribbling?: number
-  passing?: number
-  shooting?: number
-  defending?: number
-  physical?: number
-  tactical?: number
-  overall?: number
-  notes?: string
-  assessor?: string
-  assessedAt: string
-}
+  id: string;
+  playerId: string;
+  dribbling?: number;
+  passing?: number;
+  shooting?: number;
+  defending?: number;
+  physical?: number;
+  tactical?: number;
+  overall?: number;
+  notes?: string;
+  assessor?: string;
+  assessedAt: string;
+};
 
 const skillLabels: Record<string, string> = {
   dribbling: '运球',
@@ -42,8 +42,8 @@ const skillLabels: Record<string, string> = {
   shooting: '投篮',
   defending: '防守',
   physical: '体能',
-  tactical: '战术'
-}
+  tactical: '战术',
+};
 
 const skillColors: Record<string, string> = {
   dribbling: 'from-blue-400 to-blue-500',
@@ -51,15 +51,15 @@ const skillColors: Record<string, string> = {
   shooting: 'from-red-400 to-red-500',
   defending: 'from-yellow-400 to-yellow-500',
   physical: 'from-purple-400 to-purple-500',
-  tactical: 'from-orange-400 to-orange-500'
-}
+  tactical: 'from-orange-400 to-orange-500',
+};
 
 export default function AssessmentPage() {
-  const [players, setPlayers] = useState<Player[]>([])
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null)
-  const [assessments, setAssessments] = useState<Assessment[]>([])
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   // 评估表单状态
   const [scores, setScores] = useState<ScoreRecord>({
@@ -68,18 +68,18 @@ export default function AssessmentPage() {
     shooting: 5,
     defending: 5,
     physical: 5,
-    tactical: 5
-  })
-  const [notes, setNotes] = useState('')
-  const [assessor, setAssessor] = useState('')
+    tactical: 5,
+  });
+  const [notes, setNotes] = useState('');
+  const [assessor, setAssessor] = useState('');
 
   useEffect(() => {
-    fetchPlayers()
-  }, [])
+    fetchPlayers();
+  }, []);
 
   useEffect(() => {
     if (selectedPlayer) {
-      fetchAssessments(selectedPlayer.id)
+      fetchAssessments(selectedPlayer.id);
       // 用当前能力值初始化表单
       setScores({
         dribbling: selectedPlayer.dribbling,
@@ -87,45 +87,45 @@ export default function AssessmentPage() {
         shooting: selectedPlayer.shooting,
         defending: selectedPlayer.defending,
         physical: selectedPlayer.physical,
-        tactical: selectedPlayer.tactical
-      })
+        tactical: selectedPlayer.tactical,
+      });
     }
-  }, [selectedPlayer])
+  }, [selectedPlayer]);
 
   async function fetchPlayers() {
     try {
-      const response = await fetch('/api/players')
-      const data = await response.json()
+      const response = await fetch('/api/players');
+      const data = await response.json();
       if (data.success) {
-        setPlayers(data.players)
+        setPlayers(data.players);
         if (data.players.length > 0) {
-          setSelectedPlayer(data.players[0])
+          setSelectedPlayer(data.players[0]);
         }
       }
     } catch (error) {
-      console.error('获取学员失败:', error)
+      console.error('获取学员失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function fetchAssessments(playerId: string) {
     try {
-      const response = await fetch(`/api/assessments?playerId=${playerId}`)
-      const data = await response.json()
+      const response = await fetch(`/api/assessments?playerId=${playerId}`);
+      const data = await response.json();
       if (data.success) {
-        setAssessments(data.assessments)
+        setAssessments(data.assessments);
       }
     } catch (error) {
-      console.error('获取评估记录失败:', error)
+      console.error('获取评估记录失败:', error);
     }
   }
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!selectedPlayer) return
+    e.preventDefault();
+    if (!selectedPlayer) return;
 
-    setSaving(true)
+    setSaving(true);
     try {
       const response = await fetch('/api/assessments', {
         method: 'POST',
@@ -134,28 +134,33 @@ export default function AssessmentPage() {
           playerId: selectedPlayer.id,
           ...scores,
           notes,
-          assessor
-        })
-      })
-      const data = await response.json()
+          assessor,
+        }),
+      });
+      const data = await response.json();
       if (data.success) {
-        alert('评估已保存')
-        setNotes('')
-        fetchAssessments(selectedPlayer.id)
+        alert('评估已保存');
+        setNotes('');
+        fetchAssessments(selectedPlayer.id);
       } else {
-        alert(data.error || '保存失败')
+        alert(data.error || '保存失败');
       }
     } catch (error) {
-      alert('保存失败')
+      alert('保存失败');
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
   }
 
   const overallScore = Math.round(
-    (scores.dribbling + scores.passing + scores.shooting +
-     scores.defending + scores.physical + scores.tactical) / 6
-  )
+    (scores.dribbling +
+      scores.passing +
+      scores.shooting +
+      scores.defending +
+      scores.physical +
+      scores.tactical) /
+      6
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -200,11 +205,11 @@ export default function AssessmentPage() {
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
-                        selectedPlayer?.id === player.id
-                          ? 'bg-orange-500'
-                          : 'bg-gray-400'
-                      }`}>
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
+                          selectedPlayer?.id === player.id ? 'bg-orange-500' : 'bg-gray-400'
+                        }`}
+                      >
                         {player.name.charAt(0)}
                       </div>
                       <div>
@@ -222,7 +227,10 @@ export default function AssessmentPage() {
               {selectedPlayer && (
                 <>
                   {/* 评估表单 */}
-                  <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                  <form
+                    onSubmit={handleSubmit}
+                    className="bg-white rounded-xl shadow-sm border border-gray-100 p-6"
+                  >
                     <h2 className="font-semibold text-gray-900 mb-6">
                       为 {selectedPlayer.name} 评分
                     </h2>
@@ -240,10 +248,12 @@ export default function AssessmentPage() {
                               min="1"
                               max="10"
                               value={scores[skill]}
-                              onChange={(e) => setScores({
-                                ...scores,
-                                [skill]: parseInt(e.target.value)
-                              })}
+                              onChange={e =>
+                                setScores({
+                                  ...scores,
+                                  [skill]: parseInt(e.target.value),
+                                })
+                              }
                               className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500"
                             />
                             <span className="w-8 text-center font-semibold text-gray-900">
@@ -274,19 +284,17 @@ export default function AssessmentPage() {
                         <input
                           type="text"
                           value={assessor}
-                          onChange={(e) => setAssessor(e.target.value)}
+                          onChange={e => setAssessor(e.target.value)}
                           placeholder="输入评估人姓名"
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          备注
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">备注</label>
                         <input
                           type="text"
                           value={notes}
-                          onChange={(e) => setNotes(e.target.value)}
+                          onChange={e => setNotes(e.target.value)}
                           placeholder="简短的评估备注"
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                         />
@@ -331,14 +339,14 @@ export default function AssessmentPage() {
                             </div>
                             <div className="grid grid-cols-3 md:grid-cols-6 gap-2 text-xs">
                               {Object.entries(skillLabels).map(([skill, label]) => {
-                                const value = (assessment as any)[skill]
-                                if (!value) return null
+                                const value = (assessment as any)[skill];
+                                if (!value) return null;
                                 return (
                                   <div key={skill} className="text-center">
                                     <div className="text-gray-400">{label}</div>
                                     <div className="font-semibold">{value}</div>
                                   </div>
-                                )
+                                );
                               })}
                             </div>
                             {assessment.notes && (
@@ -356,5 +364,5 @@ export default function AssessmentPage() {
         )}
       </main>
     </div>
-  )
+  );
 }

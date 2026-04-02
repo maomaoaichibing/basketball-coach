@@ -1,29 +1,25 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 // GET /api/match-events - 获取比赛事件列表
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams
-    const matchId = searchParams.get('matchId')
-    const playerId = searchParams.get('playerId')
-    const eventType = searchParams.get('eventType')
-    const limit = parseInt(searchParams.get('limit') || '100')
+    const searchParams = request.nextUrl.searchParams;
+    const matchId = searchParams.get('matchId');
+    const playerId = searchParams.get('playerId');
+    const eventType = searchParams.get('eventType');
+    const limit = parseInt(searchParams.get('limit') || '100');
 
-    const where: any = {}
-    if (matchId) where.matchId = matchId
-    if (playerId) where.playerId = playerId
-    if (eventType) where.eventType = eventType
+    const where: any = {};
+    if (matchId) where.matchId = matchId;
+    if (playerId) where.playerId = playerId;
+    if (eventType) where.eventType = eventType;
 
     const events = await prisma.matchEvent.findMany({
       where,
-      orderBy: [
-        { matchId: 'desc' },
-        { quarter: 'asc' },
-        { eventTime: 'asc' }
-      ],
+      orderBy: [{ matchId: 'desc' }, { quarter: 'asc' }, { eventTime: 'asc' }],
       take: limit,
       include: {
         match: {
@@ -34,23 +30,23 @@ export async function GET(request: NextRequest) {
             homeScore: true,
             opponentScore: true,
             opponent: true,
-            result: true
-          }
-        }
-      }
-    })
+            result: true,
+          },
+        },
+      },
+    });
 
-    return NextResponse.json({ success: true, events })
+    return NextResponse.json({ success: true, events });
   } catch (error) {
-    console.error('获取比赛事件失败:', error)
-    return NextResponse.json({ success: false, error: '获取比赛事件失败' }, { status: 500 })
+    console.error('获取比赛事件失败:', error);
+    return NextResponse.json({ success: false, error: '获取比赛事件失败' }, { status: 500 });
   }
 }
 
 // POST /api/match-events - 添加比赛事件
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = await request.json();
 
     const {
       matchId,
@@ -63,32 +59,34 @@ export async function POST(request: NextRequest) {
       points,
       relatedPlayerId,
       relatedPlayerName,
-      courtZone
-    } = body
+      courtZone,
+    } = body;
 
     if (!matchId || !eventType) {
-      return NextResponse.json(
-        { success: false, error: '缺少必填字段' },
-        { status: 400 }
-      )
+      return NextResponse.json({ success: false, error: '缺少必填字段' }, { status: 400 });
     }
 
     // 如果是得分事件，更新比赛得分
     if (eventType === 'score' && points && points > 0) {
-      const match = await prisma.match.findUnique({ where: { id: matchId } })
+      const match = await prisma.match.findUnique({ where: { id: matchId } });
       if (match) {
-        const isHome = match.isHome
-        const currentScore = isHome ? match.homeScore : match.opponentScore
-        const newScore = currentScore + points
+        const isHome = match.isHome;
+        const currentScore = isHome ? match.homeScore : match.opponentScore;
+        const newScore = currentScore + points;
 
         await prisma.match.update({
           where: { id: matchId },
           data: {
             homeScore: isHome ? newScore : match.homeScore,
             opponentScore: isHome ? match.opponentScore : newScore,
-            result: newScore > match.opponentScore ? 'win' : newScore < match.opponentScore ? 'lose' : 'draw'
-          }
-        })
+            result:
+              newScore > match.opponentScore
+                ? 'win'
+                : newScore < match.opponentScore
+                  ? 'lose'
+                  : 'draw',
+          },
+        });
       }
     }
 
@@ -104,32 +102,32 @@ export async function POST(request: NextRequest) {
         points,
         relatedPlayerId,
         relatedPlayerName,
-        courtZone
-      }
-    })
+        courtZone,
+      },
+    });
 
-    return NextResponse.json({ success: true, event })
+    return NextResponse.json({ success: true, event });
   } catch (error) {
-    console.error('添加比赛事件失败:', error)
-    return NextResponse.json({ success: false, error: '添加比赛事件失败' }, { status: 500 })
+    console.error('添加比赛事件失败:', error);
+    return NextResponse.json({ success: false, error: '添加比赛事件失败' }, { status: 500 });
   }
 }
 
 // DELETE /api/match-events - 删除比赛事件
 export async function DELETE(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams
-    const id = searchParams.get('id')
+    const searchParams = request.nextUrl.searchParams;
+    const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json({ success: false, error: '缺少事件ID' }, { status: 400 })
+      return NextResponse.json({ success: false, error: '缺少事件ID' }, { status: 400 });
     }
 
-    await prisma.matchEvent.delete({ where: { id } })
+    await prisma.matchEvent.delete({ where: { id } });
 
-    return NextResponse.json({ success: true, message: '事件已删除' })
+    return NextResponse.json({ success: true, message: '事件已删除' });
   } catch (error) {
-    console.error('删除比赛事件失败:', error)
-    return NextResponse.json({ success: false, error: '删除比赛事件失败' }, { status: 500 })
+    console.error('删除比赛事件失败:', error);
+    return NextResponse.json({ success: false, error: '删除比赛事件失败' }, { status: 500 });
   }
 }

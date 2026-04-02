@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   ArrowLeft,
   CheckCircle,
@@ -10,179 +10,204 @@ import {
   Users,
   Calendar,
   Save,
-  RefreshCw
-} from 'lucide-react'
+  RefreshCw,
+} from 'lucide-react';
 
 // 类型定义
 type Plan = {
-  id: string
-  title: string
-  date: string
-  group: string
-  theme?: string
-  duration: number
-  status?: string
-}
+  id: string;
+  title: string;
+  date: string;
+  group: string;
+  theme?: string;
+  duration: number;
+  status?: string;
+};
 
 type Player = {
-  id: string
-  name: string
-  group: string
-  parentPhone: string
-}
+  id: string;
+  name: string;
+  group: string;
+  parentPhone: string;
+};
 
 type CheckinRecord = {
-  playerId: string
-  player: Player
-  attendance: string
-  signInTime?: string
-}
+  playerId: string;
+  player: Player;
+  attendance: string;
+  signInTime?: string;
+};
 
 const attendanceOptions = [
-  { value: 'present', label: '出勤', icon: CheckCircle, color: 'bg-green-500', textColor: 'text-green-600' },
-  { value: 'absent', label: '缺勤', icon: XCircle, color: 'bg-red-500', textColor: 'text-red-600' },
-  { value: 'late', label: '迟到', icon: Clock, color: 'bg-yellow-500', textColor: 'text-yellow-600' }
-]
+  {
+    value: 'present',
+    label: '出勤',
+    icon: CheckCircle,
+    color: 'bg-green-500',
+    textColor: 'text-green-600',
+  },
+  {
+    value: 'absent',
+    label: '缺勤',
+    icon: XCircle,
+    color: 'bg-red-500',
+    textColor: 'text-red-600',
+  },
+  {
+    value: 'late',
+    label: '迟到',
+    icon: Clock,
+    color: 'bg-yellow-500',
+    textColor: 'text-yellow-600',
+  },
+];
 
 export default function CheckinPage() {
-  const [plans, setPlans] = useState<Plan[]>([])
-  const [players, setPlayers] = useState<Player[]>([])
-  const [records, setRecords] = useState<Record<string, CheckinRecord>>({})
-  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [records, setRecords] = useState<Record<string, CheckinRecord>>({});
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   // 临时记录（未保存的更改）
-  const [tempRecords, setTempRecords] = useState<Record<string, string>>({})
+  const [tempRecords, setTempRecords] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    fetchPlans()
-    fetchPlayers()
-  }, [])
+    fetchPlans();
+    fetchPlayers();
+  }, []);
 
   async function fetchPlans() {
     try {
-      const response = await fetch('/api/plans?limit=20')
-      const data = await response.json()
+      const response = await fetch('/api/plans?limit=20');
+      const data = await response.json();
       if (data.success) {
         // 只显示已发布的
-        setPlans(data.plans.filter((p: Plan) => !p.status || p.status === 'published'))
+        setPlans(data.plans.filter((p: Plan) => !p.status || p.status === 'published'));
       }
     } catch (error) {
-      console.error('获取教案失败:', error)
+      console.error('获取教案失败:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function fetchPlayers() {
     try {
-      const response = await fetch('/api/players?status=training')
-      const data = await response.json()
+      const response = await fetch('/api/players?status=training');
+      const data = await response.json();
       if (data.success) {
-        setPlayers(data.players)
+        setPlayers(data.players);
       }
     } catch (error) {
-      console.error('获取学员失败:', error)
+      console.error('获取学员失败:', error);
     }
   }
 
   async function selectPlan(plan: Plan) {
-    setSelectedPlan(plan)
-    setTempRecords({})
+    setSelectedPlan(plan);
+    setTempRecords({});
 
     // 获取已有的签到记录
     try {
-      const response = await fetch(`/api/checkin?planId=${plan.id}`)
-      const data = await response.json()
+      const response = await fetch(`/api/checkin?planId=${plan.id}`);
+      const data = await response.json();
       if (data.success && data.records) {
-        const recordMap: Record<string, CheckinRecord> = {}
+        const recordMap: Record<string, CheckinRecord> = {};
         data.records.forEach((r: CheckinRecord) => {
-          recordMap[r.playerId] = r
-        })
-        setRecords(recordMap)
+          recordMap[r.playerId] = r;
+        });
+        setRecords(recordMap);
         // 初始化临时记录
-        const temp: Record<string, string> = {}
+        const temp: Record<string, string> = {};
         data.records.forEach((r: CheckinRecord) => {
-          temp[r.playerId] = r.attendance
-        })
-        setTempRecords(temp)
+          temp[r.playerId] = r.attendance;
+        });
+        setTempRecords(temp);
       } else {
-        setRecords({})
+        setRecords({});
         // 全部设为出勤
-        const temp: Record<string, string> = {}
-        players.forEach(p => { temp[p.id] = 'present' })
-        setTempRecords(temp)
+        const temp: Record<string, string> = {};
+        players.forEach(p => {
+          temp[p.id] = 'present';
+        });
+        setTempRecords(temp);
       }
     } catch (error) {
-      console.error('获取签到记录失败:', error)
+      console.error('获取签到记录失败:', error);
     }
   }
 
   function handleAttendance(playerId: string, attendance: string) {
     setTempRecords(prev => ({
       ...prev,
-      [playerId]: attendance
-    }))
+      [playerId]: attendance,
+    }));
   }
 
   async function handleSave() {
-    if (!selectedPlan) return
+    if (!selectedPlan) return;
 
-    setSaving(true)
+    setSaving(true);
     try {
       const recordsList = players.map(player => ({
         playerId: player.id,
-        attendance: tempRecords[player.id] || 'present'
-      }))
+        attendance: tempRecords[player.id] || 'present',
+      }));
 
       const response = await fetch('/api/checkin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           planId: selectedPlan.id,
-          records: recordsList
-        })
-      })
+          records: recordsList,
+        }),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
       if (data.success) {
-        alert('签到保存成功！')
-        selectPlan(selectedPlan) // 刷新
+        alert('签到保存成功！');
+        selectPlan(selectedPlan); // 刷新
       } else {
-        alert('保存失败')
+        alert('保存失败');
       }
     } catch (error) {
-      console.error('保存失败:', error)
-      alert('保存失败')
+      console.error('保存失败:', error);
+      alert('保存失败');
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
   }
 
   function markAllPresent() {
-    const temp: Record<string, string> = {}
-    players.forEach(p => { temp[p.id] = 'present' })
-    setTempRecords(temp)
+    const temp: Record<string, string> = {};
+    players.forEach(p => {
+      temp[p.id] = 'present';
+    });
+    setTempRecords(temp);
   }
 
   function getAttendanceCount(type: string) {
-    return Object.values(tempRecords).filter(v => v === type).length
+    return Object.values(tempRecords).filter(v => v === type).length;
   }
 
   // 按班级分组学员
-  const groupedPlayers = players.reduce((acc, player) => {
-    if (!acc[player.group]) acc[player.group] = []
-    acc[player.group].push(player)
-    return acc
-  }, {} as Record<string, Player[]>)
+  const groupedPlayers = players.reduce(
+    (acc, player) => {
+      if (!acc[player.group]) acc[player.group] = [];
+      acc[player.group].push(player);
+      return acc;
+    },
+    {} as Record<string, Player[]>
+  );
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
       </div>
-    )
+    );
   }
 
   return (
@@ -234,12 +259,17 @@ export default function CheckinPage() {
         {selectedPlan && (
           <div className="grid grid-cols-3 gap-4 mb-6">
             {attendanceOptions.map(option => {
-              const count = getAttendanceCount(option.value)
-              const Icon = option.icon
+              const count = getAttendanceCount(option.value);
+              const Icon = option.icon;
               return (
-                <div key={option.value} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                <div
+                  key={option.value}
+                  className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
+                >
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full ${option.color} flex items-center justify-center`}>
+                    <div
+                      className={`w-10 h-10 rounded-full ${option.color} flex items-center justify-center`}
+                    >
                       <Icon className="w-5 h-5 text-white" />
                     </div>
                     <div>
@@ -248,7 +278,7 @@ export default function CheckinPage() {
                     </div>
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         )}
@@ -261,7 +291,10 @@ export default function CheckinPage() {
               <div className="text-center py-8 text-gray-500">
                 <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                 <p>暂无训练课程</p>
-                <Link href="/plan/new" className="text-orange-500 hover:text-orange-600 mt-2 inline-block">
+                <Link
+                  href="/plan/new"
+                  className="text-orange-500 hover:text-orange-600 mt-2 inline-block"
+                >
                   创建教案
                 </Link>
               </div>
@@ -281,9 +314,7 @@ export default function CheckinPage() {
                       <span className="text-xs px-2 py-0.5 bg-orange-100 text-orange-700 rounded">
                         {plan.group}
                       </span>
-                      {plan.theme && (
-                        <span className="text-xs text-gray-500">{plan.theme}</span>
-                      )}
+                      {plan.theme && <span className="text-xs text-gray-500">{plan.theme}</span>}
                     </div>
                   </button>
                 ))}
@@ -301,8 +332,9 @@ export default function CheckinPage() {
                     {new Date(selectedPlan.date).toLocaleDateString('zh-CN', {
                       weekday: 'long',
                       month: 'long',
-                      day: 'numeric'
-                    })} · {selectedPlan.duration}分钟
+                      day: 'numeric',
+                    })}{' '}
+                    · {selectedPlan.duration}分钟
                   </p>
                 </div>
                 <button
@@ -317,7 +349,10 @@ export default function CheckinPage() {
                 <div className="text-center py-8 text-gray-500">
                   <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                   <p>暂无学员</p>
-                  <Link href="/players" className="text-orange-500 hover:text-orange-600 mt-2 inline-block">
+                  <Link
+                    href="/players"
+                    className="text-orange-500 hover:text-orange-600 mt-2 inline-block"
+                  >
                     去添加学员
                   </Link>
                 </div>
@@ -330,8 +365,8 @@ export default function CheckinPage() {
                     </h3>
                     <div className="grid gap-3">
                       {groupPlayers.map(player => {
-                        const currentAttendance = tempRecords[player.id] || 'present'
-                        const existingRecord = records[player.id]
+                        const currentAttendance = tempRecords[player.id] || 'present';
+                        const existingRecord = records[player.id];
 
                         return (
                           <div
@@ -353,8 +388,8 @@ export default function CheckinPage() {
                             {/* 出勤状态 */}
                             <div className="flex items-center gap-2">
                               {attendanceOptions.map(option => {
-                                const Icon = option.icon
-                                const isSelected = currentAttendance === option.value
+                                const Icon = option.icon;
+                                const isSelected = currentAttendance === option.value;
                                 return (
                                   <button
                                     key={option.value}
@@ -368,11 +403,11 @@ export default function CheckinPage() {
                                     <Icon className="w-4 h-4" />
                                     {option.label}
                                   </button>
-                                )
+                                );
                               })}
                             </div>
                           </div>
-                        )
+                        );
                       })}
                     </div>
                   </div>
@@ -383,5 +418,5 @@ export default function CheckinPage() {
         )}
       </main>
     </div>
-  )
+  );
 }

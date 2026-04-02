@@ -1,17 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
+
+import prisma from '@/lib/db';
 
 // GET /api/records - 获取训练记录列表
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const playerId = searchParams.get('playerId')
-    const planId = searchParams.get('planId')
-    const limit = parseInt(searchParams.get('limit') || '50')
+    const { searchParams } = new URL(request.url);
+    const playerId = searchParams.get('playerId');
+    const planId = searchParams.get('planId');
+    const limit = parseInt(searchParams.get('limit') || '50');
 
-    const where: any = {}
-    if (playerId) where.playerId = playerId
-    if (planId) where.planId = planId
+    const where: Prisma.TrainingRecordWhereInput = {};
+    if (playerId) where.playerId = playerId;
+    if (planId) where.planId = planId;
 
     const records = await prisma.trainingRecord.findMany({
       where,
@@ -20,8 +22,8 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             name: true,
-            group: true
-          }
+            group: true,
+          },
         },
         plan: {
           select: {
@@ -29,13 +31,13 @@ export async function GET(request: NextRequest) {
             title: true,
             date: true,
             group: true,
-            theme: true
-          }
-        }
+            theme: true,
+          },
+        },
       },
       orderBy: { recordedAt: 'desc' },
-      take: limit
-    })
+      take: limit,
+    });
 
     // 格式化数据
     const formattedRecords = records.map(r => ({
@@ -65,27 +67,24 @@ export async function GET(request: NextRequest) {
       mediaUrls: r.mediaUrls ? JSON.parse(r.mediaUrls) : [],
       coachConfirmed: r.coachConfirmed,
       parentViewed: r.parentViewed,
-      recordedAt: r.recordedAt
-    }))
+      recordedAt: r.recordedAt,
+    }));
 
     return NextResponse.json({
       success: true,
       records: formattedRecords,
-      total: formattedRecords.length
-    })
+      total: formattedRecords.length,
+    });
   } catch (error) {
-    console.error('获取训练记录失败:', error)
-    return NextResponse.json(
-      { success: false, error: '获取训练记录失败' },
-      { status: 500 }
-    )
+    console.error('获取训练记录失败:', error);
+    return NextResponse.json({ success: false, error: '获取训练记录失败' }, { status: 500 });
   }
 }
 
 // POST /api/records - 创建训练记录
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = await request.json();
 
     const {
       planId,
@@ -104,15 +103,12 @@ export async function POST(request: NextRequest) {
       improvements,
       skillScores,
       homework,
-      mediaUrls
-    } = body
+      mediaUrls,
+    } = body;
 
     // 验证必填字段
     if (!planId) {
-      return NextResponse.json(
-        { success: false, error: '教案ID是必填项' },
-        { status: 400 }
-      )
+      return NextResponse.json({ success: false, error: '教案ID是必填项' }, { status: 400 });
     }
 
     const record = await prisma.trainingRecord.create({
@@ -133,39 +129,36 @@ export async function POST(request: NextRequest) {
         improvements,
         skillScores: skillScores ? JSON.stringify(skillScores) : null,
         homework,
-        mediaUrls: mediaUrls ? JSON.stringify(mediaUrls) : null
+        mediaUrls: mediaUrls ? JSON.stringify(mediaUrls) : null,
       },
       include: {
         player: {
           select: {
             id: true,
             name: true,
-            group: true
-          }
+            group: true,
+          },
         },
         plan: {
           select: {
             id: true,
             title: true,
-            date: true
-          }
-        }
-      }
-    })
+            date: true,
+          },
+        },
+      },
+    });
 
     return NextResponse.json({
       success: true,
       record: {
         ...record,
         skillScores: skillScores || null,
-        mediaUrls: mediaUrls || []
-      }
-    })
+        mediaUrls: mediaUrls || [],
+      },
+    });
   } catch (error) {
-    console.error('创建训练记录失败:', error)
-    return NextResponse.json(
-      { success: false, error: '创建训练记录失败' },
-      { status: 500 }
-    )
+    console.error('创建训练记录失败:', error);
+    return NextResponse.json({ success: false, error: '创建训练记录失败' }, { status: 500 });
   }
 }

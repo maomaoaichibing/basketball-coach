@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   ArrowLeft,
   Save,
@@ -12,56 +12,60 @@ import {
   Plus,
   Trash2,
   GripVertical,
-  ChevronDown
-} from 'lucide-react'
+  ChevronDown,
+} from 'lucide-react';
 
 type Section = {
-  category: string
-  name: string
-  duration: number
+  category: string;
+  name: string;
+  duration: number;
   activities: {
-    name: string
-    duration: number
-    description: string
-    keyPoints?: string[]
-    equipment?: string[]
-    coachGuide?: string
-  }[]
-  points?: string[]
-}
+    name: string;
+    duration: number;
+    description: string;
+    keyPoints?: string[];
+    equipment?: string[];
+    coachGuide?: string;
+  }[];
+  points?: string[];
+};
 
 type TrainingPlan = {
-  id: string
-  title: string
-  group: string
-  date: string
-  duration: number
-  location: string
-  weather?: string
-  theme?: string
-  focusSkills?: string
-  intensity?: string
-  status?: string
-  sections?: string
-  notes?: string
-}
+  id: string;
+  title: string;
+  group: string;
+  date: string;
+  duration: number;
+  location: string;
+  weather?: string;
+  theme?: string;
+  focusSkills?: string;
+  intensity?: string;
+  status?: string;
+  sections?: string;
+  notes?: string;
+};
 
 const categories = [
   { id: 'warmup', label: '热身', color: 'bg-yellow-100 text-yellow-700' },
-  { id: 'ball_familiarity', label: '球性', color: 'bg-amber-100 text-amber-700' },
+  {
+    id: 'ball_familiarity',
+    label: '球性',
+    color: 'bg-amber-100 text-amber-700',
+  },
   { id: 'technical', label: '技术', color: 'bg-blue-100 text-blue-700' },
   { id: 'physical', label: '体能', color: 'bg-orange-100 text-orange-700' },
   { id: 'tactical', label: '战术', color: 'bg-purple-100 text-purple-700' },
   { id: 'game', label: '对抗', color: 'bg-red-100 text-red-700' },
   { id: 'cooldown', label: '放松', color: 'bg-green-100 text-green-700' },
-]
+];
 
 export default function EditPlanPage({ params }: { params: { id: string } }) {
-  const router = useRouter()
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [plan, setPlan] = useState<TrainingPlan | null>(null)
-  const [sections, setSections] = useState<Section[]>([])
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [plan, setPlan] = useState<TrainingPlan | null>(null);
+  const [sections, setSections] = useState<Section[]>([]);
 
   // 表单状态
   const [form, setForm] = useState({
@@ -72,21 +76,21 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
     weather: '',
     theme: '',
     intensity: 'medium',
-    notes: ''
-  })
+    notes: '',
+  });
 
   useEffect(() => {
-    fetchPlan()
-  }, [params.id])
+    fetchPlan();
+  }, [params.id]);
 
   async function fetchPlan() {
     try {
-      const response = await fetch(`/api/plans/${params.id}`)
-      const data = await response.json()
+      const response = await fetch(`/api/plans/${params.id}`);
+      const data = await response.json();
 
       if (data.success) {
-        const p = data.plan
-        setPlan(p)
+        const p = data.plan;
+        setPlan(p);
         setForm({
           title: p.title || '',
           date: p.date ? p.date.split('T')[0] : '',
@@ -95,73 +99,76 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
           weather: p.weather || '',
           theme: p.theme || '',
           intensity: p.intensity || 'medium',
-          notes: p.notes || ''
-        })
-        setSections(p.sections ? JSON.parse(p.sections) : [])
+          notes: p.notes || '',
+        });
+        setSections(p.sections ? JSON.parse(p.sections) : []);
       }
     } catch (error) {
-      console.error('获取教案失败:', error)
-      alert('获取教案失败')
+      console.error('获取教案失败:', error);
+      alert('获取教案失败');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   // 添加环节
   function addSection() {
-    setSections([...sections, {
-      category: 'warmup',
-      name: '',
-      duration: 10,
-      activities: []
-    }])
+    setSections([
+      ...sections,
+      {
+        category: 'warmup',
+        name: '',
+        duration: 10,
+        activities: [],
+      },
+    ]);
   }
 
   // 删除环节
   function removeSection(index: number) {
-    setSections(sections.filter((_, i) => i !== index))
+    setSections(sections.filter((_, i) => i !== index));
   }
 
   // 更新环节
   function updateSection(index: number, field: string, value: any) {
-    const newSections = [...sections]
-    ;(newSections[index] as any)[field] = value
-    setSections(newSections)
+    const newSections = [...sections];
+    (newSections[index] as any)[field] = value;
+    setSections(newSections);
   }
 
   // 添加活动
   function addActivity(sectionIndex: number) {
-    const newSections = [...sections]
+    const newSections = [...sections];
     newSections[sectionIndex].activities.push({
       name: '',
       duration: 5,
-      description: ''
-    })
-    setSections(newSections)
+      description: '',
+    });
+    setSections(newSections);
   }
 
   // 删除活动
   function removeActivity(sectionIndex: number, activityIndex: number) {
-    const newSections = [...sections]
-    newSections[sectionIndex].activities.splice(activityIndex, 1)
-    setSections(newSections)
+    const newSections = [...sections];
+    newSections[sectionIndex].activities.splice(activityIndex, 1);
+    setSections(newSections);
   }
 
   // 更新活动
   function updateActivity(sectionIndex: number, activityIndex: number, field: string, value: any) {
-    const newSections = [...sections]
-    ;(newSections[sectionIndex].activities[activityIndex] as any)[field] = value
-    setSections(newSections)
+    const newSections = [...sections];
+    (newSections[sectionIndex].activities[activityIndex] as any)[field] = value;
+    setSections(newSections);
   }
 
   // 保存
   async function handleSave() {
     if (!form.title) {
-      alert('请输入教案标题')
-      return
+      alert('请输入教案标题');
+      return;
     }
 
-    setSaving(true)
+    setSaving(true);
 
     try {
       const response = await fetch(`/api/plans/${params.id}`, {
@@ -176,23 +183,23 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
           theme: form.theme || null,
           intensity: form.intensity,
           notes: form.notes || null,
-          sections: JSON.stringify(sections)
-        })
-      })
+          sections: JSON.stringify(sections),
+        }),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
-        alert('保存成功！')
-        router.push(`/plans/${params.id}`)
+        alert('保存成功！');
+        router.push(`/plans/${params.id}`);
       } else {
-        alert('保存失败：' + data.error)
+        alert('保存失败：' + data.error);
       }
     } catch (error) {
-      console.error('保存失败:', error)
-      alert('保存失败')
+      console.error('保存失败:', error);
+      alert('保存失败');
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
   }
 
@@ -201,7 +208,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
       </div>
-    )
+    );
   }
 
   if (!plan) {
@@ -209,10 +216,12 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-bold text-gray-900 mb-2">教案不存在</h2>
-          <Link href="/plans" className="text-orange-600 hover:text-orange-700">返回教案库</Link>
+          <Link href="/plans" className="text-orange-600 hover:text-orange-700">
+            返回教案库
+          </Link>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -257,7 +266,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
               <input
                 type="text"
                 value={form.title}
-                onChange={e => setForm({...form, title: e.target.value})}
+                onChange={e => setForm({ ...form, title: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 placeholder="输入教案标题"
               />
@@ -268,7 +277,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
               <input
                 type="date"
                 value={form.date}
-                onChange={e => setForm({...form, date: e.target.value})}
+                onChange={e => setForm({ ...form, date: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               />
             </div>
@@ -277,7 +286,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
               <label className="block text-sm font-medium text-gray-700 mb-1">训练时长</label>
               <select
                 value={form.duration}
-                onChange={e => setForm({...form, duration: parseInt(e.target.value)})}
+                onChange={e => setForm({ ...form, duration: parseInt(e.target.value) })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               >
                 <option value={60}>60分钟</option>
@@ -290,7 +299,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
               <label className="block text-sm font-medium text-gray-700 mb-1">训练场地</label>
               <select
                 value={form.location}
-                onChange={e => setForm({...form, location: e.target.value})}
+                onChange={e => setForm({ ...form, location: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               >
                 <option value="室内">室内</option>
@@ -302,7 +311,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
               <label className="block text-sm font-medium text-gray-700 mb-1">天气</label>
               <select
                 value={form.weather}
-                onChange={e => setForm({...form, weather: e.target.value})}
+                onChange={e => setForm({ ...form, weather: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               >
                 <option value="">不限定</option>
@@ -317,7 +326,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
               <label className="block text-sm font-medium text-gray-700 mb-1">训练主题</label>
               <select
                 value={form.theme}
-                onChange={e => setForm({...form, theme: e.target.value})}
+                onChange={e => setForm({ ...form, theme: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               >
                 <option value="">选择主题</option>
@@ -336,7 +345,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
               <label className="block text-sm font-medium text-gray-700 mb-1">备注</label>
               <textarea
                 value={form.notes}
-                onChange={e => setForm({...form, notes: e.target.value})}
+                onChange={e => setForm({ ...form, notes: e.target.value })}
                 rows={2}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 placeholder="训练注意事项..."
@@ -361,10 +370,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
           {sections.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <p>暂无训练内容</p>
-              <button
-                onClick={addSection}
-                className="mt-2 text-orange-500 hover:text-orange-600"
-              >
+              <button onClick={addSection} className="mt-2 text-orange-500 hover:text-orange-600">
                 添加第一个环节
               </button>
             </div>
@@ -380,7 +386,9 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
                       className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm"
                     >
                       {categories.map(cat => (
-                        <option key={cat.id} value={cat.id}>{cat.label}</option>
+                        <option key={cat.id} value={cat.id}>
+                          {cat.label}
+                        </option>
                       ))}
                     </select>
                     <input
@@ -395,7 +403,9 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
                       <input
                         type="number"
                         value={section.duration}
-                        onChange={e => updateSection(sectionIndex, 'duration', parseInt(e.target.value) || 0)}
+                        onChange={e =>
+                          updateSection(sectionIndex, 'duration', parseInt(e.target.value) || 0)
+                        }
                         className="w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-center"
                         min={1}
                       />
@@ -420,14 +430,23 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
                           <input
                             type="text"
                             value={activity.name}
-                            onChange={e => updateActivity(sectionIndex, activityIndex, 'name', e.target.value)}
+                            onChange={e =>
+                              updateActivity(sectionIndex, activityIndex, 'name', e.target.value)
+                            }
                             placeholder="活动名称"
                             className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
                           />
                           <input
                             type="number"
                             value={activity.duration}
-                            onChange={e => updateActivity(sectionIndex, activityIndex, 'duration', parseInt(e.target.value) || 0)}
+                            onChange={e =>
+                              updateActivity(
+                                sectionIndex,
+                                activityIndex,
+                                'duration',
+                                parseInt(e.target.value) || 0
+                              )
+                            }
                             className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
                             min={1}
                           />
@@ -441,7 +460,14 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
                         </div>
                         <textarea
                           value={activity.description}
-                          onChange={e => updateActivity(sectionIndex, activityIndex, 'description', e.target.value)}
+                          onChange={e =>
+                            updateActivity(
+                              sectionIndex,
+                              activityIndex,
+                              'description',
+                              e.target.value
+                            )
+                          }
                           placeholder="活动描述..."
                           rows={2}
                           className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
@@ -463,5 +489,5 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
         </div>
       </main>
     </div>
-  )
+  );
 }

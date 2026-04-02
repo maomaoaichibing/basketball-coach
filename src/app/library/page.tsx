@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import { ArrowLeft, ClipboardList } from 'lucide-react'
+import Link from 'next/link';
+import { ArrowLeft, ClipboardList } from 'lucide-react';
 
 export default function LibraryPage() {
   return (
@@ -22,5 +22,5 @@ export default function LibraryPage() {
         <p className="text-gray-500">即将推出</p>
       </main>
     </div>
-  )
+  );
 }

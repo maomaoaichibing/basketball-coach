@@ -1,30 +1,31 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+
+import prisma from '@/lib/db';
 
 // GET /api/players - 获取所有学员
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const group = searchParams.get('group')
-    const status = searchParams.get('status')
-    const search = searchParams.get('search')
+    const { searchParams } = new URL(request.url);
+    const group = searchParams.get('group');
+    const status = searchParams.get('status');
+    const search = searchParams.get('search');
 
-    const where: any = {}
+    const where: Record<string, unknown> = {};
 
     if (group && group !== 'all') {
-      where.group = group
+      where.group = group;
     }
 
     if (status && status !== 'all') {
-      where.status = status
+      where.status = status;
     }
 
     if (search) {
       where.OR = [
         { name: { contains: search } },
         { parentName: { contains: search } },
-        { parentPhone: { contains: search } }
-      ]
+        { parentPhone: { contains: search } },
+      ];
     }
 
     const players = await prisma.player.findMany({
@@ -35,21 +36,18 @@ export async function GET(request: NextRequest) {
         _count: {
           select: {
             records: true,
-            assessments: true
-          }
-        }
+            assessments: true,
+          },
+        },
       },
-      orderBy: [
-        { group: 'asc' },
-        { name: 'asc' }
-      ]
-    })
+      orderBy: [{ group: 'asc' }, { name: 'asc' }],
+    });
 
     // 转换数据格式
     const formattedPlayers = players.map(p => {
       // 计算年龄
-      const birth = new Date(p.birthDate)
-      const age = Math.floor((Date.now() - birth.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+      const birth = new Date(p.birthDate);
+      const age = Math.floor((Date.now() - birth.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
 
       return {
         id: p.id,
@@ -73,28 +71,25 @@ export async function GET(request: NextRequest) {
         trainingCount: p._count.records,
         assessmentCount: p._count.assessments,
         createdAt: p.createdAt,
-        age // 添加年龄字段
-      }
-    })
+        age, // 添加年龄字段
+      };
+    });
 
     return NextResponse.json({
       success: true,
       players: formattedPlayers,
-      total: formattedPlayers.length
-    })
+      total: formattedPlayers.length,
+    });
   } catch (error) {
-    console.error('获取学员列表失败:', error)
-    return NextResponse.json(
-      { success: false, error: '获取学员列表失败' },
-      { status: 500 }
-    )
+    console.error('获取学员列表失败:', error);
+    return NextResponse.json({ success: false, error: '获取学员列表失败' }, { status: 500 });
   }
 }
 
 // POST /api/players - 创建新学员
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = await request.json();
 
     const {
       name,
@@ -111,20 +106,20 @@ export async function POST(request: NextRequest) {
       parentWechat,
       teamId,
       tags = [],
-      guardians = []
-    } = body
+      guardians = [],
+    } = body;
 
     // 验证必填字段
     if (!name || !birthDate) {
       return NextResponse.json(
         { success: false, error: '姓名和出生日期是必填项' },
         { status: 400 }
-      )
+      );
     }
 
     // 计算年龄
-    const birth = new Date(birthDate)
-    const age = Math.floor((Date.now() - birth.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+    const birth = new Date(birthDate);
+    const age = Math.floor((Date.now() - birth.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
 
     const player = await prisma.player.create({
       data: {
@@ -149,13 +144,13 @@ export async function POST(request: NextRequest) {
         shooting: 5,
         defending: 5,
         physical: 5,
-        tactical: 5
-      } as any,
+        tactical: 5,
+      },
       include: {
         team: true,
-        guardians: true
-      }
-    })
+        guardians: true,
+      },
+    });
 
     // 如果提供了监护人信息，一并创建
     if (guardians && guardians.length > 0) {
@@ -168,9 +163,9 @@ export async function POST(request: NextRequest) {
             mobile: guardian.mobile,
             wechat: guardian.wechat,
             email: guardian.email,
-            isPrimary: guardian.isPrimary || false
-          }
-        })
+            isPrimary: guardian.isPrimary || false,
+          },
+        });
       }
     }
 
@@ -179,14 +174,11 @@ export async function POST(request: NextRequest) {
       player: {
         ...player,
         tags: JSON.parse(player.tags || '[]'),
-        injuries: JSON.parse(player.injuries || '[]')
-      }
-    })
+        injuries: JSON.parse(player.injuries || '[]'),
+      },
+    });
   } catch (error) {
-    console.error('创建学员失败:', error)
-    return NextResponse.json(
-      { success: false, error: '创建学员失败' },
-      { status: 500 }
-    )
+    console.error('创建学员失败:', error);
+    return NextResponse.json({ success: false, error: '创建学员失败' }, { status: 500 });
   }
 }

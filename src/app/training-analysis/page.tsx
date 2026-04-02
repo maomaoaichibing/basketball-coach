@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import {
   Activity,
   TrendingUp,
@@ -10,48 +10,54 @@ import {
   AlertTriangle,
   Star,
   BarChart3,
-  Filter
-} from 'lucide-react'
+  Filter,
+} from 'lucide-react';
 
 interface TrainingAnalysis {
-  totalRecords: number
+  totalRecords: number;
   attendance: {
-    present: number
-    absent: number
-    late: number
-    rate: string
-  }
-  skillStats: Record<string, { avg: number }>
-  performanceTrend: { index: number; date: string; performance: number | null; effort: number | null; attitude: number | null }[]
-  monthlyStats: Record<string, number>
-  topIssues: { issue: string; count: number }[]
-  topHighlights: { highlight: string; count: number }[]
-  groupDistribution: { coachName: string; _count: number }[]
+    present: number;
+    absent: number;
+    late: number;
+    rate: string;
+  };
+  skillStats: Record<string, { avg: number }>;
+  performanceTrend: {
+    index: number;
+    date: string;
+    performance: number | null;
+    effort: number | null;
+    attitude: number | null;
+  }[];
+  monthlyStats: Record<string, number>;
+  topIssues: { issue: string; count: number }[];
+  topHighlights: { highlight: string; count: number }[];
+  groupDistribution: { coachName: string; _count: number }[];
 }
 
 export default function TrainingAnalysisPage() {
-  const [analysis, setAnalysis] = useState<TrainingAnalysis | null>(null)
-  const [group, setGroup] = useState('')
-  const [groups, setGroups] = useState<string[]>(['U6', 'U8', 'U10', 'U12', 'U14'])
-  const [loading, setLoading] = useState(true)
+  const [analysis, setAnalysis] = useState<TrainingAnalysis | null>(null);
+  const [group, setGroup] = useState('');
+  const [groups, setGroups] = useState<string[]>(['U6', 'U8', 'U10', 'U12', 'U14']);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchAnalysis()
-  }, [group])
+    fetchAnalysis();
+  }, [group]);
 
   const fetchAnalysis = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const params = new URLSearchParams()
-      if (group) params.set('group', group)
-      const res = await fetch(`/api/training-analysis?${params}`)
-      const data = await res.json()
-      setAnalysis(data)
+      const params = new URLSearchParams();
+      if (group) params.set('group', group);
+      const res = await fetch(`/api/training-analysis?${params}`);
+      const data = await res.json();
+      setAnalysis(data);
     } catch (error) {
-      console.error('获取训练分析失败:', error)
+      console.error('获取训练分析失败:', error);
     }
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   const skillNames: Record<string, string> = {
     dribbling: '运球',
@@ -60,9 +66,9 @@ export default function TrainingAnalysisPage() {
     defending: '防守',
     physical: '体能',
     tactical: '战术',
-  }
+  };
 
-  const formatSkillName = (skill: string) => skillNames[skill] || skill
+  const formatSkillName = (skill: string) => skillNames[skill] || skill;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -83,12 +89,14 @@ export default function TrainingAnalysisPage() {
               <Filter className="w-4 h-4 text-gray-400" />
               <select
                 value={group}
-                onChange={(e) => setGroup(e.target.value)}
+                onChange={e => setGroup(e.target.value)}
                 className="px-3 py-2 border rounded-lg"
               >
                 <option value="">全部分组</option>
-                {groups.map((g) => (
-                  <option key={g} value={g}>{g}</option>
+                {groups.map(g => (
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
                 ))}
               </select>
             </div>
@@ -218,9 +226,11 @@ export default function TrainingAnalysisPage() {
                       <div className="flex-1 bg-gray-100 rounded-full h-3">
                         <div
                           className={`h-3 rounded-full ${
-                            stats.avg >= 7 ? 'bg-green-500' :
-                            stats.avg >= 5 ? 'bg-blue-500' :
-                            'bg-orange-500'
+                            stats.avg >= 7
+                              ? 'bg-green-500'
+                              : stats.avg >= 5
+                                ? 'bg-blue-500'
+                                : 'bg-orange-500'
                           }`}
                           style={{ width: `${stats.avg * 10}%` }}
                         ></div>
@@ -295,9 +305,7 @@ export default function TrainingAnalysisPage() {
             <div className="space-y-3">
               {analysis.groupDistribution.map((item, index) => (
                 <div key={index} className="flex items-center gap-3">
-                  <span className="text-sm text-gray-600 w-24">
-                    {item.coachName || '未分配'}
-                  </span>
+                  <span className="text-sm text-gray-600 w-24">{item.coachName || '未分配'}</span>
                   <div className="flex-1 bg-gray-100 rounded-full h-2">
                     <div
                       className="bg-blue-500 h-2 rounded-full"
@@ -320,5 +328,5 @@ export default function TrainingAnalysisPage() {
         </div>
       )}
     </div>
-  )
+  );
 }
