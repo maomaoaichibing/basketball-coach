@@ -7,6 +7,20 @@ const prisma = new PrismaClient();
 type ExportData = Record<string, string | number>;
 type ExportRow = ExportData;
 
+// 扩展类型定义，包含关联数据
+interface TrainingPlanWithTeam extends TrainingPlan {
+  team?: { name: string } | null;
+}
+
+interface PlayerWithTeam extends Player {
+  team?: { name: string } | null;
+}
+
+interface TrainingRecordWithRelations extends TrainingRecord {
+  plan?: { title: string; date: Date; duration: number } | null;
+  player?: { name: string; group: string } | null;
+}
+
 // GET /api/export - 导出数据
 // ?type=plans|players|records&format=excel
 export async function GET(request: NextRequest) {
@@ -71,7 +85,7 @@ async function exportPlans() {
     },
   });
 
-  return plans.map(plan => ({
+  return plans.map((plan: TrainingPlanWithTeam) => ({
     教案标题: plan.title,
     训练日期: new Date(plan.date).toLocaleDateString('zh-CN'),
     '时长(分钟)': plan.duration,
@@ -80,7 +94,7 @@ async function exportPlans() {
     天气: plan.weather || '-',
     主题: plan.theme || '-',
     状态: plan.status === 'draft' ? '草稿' : plan.status === 'published' ? '已发布' : '已完成',
-    队伍: (plan as any).team?.name || '-',
+    队伍: plan.team?.name || '-',
     创建时间: new Date(plan.createdAt).toLocaleString('zh-CN'),
   }));
 }
@@ -93,7 +107,7 @@ async function exportPlayers() {
     },
   });
 
-  return players.map(player => ({
+  return players.map((player: PlayerWithTeam) => ({
     姓名: player.name,
     性别: player.gender === 'male' ? '男' : '女',
     出生日期: player.birthDate ? new Date(player.birthDate).toLocaleDateString('zh-CN') : '-',
@@ -106,7 +120,7 @@ async function exportPlayers() {
     学校: player.school || '-',
     '身高(cm)': player.height || '-',
     '体重(kg)': player.weight || '-',
-    所属队伍: (player as any).team?.name || '未分配',
+    所属队伍: player.team?.name || '未分配',
     状态:
       player.status === 'training'
         ? '训练中'
@@ -130,16 +144,14 @@ async function exportRecords() {
     },
   });
 
-  return records.map(record => ({
-    训练日期: (record as any).plan?.date
-      ? new Date((record as any).plan.date).toLocaleDateString('zh-CN')
-      : '-',
-    教案名称: (record as any).plan?.title || '-',
-    学员姓名: (record as any).player?.name || '-',
-    年龄段: (record as any).player?.group || '-',
+  return records.map((record: TrainingRecordWithRelations) => ({
+    训练日期: record.plan?.date ? new Date(record.plan.date).toLocaleDateString('zh-CN') : '-',
+    教案名称: record.plan?.title || '-',
+    学员姓名: record.player?.name || '-',
+    年龄段: record.player?.group || '-',
     出勤状态:
       record.attendance === 'present' ? '出勤' : record.attendance === 'late' ? '迟到' : '缺勤',
-    训练时长: (record as any).plan?.duration ? `${(record as any).plan.duration}分钟` : '-',
+    训练时长: record.plan?.duration ? `${record.plan.duration}分钟` : '-',
     表现评分: record.performance || '-',
     努力程度: record.effort || '-',
     态度评分: record.attitude || '-',

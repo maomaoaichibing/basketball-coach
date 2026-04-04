@@ -16,6 +16,45 @@ import {
 // 版本历史记录
 const versions = [
   {
+    version: 'v4.7',
+    date: '2026-04-04',
+    title: '教案生成动作规范化 + 篮球场图增强',
+    description: '动作6要素模板 + 投篮/上篮/对抗训练自动生成标准篮球半场图',
+    features: [
+      {
+        type: 'feature',
+        text: '动作描述规范化 - 新增6要素模板：姿势、动作、发力、时间/次数、形式、要点目的',
+      },
+      { type: 'feature', text: '投篮/上篮/对抗训练自动生成标准篮球半场图（三分线、罚球圈、篮筐）' },
+      { type: 'feature', text: '场地图标注站位点和移动路线' },
+      { type: 'feature', text: '参考小基础/小提高教案优化动作描述格式' },
+    ],
+    fixes: [{ type: 'fix', text: '修复动作描述过于笼统的问题（如"球性熟悉"改为具体动作）' }],
+  },
+  {
+    version: 'v4.4',
+    date: '2026-04-03',
+    title: '教案生成增强优化',
+    description: 'SVG战术图解 + 递进式关联设计 + 动作细节完善',
+    features: [
+      { type: 'feature', text: '恢复【列队】【位置】【动作】三段式描述格式' },
+      {
+        type: 'feature',
+        text: '每个活动生成SVG战术图解（学员蓝圈+编号、教练红方块、球橙点、箭头路线）',
+      },
+      { type: 'feature', text: '递进式关联设计：热身基础动作 → 正式标准训练 → 对抗实战应用' },
+      { type: 'feature', text: '添加relatedTo字段：热身动作显示"为后面的XX做准备"关联提示' },
+      { type: 'feature', text: 'trainingProgression字段自动生成完整前后关联说明' },
+      { type: 'feature', text: '每个动作包含组数、次数、递进式3层次设计' },
+      { type: 'feature', text: '生成、保存、查看全流程保持一致' },
+    ],
+    fixes: [
+      { type: 'fix', text: '添加JSON解析错误处理和自动修复机制' },
+      { type: 'fix', text: '修复详情页丢失SVG图解、关联提示等问题' },
+      { type: 'fix', text: '修复campuses页面TypeScript类型错误' },
+    ],
+  },
+  {
     version: 'v4.3',
     date: '2026-03-30',
     title: '版本管理 + UI 优化',

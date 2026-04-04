@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 
 import prisma from '@/lib/db';
+
+// 扩展Player类型，包含技术能力字段
+interface PlayerWithSkills {
+  dribbling: number;
+  passing: number;
+  shooting: number;
+  defending: number;
+  physical: number;
+  tactical: number;
+  birthDate: Date;
+  tags: string | null;
+  injuries: string | null;
+}
 
 // GET /api/players/[id] - 获取学员详情
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -40,13 +54,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     );
 
     // 计算综合能力
+    const playerWithSkills = player as unknown as PlayerWithSkills;
     const avgAbility =
-      ((player as any).dribbling +
-        (player as any).passing +
-        (player as any).shooting +
-        (player as any).defending +
-        (player as any).physical +
-        (player as any).tactical) /
+      (playerWithSkills.dribbling +
+        playerWithSkills.passing +
+        playerWithSkills.shooting +
+        playerWithSkills.defending +
+        playerWithSkills.physical +
+        playerWithSkills.tactical) /
       6;
 
     // 计算总训练次数
@@ -125,7 +140,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ success: false, error: '学员不存在' }, { status: 404 });
     }
 
-    const updateData: Record<string, unknown> = {};
+    const updateData: Prisma.PlayerUpdateInput = {};
 
     if (name !== undefined) updateData.name = name;
     if (birthDate !== undefined) updateData.birthDate = new Date(birthDate);
@@ -139,7 +154,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (parentName !== undefined) updateData.parentName = parentName;
     if (parentPhone !== undefined) updateData.parentPhone = parentPhone;
     if (parentWechat !== undefined) updateData.parentWechat = parentWechat;
-    if (teamId !== undefined) updateData.teamId = teamId;
+    if (teamId !== undefined)
+      updateData.team = teamId ? { connect: { id: teamId } } : { disconnect: true };
     if (tags !== undefined) updateData.tags = JSON.stringify(tags);
     if (injuries !== undefined) updateData.injuries = JSON.stringify(injuries);
 
@@ -150,8 +166,6 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (defending !== undefined) updateData.defending = defending;
     if (physical !== undefined) updateData.physical = physical;
     if (tactical !== undefined) updateData.tactical = tactical;
-    // 整体评估
-    if (overallAssessment !== undefined) updateData.overallAssessment = overallAssessment;
 
     const player = await prisma.player.update({
       where: { id },

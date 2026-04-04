@@ -77,6 +77,7 @@ export interface SectionActivity {
   repetitions?: string; // 次数/时间（如：每组8-10次）
   progression?: string; // 递进式说明（从易到难）
   drillDiagram?: string; // 动作路线示意图（SVG格式）
+  relatedTo?: string; // 关联提示（如：为后面的XX训练做准备）
 }
 
 // ============================================
@@ -88,7 +89,7 @@ const WARMUP_ACTIVITIES: Omit<TrainingActivity, 'id'>[] = [
   {
     name: '集合站队',
     description:
-      '【排面】所有学员在中场线站好，教练与学员相对而站。【动作】教练点名确认学员到齐，引导学员调整站姿，保持安静。',
+      '【姿势】抬头挺胸，双脚与肩同宽，双手放在身体两侧，目视前方\n【动作】教练点名确认学员到齐，引导学员调整站姿，保持安静\n【发力】核心肌群收紧，保持身体稳定\n【次数】1次，持续2分钟\n【形式】集体进行，排面站好\n【要点目的】建立课堂秩序，培养专注力',
     duration: 2,
     category: 'warmup',
     skills: [],
@@ -102,7 +103,7 @@ const WARMUP_ACTIVITIES: Omit<TrainingActivity, 'id'>[] = [
   {
     name: '慢跑热身',
     description:
-      '【队形】所有学员在底线排成一排。【动作】绕场慢跑2圈，保持中等速度，注意呼吸节奏，不要说话，集中注意力。',
+      '【姿势】身体直立，目视前方，双臂自然摆动\n【动作】绕篮球场慢跑2圈，保持中等速度，呼吸均匀，不要说话，集中注意力\n【发力】腿部肌群发力，核心稳定\n【次数】2圈，约3分钟\n【形式】集体进行，排面跑动\n【要点目的】提升心率，促进血液循环，为后续训练做好准备',
     duration: 5,
     category: 'warmup',
     skills: ['physical'],
@@ -115,7 +116,7 @@ const WARMUP_ACTIVITIES: Omit<TrainingActivity, 'id'>[] = [
   {
     name: '肩部活动',
     description:
-      '【排面】所有学员底线站好，双手放在肩膀上。【动作】向前绕环走到另一侧底线，然后向后绕环回到起点。',
+      '【姿势】身体直立，双脚与肩同宽，双手放在肩膀上，手肘打开\n【动作】肩关节向前绕环10圈，走到另一侧底线，然后向后绕环10圈返回\n【发力】肩部肌群发力，带动上肢协调运动\n【次数】前绕环10次+后绕环10次×2组\n【形式】集体进行，排面站好\n【要点目的】充分活动肩关节，预防肩部受伤',
     duration: 3,
     category: 'warmup',
     skills: ['physical'],
@@ -197,7 +198,7 @@ const BALL_FAMILIARITY_ACTIVITIES: Omit<TrainingActivity, 'id'>[] = [
   {
     name: '原地拍球',
     description:
-      '【队形】所有学员在标志桶后站好，保持一定间距。【动作】双手自然下垂，用手指触球，掌心空出，进行原地拍球练习。',
+      '【姿势】双脚与肩同宽站立，膝盖微屈，重心降低，双手自然下垂\n【动作】用手指触球，掌心空出，进行原地拍球练习，球弹起高度约与腰部平齐\n【发力】手腕下压，手指控制球的方向和力度\n【次数】每组30秒×3组，组间休息15秒\n【形式】原地进行，集体练习\n【要点目的】建立球感，熟悉手指触球的感觉，为后续运球练习打下基础',
     duration: 5,
     category: 'ball_familiarity',
     skills: ['dribbling'],
@@ -210,7 +211,7 @@ const BALL_FAMILIARITY_ACTIVITIES: Omit<TrainingActivity, 'id'>[] = [
   {
     name: '左右手交替',
     description:
-      '【队形】所有学员在标志桶后站好。【动作】先用右手拍球10次，再换左手拍球10次，双手交替进行。',
+      '【姿势】双脚与肩同宽站立，膝盖微屈，重心略微前倾\n【动作】先用右手拍球10次，再换左手拍球10次，双手交替进行，眼睛看前方\n【发力】右手练习时右手发力按拍球，左手练习时左手发力\n【次数】每组左右手各10次×2组\n【形式】原地进行，集体练习\n【要点目的】均衡训练左右手，培养双手运球能力',
     duration: 5,
     category: 'ball_familiarity',
     skills: ['dribbling'],
@@ -223,7 +224,7 @@ const BALL_FAMILIARITY_ACTIVITIES: Omit<TrainingActivity, 'id'>[] = [
   {
     name: '高低运球',
     description:
-      '【队形】所有学员在标志桶后站好。【动作】高运球时大力拍球，球弹起高度超过腰部；低运球时手指控制，球弹起高度不超过膝盖。',
+      '【姿势】双脚与肩同宽站立，膝盖微屈，重心降低，眼睛看前方\n【动作】高运球时大力拍球，球弹起高度超过腰部；低运球时手指控制，球弹起高度不超过膝盖，左右手交替练习\n【发力】手腕下压发力，手指控制球的高度和方向\n【次数】每组30秒×3组，组间休息15秒\n【形式】原地进行，集体练习\n【要点目的】掌握运球力度控制，建立高低运球的节奏感',
     duration: 5,
     category: 'ball_familiarity',
     skills: ['dribbling'],
@@ -307,7 +308,7 @@ const TECHNICAL_ACTIVITIES: Omit<TrainingActivity, 'id'>[] = [
   {
     name: '原地高低运球',
     description:
-      '【队形】所有学员在标志桶后站好，保持间距。【动作】高运球时大力拍球，球弹起高度超过腰部；低运球时手指控制，球弹起高度不超过膝盖。左右手交替练习。',
+      '【姿势】双脚与肩同宽，膝盖微屈，重心降低，眼睛看前方\n【动作】高运球时大力拍球，球弹起高度超过腰部；低运球时手指控制，球弹起高度不超过膝盖，左右手交替练习\n【发力】手腕下压发力，手指控制球的高度和方向\n【次数】每组30秒×3组，组间休息15秒\n【形式】原地进行，集体练习\n【要点目的】掌握运球力度控制，建立高低运球的节奏感，强化手腕力量',
     duration: 8,
     category: 'technical',
     skills: ['dribbling'],
@@ -321,7 +322,7 @@ const TECHNICAL_ACTIVITIES: Omit<TrainingActivity, 'id'>[] = [
   {
     name: '行进间直线运球',
     description:
-      '【队形】学员排成一路纵队，站在底线。【动作】从底线运球到另一侧底线，保持直线，眼睛看前方，不要低头看球。运到终点后返回。',
+      '【姿势】身体略微前倾，重心在前脚掌，目视前方\n【动作】从底线运球到另一侧底线，保持直线运球，不要低头看球，运到终点后换手运球返回\n【发力】前脚掌蹬地发力，运球手手腕下压控制球\n【次数】往返2次×3组，组间休息20秒\n【形式】依次进行，一人练习时其他人等待\n【要点目的】建立行进间运球基础，培养抬头运球的习惯',
     duration: 8,
     category: 'technical',
     skills: ['dribbling'],
@@ -334,7 +335,7 @@ const TECHNICAL_ACTIVITIES: Omit<TrainingActivity, 'id'>[] = [
   {
     name: 'Z字形运球',
     description:
-      '【队形】标志桶摆成Z字型，学员在起点站好。【动作】运球绕过每个标志桶，到达终点后返回。注意变向时压球和加速。',
+      '【姿势】身体略微前倾，重心降低，目视前方标志桶\n【动作】运球绕过每个标志桶，到达终点后换手返回，变向时压球加速\n【发力】手腕下压变向，前脚掌蹬地加速\n【次数】往返3次×2组，组间休息20秒\n【形式】依次进行\n【要点目的】提升变向运球能力，培养身体的协调性和节奏感',
     duration: 10,
     category: 'technical',
     skills: ['dribbling'],
@@ -1228,7 +1229,7 @@ export function generateTrainingPlan(params: {
   theme?: string;
   focusSkills?: string[];
 }): TrainingPlanOutput {
-  const { group, duration, location, weather, theme, focusSkills = [] } = params;
+  const { group, duration: _duration, location, weather, theme, focusSkills = [] } = params;
 
   const config = AGE_GROUP_CONFIG[group];
 
@@ -1238,7 +1239,6 @@ export function generateTrainingPlan(params: {
     THEME_CONFIG[selectedTheme as keyof typeof THEME_CONFIG] || THEME_CONFIG['综合训练'];
 
   // 根据主题调整时间分配
-  const adjustedDuration = duration || 90;
   const sections: PlanSection[] = [];
 
   // 1. 课前礼仪
@@ -1388,7 +1388,7 @@ export function generateTrainingPlan(params: {
   const title = `${config.name} - ${themeNames[selectedTheme] || selectedTheme}`;
 
   // 生成备注
-  const notes = generateNotes(group, location, weather, sections);
+  const notes = generateNotes(group, location, weather);
 
   // 合并所有技能作为重点
   const allFocusSkills = Array.from(new Set([...themeConfig.skills, ...focusSkills]));
@@ -1457,12 +1457,7 @@ function selectActivities(
 }
 
 // 生成备注
-function generateNotes(
-  group: AgeGroup,
-  location: Location,
-  weather: string | undefined,
-  sections: PlanSection[]
-): string {
+function generateNotes(group: AgeGroup, location: Location, weather: string | undefined): string {
   const notes: string[] = [];
 
   // 年龄段注意事项

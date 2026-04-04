@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -55,7 +55,13 @@ export async function POST(request: NextRequest) {
     const { playerIds, teamId, group, duration = 90, location = '室内' } = body;
 
     // 1. 获取学员列表
-    let players: any[] = [];
+    type PlayerWithRecords = Prisma.PlayerGetPayload<{
+      include: {
+        records: { orderBy: { recordedAt: 'desc' }; take: 10 };
+        assessments: { orderBy: { assessedAt: 'desc' }; take: 3 };
+      };
+    }>;
+    let players: PlayerWithRecords[] = [];
 
     if (playerIds && playerIds.length > 0) {
       players = await prisma.player.findMany({
@@ -220,7 +226,8 @@ export async function POST(request: NextRequest) {
       // 出勤率
       const totalRecords = player.records?.length || 0;
       const presentRecords =
-        player.records?.filter((r: any) => r.attendance === 'present').length || 0;
+        player.records?.filter((r: { attendance: string }) => r.attendance === 'present').length ||
+        0;
       const attendanceRate =
         totalRecords > 0 ? Math.round((presentRecords / totalRecords) * 100) : 100;
 

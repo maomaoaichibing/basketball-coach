@@ -641,12 +641,14 @@ function PageModals({
     y: number;
     player: Player | null;
   };
-  setLongPressMenu: React.Dispatch<React.SetStateAction<{
-    show: boolean;
-    x: number;
-    y: number;
-    player: Player | null;
-  }>>;
+  setLongPressMenu: React.Dispatch<
+    React.SetStateAction<{
+      show: boolean;
+      x: number;
+      y: number;
+      player: Player | null;
+    }>
+  >;
   showAddModal: boolean;
   setShowAddModal: (v: boolean) => void;
   editingPlayer: Player | null;
@@ -662,17 +664,19 @@ function PageModals({
     parentPhone: string;
     parentWechat: string;
   };
-  setFormData: React.Dispatch<React.SetStateAction<{
-    name: string;
-    gender: string;
-    birthDate: string;
-    group: string;
-    status: string;
-    school: string;
-    parentName: string;
-    parentPhone: string;
-    parentWechat: string;
-  }>>;
+  setFormData: React.Dispatch<
+    React.SetStateAction<{
+      name: string;
+      gender: string;
+      birthDate: string;
+      group: string;
+      status: string;
+      school: string;
+      parentName: string;
+      parentPhone: string;
+      parentWechat: string;
+    }>
+  >;
   handleUpdatePlayer: () => void;
   handleAddPlayer: () => void;
   handleEditPlayer: (p: Player) => void;
@@ -687,14 +691,16 @@ function PageModals({
     message?: string;
     errors?: { row: number; message?: string; name?: string; error?: string; type?: string }[];
   } | null;
-  setImportResult: (v: {
-    success: boolean;
-    total?: number;
-    created?: number;
-    failed?: number;
-    message?: string;
-    errors?: { row: number; message?: string; name?: string; error?: string; type?: string }[];
-  } | null) => void;
+  setImportResult: (
+    v: {
+      success: boolean;
+      total?: number;
+      created?: number;
+      failed?: number;
+      message?: string;
+      errors?: { row: number; message?: string; name?: string; error?: string; type?: string }[];
+    } | null
+  ) => void;
   dragActive: boolean;
   setDragActive: (v: boolean) => void;
   handleFileUpload: (f: File) => Promise<void>;

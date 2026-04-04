@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const dayOfWeek = searchParams.get('dayOfWeek');
     const status = searchParams.get('status');
 
-    const where: any = {};
+    const where: Prisma.ScheduleWhereInput = {};
     if (group && group !== 'all') where.group = group;
     if (dayOfWeek && dayOfWeek !== 'all') where.dayOfWeek = parseInt(dayOfWeek);
     if (status && status !== 'all') where.status = status;

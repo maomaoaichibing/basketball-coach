@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const eventType = searchParams.get('eventType');
     const limit = parseInt(searchParams.get('limit') || '100');
 
-    const where: any = {};
+    const where: Prisma.MatchEventWhereInput = {};
     if (matchId) where.matchId = matchId;
     if (playerId) where.playerId = playerId;
     if (eventType) where.eventType = eventType;

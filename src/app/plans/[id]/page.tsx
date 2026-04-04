@@ -18,6 +18,26 @@ import {
 } from 'lucide-react';
 
 // 教案类型
+type Section = {
+  category: string;
+  name: string;
+  duration: number;
+  activities: {
+    name: string;
+    duration: number;
+    description: string;
+    keyPoints?: string[];
+    equipment?: string[];
+    relatedTo?: string;
+    drillDiagram?: string;
+    sets?: string;
+    repetitions?: string;
+    progression?: string;
+    coachGuide?: string;
+  }[];
+  points?: string[];
+};
+
 type TrainingPlan = {
   id: string;
   title: string;
@@ -31,9 +51,10 @@ type TrainingPlan = {
   intensity?: string;
   status?: string;
   generatedBy?: string;
-  sections?: any[];
+  sections?: Section[];
   notes?: string;
   focusSkills?: string;
+  trainingProgression?: string;
 };
 
 export default function PlanDetailPage({ params }: { params: { id: string } }) {
@@ -203,33 +224,33 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={handleCopyPlan}
                 disabled={copying}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 text-sm sm:text-base"
               >
                 {copying ? (
                   <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <Copy className="w-4 h-4" />
                 )}
-                复制
+                <span className="hidden sm:inline">复制</span>
               </button>
               <Link
                 href={`/plans/${plan.id}/edit`}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm sm:text-base"
               >
                 <Edit className="w-4 h-4" />
-                编辑
+                <span className="hidden sm:inline">编辑</span>
               </Link>
-              <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+              <button className="flex items-center gap-2 px-3 sm:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm sm:text-base">
                 <Download className="w-4 h-4" />
-                导出
+                <span className="hidden sm:inline">导出</span>
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg">
+              <button className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm sm:text-base">
                 <Play className="w-4 h-4" />
-                开始训练
+                <span>开始训练</span>
               </button>
             </div>
           </div>
@@ -312,8 +333,18 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                 </button>
               </div>
 
+              {/* 第一节显示训练递进说明 */}
+              {index === 0 && plan.trainingProgression && (
+                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="text-sm font-medium text-blue-800 mb-2">📈 训练递进关联说明</div>
+                  <div className="text-xs text-blue-700 whitespace-pre-line leading-relaxed">
+                    {plan.trainingProgression}
+                  </div>
+                </div>
+              )}
+
               <div className="ml-11 space-y-3">
-                {section.activities?.map((activity: any, aIdx: number) => (
+                {section.activities?.map((activity, aIdx: number) => (
                   <div key={aIdx} className="bg-gray-50 rounded-lg p-3">
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-medium text-gray-900">{activity.name}</span>
@@ -321,11 +352,12 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                     </div>
                     <p className="text-sm text-gray-600 mb-2">{activity.description}</p>
 
-                    {/* 教练引导语 */}
-                    {activity.coachGuide && (
-                      <div className="mt-2 p-2 bg-purple-50 border border-purple-100 rounded text-sm">
-                        <div className="text-purple-700 font-medium mb-1">教练引导语</div>
-                        <p className="text-gray-700">{activity.coachGuide}</p>
+                    {/* 关联提示 - 在热身为后面的训练做准备时显示 */}
+                    {activity.relatedTo && (
+                      <div className="mt-1 mb-2">
+                        <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                          💡 {activity.relatedTo}
+                        </span>
                       </div>
                     )}
 
@@ -345,6 +377,45 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                     {activity.equipment && activity.equipment.length > 0 && (
                       <div className="text-xs text-gray-500 mt-1">
                         器材：{activity.equipment.join('、')}
+                      </div>
+                    )}
+
+                    {/* SVG战术图解 - 移动端可滚动 */}
+                    {activity.drillDiagram && (
+                      <div className="mt-3 bg-white rounded-lg border border-gray-200 p-3">
+                        <div className="text-xs font-medium text-gray-600 mb-2">动作路线示意图</div>
+                        <div className="overflow-x-auto -mx-2 px-2 sm:overflow-x-visible sm:mx-0 sm:px-0">
+                          <div
+                            className="inline-block min-w-full sm:min-w-0"
+                            dangerouslySetInnerHTML={{ __html: activity.drillDiagram }}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 组数、次数、递进式 */}
+                    {(activity.sets || activity.repetitions || activity.progression) && (
+                      <div className="mt-3 grid grid-cols-1 gap-2 text-xs">
+                        {activity.sets && (
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-gray-700">组数：</span>
+                            <span className="text-gray-600">{activity.sets}</span>
+                          </div>
+                        )}
+                        {activity.repetitions && (
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-gray-700">次数/时间：</span>
+                            <span className="text-gray-600">{activity.repetitions}</span>
+                          </div>
+                        )}
+                        {activity.progression && (
+                          <div className="mt-1">
+                            <div className="font-medium text-gray-700 mb-1">递进式设计：</div>
+                            <div className="text-gray-600 whitespace-pre-line">
+                              {activity.progression}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

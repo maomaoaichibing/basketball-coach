@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const group = searchParams.get('group');
 
     // 基础筛选条件
-    const whereClause: any = {};
+    const whereClause: Prisma.TrainingRecordWhereInput = {};
     if (playerId) whereClause.playerId = playerId;
     if (group) whereClause.player = { group };
 

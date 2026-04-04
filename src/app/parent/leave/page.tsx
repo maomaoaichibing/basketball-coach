@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ComponentType } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -116,7 +116,10 @@ export default function ParentLeavePage() {
     }
   }
 
-  const statusConfig: Record<string, { color: string; icon: any; label: string }> = {
+  const statusConfig: Record<
+    string,
+    { color: string; icon: ComponentType<{ className?: string }>; label: string }
+  > = {
     pending: {
       color: 'bg-yellow-100 text-yellow-700',
       icon: AlertCircle,

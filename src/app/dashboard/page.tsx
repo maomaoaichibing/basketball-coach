@@ -46,6 +46,27 @@ type RecentFeedback = {
   performance?: number;
 };
 
+type TrainingRecordWithPlan = {
+  id: string;
+  playerName?: string;
+  recordedAt: string;
+  performance?: number;
+  plan?: {
+    title: string;
+  };
+};
+
+type PlayerWithEnrollDate = {
+  id: string;
+  enrollDate: string;
+};
+
+type Match = {
+  id: string;
+  status: string;
+  matchDate: string;
+};
+
 type WeeklyStats = {
   totalTrainings: number;
   totalStudents: number;
@@ -155,13 +176,15 @@ export default function DashboardPage() {
       setAlerts(playerAlerts.slice(0, 6));
 
       // 最近反馈（训练记录）
-      const recentRecords = (recordsData.records || []).slice(0, 5).map((r: any) => ({
-        id: r.id,
-        playerName: r.playerName || '未知',
-        planTitle: r.plan?.title || '训练课',
-        date: r.recordedAt,
-        performance: r.performance,
-      }));
+      const recentRecords = (recordsData.records || [])
+        .slice(0, 5)
+        .map((r: TrainingRecordWithPlan) => ({
+          id: r.id,
+          playerName: r.playerName || '未知',
+          planTitle: r.plan?.title || '训练课',
+          date: r.recordedAt,
+          performance: r.performance,
+        }));
       setFeedbacks(recentRecords);
 
       // 周统计
@@ -170,7 +193,7 @@ export default function DashboardPage() {
       weekStart.setHours(0, 0, 0, 0);
 
       const weekRecords = (recordsData.records || []).filter(
-        (r: any) => new Date(r.recordedAt) >= weekStart
+        (r: TrainingRecordWithPlan) => new Date(r.recordedAt) >= weekStart
       );
 
       setStats({
@@ -178,12 +201,12 @@ export default function DashboardPage() {
         totalStudents: players.length,
         avgAttendance: players.length > 0 ? 85 : 0,
         avgPerformance: 7.5,
-        newStudents: players.filter((p: any) => {
+        newStudents: players.filter((p: PlayerWithEnrollDate) => {
           const enrollDate = new Date(p.enrollDate);
           return enrollDate >= weekStart;
         }).length,
         upcomingMatches: (matchesData.matches || []).filter(
-          (m: any) => m.status === 'scheduled' && new Date(m.matchDate) >= new Date()
+          (m: Match) => m.status === 'scheduled' && new Date(m.matchDate) >= new Date()
         ).length,
       });
     } catch (error) {

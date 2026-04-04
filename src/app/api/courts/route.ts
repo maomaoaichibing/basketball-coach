@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const campusId = searchParams.get('campusId');
     const status = searchParams.get('status');
 
-    const where: any = {};
+    const where: Prisma.CourtWhereInput = {};
     if (campusId) where.campusId = campusId;
     if (status) where.status = status;
 

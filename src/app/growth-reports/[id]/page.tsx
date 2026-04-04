@@ -29,8 +29,8 @@ type GrowthReport = {
   periodEnd: string;
   reportType: string;
   abilities: AbilityDimensions;
-  trainingStats: any;
-  matchStats: any;
+  trainingStats: TrainingStats;
+  matchStats: MatchStats;
   strengths: string[];
   improvements: string[];
   goals: string[];
@@ -51,12 +51,21 @@ type AbilityDimensions = {
   tactical: number;
 };
 
+type TrainingStats = {
+  totalSessions?: number;
+  attendanceRate?: number;
+  avgPerformance?: number;
+  totalHours?: number;
+  skillImprovements?: string[];
+};
+
 type MatchStats = {
   totalMatches: number;
   wins: number;
   losses: number;
   draws: number;
   avgScore: string;
+  winRate?: number;
 };
 
 export default function GrowthReportDetailPage({ params }: { params: Promise<{ id: string }> }) {

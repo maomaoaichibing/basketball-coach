@@ -50,11 +50,13 @@ export default function TrainingSessionPage() {
       const response = await fetch('/api/plans');
       const data = await response.json();
       if (data.success) {
-        const parsedPlans = data.plans.map((plan: TrainingPlan & { focusSkills?: string; sections?: string }) => ({
-          ...plan,
-          focusSkills: plan.focusSkills ? JSON.parse(plan.focusSkills) : [],
-          sections: plan.sections ? JSON.parse(plan.sections) : [],
-        }));
+        const parsedPlans = data.plans.map(
+          (plan: TrainingPlan & { focusSkills?: string; sections?: string }) => ({
+            ...plan,
+            focusSkills: plan.focusSkills ? JSON.parse(plan.focusSkills) : [],
+            sections: plan.sections ? JSON.parse(plan.sections) : [],
+          })
+        );
         setPlans(parsedPlans);
       }
     } catch (error) {

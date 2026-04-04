@@ -15,19 +15,23 @@ import {
   ChevronDown,
 } from 'lucide-react';
 
+type Activity = {
+  name: string;
+  duration: number;
+  description: string;
+  keyPoints?: string[];
+  equipment?: string[];
+  coachGuide?: string;
+  [key: string]: unknown;
+};
+
 type Section = {
   category: string;
   name: string;
   duration: number;
-  activities: {
-    name: string;
-    duration: number;
-    description: string;
-    keyPoints?: string[];
-    equipment?: string[];
-    coachGuide?: string;
-  }[];
+  activities: Activity[];
   points?: string[];
+  [key: string]: unknown;
 };
 
 type TrainingPlan = {
@@ -130,9 +134,9 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
   }
 
   // 更新环节
-  function updateSection(index: number, field: string, value: any) {
+  function updateSection(index: number, field: string, value: unknown) {
     const newSections = [...sections];
-    (newSections[index] as any)[field] = value;
+    newSections[index][field as keyof Section] = value as never;
     setSections(newSections);
   }
 
@@ -155,9 +159,14 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
   }
 
   // 更新活动
-  function updateActivity(sectionIndex: number, activityIndex: number, field: string, value: any) {
+  function updateActivity(
+    sectionIndex: number,
+    activityIndex: number,
+    field: string,
+    value: unknown
+  ) {
     const newSections = [...sections];
-    (newSections[sectionIndex].activities[activityIndex] as any)[field] = value;
+    newSections[sectionIndex].activities[activityIndex][field as keyof Activity] = value as never;
     setSections(newSections);
   }
 

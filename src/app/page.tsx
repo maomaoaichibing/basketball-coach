@@ -16,7 +16,9 @@ import {
   FileText,
   Lightbulb,
   Medal,
+  Menu,
   MessageCircle,
+  Mic,
   Package,
   Play,
   Plus,
@@ -29,6 +31,7 @@ import {
   TrendingUp,
   User,
   Users,
+  X,
 } from 'lucide-react';
 
 // 统计数据类型
@@ -60,6 +63,7 @@ export default function Home() {
   const [selectedGroup, setSelectedGroup] = useState('U10');
   const [recentPlans, setRecentPlans] = useState<TrainingPlan[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [stats, setStats] = useState<Stats>({
     totalPlayers: 0,
     totalPlans: 0,
@@ -132,23 +136,29 @@ export default function Home() {
     <div className="min-h-screen">
       {/* 头部 */}
       <header className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                <Dumbbell className="w-7 h-7" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold">篮球青训教案系统</h1>
-                  <span className="px-2 py-0.5 bg-white/20 text-white text-xs rounded-full font-medium">
-                    v4.3
-                  </span>
+              <Link href="/" className="flex items-center gap-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                  <Dumbbell className="w-6 h-6 sm:w-7 sm:h-7" />
                 </div>
-                <p className="text-orange-100 text-sm">智能教案生成 · 球员成长追踪</p>
-              </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-lg sm:text-xl font-bold">篮球青训教案系统</h1>
+                    <span className="px-2 py-0.5 bg-white/20 text-white text-xs rounded-full font-medium hidden sm:inline">
+                      v4.4
+                    </span>
+                  </div>
+                  <p className="text-orange-100 text-sm hidden sm:block">
+                    智能教案生成 · 球员成长追踪
+                  </p>
+                </div>
+              </Link>
             </div>
-            <div className="flex items-center gap-2">
+
+            {/* 桌面端导航 */}
+            <div className="hidden sm:flex items-center gap-2">
               <Link
                 href="/version"
                 className="px-3 py-1.5 text-sm hover:bg-white/10 rounded-lg flex items-center gap-1"
@@ -159,7 +169,35 @@ export default function Home() {
                 <Settings className="w-5 h-5" />
               </Link>
             </div>
+
+            {/* 移动端汉堡菜单按钮 */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="sm:hidden p-2 hover:bg-white/10 rounded-lg"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
           </div>
+
+          {/* 移动端菜单 */}
+          {mobileMenuOpen && (
+            <div className="sm:hidden mt-4 pt-4 border-t border-white/20 space-y-2">
+              <Link
+                href="/version"
+                className="block px-3 py-2 text-sm hover:bg-white/10 rounded-lg"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                版本管理
+              </Link>
+              <Link
+                href="/settings"
+                className="block px-3 py-2 text-sm hover:bg-white/10 rounded-lg"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                设置
+              </Link>
+            </div>
+          )}
         </div>
       </header>
 
@@ -384,6 +422,13 @@ export default function Home() {
         <section>
           <h2 className="text-lg font-semibold text-gray-900 mb-4">快捷功能</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <Link
+              href="/voice"
+              className="bg-gradient-to-br from-orange-500 to-red-500 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center text-white"
+            >
+              <Mic className="w-8 h-8 mx-auto mb-2" />
+              <span className="text-sm font-medium">语音生成教案</span>
+            </Link>
             <Link
               href="/checkin"
               className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center"

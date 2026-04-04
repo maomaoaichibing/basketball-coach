@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const group = searchParams.get('group');
 
-    const where: any = {};
+    const where: { group?: string } = {};
     if (group && group !== 'all') {
       where.group = group;
     }

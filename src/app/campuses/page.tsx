@@ -1,20 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import {
-  Building2,
-  ChevronRight,
-  Clock,
-  Edit,
-  MapPin,
-  MapPinned,
-  Phone,
-  Plus,
-  Trash2,
-  Users,
-  UsersRound,
-  X,
-} from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { Building2, Clock, MapPin, MapPinned, Phone, Plus, Users, X } from 'lucide-react';
 
 interface Campus {
   id: string;
@@ -67,7 +54,7 @@ export default function CampusesPage() {
   const [activeTab, setActiveTab] = useState<'campuses' | 'courts' | 'coaches'>('campuses');
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<'campus' | 'court' | 'coach'>('campus');
-  const [editingItem, setEditingItem] = useState<Record<string, unknown> | null>(null);
+  const [editingItem, setEditingItem] = useState<Campus | Court | Coach | null>(null);
 
   // 校区表单
   const [campusForm, setCampusForm] = useState({
@@ -101,11 +88,7 @@ export default function CampusesPage() {
     notes: '',
   });
 
-  useEffect(() => {
-    fetchData();
-  }, [activeTab]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       if (activeTab === 'campuses') {
@@ -125,40 +108,48 @@ export default function CampusesPage() {
       console.error('获取数据失败:', error);
     }
     setLoading(false);
-  };
+  }, [activeTab]);
 
-  const openModal = (type: 'campus' | 'court' | 'coach', item?: any) => {
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const openModal = (type: 'campus' | 'court' | 'coach', item?: Campus | Court | Coach | null) => {
     setModalType(type);
     setEditingItem(item || null);
     if (item) {
-      if (type === 'campus') {
+      if (type === 'campus' && 'code' in item) {
+        const campus = item as Campus;
         setCampusForm({
-          name: String(item.name || ''),
-          code: String(item.code || ''),
-          address: String(item.address || ''),
-          phone: String(item.phone || ''),
-          managerName: String(item.managerName || ''),
-          openTime: String(item.openTime || ''),
-          closeTime: String(item.closeTime || ''),
-          description: String(item.description || ''),
+          name: String(campus.name || ''),
+          code: String(campus.code || ''),
+          address: String(campus.address || ''),
+          phone: String(campus.phone || ''),
+          managerName: String(campus.managerName || ''),
+          openTime: String(campus.openTime || ''),
+          closeTime: String(campus.closeTime || ''),
+          description: String(campus.description || ''),
         });
-      } else if (type === 'court') {
+      } else if (type === 'court' && 'campusId' in item) {
+        const court = item as Court;
         setCourtForm({
-          name: String(item.name || ''),
-          campusId: String(item.campusId || ''),
-          type: String(item.type || ''),
-          capacity: Number(item.capacity || 0),
-          description: String(item.description || ''),
+          name: String(court.name || ''),
+          campusId: String(court.campusId || ''),
+          type: String(court.type || ''),
+          capacity: Number(court.capacity || 0),
+          description: '',
         });
-      } else if (type === 'coach') {
+      } else if (type === 'coach' && 'email' in item) {
+        const coach = item as Coach;
         setCoachForm({
-          name: String(item.name || ''),
-          phone: String(item.phone || ''),
-          email: String(item.email || ''),
-          campusId: String(item.campusId || ''),
-          specialties: typeof item.specialties === 'string' ? JSON.parse(item.specialties).join(', ') : '',
-          hireDate: String(item.hireDate || ''),
-          notes: String(item.notes || ''),
+          name: String(coach.name || ''),
+          phone: String(coach.phone || ''),
+          email: String(coach.email || ''),
+          campusId: String(coach.campusId || ''),
+          specialties:
+            typeof coach.specialties === 'string' ? JSON.parse(coach.specialties).join(', ') : '',
+          hireDate: String(coach.hireDate || ''),
+          notes: '',
         });
       }
     } else {
@@ -240,7 +231,7 @@ export default function CampusesPage() {
   };
 
   const handleDelete = async (type: string, id: string) => {
-    if (!confirm('确定要删除吗？')) return;
+    if (typeof window !== 'undefined' && !window.confirm('确定要删除吗？')) return;
     try {
       if (type === 'campus') {
         await fetch(`/api/campuses/${id}`, { method: 'DELETE' });

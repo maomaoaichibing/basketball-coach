@@ -184,7 +184,7 @@ export default function OrdersPage() {
     setNewOrder({ ...newOrder, items });
   };
 
-  const handleItemChange = (index: number, field: string, value: any) => {
+  const handleItemChange = (index: number, field: string, value: string | number) => {
     const items = [...newOrder.items];
     items[index] = { ...items[index], [field]: value };
 

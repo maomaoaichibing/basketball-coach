@@ -1,11 +1,83 @@
-import { FlatCompat } from '@eslint/eslintrc'
+import js from '@eslint/js'
+import tsParser from '@typescript-eslint/parser'
+import tsPlugin from '@typescript-eslint/eslint-plugin'
+import reactPlugin from 'eslint-plugin-react'
+import reactHooksPlugin from 'eslint-plugin-react-hooks'
 
-const compat = new FlatCompat({
-  baseDirectory: import.meta.dirname,
-})
-
-const eslintConfig = [
-  ...compat.extends('next/core-web-vitals'),
+export default [
+  js.configs.recommended,
+  {
+    files: ['**/*.{js,mjs,cjs,ts,tsx,jsx}'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+      globals: {
+        window: 'readonly',
+        document: 'readonly',
+        console: 'readonly',
+        process: 'readonly',
+        fetch: 'readonly',
+        URL: 'readonly',
+        alert: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        Event: 'readonly',
+        SpeechRecognition: 'readonly',
+        SpeechRecognitionResultList: 'readonly',
+        localStorage: 'readonly',
+        RequestInit: 'readonly',
+        File: 'readonly',
+        Response: 'readonly',
+        React: 'readonly',
+        confirm: 'readonly',
+        URLSearchParams: 'readonly',
+        SpeechSynthesisUtterance: 'readonly',
+        Blob: 'readonly',
+        MediaRecorder: 'readonly',
+        navigator: 'readonly',
+        EventTarget: 'readonly',
+        Buffer: 'readonly',
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tsPlugin,
+      'react': reactPlugin,
+      'react-hooks': reactHooksPlugin,
+    },
+    rules: {
+      ...tsPlugin.configs.recommended.rules,
+      'react/react-in-jsx-scope': 'off',
+      'react/prop-types': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      'prefer-const': 'warn',
+      'no-var': 'error',
+      'no-unused-vars': 'off',
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+  },
+  {
+    ignores: [
+      '**/.next/**',
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/build/**',
+      '**/coverage/**',
+      '**/.git/**',
+      '**/.workbuddy/**',
+      '**/.codebuddy/**',
+    ],
+  },
 ]
-
-export default eslintConfig

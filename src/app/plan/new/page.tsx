@@ -14,6 +14,8 @@ import {
   CloudRain,
   Snowflake,
   Sparkles,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 import {
@@ -28,6 +30,7 @@ export default function NewPlanPage() {
   const [saving, setSaving] = useState(false);
   const [plan, setPlan] = useState<TrainingPlanOutput | null>(null);
   const [useAI, setUseAI] = useState(false); // 是否使用AI生成
+  const [configCollapsed, setConfigCollapsed] = useState(false); // 配置面板折叠状态
 
   // 表单状态
   const [form, setForm] = useState({
@@ -269,280 +272,331 @@ export default function NewPlanPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 左侧：配置表单 */}
           <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between mb-4">
+            <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-gray-100">
+              {/* 移动端折叠标题栏 + 切换按钮 */}
+              <div className="lg:hidden flex items-center justify-between mb-0">
                 <h2 className="font-semibold text-gray-900">训练配置</h2>
-                {/* 生成模式切换 */}
+                <div className="flex items-center gap-2">
+                  {/* 移动端生成模式切换 */}
+                  <button
+                    onClick={() => setUseAI(!useAI)}
+                    className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-all ${
+                      useAI
+                        ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {useAI ? (
+                      <>
+                        <Sparkles className="w-3 h-3" />
+                        AI
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-3 h-3" />
+                        规则
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setConfigCollapsed(!configCollapsed)}
+                    className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    {configCollapsed ? '展开' : '收起'}
+                    {configCollapsed ? (
+                      <ChevronDown className="w-4 h-4" />
+                    ) : (
+                      <ChevronUp className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* 配置内容 - 移动端可折叠 */}
+              <div className={`${configCollapsed ? 'hidden' : 'block'} lg:block`}>
+                {/* 桌面端标题栏 */}
+                <div className="hidden lg:flex items-center justify-between mb-4">
+                  <h2 className="font-semibold text-gray-900">训练配置</h2>
+                  {/* 生成模式切换 */}
+                  <button
+                    onClick={() => setUseAI(!useAI)}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                      useAI
+                        ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {useAI ? (
+                      <>
+                        <Sparkles className="w-4 h-4" />
+                        AI生成
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4" />
+                        规则生成
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* 年龄段 */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">年龄段</label>
+                  <div className="grid grid-cols-1 gap-2">
+                    {groups.map(g => (
+                      <button
+                        key={g.id}
+                        onClick={() => setForm({ ...form, group: g.id })}
+                        className={`p-2 rounded-lg text-center transition-all ${
+                          form.group === g.id
+                            ? 'bg-orange-500 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        <div className="font-bold text-left">{g.name}</div>
+                        <div className="text-xs text-left opacity-80">
+                          {g.age} · {g.desc}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 时长 */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">训练时长</label>
+                  <div className="flex gap-2">
+                    {durations.map(d => (
+                      <button
+                        key={d}
+                        onClick={() => setForm({ ...form, duration: d })}
+                        className={`flex-1 p-2 rounded-lg text-center transition-all flex items-center justify-center gap-1 ${
+                          form.duration === d
+                            ? 'bg-orange-500 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        <Clock className="w-4 h-4" />
+                        {d}分钟
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 场地 */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">训练场地</label>
+                  <div className="flex gap-2">
+                    {locations.map(l => (
+                      <button
+                        key={l}
+                        onClick={() => setForm({ ...form, location: l })}
+                        className={`flex-1 p-2 rounded-lg text-center transition-all flex items-center justify-center gap-1 ${
+                          form.location === l
+                            ? 'bg-orange-500 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        <MapPin className="w-4 h-4" />
+                        {l}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 天气 */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    天气（可选）
+                  </label>
+                  <select
+                    value={form.weather}
+                    onChange={e => setForm({ ...form, weather: e.target.value })}
+                    className="w-full p-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="">请选择</option>
+                    {weathers
+                      .filter(w => w)
+                      .map(w => (
+                        <option key={w} value={w}>
+                          {w}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                {/* 主题 */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    训练主题（可选）
+                  </label>
+                  <select
+                    value={form.theme}
+                    onChange={e => setForm({ ...form, theme: e.target.value })}
+                    className="w-full p-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="">随机选择</option>
+                    {themes
+                      .filter(t => t)
+                      .map(t => (
+                        <option key={t} value={t}>
+                          {t}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                {/* 重点技能 */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    重点训练技能
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {skillOptions.map(s => (
+                      <button
+                        key={s}
+                        onClick={() => toggleSkill(s)}
+                        className={`px-3 py-1 rounded-full text-sm transition-all ${
+                          focusSkills.includes(s)
+                            ? 'bg-orange-500 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* AI专属配置 */}
+                {useAI && (
+                  <div className="mb-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <div className="flex items-center gap-2 mb-3 text-purple-700">
+                      <Sparkles className="w-4 h-4" />
+                      <span className="font-medium text-sm">AI生成配置</span>
+                    </div>
+
+                    {/* 学员人数 */}
+                    <div className="mb-3">
+                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                        学员人数 <span className="text-orange-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="30"
+                        placeholder="请填写"
+                        value={aiConfig.playerCount}
+                        onChange={e =>
+                          setAiConfig({
+                            ...aiConfig,
+                            playerCount: e.target.value,
+                          })
+                        }
+                        className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+                          !aiConfig.playerCount
+                            ? 'border-orange-300 bg-orange-50'
+                            : 'border-gray-300'
+                        }`}
+                      />
+                      {!aiConfig.playerCount ? (
+                        <p className="mt-1 text-xs text-orange-600">
+                          请填写学员人数，AI将据此调整训练分组和强度
+                        </p>
+                      ) : (
+                        <p className="mt-1 text-xs text-green-600">
+                          已设置 {aiConfig.playerCount} 名学员
+                        </p>
+                      )}
+                    </div>
+
+                    {/* 技能水平 */}
+                    <div className="mb-3">
+                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                        学员技能水平
+                      </label>
+                      <select
+                        value={aiConfig.skillLevel}
+                        onChange={e =>
+                          setAiConfig({
+                            ...aiConfig,
+                            skillLevel: e.target.value as any,
+                          })
+                        }
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                      >
+                        <option value="beginner">初级</option>
+                        <option value="intermediate">中级</option>
+                        <option value="advanced">高级</option>
+                      </select>
+                    </div>
+
+                    {/* 最近训练 */}
+                    <div className="mb-3">
+                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                        最近训练内容（避免重复）
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="如：运球, 传球"
+                        value={aiConfig.previousTraining}
+                        onChange={e =>
+                          setAiConfig({
+                            ...aiConfig,
+                            previousTraining: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                      />
+                    </div>
+
+                    {/* 其他要求 */}
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                        其他要求
+                      </label>
+                      <textarea
+                        placeholder="如：重点培养团队协作，增加趣味性..."
+                        value={aiConfig.additionalNotes}
+                        onChange={e =>
+                          setAiConfig({
+                            ...aiConfig,
+                            additionalNotes: e.target.value,
+                          })
+                        }
+                        rows={3}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg resize-none"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* 生成按钮 */}
                 <button
-                  onClick={() => setUseAI(!useAI)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  onClick={handleGenerate}
+                  disabled={generating}
+                  className={`w-full py-3 font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 ${
                     useAI
-                      ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      ? 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white'
+                      : 'bg-orange-500 hover:bg-orange-600 text-white'
                   }`}
                 >
-                  {useAI ? (
+                  {generating ? (
+                    <>生成中...</>
+                  ) : useAI ? (
                     <>
-                      <Sparkles className="w-4 h-4" />
-                      AI生成
+                      <Sparkles className="w-5 h-5" />
+                      AI生成教案
                     </>
                   ) : (
                     <>
-                      <Plus className="w-4 h-4" />
-                      规则生成
+                      <Plus className="w-5 h-5" />
+                      生成教案
                     </>
                   )}
                 </button>
               </div>
-
-              {/* 年龄段 */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">年龄段</label>
-                <div className="grid grid-cols-1 gap-2">
-                  {groups.map(g => (
-                    <button
-                      key={g.id}
-                      onClick={() => setForm({ ...form, group: g.id })}
-                      className={`p-2 rounded-lg text-center transition-all ${
-                        form.group === g.id
-                          ? 'bg-orange-500 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      <div className="font-bold text-left">{g.name}</div>
-                      <div className="text-xs text-left opacity-80">
-                        {g.age} · {g.desc}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 时长 */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">训练时长</label>
-                <div className="flex gap-2">
-                  {durations.map(d => (
-                    <button
-                      key={d}
-                      onClick={() => setForm({ ...form, duration: d })}
-                      className={`flex-1 p-2 rounded-lg text-center transition-all flex items-center justify-center gap-1 ${
-                        form.duration === d
-                          ? 'bg-orange-500 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      <Clock className="w-4 h-4" />
-                      {d}分钟
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 场地 */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">训练场地</label>
-                <div className="flex gap-2">
-                  {locations.map(l => (
-                    <button
-                      key={l}
-                      onClick={() => setForm({ ...form, location: l })}
-                      className={`flex-1 p-2 rounded-lg text-center transition-all flex items-center justify-center gap-1 ${
-                        form.location === l
-                          ? 'bg-orange-500 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      <MapPin className="w-4 h-4" />
-                      {l}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 天气 */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">天气（可选）</label>
-                <select
-                  value={form.weather}
-                  onChange={e => setForm({ ...form, weather: e.target.value })}
-                  className="w-full p-2 border border-gray-300 rounded-lg"
-                >
-                  <option value="">请选择</option>
-                  {weathers
-                    .filter(w => w)
-                    .map(w => (
-                      <option key={w} value={w}>
-                        {w}
-                      </option>
-                    ))}
-                </select>
-              </div>
-
-              {/* 主题 */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  训练主题（可选）
-                </label>
-                <select
-                  value={form.theme}
-                  onChange={e => setForm({ ...form, theme: e.target.value })}
-                  className="w-full p-2 border border-gray-300 rounded-lg"
-                >
-                  <option value="">随机选择</option>
-                  {themes
-                    .filter(t => t)
-                    .map(t => (
-                      <option key={t} value={t}>
-                        {t}
-                      </option>
-                    ))}
-                </select>
-              </div>
-
-              {/* 重点技能 */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">重点训练技能</label>
-                <div className="flex flex-wrap gap-2">
-                  {skillOptions.map(s => (
-                    <button
-                      key={s}
-                      onClick={() => toggleSkill(s)}
-                      className={`px-3 py-1 rounded-full text-sm transition-all ${
-                        focusSkills.includes(s)
-                          ? 'bg-orange-500 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* AI专属配置 */}
-              {useAI && (
-                <div className="mb-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
-                  <div className="flex items-center gap-2 mb-3 text-purple-700">
-                    <Sparkles className="w-4 h-4" />
-                    <span className="font-medium text-sm">AI生成配置</span>
-                  </div>
-
-                  {/* 学员人数 */}
-                  <div className="mb-3">
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                      学员人数 <span className="text-orange-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="30"
-                      placeholder="请填写"
-                      value={aiConfig.playerCount}
-                      onChange={e =>
-                        setAiConfig({
-                          ...aiConfig,
-                          playerCount: e.target.value,
-                        })
-                      }
-                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
-                        !aiConfig.playerCount ? 'border-orange-300 bg-orange-50' : 'border-gray-300'
-                      }`}
-                    />
-                    {!aiConfig.playerCount ? (
-                      <p className="mt-1 text-xs text-orange-600">
-                        请填写学员人数，AI将据此调整训练分组和强度
-                      </p>
-                    ) : (
-                      <p className="mt-1 text-xs text-green-600">
-                        已设置 {aiConfig.playerCount} 名学员
-                      </p>
-                    )}
-                  </div>
-
-                  {/* 技能水平 */}
-                  <div className="mb-3">
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                      学员技能水平
-                    </label>
-                    <select
-                      value={aiConfig.skillLevel}
-                      onChange={e =>
-                        setAiConfig({
-                          ...aiConfig,
-                          skillLevel: e.target.value as any,
-                        })
-                      }
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
-                    >
-                      <option value="beginner">初级</option>
-                      <option value="intermediate">中级</option>
-                      <option value="advanced">高级</option>
-                    </select>
-                  </div>
-
-                  {/* 最近训练 */}
-                  <div className="mb-3">
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                      最近训练内容（避免重复）
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="如：运球, 传球"
-                      value={aiConfig.previousTraining}
-                      onChange={e =>
-                        setAiConfig({
-                          ...aiConfig,
-                          previousTraining: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
-                    />
-                  </div>
-
-                  {/* 其他要求 */}
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">其他要求</label>
-                    <textarea
-                      placeholder="如：重点培养团队协作，增加趣味性..."
-                      value={aiConfig.additionalNotes}
-                      onChange={e =>
-                        setAiConfig({
-                          ...aiConfig,
-                          additionalNotes: e.target.value,
-                        })
-                      }
-                      rows={3}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg resize-none"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* 生成按钮 */}
-              <button
-                onClick={handleGenerate}
-                disabled={generating}
-                className={`w-full py-3 font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 ${
-                  useAI
-                    ? 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white'
-                    : 'bg-orange-500 hover:bg-orange-600 text-white'
-                }`}
-              >
-                {generating ? (
-                  <>生成中...</>
-                ) : useAI ? (
-                  <>
-                    <Sparkles className="w-5 h-5" />
-                    AI生成教案
-                  </>
-                ) : (
-                  <>
-                    <Plus className="w-5 h-5" />
-                    生成教案
-                  </>
-                )}
-              </button>
             </div>
           </div>
 
@@ -622,6 +676,18 @@ export default function NewPlanPage() {
                         </span>
                       </div>
 
+                      {/* 第一节显示训练递进说明（仅在第一节顶部显示一次） */}
+                      {idx === 0 && plan.trainingProgression && (
+                        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div className="text-sm font-medium text-blue-800 mb-2">
+                            📈 训练递进关联说明
+                          </div>
+                          <div className="text-xs text-blue-700 whitespace-pre-line leading-relaxed">
+                            {plan.trainingProgression}
+                          </div>
+                        </div>
+                      )}
+
                       <div className="space-y-3">
                         {section.activities.map((activity, aIdx) => (
                           <div key={aIdx} className="bg-white/60 rounded-lg p-3">
@@ -630,10 +696,13 @@ export default function NewPlanPage() {
                               <span className="text-sm text-gray-500">{activity.duration}分钟</span>
                             </div>
                             <p className="text-sm text-gray-600 mb-2">{activity.description}</p>
-                            {activity.coachGuide && (
-                              <div className="mt-2 p-2 bg-purple-50 border border-purple-100 rounded text-sm">
-                                <div className="text-purple-700 font-medium mb-1">教练引导语</div>
-                                <p className="text-gray-700">{activity.coachGuide}</p>
+
+                            {/* 关联提示 - 在热身为后面的训练做准备时显示 */}
+                            {activity.relatedTo && (
+                              <div className="mt-1 mb-2">
+                                <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                                  💡 {activity.relatedTo}
+                                </span>
                               </div>
                             )}
                             {activity.keyPoints && activity.keyPoints.length > 0 && (
@@ -651,6 +720,47 @@ export default function NewPlanPage() {
                             {activity.equipment && activity.equipment.length > 0 && (
                               <div className="text-xs text-gray-500 mt-1">
                                 器材：{activity.equipment.join('、')}
+                              </div>
+                            )}
+
+                            {/* 动作图解 */}
+                            {activity.drillDiagram && (
+                              <div className="mt-3 bg-white rounded-lg border border-gray-200 p-3">
+                                <div className="text-xs font-medium text-gray-600 mb-2">
+                                  动作路线示意图
+                                </div>
+                                <div
+                                  className="flex justify-center"
+                                  dangerouslySetInnerHTML={{ __html: activity.drillDiagram }}
+                                />
+                              </div>
+                            )}
+
+                            {/* 组数、次数、递进式 */}
+                            {(activity.sets || activity.repetitions || activity.progression) && (
+                              <div className="mt-3 grid grid-cols-1 gap-2 text-xs">
+                                {activity.sets && (
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium text-gray-700">组数：</span>
+                                    <span className="text-gray-600">{activity.sets}</span>
+                                  </div>
+                                )}
+                                {activity.repetitions && (
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium text-gray-700">次数/时间：</span>
+                                    <span className="text-gray-600">{activity.repetitions}</span>
+                                  </div>
+                                )}
+                                {activity.progression && (
+                                  <div className="mt-1">
+                                    <div className="font-medium text-gray-700 mb-1">
+                                      递进式设计：
+                                    </div>
+                                    <div className="text-gray-600 whitespace-pre-line">
+                                      {activity.progression}
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>

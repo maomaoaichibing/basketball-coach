@@ -18,6 +18,25 @@ import {
   Eye,
 } from 'lucide-react';
 
+type AbilityMetrics = {
+  technical?: Record<string, number>;
+  tactical?: Record<string, number>;
+  physical?: Record<string, number>;
+  mental?: Record<string, number>;
+};
+
+type TrainingStats = {
+  totalHours?: number;
+  attendanceRate?: number;
+  skillImprovements?: string[];
+};
+
+type MatchStats = {
+  gamesPlayed?: number;
+  avgScore?: number;
+  performanceRating?: number;
+};
+
 type GrowthReport = {
   id: string;
   playerId: string;
@@ -26,9 +45,9 @@ type GrowthReport = {
   periodStart: string;
   periodEnd: string;
   reportType: string;
-  abilities: any;
-  trainingStats: any;
-  matchStats: any;
+  abilities: AbilityMetrics;
+  trainingStats: TrainingStats;
+  matchStats: MatchStats;
   strengths: string[];
   improvements: string[];
   overallRating: number;

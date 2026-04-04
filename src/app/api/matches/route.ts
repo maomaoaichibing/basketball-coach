@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    const where: any = {};
+    const where: Prisma.MatchWhereInput = {};
     if (group) where.group = group;
     if (result && result !== 'all') where.result = result;
     if (teamId) where.teamId = teamId;

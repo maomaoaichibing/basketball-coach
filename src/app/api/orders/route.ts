@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 const prisma = new PrismaClient();
+
+interface OrderItemInput {
+  itemType: string;
+  itemId?: string;
+  name: string;
+  quantity?: number;
+  unitPrice: number;
+  subtotal: number;
+  courseId?: string;
+  hours?: number;
+  validDays?: number;
+  notes?: string;
+}
 
 // 生成订单号
 function generateOrderNo(): string {
@@ -20,7 +33,7 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type');
     const search = searchParams.get('search');
 
-    const where: any = {};
+    const where: Prisma.OrderWhereInput = {};
     if (status) where.status = status;
     if (playerId) where.playerId = playerId;
     if (type) where.type = type;
@@ -80,7 +93,7 @@ export async function POST(request: NextRequest) {
 
     // 计算订单金额
     const totalAmount =
-      items.reduce((sum: number, item: any) => sum + item.subtotal, 0) - discountAmount;
+      items.reduce((sum: number, item: OrderItemInput) => sum + item.subtotal, 0) - discountAmount;
 
     // 创建订单
     const order = await prisma.order.create({
@@ -101,7 +114,7 @@ export async function POST(request: NextRequest) {
         validFrom: validFrom ? new Date(validFrom) : null,
         validUntil: validUntil ? new Date(validUntil) : null,
         items: {
-          create: items.map((item: any) => ({
+          create: items.map((item: OrderItemInput) => ({
             itemType: item.itemType,
             itemId: item.itemId,
             name: item.name,
