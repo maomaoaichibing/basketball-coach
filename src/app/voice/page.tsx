@@ -346,13 +346,13 @@ export default function VoicePlanPage() {
                     handleStopRecording();
                   }
                 }}
-                onTouchStart={(e) => {
+                onTouchStart={e => {
                   e.preventDefault();
                   if (!voice.isRecording && !voice.isRecognizing && voice.isSupported) {
                     handleStartRecording();
                   }
                 }}
-                onTouchEnd={(e) => {
+                onTouchEnd={e => {
                   e.preventDefault();
                   if (voice.isRecording) {
                     handleStopRecording();
@@ -379,13 +379,9 @@ export default function VoicePlanPage() {
                 </div>
               )}
 
-              <p className="mt-5 text-lg font-medium text-gray-700">
-                {getStatusText()}
-              </p>
+              <p className="mt-5 text-lg font-medium text-gray-700">{getStatusText()}</p>
 
-              <p className="mt-2 text-sm text-gray-500">
-                点击或按住录音，松开自动识别
-              </p>
+              <p className="mt-2 text-sm text-gray-500">点击或按住录音，松开自动识别</p>
             </div>
 
             {/* 识别结果 */}
@@ -438,15 +434,21 @@ export default function VoicePlanPage() {
               <p className="text-sm font-medium text-gray-700 mb-2">支持的指令：</p>
               <ul className="text-sm text-gray-600 space-y-1.5">
                 <li className="flex items-center gap-2">
-                  <span className="w-5 h-5 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-xs">1</span>
+                  <span className="w-5 h-5 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-xs">
+                    1
+                  </span>
                   &quot;今天张三来上课&quot; — 识别学员并查看信息
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="w-5 h-5 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-xs">2</span>
+                  <span className="w-5 h-5 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-xs">
+                    2
+                  </span>
                   &quot;帮我生成教案&quot; — 为学员生成训练教案
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="w-5 h-5 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-xs">3</span>
+                  <span className="w-5 h-5 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-xs">
+                    3
+                  </span>
                   &quot;为U10学员生成运球教案&quot; — 按条件筛选
                 </li>
               </ul>
@@ -466,7 +468,9 @@ export default function VoicePlanPage() {
               <div className="flex items-center gap-2 mb-3">
                 <CheckCircle className="w-5 h-5 text-green-500" />
                 <span className="font-medium text-gray-900">语音识别结果</span>
-                <span className="ml-auto text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">云端识别</span>
+                <span className="ml-auto text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                  云端识别
+                </span>
               </div>
               <p className="text-gray-700 text-sm">&quot;{parsedCommand.raw}&quot;</p>
             </div>

@@ -52,7 +52,9 @@ async function generateSignature(
   // Step 2: 拼接待签名字符串
   const algorithm = 'TC3-HMAC-SHA256';
   const hashedCanonicalRequest = await hashSHA256(canonicalRequest);
-  const stringToSign = [algorithm, String(timestamp), credentialScope, hashedCanonicalRequest].join('\n');
+  const stringToSign = [algorithm, String(timestamp), credentialScope, hashedCanonicalRequest].join(
+    '\n'
+  );
 
   // Step 3: 计算签名
   const secretDate = hmacSHA256(`TC3${TENCENT_SECRET_KEY}`, date);
@@ -133,10 +135,7 @@ export async function POST(request: NextRequest) {
     const { audio, audioLength } = body;
 
     if (!audio) {
-      return NextResponse.json(
-        { success: false, error: '缺少音频数据' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: '缺少音频数据' }, { status: 400 });
     }
 
     // 检查音频长度（一句话识别限制 60 秒）
@@ -167,7 +166,11 @@ export async function POST(request: NextRequest) {
     };
 
     const payload = JSON.stringify(params);
-    const { authorization, headers } = await generateSignature(payload, timestamp, 'SentenceRecognition');
+    const { authorization, headers } = await generateSignature(
+      payload,
+      timestamp,
+      'SentenceRecognition'
+    );
 
     // 调用腾讯云 API
     console.log('[ASR] 调用腾讯云一句话识别...');
@@ -208,10 +211,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json(
-      { success: false, error: '未识别到语音内容' },
-      { status: 400 }
-    );
+    return NextResponse.json({ success: false, error: '未识别到语音内容' }, { status: 400 });
   } catch (error) {
     console.error('[ASR] 异常:', error);
     return NextResponse.json(

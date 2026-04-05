@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -58,11 +58,7 @@ export default function TeamsPage() {
     trainingTime: '',
   });
 
-  useEffect(() => {
-    fetchTeams();
-  }, [groupFilter]);
-
-  async function fetchTeams() {
+  const fetchTeams = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -79,7 +75,11 @@ export default function TeamsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [groupFilter]);
+
+  useEffect(() => {
+    fetchTeams();
+  }, [groupFilter, fetchTeams]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

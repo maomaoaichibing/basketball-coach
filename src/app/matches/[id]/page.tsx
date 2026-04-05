@@ -1,11 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  Trophy,
-  ChevronRight,
   Calendar,
   MapPin,
   Users,
@@ -16,7 +14,6 @@ import {
   X,
   ArrowLeft,
   Target,
-  TrendingUp,
 } from 'lucide-react';
 
 type QuarterScore = {
@@ -113,9 +110,21 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
     });
   }, [params]);
 
+  const fetchPlayers = useCallback(async () => {
+    try {
+      const response = await fetch('/api/players?limit=100');
+      const data = await response.json();
+      if (data.success) {
+        setPlayers(data.players.filter((p: Player) => p.group === match?.group));
+      }
+    } catch (error) {
+      console.error('获取球员列表失败:', error);
+    }
+  }, [match?.group]);
+
   useEffect(() => {
     fetchPlayers();
-  }, []);
+  }, [fetchPlayers]);
 
   async function fetchMatch(id: string) {
     try {
@@ -136,18 +145,6 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
       console.error('获取比赛详情失败:', error);
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function fetchPlayers() {
-    try {
-      const response = await fetch('/api/players?limit=100');
-      const data = await response.json();
-      if (data.success) {
-        setPlayers(data.players.filter((p: Player) => p.group === match?.group));
-      }
-    } catch (error) {
-      console.error('获取球员列表失败:', error);
     }
   }
 

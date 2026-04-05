@@ -15,13 +15,13 @@ interface VoiceRecognitionReturn {
 
 /**
  * 云端语音识别 Hook
- * 
+ *
  * 原理：
  * 1. 用 Web Audio API 获取麦克风流，降采样到 16kHz
  * 2. 将 Float32 PCM 转为 Int16 PCM
  * 3. 录音停止后，将 PCM 数据 base64 编码
  * 4. 上传到 /api/voice/recognize 调用腾讯云一句话识别
- * 
+ *
  * 优势：不受浏览器安全上下文限制，HTTP+IP 也能用
  */
 export function useCloudVoiceRecognition(): VoiceRecognitionReturn {
@@ -103,7 +103,10 @@ export function useCloudVoiceRecognition(): VoiceRecognitionReturn {
       streamRef.current = stream;
 
       // 创建 AudioContext
-      const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      const audioContext = new (
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+      )();
       audioContextRef.current = audioContext;
 
       const source = audioContext.createMediaStreamSource(stream);
@@ -114,7 +117,7 @@ export function useCloudVoiceRecognition(): VoiceRecognitionReturn {
       const processor = audioContext.createScriptProcessor(4096, 1, 1);
       processorRef.current = processor;
 
-      processor.onaudioprocess = (e) => {
+      processor.onaudioprocess = e => {
         const float32Data = e.inputBuffer.getChannelData(0);
         // 降采样到 16kHz
         const downsampled = downsample(float32Data, inputSampleRate);
@@ -147,7 +150,7 @@ export function useCloudVoiceRecognition(): VoiceRecognitionReturn {
 
   // 停止录音并识别
   const stopRecording = useCallback(async (): Promise<string | null> => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       // 停止录音
       setIsRecording(false);
 
@@ -198,8 +201,8 @@ export function useCloudVoiceRecognition(): VoiceRecognitionReturn {
           audioLength: duration,
         }),
       })
-        .then((res) => res.json())
-        .then((data) => {
+        .then(res => res.json())
+        .then(data => {
           setIsRecognizing(false);
           if (data.success && data.text) {
             console.log(`[Voice] 识别结果: "${data.text}"`);
@@ -211,7 +214,7 @@ export function useCloudVoiceRecognition(): VoiceRecognitionReturn {
             resolve(null);
           }
         })
-        .catch((err) => {
+        .catch(err => {
           setIsRecognizing(false);
           console.error('[Voice] 识别请求失败:', err);
           setError('语音识别请求失败，请检查网络');
@@ -231,7 +234,7 @@ export function useCloudVoiceRecognition(): VoiceRecognitionReturn {
       audioContextRef.current = null;
     }
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
   }, []);

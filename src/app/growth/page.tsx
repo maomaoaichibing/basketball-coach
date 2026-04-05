@@ -1,17 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import {
-  ArrowLeft,
-  TrendingUp,
-  TrendingDown,
-  Star,
-  Award,
-  Target,
-  Calendar,
-  Users,
-} from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Target, Users } from 'lucide-react';
 
 // 类型定义
 type AssessmentHistory = {
@@ -187,11 +178,7 @@ export default function GrowthPage() {
   const [selectedGroup, setSelectedGroup] = useState('all');
   const [viewMode, setViewMode] = useState<'chart' | 'bars'>('chart');
 
-  useEffect(() => {
-    fetchGrowthData();
-  }, [selectedGroup]);
-
-  async function fetchGrowthData() {
+  const fetchGrowthData = useCallback(async () => {
     try {
       setLoading(true);
       const url = selectedGroup !== 'all' ? `/api/growth?group=${selectedGroup}` : '/api/growth';
@@ -205,7 +192,11 @@ export default function GrowthPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [selectedGroup]);
+
+  useEffect(() => {
+    fetchGrowthData();
+  }, [fetchGrowthData]);
 
   const labels: Record<string, string> = {
     dribbling: '运球',

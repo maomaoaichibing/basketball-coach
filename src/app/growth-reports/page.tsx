@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -92,12 +92,7 @@ export default function GrowthReportsPage() {
     reportType: 'quarterly',
   });
 
-  useEffect(() => {
-    fetchReports();
-    fetchPlayers();
-  }, [selectedPlayer]);
-
-  async function fetchReports() {
+  const fetchReports = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -114,9 +109,9 @@ export default function GrowthReportsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [selectedPlayer]);
 
-  async function fetchPlayers() {
+  const fetchPlayers = useCallback(async () => {
     try {
       const response = await fetch('/api/players?limit=100');
       const data = await response.json();
@@ -126,7 +121,12 @@ export default function GrowthReportsPage() {
     } catch (error) {
       console.error('获取学员列表失败:', error);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    fetchReports();
+    fetchPlayers();
+  }, [selectedPlayer, fetchReports, fetchPlayers]);
 
   async function handlePreview() {
     if (!createForm.playerId || !createForm.periodStart || !createForm.periodEnd) {

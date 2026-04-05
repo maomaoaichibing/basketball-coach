@@ -36,7 +36,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const { id } = params;
     const body = await request.json();
 
-    const { type, content, coachId, coachName, coachComment, status } = body;
+    const { type, content, coachId, coachName, coachComment } = body;
 
     // 检查是否存在
     const existing = await prisma.checkIn.findUnique({

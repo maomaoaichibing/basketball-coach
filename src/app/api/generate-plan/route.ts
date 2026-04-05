@@ -171,75 +171,121 @@ function generateProgressionByActivity(activityName: string, category: string): 
 }
 
 // 生成篮球场SVG背景（标准半场/全场）
+// 坐标系：400x300，半场视图，篮筐在底部中央（y=285附近），底线在底部
 function generateBasketballCourtSVG(isHalfCourt: boolean = true): string {
-  let svg = `<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg" style="background-color: #f5f5f5;">`;
+  let svg = `<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg" style="background-color: #f5f0e6;">`;
 
   if (isHalfCourt) {
-    // 半场标准图
+    // ===== 标准篮球半场图（俯视图，篮筐在底部中央） =====
+    // 场地比例：宽度28m → 380px，高度15m（半场）→ 280px
+    // 场地边框：左上角(10,10) 右下角(390,290)
+    const W = 390, H = 290; // 场地右下角
+    const cx = 200; // 场地横向中心线
+    const baseline = H; // 底线 y=290
+    const sideline_l = 10; // 左边线 x=10
+    const sideline_r = W; // 右边线 x=390
+    const halfcourt = 10; // 中线 y=10（半场顶部）
+
     svg += `
-    <!-- 场地边框 -->
-    <rect x="10" y="10" width="380" height="280" fill="#e8e8e8" stroke="#333" stroke-width="2"/>
+    <!-- 场地地面 -->
+    <rect x="${sideline_l}" y="${halfcourt}" width="${W - sideline_l - sideline_l + (sideline_l - 10)}" height="${baseline - halfcourt}" fill="#f5f0e6" stroke="#5c4033" stroke-width="2.5"/>
     
-    <!-- 三分线 -->
-    <path d="M 10 40 Q 10 150, 70 150 L 10 150" fill="none" stroke="#333" stroke-width="2"/>
-    <path d="M 390 40 Q 390 150, 330 150 L 390 150" fill="none" stroke="#333" stroke-width="2"/>
+    <!-- 木地板纹理线 -->
+    <line x1="${sideline_l}" y1="75" x2="${sideline_r}" y2="75" stroke="#e8dcc8" stroke-width="0.5"/>
+    <line x1="${sideline_l}" y1="150" x2="${sideline_r}" y2="150" stroke="#e8dcc8" stroke-width="0.5"/>
+    <line x1="${sideline_l}" y1="225" x2="${sideline_r}" y2="225" stroke="#e8dcc8" stroke-width="0.5"/>
     
-    <!-- 罚球圈 -->
-    <circle cx="70" cy="150" r="35" fill="none" stroke="#333" stroke-width="2"/>
-    <circle cx="330" cy="150" r="35" fill="none" stroke="#333" stroke-width="2"/>
+    <!-- 中线（半场边界，虚线表示延伸） -->
+    <line x1="${sideline_l}" y1="${halfcourt}" x2="${sideline_r}" y2="${halfcourt}" stroke="#5c4033" stroke-width="2"/>
     
-    <!-- 罚球线 -->
-    <line x1="35" y1="150" x2="105" y2="150" stroke="#333" stroke-width="2"/>
-    <line x1="295" y1="150" x2="365" y2="150" stroke="#333" stroke-width="2"/>
+    <!-- 中圈（半圆，朝中线方向） -->
+    <path d="M ${cx - 45} ${halfcourt} A 45 45 0 0 1 ${cx + 45} ${halfcourt}" fill="none" stroke="#5c4033" stroke-width="2"/>
+    
+    <!-- 罚球区（油漆区）：宽5.8m≈78px，高5.8m≈108px -->
+    <!-- 罚球区左边界 x=161, 右边界 x=239 -->
+    <!-- 罚球线 y=182（距底线108px） -->
+    <rect x="161" y="182" width="78" height="108" fill="#c9463e" fill-opacity="0.15" stroke="#5c4033" stroke-width="2"/>
+    
+    <!-- 罚球圈：圆心(cx, 182)，半径45px -->
+    <circle cx="${cx}" cy="182" r="45" fill="none" stroke="#5c4033" stroke-width="2"/>
+    <!-- 罚球圈虚线半圆（远离篮筐方向） -->
+    <path d="M ${cx - 45} 182 A 45 45 0 0 0 ${cx + 45} 182" fill="none" stroke="#5c4033" stroke-width="1.5" stroke-dasharray="6,4"/>
+    
+    <!-- 三分线：弧线圆心在篮筐位置，半径约6.75m≈91px -->
+    <!-- 篮筐位于 (cx, 272)，三分线从底角(x≈52和x≈348)画弧 -->
+    <!-- 左侧底角三分线 -->
+    <line x1="${sideline_l}" y1="228" x2="52" y2="${baseline}" stroke="#5c4033" stroke-width="2"/>
+    <!-- 右侧底角三分线 -->
+    <line x1="${sideline_r}" y1="228" x2="348" y2="${baseline}" stroke="#5c4033" stroke-width="2"/>
+    <!-- 三分线弧线 -->
+    <path d="M 52 ${baseline} A 91 91 0 0 1 348 ${baseline}" fill="none" stroke="#5c4033" stroke-width="2"/>
     
     <!-- 篮板 -->
-    <rect x="193" y="25" width="14" height="25" fill="#666"/>
+    <rect x="${cx - 18}" y="${baseline - 18}" width="36" height="4" fill="#5c4033"/>
     
     <!-- 篮筐 -->
-    <circle cx="200" cy="55" r="18" fill="none" stroke="#ff6600" stroke-width="3"/>
+    <circle cx="${cx}" cy="${baseline - 30}" r="9" fill="none" stroke="#ff6600" stroke-width="2.5"/>
+    <!-- 篮网（简化表示） -->
+    <line x1="${cx - 6}" y1="${baseline - 22}" x2="${cx - 3}" y2="${baseline - 12}" stroke="#999" stroke-width="0.8"/>
+    <line x1="${cx}" y1="${baseline - 21}" x2="${cx}" y2="${baseline - 10}" stroke="#999" stroke-width="0.8"/>
+    <line x1="${cx + 6}" y1="${baseline - 22}" x2="${cx + 3}" y2="${baseline - 12}" stroke="#999" stroke-width="0.8"/>
     
-    <!-- 合理冲撞区 -->
-    <circle cx="200" cy="80" r="25" fill="none" stroke="#999" stroke-width="1" stroke-dasharray="4,4"/>
+    <!-- 合理冲撞区：篮筐下方小半圆，半径约30px -->
+    <path d="M ${cx - 30} ${baseline - 30} A 30 30 0 0 0 ${cx + 30} ${baseline - 30}" fill="none" stroke="#5c4033" stroke-width="1.5"/>
     
-    <!-- 中场线标记（用于全场提示） -->
-    <line x1="10" y1="150" x2="30" y2="150" stroke="#999" stroke-width="1" stroke-dasharray="2,2"/>
-    <line x1="370" y1="150" x2="390" y2="150" stroke="#999" stroke-width="1" stroke-dasharray="2,2"/>
+    <!-- 限制区标记角 -->
+    <!-- 左上角 -->
+    <line x1="${sideline_l}" y1="182" x2="${sideline_l}" y2="168" stroke="#5c4033" stroke-width="1.5"/>
+    <line x1="${sideline_l}" y1="168" x2="${sideline_l + 15}" y2="182" stroke="#5c4033" stroke-width="1.5"/>
+    <!-- 右上角 -->
+    <line x1="${sideline_r}" y1="182" x2="${sideline_r}" y2="168" stroke="#5c4033" stroke-width="1.5"/>
+    <line x1="${sideline_r}" y1="168" x2="${sideline_r - 15}" y2="182" stroke="#5c4033" stroke-width="1.5"/>
     `;
   } else {
-    // 全场标准图
+    // ===== 全场标准图 =====
+    const W = 780, H = 380;
+    const cx = W / 2; // 中场线
+    const cy = H / 2; // 场地横向中心
     svg += `
-    <!-- 场地边框 -->
-    <rect x="10" y="10" width="780" height="380" fill="#e8e8e8" stroke="#333" stroke-width="2"/>
+    <!-- 场地地面 -->
+    <rect x="10" y="10" width="${W}" height="${H}" fill="#f5f0e6" stroke="#5c4033" stroke-width="2.5"/>
+    
+    <!-- 木地板纹理线 -->
+    <line x1="10" y1="${cy - 70}" x2="${W + 10}" y2="${cy - 70}" stroke="#e8dcc8" stroke-width="0.5"/>
+    <line x1="10" y1="${cy}" x2="${W + 10}" y2="${cy}" stroke="#e8dcc8" stroke-width="0.5"/>
+    <line x1="10" y1="${cy + 70}" x2="${W + 10}" y2="${cy + 70}" stroke="#e8dcc8" stroke-width="0.5"/>
     
     <!-- 中线 -->
-    <line x1="400" y1="10" x2="400" y2="390" stroke="#333" stroke-width="2"/>
+    <line x1="${cx + 10}" y1="10" x2="${cx + 10}" y2="${H + 10}" stroke="#5c4033" stroke-width="2"/>
     
     <!-- 中圈 -->
-    <circle cx="400" cy="200" r="50" fill="none" stroke="#333" stroke-width="2"/>
+    <circle cx="${cx + 10}" cy="${cy + 10}" r="45" fill="none" stroke="#5c4033" stroke-width="2"/>
+    
+    <!-- 左侧油漆区 -->
+    <rect x="61" y="162" width="78" height="108" fill="#c9463e" fill-opacity="0.12" stroke="#5c4033" stroke-width="2"/>
+    <circle cx="100" cy="162" r="45" fill="none" stroke="#5c4033" stroke-width="2"/>
     
     <!-- 左侧三分线 -->
-    <path d="M 10 60 Q 10 200, 90 200 L 10 200" fill="none" stroke="#333" stroke-width="2"/>
-    <path d="M 10 340 Q 10 200, 90 200 L 10 200" fill="none" stroke="#333" stroke-width="2"/>
+    <line x1="10" y1="208" x2="38" y2="270" stroke="#5c4033" stroke-width="2"/>
+    <line x1="10" y1="208" x2="162" y2="270" stroke="#5c4033" stroke-width="2"/>
+    <path d="M 38 270 A 62 62 0 0 1 162 270" fill="none" stroke="#5c4033" stroke-width="2"/>
+    
+    <!-- 右侧油漆区 -->
+    <rect x="651" y="162" width="78" height="108" fill="#c9463e" fill-opacity="0.12" stroke="#5c4033" stroke-width="2"/>
+    <circle cx="690" cy="162" r="45" fill="none" stroke="#5c4033" stroke-width="2"/>
     
     <!-- 右侧三分线 -->
-    <path d="M 790 60 Q 790 200, 710 200 L 790 200" fill="none" stroke="#333" stroke-width="2"/>
-    <path d="M 790 340 Q 790 200, 710 200 L 790 200" fill="none" stroke="#333" stroke-width="2"/>
+    <line x1="790" y1="208" x2="762" y2="270" stroke="#5c4033" stroke-width="2"/>
+    <line x1="790" y1="208" x2="638" y2="270" stroke="#5c4033" stroke-width="2"/>
+    <path d="M 762 270 A 62 62 0 0 0 638 270" fill="none" stroke="#5c4033" stroke-width="2"/>
     
-    <!-- 左侧罚球区 -->
-    <circle cx="90" cy="200" r="45" fill="none" stroke="#333" stroke-width="2"/>
-    <line x1="45" y1="200" x2="135" y2="200" stroke="#333" stroke-width="2"/>
+    <!-- 左侧篮筐 -->
+    <rect x="92" y="262" width="16" height="4" fill="#5c4033"/>
+    <circle cx="100" cy="250" r="9" fill="none" stroke="#ff6600" stroke-width="2.5"/>
     
-    <!-- 右侧罚球区 -->
-    <circle cx="710" cy="200" r="45" fill="none" stroke="#333" stroke-width="2"/>
-    <line x1="665" y1="200" x2="755" y2="200" stroke="#333" stroke-width="2"/>
-    
-    <!-- 左侧篮板篮筐 -->
-    <rect x="43" y="175" width="10" height="20" fill="#666"/>
-    <circle cx="50" cy="185" r="12" fill="none" stroke="#ff6600" stroke-width="2"/>
-    
-    <!-- 右侧篮板篮筐 -->
-    <rect x="747" y="175" width="10" height="20" fill="#666"/>
-    <circle cx="750" cy="185" r="12" fill="none" stroke="#ff6600" stroke-width="2"/>
+    <!-- 右侧篮筐 -->
+    <rect x="682" y="262" width="16" height="4" fill="#5c4033"/>
+    <circle cx="690" cy="250" r="9" fill="none" stroke="#ff6600" stroke-width="2.5"/>
     `;
   }
 
@@ -292,67 +338,86 @@ function generateDefaultDrillDiagram(
   </defs>`;
 
   // 根据活动类型和形式生成不同的站位图
+  // 注意：篮筐现在在底部中央 (cx=200, y≈262)
   if (
     activityName.includes('投篮') ||
     activityName.includes('上篮') ||
     activityName.includes('三步')
   ) {
-    // 投篮/上篮训练 - 在半场场地中显示投篮位置和路线
-    // 投篮学员位置（罚球线附近）
-    svg += `<circle cx="200" cy="150" r="12" fill="#2563eb" stroke="white" stroke-width="2"/>`;
-    svg += `<text x="200" y="155" text-anchor="middle" font-size="11" fill="white" font-weight="bold">投</text>`;
-    // 球在投篮位置
-    svg += `<circle cx="200" cy="150" r="4" fill="#ea580c"/>`;
-    // 投篮路线（向上到篮筐）
-    svg += `<line x1="200" y1="145" x2="200" y2="70" stroke="#dc2626" stroke-width="2" marker-end="url(#arrow-red)" stroke-dasharray="5,3"/>`;
-    // 篮筐
-    svg += `<circle cx="200" cy="55" r="15" fill="none" stroke="#ff6600" stroke-width="2"/>`;
-    // 辅助学员（捡球）
-    svg += `<circle cx="260" cy="200" r="10" fill="#2563eb" stroke="white" stroke-width="2"/>`;
-    svg += `<text x="260" y="204" text-anchor="middle" font-size="9" fill="white" font-weight="bold">捡</text>`;
-    // 教练位置
-    svg += `<rect x="100" y="100" width="18" height="18" fill="#dc2626" stroke="white" stroke-width="2"/>`;
-    svg += `<text x="109" y="112" text-anchor="middle" font-size="9" fill="white" font-weight="bold">教</text>`;
+    // 投篮/上篮训练 - 学员在罚球线位置排成一列
+    // 罚球线位置约 y=182，学员间隔排列
+    svg += `<circle cx="200" cy="165" r="14" fill="#2563eb" stroke="white" stroke-width="2.5"/>`;
+    svg += `<text x="200" y="170" text-anchor="middle" font-size="12" fill="white" font-weight="bold">1</text>`;
+    svg += `<circle cx="200" cy="130" r="14" fill="#2563eb" stroke="white" stroke-width="2.5"/>`;
+    svg += `<text x="200" y="135" text-anchor="middle" font-size="12" fill="white" font-weight="bold">2</text>`;
+    svg += `<circle cx="200" cy="95" r="14" fill="#2563eb" stroke="white" stroke-width="2.5"/>`;
+    svg += `<text x="200" y="100" text-anchor="middle" font-size="12" fill="white" font-weight="bold">3</text>`;
+    // 球在第一个学员手中
+    svg += `<circle cx="215" cy="155" r="5" fill="#ea580c"/>`;
+    // 投篮路线（从罚球线到篮筐）
+    svg += `<path d="M 200 152 Q 200 200, 200 242" fill="none" stroke="#dc2626" stroke-width="2" marker-end="url(#arrow-red)" stroke-dasharray="5,3"/>`;
+    // 上篮路线（从右侧45度角突破到篮筐）
+    svg += `<path d="M 260 140 Q 250 200, 210 255" fill="none" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue)" stroke-dasharray="5,3"/>`;
+    svg += `<text x="275" y="135" font-size="9" fill="#2563eb">上篮路线</text>`;
+    // 教练在侧翼观察指导
+    svg += `<rect x="95" y="140" width="20" height="20" fill="#dc2626" stroke="white" stroke-width="2" rx="3"/>`;
+    svg += `<text x="105" y="154" text-anchor="middle" font-size="10" fill="white" font-weight="bold">教</text>`;
   } else if (
     activityName.includes('对抗') ||
     activityName.includes('比赛') ||
     activityName.includes('3v3') ||
     activityName.includes('4v4')
   ) {
-    // 对抗比赛 - 显示双方站位
-    // 进攻方（3人）
-    const attackX = [150, 200, 250];
-    const attackY = [200, 150, 200];
+    // 对抗比赛 - 显示半场攻防站位
+    // 进攻方（蓝色，3人：PG/SF/PF站位）
+    const attackPos = [
+      { x: 200, y: 120, label: 'PG' }, // 控球后卫弧顶
+      { x: 120, y: 180, label: 'SF' }, // 小前锋侧翼
+      { x: 280, y: 180, label: 'PF' }, // 大前锋侧翼
+    ];
     for (let i = 0; i < 3; i++) {
-      svg += `<circle cx="${attackX[i]}" cy="${attackY[i]}" r="12" fill="#2563eb" stroke="white" stroke-width="2"/>`;
-      svg += `<text x="${attackX[i]}" y="${attackY[i] + 5}" text-anchor="middle" font-size="11" fill="white" font-weight="bold">${i + 1}</text>`;
+      const p = attackPos[i];
+      svg += `<circle cx="${p.x}" cy="${p.y}" r="14" fill="#2563eb" stroke="white" stroke-width="2.5"/>`;
+      svg += `<text x="${p.x}" y="${p.y + 4}" text-anchor="middle" font-size="10" fill="white" font-weight="bold">${p.label}</text>`;
     }
-    // 防守方（2人）
-    const defendX = [175, 225];
-    const defendY = [180, 180];
-    for (let i = 0; i < 2; i++) {
-      svg += `<circle cx="${defendX[i]}" cy="${defendY[i]}" r="12" fill="#dc2626" stroke="white" stroke-width="2"/>`;
-      svg += `<text x="${defendX[i]}" y="${defendY[i] + 5}" text-anchor="middle" font-size="11" fill="white" font-weight="bold">防${i + 1}</text>`;
+    // 防守方（红色，2-3人：防守进攻队员）
+    const defendPos = [
+      { x: 200, y: 145, label: 'D1' },
+      { x: 140, y: 175, label: 'D2' },
+      { x: 260, y: 175, label: 'D3' },
+    ];
+    for (let i = 0; i < 3; i++) {
+      const p = defendPos[i];
+      svg += `<circle cx="${p.x}" cy="${p.y}" r="12" fill="#dc2626" stroke="white" stroke-width="2"/>`;
+      svg += `<text x="${p.x}" y="${p.y + 4}" text-anchor="middle" font-size="8" fill="white" font-weight="bold">${p.label}</text>`;
     }
-    // 进攻路线
-    svg += `<line x1="175" y1="195" x2="200" y2="100" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue)" stroke-dasharray="5,3"/>`;
-    // 篮筐
-    svg += `<circle cx="200" cy="55" r="15" fill="none" stroke="#ff6600" stroke-width="2"/>`;
-  } else if (formType.includes('2人一组') || formType.includes('双人')) {
-    // 双人训练示意图（如传球练习）
+    // 进攻传球路线
+    svg += `<line x1="200" y1="135" x2="135" y2="172" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arrow-blue)" stroke-dasharray="4,3" opacity="0.6"/>`;
+    svg += `<line x1="200" y1="135" x2="265" y2="172" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arrow-blue)" stroke-dasharray="4,3" opacity="0.6"/>`;
+    // 球在PG手中
+    svg += `<circle cx="215" cy="112" r="5" fill="#ea580c"/>`;
+    // 教练在边线
+    svg += `<rect x="340" y="180" width="20" height="20" fill="#dc2626" stroke="white" stroke-width="2" rx="3"/>`;
+    svg += `<text x="350" y="194" text-anchor="middle" font-size="10" fill="white" font-weight="bold">教</text>`;
+  } else if (formType.includes('2人一组') || formType.includes('双人') || activityName.includes('传球')) {
+    // 双人训练/传球训练 - 两人面对面站位
     // 学员1
-    svg += `<circle cx="120" cy="150" r="12" fill="#2563eb" stroke="white" stroke-width="2"/>`;
-    svg += `<text x="120" y="155" text-anchor="middle" font-size="11" fill="white" font-weight="bold">1</text>`;
+    svg += `<circle cx="120" cy="140" r="14" fill="#2563eb" stroke="white" stroke-width="2.5"/>`;
+    svg += `<text x="120" y="145" text-anchor="middle" font-size="12" fill="white" font-weight="bold">1</text>`;
     // 学员2
-    svg += `<circle cx="280" cy="150" r="12" fill="#2563eb" stroke="white" stroke-width="2"/>`;
-    svg += `<text x="280" y="155" text-anchor="middle" font-size="11" fill="white" font-weight="bold">2</text>`;
+    svg += `<circle cx="280" cy="140" r="14" fill="#2563eb" stroke="white" stroke-width="2.5"/>`;
+    svg += `<text x="280" y="145" text-anchor="middle" font-size="12" fill="white" font-weight="bold">2</text>`;
+    // 球在学员1手中
+    svg += `<circle cx="135" cy="132" r="5" fill="#ea580c"/>`;
     // 传球路线
-    svg += `<line x1="135" y1="150" x2="265" y2="150" stroke="#dc2626" stroke-width="2" marker-end="url(#arrow-red)" stroke-dasharray="5,3"/>`;
-    // 球在中间
-    svg += `<circle cx="200" cy="150" r="4" fill="#ea580c"/>`;
-    // 教练指导位置
-    svg += `<rect x="190" y="100" width="20" height="20" fill="#dc2626" stroke="white" stroke-width="2"/>`;
-    svg += `<text x="200" y="113" text-anchor="middle" font-size="10" fill="white" font-weight="bold">教</text>`;
+    svg += `<line x1="135" y1="135" x2="265" y2="135" stroke="#dc2626" stroke-width="2" marker-end="url(#arrow-red)" stroke-dasharray="5,3"/>`;
+    // 传回路线（虚线）
+    svg += `<line x1="265" y1="148" x2="135" y2="148" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arrow-blue)" stroke-dasharray="4,3" opacity="0.5"/>
+    <text x="200" y="125" text-anchor="middle" font-size="9" fill="#6b7280">传球 →</text>
+    <text x="200" y="162" text-anchor="middle" font-size="9" fill="#6b7280">← 回传</text>`;
+    // 教练在侧面指导
+    svg += `<rect x="340" y="120" width="20" height="20" fill="#dc2626" stroke="white" stroke-width="2" rx="3"/>`;
+    svg += `<text x="350" y="134" text-anchor="middle" font-size="10" fill="white" font-weight="bold">教</text>`;
   } else if (formType.includes('分组') && formType.includes('3人')) {
     // 3人一组训练
     const groups = 3;
@@ -371,7 +436,33 @@ function generateDefaultDrillDiagram(
       // 传球路线
       svg += `<line x1="${baseX + 12}" y1="130" x2="${baseX - 25}" y2="150" stroke="#dc2626" stroke-width="2" marker-end="url(#arrow-red)" opacity="0.7"/>`;
     }
-  } else if (formType.includes('排面')) {
+  } else if (activityName.includes('运球') && !activityName.includes('投篮')) {
+    // 运球训练 - 学员纵队依次出发，教练在终点
+    // 纵队起点（左侧底线附近）
+    for (let i = 0; i < 4; i++) {
+      const x = 60;
+      const y = 120 + i * 35;
+      svg += `<circle cx="${x}" cy="${y}" r="12" fill="#2563eb" stroke="white" stroke-width="2"/>`;
+      svg += `<text x="${x}" y="${y + 4}" text-anchor="middle" font-size="10" fill="white" font-weight="bold">${i + 1}</text>`;
+    }
+    // 第一个学员的球
+    svg += `<circle cx="60" cy="120" r="4" fill="#ea580c"/>`;
+    // 运球路线（Z字形或直线）
+    if (activityName.includes('变向') || activityName.includes('Z字')) {
+      // Z字变向运球路线
+      svg += `<path d="M 72 120 L 150 80 L 250 150 L 350 80" fill="none" stroke="#dc2626" stroke-width="2" marker-end="url(#arrow-red)" stroke-dasharray="5,3"/>`;
+      // 障碍物（雪糕桶）
+      svg += `<polygon points="150,75 155,85 145,85" fill="#f59e0b"/>`;
+      svg += `<polygon points="250,145 255,155 245,155" fill="#f59e0b"/>`;
+      svg += `<text x="200" y="70" text-anchor="middle" font-size="9" fill="#6b7280">Z字变向路线</text>`;
+    } else {
+      // 直线运球路线
+      svg += `<line x1="72" y1="120" x2="340" y2="120" stroke="#dc2626" stroke-width="2" marker-end="url(#arrow-red)" stroke-dasharray="5,3"/>`;
+      svg += `<text x="200" y="110" text-anchor="middle" font-size="9" fill="#6b7280">直线运球路线</text>`;
+    }
+    // 教练在终点
+    svg += `<rect x="340" y="108" width="20" height="20" fill="#dc2626" stroke="white" stroke-width="2" rx="3"/>`;
+    svg += `<text x="350" y="122" text-anchor="middle" font-size="10" fill="white" font-weight="bold">教</text>`;
     // 排面训练示意图
     const rows = 3;
     const cols = 4;
@@ -425,7 +516,7 @@ function generateDefaultDrillDiagram(
   </g>`;
 
   // 组织形式标签
-  svg += `<text x="200" y="290" text-anchor="middle" font-size="11" fill="#6b7280" font-weight="500">${formType}</text>`;
+  svg += `<text x="200" y="288" text-anchor="middle" font-size="11" fill="#6b7280" font-weight="500">${formType}</text>`;
 
   svg += `</svg>`;
 
@@ -670,21 +761,21 @@ function generateSegmentStructure(duration: number): Array<{
   ];
 }
 
-// U10三级版说明
+// U10三级版说明（大幅细化，参考2023暑期教案真实标准）
 const u10LevelGuide: Record<string, string> = {
-  基础: '初次接触篮球，动作以模仿为主，难度最低，对抗少',
-  进阶: '有一定篮球基础，可进行标准动作训练，有少量对抗',
-  精英: '技术较成熟，可进行组合动作训练，有正式对抗比赛',
+  基础: '初次接触篮球，以模仿、游戏为主。运球：原地高/低运球、单手左右拉球。传球：双手胸前传接球（近距离）。投篮：无球投篮脚步模仿、近筐投篮。体能：模仿秀游戏、基础跳跃。无对抗比赛，以趣味游戏代替。',
+  进阶: '有一定篮球基础。运球：行进间运球、体前变向运球、运双球训练。传球：行进间传接球、击地传球。投篮：三步上篮脚步+持球上篮、基础投篮训练。体能：绳梯训练、行进间协调。有小规模分组对抗（2v2/3v3）。',
+  精英: '技术较成熟，接近比赛水平。运球：组合运球（体前变向+胯下+背后）、运球突破衔接上篮。传球：快攻传接球、行进间不停球传球。投篮：接球投篮、运球急停跳投、三威胁衔接投篮。防守：人球兼顾选位、防有球/无球。正式全场对抗（3v3/4v4/5v5），强调比赛规则和战术配合。',
 };
 
 // 生成Prompt
 function generatePrompt(params: AIPlanParams, cases: LessonPlan[]): string {
   const ageGroupInfo: Record<string, string> = {
-    U6: '4-6岁幼儿班，以游戏为主，培养球性和兴趣',
-    U8: '7-8岁小学低年级，基础运球、传球入门',
-    U10: '9-10岁小学中年级，技术规范化，开始体能训练',
-    U12: '11-12岁小学高年级，战术训练，加强对抗',
-    U14: '13-14岁初中，综合提升，中考体育',
+    U6: '4-6岁幼儿班，注意力短暂，以游戏为主培养球性和兴趣。每个动作不超过3分钟，多重复少讲解。热身用模仿秀（木头人、动物爬行），运球只做原地高低运球和拉球，投篮只做无球脚步模仿。对抗用投篮小游戏、接力赛代替。教练多鼓励、多击掌。',
+    U8: '7-8岁小学低年级，可进行基础技术训练。运球：行进间运球、基础体前变向、运双球。传球：双手胸前传球、击地传球。投篮：三步上篮脚步+持球上篮。体能：绳梯、侧滑步。有少量对抗（2v2），重点培养基本功和比赛兴趣。',
+    U10: '9-10岁小学中年级，技术规范化，开始体能训练。运球：体前变向、胯下运球、运双球。传球：行进间传接球、移动传球。投篮：接球上篮、基础投篮训练。体能：绳梯进阶、敏捷梯。有正式对抗（3v3），强调规则和基础战术配合。',
+    U12: '11-12岁小学高年级，接近比赛水平。运球：组合运球（体前+胯下+背后）、运球突破。传球：快攻传球、行进间不停球传球。投篮：急停投篮、接球投篮、三威胁衔接。防守：防有球/无球、人球兼顾。正式全场对抗（4v4/5v5），有战术配合和位置训练。',
+    U14: '13-14岁初中，接近成人比赛。全面技术：四项组合运球、运球衔接突破上篮/急停投篮、全场快攻、半场阵地战术、1v1-5v5对抗。体能：自重力量训练+专项体能。防守：全场紧逼、半场联防/人盯人。强度高、时间长的正式比赛。',
   };
 
   const segments = generateSegmentStructure(params.duration);
@@ -732,10 +823,11 @@ function generatePrompt(params: AIPlanParams, cases: LessonPlan[]): string {
 ${segmentDesc}
 
 ## 训练要求
-- 训练主题：${params.theme || '根据年龄段特点自动确定'}
+- 训练主题：${params.theme || '根据年龄段特点自动确定'}${params.theme && params.theme.includes('+') ? '\n（教练选择了多个主题，教案中需要同时覆盖这些主题的训练内容，可以将不同主题分配到不同时间段或进行组合训练）' : ''}
 - 重点训练技能：${params.focusSkills?.join('、') || '根据年龄段特点自动确定'}
 - 技能水平：${isU10 ? levelLabel + '（' + u10LevelGuide[levelLabel] + '）' : params.skillLevel || 'intermediate'}
 ${params.previousTraining?.length ? `- 最近训练内容：${params.previousTraining.join('、')}（避免重复或进阶）` : ''}
+${params.additionalNotes ? `- 教练特别要求（必须严格执行）：${params.additionalNotes}\n（以上要求是教练明确的训练需求，必须在教案中完整体现，不能忽略！\n如果教练要求"运球和传球结合"，则教案中必须有运球传球结合的练习！）` : ''}
 
 ${casesText ? `## 参考案例（来自真实教学数据）\n${casesText}\n` : ''}
 
@@ -755,21 +847,21 @@ ${casesText ? `## 参考案例（来自真实教学数据）\n${casesText}\n` : 
           "name": "活动名称（必须精确，如\"右手原地高低运球\"）",
           "duration": 5,
           "form": "组织形式（必须具体：集体/分组（几人一组）/排面（几排）/依次（轮流））",
-          "description": "【列队】【位置】【动作】用简洁专业的中文描述。例如：\"【列队】所有学员排成一路纵队。【位置】围绕篮球场慢跑。【动作】保持均匀速度，绕场慢跑1-2圈。\"",
+          "description": "【列队】【位置】【动作】用简洁专业的中文描述。例如："【列队】所有学员排成一路纵队。【位置】围绕篮球场慢跑。【动作】保持均匀速度，绕场慢跑1-2圈。"",
           "keyPoints": ["要点1", "要点2"],
           "sets": "2-3组（必须填写具体组数）",
           "repetitions": "每组8-10次或30秒（必须填写具体次数或时间）",
           "progression": "从易到难的3个层次：1.基础动作（简单模仿）→ 2.进阶动作（增加难度）→ 3.挑战动作（组合运用）（必须明确写出3个层次）",
           "equipment": ["器材（如有）"],
           "drillDiagram": "<svg>...</svg> 动作路线示意图（必须包含：学员圆圈+编号蓝色、教练方块红色、球橙色圆点、箭头路线）",
-          "relatedTo": "关联说明（可选）：如果是热身环节的基础动作，说明为后面的哪个技术训练做准备。例如：\"为后面的行进间体前变向运球做准备\""
+          "relatedTo": "关联说明（可选）：如果是热身环节的基础动作，说明为后面的哪个技术训练做准备。例如："为后面的行进间体前变向运球做准备""
 }
       ],
       "points": ["本节要点1", "本节要点2"]
     },
     {
       "name": "第二节",
-      "duration": ${segments[1].minutes},
+      "duration": segments[1].minutes,
       "activities": [...],
       "points": [...]
     },
@@ -790,12 +882,24 @@ ${casesText ? `## 参考案例（来自真实教学数据）\n${casesText}\n` : 
 **必须按此顺序生成4-5个活动，严格按照标注的时间：**
 1. **课前礼仪**（2分钟）：集合、点名、讲解本节课内容
 2. **慢跑热身**（严格≤3分钟，duration必须设为2或3）：绕场慢跑1-2圈，最多3分钟，绝对不能超过3分钟。此条为硬性规则，违反将导致教案作废。
-3. **动态伸展**（5-8分钟）：肩关节、髋关节、膝关节、踝关节动态拉伸
-4. **身体协调性**（5-8分钟）：绳梯、侧滑步、交叉步、小碎步等
+3. **动态伸展**（5-8分钟）：**必须将每个拉伸动作单独列为一个活动！** 不要笼统写"依次进行肩关节、髋关节拉伸"。
+   每个拉伸动作必须包含：具体动作名称（如"直腿摸脚尖""前抱腿""后提拉腿""提膝外展"等）、详细的姿势描述、行进间还是原地。
+   示例（参考真实教案格式）：
+   - 活动1（2分钟）：直腿摸脚尖 — 行进间 — 【姿势】跨出一步脚跟落地脚尖翘起 — 【动作】双手碰触前脚尖交替进行 — 【次数】底线至中线2趟 — 【要点】增强协调能力、拉伸大腿后侧
+   - 活动2（2分钟）：前抱腿 — 行进间 — 【姿势】十指交叉抱膝盖 — 【动作】向上提拉交替进行 — 【次数】每条腿10次 — 【要点】增强单腿稳定性、拉伸大腿肌肉
+   - 活动3（2分钟）：后提拉腿 — 行进间 — 【姿势】身体直立 — 【动作】身后抓住脚踝向上提拉 — 【次数】每条腿10次 — 【要点】拉伸大腿前侧
+   - 活动4（2分钟）：提膝外展 — 原地 — 【姿势】单脚站立 — 【动作】提膝外展小跳交换进行 — 【次数】每侧8次×2组 — 【要点】增强髋关节稳定性
+4. **身体协调性**（5-8分钟）：每个协调训练动作也要单独列出（如"双脚脚尖前后跳""小碎步变向""侧滑步"等），包含具体姿势、动作、次数
 5. **球性熟悉**（8-10分钟）：原地运球、移动运球、球绕环等
 
 ### 2. 具体动作描述规范（核心改进⭐）
 **每个动作必须包含以下6个要素，缺一不可：**
+
+**⚠️ 重要：每个动作必须单独列为一个活动（activity），不能把多个动作合并成一条描述！**
+- ❌ 错误："依次进行肩关节、髋关节、膝关节、踝关节的动态拉伸"
+- ❌ 错误："球性熟悉：进行原地运球、行进间运球、球绕环等练习"
+- ✅ 正确：每个拉伸动作单独一个activity（如"直腿摸脚尖""前抱腿""后提拉腿"）
+- ✅ 正确：每个球性动作单独一个activity（如"右手原地高低运球""三绕环""单手左右地滚球"）
 
 **【姿势】** - 身体各部位的具体位置和状态
 - 示例1："膝盖微屈，重心降低，略微前倾，眼睛看前方"
@@ -937,6 +1041,13 @@ ${casesText ? `## 参考案例（来自真实教学数据）\n${casesText}\n` : 
 3. 队形描述使用：排面/列队/分组/圆形/菱形/方形等
 4. ${params.location === '室外' && params.weather === '雨天' ? '雨天室外注意安全，可改为室内或减少对抗环节' : ''}
 ${casesText ? '5. 参考案例库的训练方法格式' : ''}
+6. **年龄段差异化（必须严格执行）**：
+   - U6：动作数量少（每节2-3个）、时间短（每个2-3分钟）、游戏化（加游戏名称如"木头人""模仿秀"）、无对抗、以模仿和趣味为主
+   - U8：动作数量适中（每节3-4个）、基础技术为主（行进间运球、体前变向、胸前传球、三步上篮）、少量2v2对抗
+   - U10/U12：动作数量多（每节4-5个）、技术难度高（胯下/背后运球、接球投篮、急停跳投）、正式3v3/4v4对抗、有战术配合
+   - U14：高强度、长时间、成人化训练（全场快攻、联防/盯人、体能力量训练、5v5全场对抗）
+   **不同年龄段不能生成相同或相似的动作和强度！**
+${params.additionalNotes ? `\n7. **教练特别要求必须完全遵守**：${params.additionalNotes}。这是教练明确的训练需求，必须在教案中完整体现！\n   - 如果要求"A和B结合"，则必须有A和B结合的练习\n   - 如果要求"增加某项内容"，则必须加入该内容\n   - 如果要求"减少某项内容"，则必须减少或取消\n   - 违反教练要求=教案不合格` : ''}
 `.trim();
 }
 

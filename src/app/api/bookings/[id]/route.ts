@@ -16,7 +16,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     if (!booking)
       return NextResponse.json({ success: false, error: '预约不存在' }, { status: 404 });
     return NextResponse.json({ success: true, booking });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ success: false, error: '获取失败' }, { status: 500 });
   }
 }
@@ -52,7 +52,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     });
 
     return NextResponse.json({ success: true, booking: updated });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ success: false, error: '更新失败' }, { status: 500 });
   }
 }
@@ -71,7 +71,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
     await prisma.booking.delete({ where: { id: params.id } });
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ success: false, error: '删除失败' }, { status: 500 });
   }
 }

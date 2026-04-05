@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface Player {
   id: string;
@@ -59,18 +59,7 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
 
-  useEffect(() => {
-    fetchPlayers();
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    if (selectedPlayer) {
-      fetchData();
-    }
-  }, [selectedPlayer]);
-
-  const fetchPlayers = async () => {
+  const fetchPlayers = useCallback(async () => {
     try {
       const res = await fetch('/api/players');
       const data = await res.json();
@@ -78,9 +67,9 @@ export default function AnalyticsPage() {
     } catch (error) {
       console.error('获取学员列表失败:', error);
     }
-  };
+  }, []);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const [recRes, analysisRes, teamRes] = await Promise.all([
@@ -103,7 +92,18 @@ export default function AnalyticsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedPlayer]);
+
+  useEffect(() => {
+    fetchPlayers();
+    fetchData();
+  }, [fetchPlayers, fetchData]);
+
+  useEffect(() => {
+    if (selectedPlayer) {
+      fetchData();
+    }
+  }, [selectedPlayer, fetchData]);
 
   const handleGenerateAnalysis = async () => {
     if (!selectedPlayer) {

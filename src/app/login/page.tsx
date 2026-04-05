@@ -37,7 +37,7 @@ export default function LoginPage() {
 
       // 登录成功，跳转到首页
       router.push('/');
-    } catch (err) {
+    } catch {
       setError('网络错误，请重试');
       setLoading(false);
     }

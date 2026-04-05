@@ -38,7 +38,7 @@ export default function NewPlanPage() {
     duration: 90,
     location: '室内' as Location,
     weather: '',
-    theme: '',
+    themes: [] as string[],
   });
 
   // AI特有配置
@@ -114,7 +114,7 @@ export default function NewPlanPage() {
           duration: form.duration,
           location: form.location,
           weather: form.weather || undefined,
-          theme: form.theme || undefined,
+          theme: form.themes.length > 0 ? form.themes.join('+') : undefined,
           focusSkills,
           additionalNotes: aiConfig.additionalNotes || undefined,
           playerCount: aiConfig.playerCount ? parseInt(aiConfig.playerCount) : undefined,
@@ -143,7 +143,7 @@ export default function NewPlanPage() {
           duration: form.duration,
           location: form.location,
           weather: form.weather || undefined,
-          theme: form.theme || undefined,
+          theme: form.themes.length > 0 ? form.themes.join('+') : undefined,
           focusSkills,
         });
       }
@@ -426,25 +426,35 @@ export default function NewPlanPage() {
                   </select>
                 </div>
 
-                {/* 主题 */}
+                {/* 主题（多选） */}
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    训练主题（可选）
+                    训练主题（可多选，支持一节课练多个内容）
                   </label>
-                  <select
-                    value={form.theme}
-                    onChange={e => setForm({ ...form, theme: e.target.value })}
-                    className="w-full p-2 border border-gray-300 rounded-lg"
-                  >
-                    <option value="">随机选择</option>
+                  <div className="flex flex-wrap gap-2">
                     {themes
                       .filter(t => t)
                       .map(t => (
-                        <option key={t} value={t}>
+                        <button
+                          key={t}
+                          onClick={() =>
+                            setForm(f => ({
+                              ...f,
+                              themes: f.themes.includes(t)
+                                ? f.themes.filter(x => x !== t)
+                                : [...f.themes, t],
+                            }))
+                          }
+                          className={`px-3 py-1 rounded-full text-sm transition-all ${
+                            form.themes.includes(t)
+                              ? 'bg-orange-500 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
                           {t}
-                        </option>
+                        </button>
                       ))}
-                  </select>
+                  </div>
                 </div>
 
                 {/* 重点技能 */}
