@@ -16,6 +16,34 @@ import {
 // 版本历史记录
 const versions = [
   {
+    version: 'v4.9',
+    date: '2026-04-05',
+    title: '全场景篮球场地图 + SVG验证强化',
+    description: '所有活动类型统一使用标准篮球半场图，AI生成的非标准SVG自动替换',
+    features: [
+      { type: 'feature', text: '所有活动（运球、传球、体能、拉伸等）统一使用标准篮球半场图' },
+      { type: 'feature', text: 'SVG验证增强：AI生成的非篮球场地图自动替换为标准场地图' },
+    ],
+    fixes: [{ type: 'fix', text: '修复部分活动示意图仍显示虚线边框而非篮球场的问题' }],
+  },
+  {
+    version: 'v4.8',
+    date: '2026-04-05',
+    title: 'SVG场地图重写 + 动作拆分 + 级别差异化 + 主题多选',
+    description: '基于真实教案标准全面优化：FIBA标准比例、动作单独列出、三级差异化训练',
+    features: [
+      { type: 'feature', text: 'SVG场地图重写：FIBA标准比例（28m×15m）、准确三分线、罚球区、篮筐' },
+      { type: 'feature', text: '动作单独列出：每个拉伸/动作不再笼统合并，独立描述姿势、次数、要点' },
+      { type: 'feature', text: '基础/进阶/精英三级差异化：参考2023年暑期教案真实标准' },
+      { type: 'feature', text: '训练主题支持多选（如运球+传球同时训练）' },
+      { type: 'feature', text: '附加要求严格执行：AI必须遵循教练特别要求生成教案' },
+    ],
+    fixes: [
+      { type: 'fix', text: '修复投篮/上篮/对抗训练球员站位不贴合实际的问题' },
+      { type: 'fix', text: '修复teams页面重复代码块导致的构建错误' },
+    ],
+  },
+  {
     version: 'v4.7',
     date: '2026-04-04',
     title: '教案生成动作规范化 + 篮球场图增强',

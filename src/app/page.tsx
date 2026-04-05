@@ -147,7 +147,7 @@ export default function Home() {
                   <div className="flex items-center gap-2">
                     <h1 className="text-lg sm:text-xl font-bold">篮球青训教案系统</h1>
                     <span className="px-2 py-0.5 bg-white/20 text-white text-xs rounded-full font-medium hidden sm:inline">
-                      v4.4
+                      v4.9
                     </span>
                   </div>
                   <p className="text-orange-100 text-sm hidden sm:block">

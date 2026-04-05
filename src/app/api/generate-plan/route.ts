@@ -99,14 +99,18 @@ function validateAndFixActivity(
     fixed.progression = generateProgressionByActivity(fixed.name, category);
   }
 
-  // 确保SVG图解存在且格式正确
+  // 确保SVG图解存在、格式正确且是篮球场地图
+  const isCourtSVG = fixed.drillDiagram &&
+    fixed.drillDiagram.includes('#f5f0e6') && // 篮球场木地板底色
+    fixed.drillDiagram.includes('#5c4033'); // 篮球场线颜色
   if (
     !fixed.drillDiagram ||
     fixed.drillDiagram === '<svg>...</svg>' ||
     !fixed.drillDiagram.includes('<svg') ||
-    !fixed.drillDiagram.includes('xmlns="http://www.w3.org/2000/svg"')
+    !fixed.drillDiagram.includes('xmlns="http://www.w3.org/2000/svg"') ||
+    !isCourtSVG // AI返回的不是篮球场地图，强制替换
   ) {
-    // 生成默认SVG图解
+    // 生成默认SVG图解（篮球场地图）
     fixed.drillDiagram = generateDefaultDrillDiagram(
       category,
       fixed.form || '集体',
@@ -301,28 +305,8 @@ function generateDefaultDrillDiagram(
   const formType = form || '集体';
   const activityType = category || 'technical';
 
-  // 判断是否需要篮球场图
-  const needsCourt =
-    activityName.includes('投篮') ||
-    activityName.includes('上篮') ||
-    activityName.includes('三步') ||
-    activityName.includes('对抗') ||
-    activityName.includes('比赛') ||
-    activityName.includes('进攻') ||
-    activityName.includes('防守') ||
-    activityName.includes('突破') ||
-    activityName.includes('快攻');
-
-  // 基础模板 - 包含箭头标记定义
-  let svg = `<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg" style="background-color: white;">`;
-
-  // 如果需要篮球场，先画场地
-  if (needsCourt) {
-    svg += generateBasketballCourtSVG(true);
-  } else {
-    // 简化的场地边框
-    svg += `<rect x="10" y="10" width="380" height="280" stroke="#374151" fill="none" stroke-width="2" stroke-dasharray="5,5"/>`;
-  }
+  // 所有活动统一使用篮球场半场图
+  let svg = generateBasketballCourtSVG(true);
 
   // 箭头标记定义
   svg += `<defs>
