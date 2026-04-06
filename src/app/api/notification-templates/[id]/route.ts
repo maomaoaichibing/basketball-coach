@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import prisma from '@/lib/db';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 // GET /api/notification-templates/[id] - 获取模板详情
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const { id } = params;
 
@@ -27,6 +31,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 // PUT /api/notification-templates/[id] - 更新模板
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request, { roles: ['admin'] });
+  if (!auth.success) return auth.response;
+
   try {
     const { id } = params;
     const body = await request.json();
@@ -68,6 +75,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 // DELETE /api/notification-templates/[id] - 删除模板
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request, { roles: ['admin'] });
+  if (!auth.success) return auth.response;
+
   try {
     const { id } = params;
 

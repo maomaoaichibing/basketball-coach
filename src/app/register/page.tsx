@@ -6,9 +6,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Dumbbell, Mail, Lock, Eye, EyeOff, User, Phone } from 'lucide-react';
+import { useAuth } from '@/components/AuthProvider';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -43,6 +45,22 @@ export default function RegisterPage() {
       return;
     }
 
+    // 验证邮箱格式
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('请输入有效的邮箱地址');
+      return;
+    }
+
+    // 验证手机号格式（如果填写了）
+    if (formData.phone) {
+      const phoneRegex = /^1[3-9]\d{9}$/;
+      if (!phoneRegex.test(formData.phone)) {
+        setError('请输入有效的手机号');
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -65,7 +83,8 @@ export default function RegisterPage() {
         return;
       }
 
-      // 注册成功，跳转到首页（后续可能需要优化为自动登录）
+      // 注册成功，自动登录并跳转到首页
+      login(data.data.user, data.data.token);
       router.push('/');
     } catch (err) {
       setError('网络错误，请重试');

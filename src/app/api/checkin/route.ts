@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { prisma } from '@/lib/db';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 // 批量签到/更新出勤
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest) {const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
+  
   try {
     const body = await request.json();
     const { planId, records } = body;
@@ -59,7 +63,10 @@ export async function POST(request: NextRequest) {
 }
 
 // 获取某课程的签到状态
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
+  
   try {
     const { searchParams } = new URL(request.url);
     const planId = searchParams.get('planId');

@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 const prisma = new PrismaClient();
 
 // GET /api/courses/[id] - 获取单个课程包
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const course = await prisma.course.findUnique({
       where: { id: params.id },
@@ -44,6 +48,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 // PUT /api/courses/[id] - 更新课程包
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request, { roles: ['admin'] });
+  if (!auth.success) return auth.response;
+
   try {
     const body = await request.json();
     const { name, type, totalHours, price, validDays, groups, description, notes, status } = body;
@@ -79,6 +86,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 // DELETE /api/courses/[id] - 删除课程包
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request, { roles: ['admin'] });
+  if (!auth.success) return auth.response;
+
   try {
     // 检查是否有购买记录
     const enrollments = await prisma.courseEnrollment.count({

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   ArrowLeft,
   Plus,
@@ -62,7 +63,7 @@ export default function SchedulePage() {
     try {
       const params = new URLSearchParams();
       if (selectedGroup !== 'all') params.set('group', selectedGroup);
-      const res = await fetch(`/api/schedules?${params}`);
+      const res = await fetchWithAuth(`/api/schedules?${params}`);
       const data = await res.json();
       if (data.success) setSchedules(data.schedules);
     } catch (error) {
@@ -97,7 +98,7 @@ export default function SchedulePage() {
   async function handleDelete(id: string) {
     if (!confirm('确定要删除这个课程安排吗？')) return;
     try {
-      const res = await fetch(`/api/schedules/${id}`, { method: 'DELETE' });
+      const res = await fetchWithAuth(`/api/schedules/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) fetchSchedules();
       else alert(data.error);

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChevronRight, Send, MessageCircle, User } from 'lucide-react';
+import { fetchWithAuth } from '@/lib/auth';
 
 type Message = {
   id: string;
@@ -44,7 +45,7 @@ export default function ParentMessagesPage() {
 
   async function fetchMessages(playerId: string) {
     try {
-      const response = await fetch(`/api/messages?playerId=${playerId}`);
+      const response = await fetchWithAuth(`/api/messages?playerId=${playerId}`);
       const data = await response.json();
       if (data.success) {
         setMessages(data.messages);
@@ -60,7 +61,7 @@ export default function ParentMessagesPage() {
     if (!newMessage.trim() || !player) return;
 
     try {
-      const response = await fetch('/api/messages', {
+      const response = await fetchWithAuth('/api/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -87,7 +88,7 @@ export default function ParentMessagesPage() {
   // 标记消息为已读
   async function markAsRead(messageId: string) {
     try {
-      await fetch(`/api/messages/${messageId}`, {
+      await fetchWithAuth(`/api/messages/${messageId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isRead: true }),

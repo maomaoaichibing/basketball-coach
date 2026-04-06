@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   ArrowLeft,
   Sparkles,
@@ -90,7 +91,7 @@ export default function SmartPlanPage() {
   async function analyze() {
     setLoading(true);
     try {
-      const response = await fetch('/api/smart-plan', {
+      const response = await fetchWithAuth('/api/smart-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

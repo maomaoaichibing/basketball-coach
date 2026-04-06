@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   Lightbulb,
   TrendingUp,
@@ -49,7 +50,7 @@ export default function RecommendationsPage() {
 
   const fetchPlayers = async () => {
     try {
-      const res = await fetch('/api/players?status=training');
+      const res = await fetchWithAuth('/api/players?status=training');
       const data = await res.json();
       setPlayers(data.players || []);
       if (data.players?.length > 0) {
@@ -64,7 +65,7 @@ export default function RecommendationsPage() {
     if (!selectedPlayer) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/recommendations?playerId=${selectedPlayer}&type=all`);
+      const res = await fetchWithAuth(`/api/recommendations?playerId=${selectedPlayer}&type=all`);
       const data = await res.json();
       setRecommendations(data.recommendations || []);
       setPlayerInfo(data.player);

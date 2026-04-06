@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   FileText,
   ChevronRight,
@@ -93,7 +94,7 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
   async function fetchReport(id: string) {
     try {
       setLoading(true);
-      const response = await fetch(`/api/growth-reports/${id}`);
+      const response = await fetchWithAuth(`/api/growth-reports/${id}`);
       const data = await response.json();
 
       if (data.success) {
@@ -117,7 +118,7 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
     if (!report) return;
 
     try {
-      const response = await fetch(`/api/growth-reports/${report.id}`, {
+      const response = await fetchWithAuth(`/api/growth-reports/${report.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -144,7 +145,7 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
     if (!report || !confirm('确定要删除这份报告吗？')) return;
 
     try {
-      const response = await fetch(`/api/growth-reports/${report.id}`, {
+      const response = await fetchWithAuth(`/api/growth-reports/${report.id}`, {
         method: 'DELETE',
       });
       if (response.ok) {

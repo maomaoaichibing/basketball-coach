@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { prisma } from '@/lib/db';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 // 获取目标详情
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const goal = await prisma.playerGoal.findUnique({
       where: { id: params.id },
@@ -31,6 +35,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 // 更新目标
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const body = await request.json();
     const { targetScore, currentScore, status, targetDate } = body;
@@ -60,6 +67,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 // 删除目标
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     await prisma.playerGoal.delete({
       where: { id: params.id },

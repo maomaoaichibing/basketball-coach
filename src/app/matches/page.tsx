@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   Trophy,
   Plus,
@@ -82,7 +83,7 @@ export default function MatchesPage() {
 
   async function handleCreateMatch() {
     try {
-      const response = await fetch('/api/matches', {
+      const response = await fetchWithAuth('/api/matches', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

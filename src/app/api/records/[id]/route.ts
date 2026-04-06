@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import prisma from '@/lib/db';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 // GET /api/records/[id] - 获取训练记录详情
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const { id } = params;
 
@@ -31,6 +35,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 // PUT /api/records/[id] - 更新训练记录
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const { id } = params;
     const body = await request.json();
@@ -91,6 +98,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 // DELETE /api/records/[id] - 删除训练记录
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const { id } = params;
 

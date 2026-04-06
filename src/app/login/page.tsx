@@ -2,13 +2,16 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Dumbbell, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '@/components/AuthProvider';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -35,8 +38,12 @@ export default function LoginPage() {
         return;
       }
 
-      // 登录成功，跳转到首页
-      router.push('/');
+      // 登录成功，保存状态到 AuthProvider
+      login(data.data.user, data.data.token);
+
+      // 跳转：优先跳到 redirect 指定的页面，否则跳首页
+      const redirectTo = searchParams.get('redirect') || '/';
+      router.push(redirectTo);
     } catch {
       setError('网络错误，请重试');
       setLoading(false);
@@ -133,5 +140,17 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

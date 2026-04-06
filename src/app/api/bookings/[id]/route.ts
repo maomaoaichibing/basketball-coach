@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 const prisma = new PrismaClient();
 
 // GET /api/bookings/[id]
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const booking = await prisma.booking.findUnique({
       where: { id: params.id },
@@ -23,6 +27,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 // PUT /api/bookings/[id] - 更新预约状态
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const body = await request.json();
     const { status, cancelReason } = body;
@@ -59,6 +66,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 // DELETE /api/bookings/[id]
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const booking = await prisma.booking.findUnique({
       where: { id: params.id },

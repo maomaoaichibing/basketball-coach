@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useCloudVoiceRecognition } from '@/hooks/useCloudVoiceRecognition';
 import { parseVoiceCommand } from '@/hooks/useVoiceInput';
+import { fetchWithAuth } from '@/lib/auth';
 
 // 学员类型
 interface Player {
@@ -122,7 +123,7 @@ export default function VoicePlanPage() {
   // 查询所有学员
   async function queryAllPlayers(ageGroup?: string, skills?: string[]) {
     try {
-      const response = await fetch('/api/players');
+      const response = await fetchWithAuth('/api/players');
       const data = await response.json();
 
       if (data.success && data.players && data.players.length > 0) {
@@ -206,7 +207,7 @@ export default function VoicePlanPage() {
     try {
       const mainPlayer = selectedPlayers[0];
 
-      const response = await fetch('/api/generate-plan', {
+      const response = await fetchWithAuth('/api/generate-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -221,7 +222,7 @@ export default function VoicePlanPage() {
       const data = await response.json();
 
       if (data.success && data.plan) {
-        const saveResponse = await fetch('/api/plans', {
+        const saveResponse = await fetchWithAuth('/api/plans', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

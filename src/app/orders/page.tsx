@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { fetchWithAuth } from '@/lib/auth';
 
 interface OrderItem {
   id: string;
@@ -130,7 +131,7 @@ export default function OrdersPage() {
       if (filter.type) params.set('type', filter.type);
       if (filter.search) params.set('search', filter.search);
 
-      const res = await fetch(`/api/orders?${params}`);
+      const res = await fetchWithAuth(`/api/orders?${params}`);
       const data = await res.json();
       setOrders(data.orders);
       setStats(data.stats);
@@ -142,7 +143,7 @@ export default function OrdersPage() {
 
   const fetchCourses = async () => {
     try {
-      const res = await fetch('/api/courses?status=active');
+      const res = await fetchWithAuth('/api/courses?status=active');
       const data = await res.json();
       setCourses(data.courses || []);
     } catch (error) {
@@ -152,7 +153,7 @@ export default function OrdersPage() {
 
   const fetchPlayers = async () => {
     try {
-      const res = await fetch('/api/players?status=training');
+      const res = await fetchWithAuth('/api/players?status=training');
       const data = await res.json();
       setPlayers(data.players || []);
     } catch (error) {
@@ -227,7 +228,7 @@ export default function OrdersPage() {
         }
       }
 
-      const res = await fetch('/api/orders', {
+      const res = await fetchWithAuth('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -277,7 +278,7 @@ export default function OrdersPage() {
     if (!selectedOrder) return;
 
     try {
-      const res = await fetch('/api/payments', {
+      const res = await fetchWithAuth('/api/payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -319,7 +320,7 @@ export default function OrdersPage() {
     if (!confirm('确定要取消该订单吗？')) return;
 
     try {
-      const res = await fetch(`/api/orders/${order.id}`, {
+      const res = await fetchWithAuth(`/api/orders/${order.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'cancelled' }),

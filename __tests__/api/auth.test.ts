@@ -139,16 +139,16 @@ describe('POST /api/auth/login', () => {
     expect(result.data.data.user.id).toBe('coach-1');
 
     // Verify JWT was called with correct payload
-    // JWT_SECRET uses fallback value from the code: 'basketball-coach-secret-key-2024'
-    expect(jwt.sign).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'coach-1',
-        email: 'wang@coach.com',
-        role: 'head_coach',
-      }),
-      'basketball-coach-secret-key-2024',
-      { expiresIn: '7d' }
-    );
+      // JWT_SECRET uses fallback value from the code: 'basketball-coach-dev-secret-2024'
+      expect(jwt.sign).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'coach-1',
+          email: 'wang@coach.com',
+          role: 'head_coach',
+        }),
+        'basketball-coach-dev-secret-2024',
+        { expiresIn: '7d' }
+      );
   });
 
   it('should handle database errors', async () => {

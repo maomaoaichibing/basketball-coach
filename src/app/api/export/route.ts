@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient, TrainingPlan, Player, TrainingRecord } from '@prisma/client';
 import * as XLSX from 'xlsx';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 const prisma = new PrismaClient();
 
@@ -24,6 +25,9 @@ interface TrainingRecordWithRelations extends TrainingRecord {
 // GET /api/export - 导出数据
 // ?type=plans|players|records&format=excel
 export async function GET(request: NextRequest) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') || 'plans';

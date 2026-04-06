@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/components/AuthProvider';
+import UserMenu from '@/components/UserMenu';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   Activity,
   BarChart3,
@@ -60,6 +63,7 @@ type TrainingPlan = {
 };
 
 export default function Home() {
+  const { user, isLoading, isAuthenticated, logout } = useAuth();
   const [selectedGroup, setSelectedGroup] = useState('U10');
   const [recentPlans, setRecentPlans] = useState<TrainingPlan[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(false);
@@ -79,10 +83,10 @@ export default function Home() {
   async function fetchStats() {
     try {
       const [playersRes, plansRes, recordsRes, assessmentsRes] = await Promise.all([
-        fetch('/api/players'),
-        fetch('/api/plans'),
-        fetch('/api/records'),
-        fetch('/api/assessments'),
+        fetchWithAuth('/api/players'),
+        fetchWithAuth('/api/plans'),
+        fetchWithAuth('/api/records'),
+        fetchWithAuth('/api/assessments'),
       ]);
       const playersData = await playersRes.json();
       const plansData = await plansRes.json();
@@ -103,7 +107,7 @@ export default function Home() {
   async function fetchRecentPlans() {
     try {
       setLoadingPlans(true);
-      const response = await fetch('/api/plans?limit=6');
+      const response = await fetchWithAuth('/api/plans?limit=6');
       const data = await response.json();
 
       if (data.success) {
@@ -159,14 +163,29 @@ export default function Home() {
 
             {/* 桌面端导航 */}
             <div className="hidden sm:flex items-center gap-2">
+              {!isLoading && !isAuthenticated ? (
+                <>
+                  <Link
+                    href="/login"
+                    className="px-3 py-1.5 text-sm hover:bg-white/10 rounded-lg"
+                  >
+                    登录
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="px-4 py-1.5 text-sm bg-white text-orange-600 hover:bg-orange-50 rounded-lg font-medium"
+                  >
+                    注册
+                  </Link>
+                </>
+              ) : !isLoading && isAuthenticated ? (
+                <UserMenu />
+              ) : null}
               <Link
                 href="/version"
                 className="px-3 py-1.5 text-sm hover:bg-white/10 rounded-lg flex items-center gap-1"
               >
                 <span>版本管理</span>
-              </Link>
-              <Link href="/settings" className="p-2 hover:bg-white/10 rounded-lg">
-                <Settings className="w-5 h-5" />
               </Link>
             </div>
 
@@ -182,19 +201,53 @@ export default function Home() {
           {/* 移动端菜单 */}
           {mobileMenuOpen && (
             <div className="sm:hidden mt-4 pt-4 border-t border-white/20 space-y-2">
+              {!isLoading && !isAuthenticated && (
+                <>
+                  <Link
+                    href="/login"
+                    className="block px-3 py-2 text-sm hover:bg-white/10 rounded-lg"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    登录
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="block px-3 py-2 text-sm hover:bg-white/10 rounded-lg"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    注册
+                  </Link>
+                </>
+              )}
+              {!isLoading && isAuthenticated && (
+                <>
+                  <div className="px-3 py-2 text-sm text-orange-100">
+                    {user?.name || user?.email}
+                  </div>
+                  <Link
+                    href="/settings"
+                    className="block px-3 py-2 text-sm hover:bg-white/10 rounded-lg"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    个人设置
+                  </Link>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="block w-full text-left px-3 py-2 text-sm text-red-200 hover:bg-white/10 rounded-lg"
+                  >
+                    退出登录
+                  </button>
+                </>
+              )}
               <Link
                 href="/version"
                 className="block px-3 py-2 text-sm hover:bg-white/10 rounded-lg"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 版本管理
-              </Link>
-              <Link
-                href="/settings"
-                className="block px-3 py-2 text-sm hover:bg-white/10 rounded-lg"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                设置
               </Link>
             </div>
           )}

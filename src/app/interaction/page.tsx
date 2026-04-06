@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   MessageCircle,
   Calendar,
@@ -60,9 +61,9 @@ export default function InteractionPage() {
   async function fetchData() {
     try {
       const [leavesRes, checkinsRes, messagesRes] = await Promise.all([
-        fetch('/api/leaves?status=pending'),
-        fetch('/api/checkins?limit=20'),
-        fetch('/api/messages?isRead=false'),
+        fetchWithAuth('/api/leaves?status=pending'),
+        fetchWithAuth('/api/checkins?limit=20'),
+        fetchWithAuth('/api/messages?isRead=false'),
       ]);
 
       const [leavesData, checkinsData, messagesData] = await Promise.all([
@@ -83,7 +84,7 @@ export default function InteractionPage() {
 
   async function handleApproveLeave(leaveId: string, approved: boolean) {
     try {
-      const response = await fetch(`/api/leaves/${leaveId}`, {
+      const response = await fetchWithAuth(`/api/leaves/${leaveId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -104,7 +105,7 @@ export default function InteractionPage() {
 
   async function handleFeedback(checkInId: string, feedback: string) {
     try {
-      const response = await fetch(`/api/checkins/${checkInId}`, {
+      const response = await fetchWithAuth(`/api/checkins/${checkInId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

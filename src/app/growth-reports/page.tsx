@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   FileText,
   Plus,
@@ -113,7 +114,7 @@ export default function GrowthReportsPage() {
 
   const fetchPlayers = useCallback(async () => {
     try {
-      const response = await fetch('/api/players?limit=100');
+      const response = await fetchWithAuth('/api/players?limit=100');
       const data = await response.json();
       if (data.success) {
         setPlayers(data.players);
@@ -140,7 +141,7 @@ export default function GrowthReportsPage() {
     }
 
     try {
-      const response = await fetch('/api/growth-reports/generate', {
+      const response = await fetchWithAuth('/api/growth-reports/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(createForm),
@@ -163,7 +164,7 @@ export default function GrowthReportsPage() {
     if (!previewData) return;
 
     try {
-      const response = await fetch('/api/growth-reports', {
+      const response = await fetchWithAuth('/api/growth-reports', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

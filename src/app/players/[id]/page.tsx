@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   ArrowLeft,
   Edit2,
@@ -181,7 +182,7 @@ export default function PlayerDetailPage() {
   async function fetchPlayer(id: string) {
     try {
       setLoading(true);
-      const response = await fetch(`/api/players/${id}`);
+      const response = await fetchWithAuth(`/api/players/${id}`);
       const data = await response.json();
 
       if (data.success) {
@@ -235,7 +236,7 @@ export default function PlayerDetailPage() {
     if (!player) return;
 
     try {
-      const response = await fetch(`/api/players/${player.id}`, {
+      const response = await fetchWithAuth(`/api/players/${player.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

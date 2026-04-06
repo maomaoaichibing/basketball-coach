@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { TrainingPlanOutput, PlanSection } from '@/lib/plan-generator';
 import { retrieveSimilarCases, allPlans, LessonPlan } from '@/lib/cases';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 // AI生成参数
 interface AIPlanParams {
@@ -1112,6 +1113,9 @@ async function callAIAPI(
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const params: AIPlanParams = await request.json();
 

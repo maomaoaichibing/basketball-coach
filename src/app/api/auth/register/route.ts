@@ -2,16 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { JWT_CONFIG } from '@/lib/jwt';
 
 const prisma = new PrismaClient();
-
-const JWT_SECRET = process.env.JWT_SECRET || 'basketball-coach-secret-key-2024';
-const JWT_EXPIRES_IN = '7d';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password, name, phone, role = 'coach' } = body;
+    const { email, password, name, phone } = body;
 
     // 验证必填字段
     if (!email || !password || !name) {
@@ -45,14 +43,14 @@ export async function POST(request: NextRequest) {
         password: hashedPassword,
         name,
         phone: phone || null,
-        role,
+        role: 'coach', // 注册固定为普通教练，防止注册 admin
         status: 'active',
       },
     });
 
     // 生成 JWT token
-    const token = jwt.sign({ id: coach.id, email: coach.email, role: coach.role }, JWT_SECRET, {
-      expiresIn: JWT_EXPIRES_IN,
+    const token = jwt.sign({ id: coach.id, email: coach.email, role: coach.role }, JWT_CONFIG.secret, {
+      expiresIn: JWT_CONFIG.expiresIn,
     });
 
     return NextResponse.json({

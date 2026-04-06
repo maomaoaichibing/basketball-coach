@@ -3,6 +3,7 @@
 import { useState, useEffect, ComponentType } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   ChevronRight,
   Plus,
@@ -59,7 +60,7 @@ export default function ParentLeavePage() {
 
   async function fetchLeaves(playerId: string) {
     try {
-      const response = await fetch(`/api/leaves?playerId=${playerId}`);
+      const response = await fetchWithAuth(`/api/leaves?playerId=${playerId}`);
       const data = await response.json();
       if (data.success) {
         setLeaves(data.leaves);
@@ -75,7 +76,7 @@ export default function ParentLeavePage() {
     if (!player || createForm.dates.length === 0) return;
 
     try {
-      const response = await fetch('/api/leaves', {
+      const response = await fetchWithAuth('/api/leaves', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

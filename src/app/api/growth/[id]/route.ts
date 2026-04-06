@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import prisma from '@/lib/db';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 // GET /api/growth/[id] - 获取成长数据详情
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const { id } = params;
 

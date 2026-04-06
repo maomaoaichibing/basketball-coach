@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   ArrowLeft,
   Plus,
@@ -64,7 +65,7 @@ export default function TeamsPage() {
       const params = new URLSearchParams();
       if (groupFilter !== 'all') params.set('group', groupFilter);
 
-      const response = await fetch(`/api/teams?${params}`);
+      const response = await fetchWithAuth(`/api/teams?${params}`);
       const data = await response.json();
 
       if (data.success) {
@@ -114,7 +115,7 @@ export default function TeamsPage() {
     if (!confirm(`确定要删除球队「${name}」吗？`)) return;
 
     try {
-      const response = await fetch(`/api/teams/${id}`, {
+      const response = await fetchWithAuth(`/api/teams/${id}`, {
         method: 'DELETE',
       });
 

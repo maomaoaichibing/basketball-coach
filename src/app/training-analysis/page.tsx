@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   Activity,
   TrendingUp,
@@ -50,7 +51,7 @@ export default function TrainingAnalysisPage() {
     try {
       const params = new URLSearchParams();
       if (group) params.set('group', group);
-      const res = await fetch(`/api/training-analysis?${params}`);
+      const res = await fetchWithAuth(`/api/training-analysis?${params}`);
       const data = await res.json();
       setAnalysis(data);
     } catch (error) {

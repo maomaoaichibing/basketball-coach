@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 const prisma = new PrismaClient();
 
 // GET /api/schedules/[id] - 获取单个排课详情
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const schedule = await prisma.schedule.findUnique({
       where: { id: params.id },
@@ -39,6 +43,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 // PUT /api/schedules/[id] - 更新排课
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request, { roles: ['admin'] });
+  if (!auth.success) return auth.response;
+
   try {
     const body = await request.json();
     const {
@@ -95,6 +102,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 // DELETE /api/schedules/[id] - 删除排课
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request, { roles: ['admin'] });
+  if (!auth.success) return auth.response;
+
   try {
     // 先删除关联的预约
     await prisma.booking.deleteMany({

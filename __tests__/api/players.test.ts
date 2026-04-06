@@ -2,6 +2,14 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import mockPrisma, { createMockPlayer, resetPrismaMocks } from '../helpers/mockPrisma';
 import { createMockRequest, parseJsonResponse } from '../helpers/mockRequest';
 
+// Mock verifyAuth to always return success
+jest.mock('@/lib/auth-middleware', () => ({
+  verifyAuth: jest.fn().mockResolvedValue({
+    success: true,
+    user: { id: 'coach-1', email: 'test@test.com', role: 'coach' },
+  }),
+}));
+
 // Mock the database module
 jest.mock('@/lib/db', () => ({
   __esModule: true,

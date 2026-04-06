@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 const prisma = new PrismaClient();
 
 // GET /api/matches/[id] - 获取比赛详情
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const { id } = await params;
 
@@ -41,6 +45,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
 // PUT /api/matches/[id] - 更新比赛
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const { id } = await params;
     const body = await request.json();

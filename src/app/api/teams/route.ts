@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 
 import prisma from '@/lib/db';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 // GET /api/teams - 获取所有球队
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
+  
   try {
     const { searchParams } = new URL(request.url);
     const group = searchParams.get('group');
@@ -51,7 +55,10 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/teams - 创建新球队
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest) {const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
+  
   try {
     const body = await request.json();
 

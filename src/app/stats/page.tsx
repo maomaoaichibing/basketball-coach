@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   Users,
   TrendingUp,
@@ -50,7 +51,7 @@ export default function StatsPage() {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/stats?period=${period}`);
+      const res = await fetchWithAuth(`/api/stats?period=${period}`);
       const data = await res.json();
       setStats(data);
     } catch (error) {

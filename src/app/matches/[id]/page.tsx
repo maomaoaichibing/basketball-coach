@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   Calendar,
   MapPin,
@@ -112,7 +113,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
 
   const fetchPlayers = useCallback(async () => {
     try {
-      const response = await fetch('/api/players?limit=100');
+      const response = await fetchWithAuth('/api/players?limit=100');
       const data = await response.json();
       if (data.success) {
         setPlayers(data.players.filter((p: Player) => p.group === match?.group));
@@ -129,7 +130,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
   async function fetchMatch(id: string) {
     try {
       setLoading(true);
-      const response = await fetch(`/api/matches/${id}`);
+      const response = await fetchWithAuth(`/api/matches/${id}`);
       const data = await response.json();
 
       if (data.success) {
@@ -152,7 +153,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
     if (!match) return;
 
     try {
-      const response = await fetch(`/api/matches/${match.id}`, {
+      const response = await fetchWithAuth(`/api/matches/${match.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -179,7 +180,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
     try {
       const selectedPlayer = players.find(p => p.id === eventForm.playerId);
 
-      const response = await fetch('/api/match-events', {
+      const response = await fetchWithAuth('/api/match-events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -210,7 +211,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
 
   async function handleDeleteEvent(eventId: string) {
     try {
-      await fetch(`/api/match-events?id=${eventId}`, { method: 'DELETE' });
+      await fetchWithAuth(`/api/match-events?id=${eventId}`, { method: 'DELETE' });
       fetchMatch(matchId);
     } catch (error) {
       console.error('删除事件失败:', error);
@@ -221,7 +222,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
     if (!match || !confirm('确定要删除这场比赛吗？')) return;
 
     try {
-      const response = await fetch(`/api/matches/${match.id}`, {
+      const response = await fetchWithAuth(`/api/matches/${match.id}`, {
         method: 'DELETE',
       });
       if (response.ok) {

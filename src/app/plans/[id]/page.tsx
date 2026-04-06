@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   ArrowLeft,
   Clock,
@@ -71,7 +72,7 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
   async function fetchPlan() {
     try {
       setLoading(true);
-      const response = await fetch(`/api/plans/${params.id}`);
+      const response = await fetchWithAuth(`/api/plans/${params.id}`);
       const data = await response.json();
 
       if (data.success) {
@@ -94,7 +95,7 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
 
     try {
       setCopying(true);
-      const response = await fetch('/api/plans', {
+      const response = await fetchWithAuth('/api/plans', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

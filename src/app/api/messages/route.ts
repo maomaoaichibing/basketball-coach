@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 const prisma = new PrismaClient();
 
 // GET /api/messages - 获取消息列表
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
+  
   try {
     const searchParams = request.nextUrl.searchParams;
     const playerId = searchParams.get('playerId');
@@ -45,7 +49,10 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/messages - 发送消息
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest) {const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
+  
   try {
     const body = await request.json();
 

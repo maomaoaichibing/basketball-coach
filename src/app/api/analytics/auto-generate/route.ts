@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import prisma from '@/lib/db';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 // POST 自动生成智能推荐和分析
 export async function POST(request: NextRequest) {
+  const auth = await verifyAuth(request, { roles: ['admin'] });
+  if (!auth.success) return auth.response;
+
   try {
     const body = await request.json();
     const { playerId, coachId, coachName } = body;

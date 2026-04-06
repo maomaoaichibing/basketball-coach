@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Prisma, Player } from '@prisma/client';
 
 import { prisma } from '@/lib/db';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 // 技能类型映射
 type SkillType = keyof Pick<
@@ -10,7 +11,10 @@ type SkillType = keyof Pick<
 >;
 
 // 获取目标列表
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
+  
   try {
     const { searchParams } = new URL(request.url);
     const playerId = searchParams.get('playerId');
@@ -44,7 +48,10 @@ export async function GET(request: NextRequest) {
 }
 
 // 创建目标
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest) {const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
+  
   try {
     const body = await request.json();
     const { playerId, skillType, targetScore, targetDate } = body;

@@ -2,12 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { JWT_CONFIG } from '@/lib/jwt';
 
 const prisma = new PrismaClient();
-
-// JWT Secret - 生产环境应从环境变量读取
-const JWT_SECRET = process.env.JWT_SECRET || 'basketball-coach-secret-key-2024';
-const JWT_EXPIRES_IN = '7d';
 
 export async function POST(request: NextRequest) {
   try {
@@ -57,8 +54,8 @@ export async function POST(request: NextRequest) {
         email: coach.email,
         role: coach.role,
       },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
+      JWT_CONFIG.secret,
+      { expiresIn: JWT_CONFIG.expiresIn }
     );
 
     // 返回用户信息和 token

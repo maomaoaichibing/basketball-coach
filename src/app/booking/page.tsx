@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   ArrowLeft,
   Plus,
@@ -58,7 +59,7 @@ export default function BookingPage() {
 
   async function fetchSchedules() {
     try {
-      const res = await fetch('/api/schedules?status=active');
+      const res = await fetchWithAuth('/api/schedules?status=active');
       const data = await res.json();
       if (data.success) setSchedules(data.schedules);
     } catch (error) {
@@ -70,7 +71,7 @@ export default function BookingPage() {
 
   async function fetchPlayers() {
     try {
-      const res = await fetch('/api/players?status=training');
+      const res = await fetchWithAuth('/api/players?status=training');
       const data = await res.json();
       if (data.success) setPlayers(data.players);
     } catch (error) {
@@ -86,7 +87,7 @@ export default function BookingPage() {
 
     setSubmitting(true);
     try {
-      const res = await fetch('/api/bookings', {
+      const res = await fetchWithAuth('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

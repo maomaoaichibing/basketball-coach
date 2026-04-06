@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Play, Users, CheckCircle, Clock, ClipboardList } from 'lucide-react';
+import { fetchWithAuth } from '@/lib/auth';
 
 // 类型定义
 type TrainingPlan = {
@@ -47,7 +48,7 @@ export default function TrainingSessionPage() {
 
   async function fetchPlans() {
     try {
-      const response = await fetch('/api/plans');
+      const response = await fetchWithAuth('/api/plans');
       const data = await response.json();
       if (data.success) {
         const parsedPlans = data.plans.map(
@@ -68,7 +69,7 @@ export default function TrainingSessionPage() {
 
   async function fetchPlayers() {
     try {
-      const response = await fetch('/api/players');
+      const response = await fetchWithAuth('/api/players');
       const data = await response.json();
       if (data.success) {
         setPlayers(data.players);
@@ -110,7 +111,7 @@ export default function TrainingSessionPage() {
 
       // 为每个签到学员创建训练记录
       for (const record of records) {
-        await fetch('/api/records', {
+        await fetchWithAuth('/api/records', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient, Prisma } from '@prisma/client';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 const prisma = new PrismaClient();
 
 // GET /api/enrollments - 获取学员课程记录
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
+  
   try {
     const { searchParams } = new URL(request.url);
     const playerId = searchParams.get('playerId');
@@ -45,7 +49,10 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/enrollments - 为学员购买课程
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest) {const auth = await verifyAuth(request, { roles: ['admin'] });
+  if (!auth.success) return auth.response;
+
+  
   try {
     const body = await request.json();
     const { playerId, courseId, purchaseDate, startDate, totalHours, notes } = body;

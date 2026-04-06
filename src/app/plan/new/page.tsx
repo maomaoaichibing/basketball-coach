@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   ArrowLeft,
   Plus,
@@ -125,7 +126,7 @@ export default function NewPlanPage() {
         };
 
         // 调用服务端API生成教案
-        const response = await fetch('/api/generate-plan', {
+        const response = await fetchWithAuth('/api/generate-plan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(aiParams),
@@ -164,7 +165,7 @@ export default function NewPlanPage() {
     setSaving(true);
 
     try {
-      const response = await fetch('/api/plans', {
+      const response = await fetchWithAuth('/api/plans', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

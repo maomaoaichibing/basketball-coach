@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   ArrowLeft,
   Plus,
@@ -115,7 +116,7 @@ export default function FeedbackPage() {
       setLoading(true);
 
       // 获取教案列表
-      const plansRes = await fetch('/api/plans?limit=100');
+      const plansRes = await fetchWithAuth('/api/plans?limit=100');
       const plansData = await plansRes.json();
       if (plansData.success) {
         // 只显示已发布的教案
@@ -123,14 +124,14 @@ export default function FeedbackPage() {
       }
 
       // 获取学员列表
-      const playersRes = await fetch('/api/players?status=training');
+      const playersRes = await fetchWithAuth('/api/players?status=training');
       const playersData = await playersRes.json();
       if (playersData.success) {
         setPlayers(playersData.players);
       }
 
       // 获取训练记录
-      const recordsRes = await fetch('/api/records?limit=50');
+      const recordsRes = await fetchWithAuth('/api/records?limit=50');
       const recordsData = await recordsRes.json();
       if (recordsData.success) {
         setRecords(recordsData.records);
@@ -173,7 +174,7 @@ export default function FeedbackPage() {
 
     try {
       for (const playerId of selectedPlayers) {
-        await fetch('/api/records', {
+        await fetchWithAuth('/api/records', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

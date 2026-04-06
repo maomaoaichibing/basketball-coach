@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { Building2, Clock, MapPin, MapPinned, Phone, Plus, Users, X } from 'lucide-react';
+import { fetchWithAuth } from '@/lib/auth';
 
 interface Campus {
   id: string;
@@ -92,15 +93,15 @@ export default function CampusesPage() {
     setLoading(true);
     try {
       if (activeTab === 'campuses') {
-        const res = await fetch('/api/campuses');
+        const res = await fetchWithAuth('/api/campuses');
         const data = await res.json();
         setCampuses(data.campuses || []);
       } else if (activeTab === 'courts') {
-        const res = await fetch('/api/courts');
+        const res = await fetchWithAuth('/api/courts');
         const data = await res.json();
         setCourts(data.courts || []);
       } else if (activeTab === 'coaches') {
-        const res = await fetch('/api/coaches');
+        const res = await fetchWithAuth('/api/coaches');
         const data = await res.json();
         setCoaches(data.coaches || []);
       }
@@ -191,26 +192,26 @@ export default function CampusesPage() {
     try {
       if (modalType === 'campus') {
         const res = editingItem
-          ? await fetch(`/api/campuses/${editingItem.id}`, {
+          ? await fetchWithAuth(`/api/campuses/${editingItem.id}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(campusForm),
             })
-          : await fetch('/api/campuses', {
+          : await fetchWithAuth('/api/campuses', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(campusForm),
             });
         if (res.ok) fetchData();
       } else if (modalType === 'court') {
-        const res = await fetch('/api/courts', {
+        const res = await fetchWithAuth('/api/courts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(courtForm),
         });
         if (res.ok) fetchData();
       } else if (modalType === 'coach') {
-        const res = await fetch('/api/coaches', {
+        const res = await fetchWithAuth('/api/coaches', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -234,7 +235,7 @@ export default function CampusesPage() {
     if (typeof window !== 'undefined' && !window.confirm('确定要删除吗？')) return;
     try {
       if (type === 'campus') {
-        await fetch(`/api/campuses/${id}`, { method: 'DELETE' });
+        await fetchWithAuth(`/api/campuses/${id}`, { method: 'DELETE' });
       }
       fetchData();
     } catch (error) {

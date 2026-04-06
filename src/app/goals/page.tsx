@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   ArrowLeft,
   Plus,
@@ -74,8 +75,8 @@ export default function GoalsPage() {
     try {
       setLoading(true);
       const [goalsRes, playersRes] = await Promise.all([
-        fetch('/api/goals'),
-        fetch('/api/players?status=training'),
+        fetchWithAuth('/api/goals'),
+        fetchWithAuth('/api/players?status=training'),
       ]);
 
       const goalsData = await goalsRes.json();
@@ -117,7 +118,7 @@ export default function GoalsPage() {
     try {
       if (editingGoal) {
         // 更新
-        await fetch(`/api/goals/${editingGoal.id}`, {
+        await fetchWithAuth(`/api/goals/${editingGoal.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -127,7 +128,7 @@ export default function GoalsPage() {
         });
       } else {
         // 创建
-        await fetch('/api/goals', {
+        await fetchWithAuth('/api/goals', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -149,7 +150,7 @@ export default function GoalsPage() {
 
   async function handleUpdateStatus(goal: Goal, newStatus: string) {
     try {
-      await fetch(`/api/goals/${goal.id}`, {
+      await fetchWithAuth(`/api/goals/${goal.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
@@ -164,7 +165,7 @@ export default function GoalsPage() {
     if (!confirm('确定要删除这个目标吗？')) return;
 
     try {
-      await fetch(`/api/goals/${goal.id}`, {
+      await fetchWithAuth(`/api/goals/${goal.id}`, {
         method: 'DELETE',
       });
       fetchData();

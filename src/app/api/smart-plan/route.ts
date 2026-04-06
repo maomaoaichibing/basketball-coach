@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient, Prisma } from '@prisma/client';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 const prisma = new PrismaClient();
 
@@ -50,6 +51,9 @@ const skillRecommendations: Record<
 
 // POST /api/smart-plan - 获取学员技能短板分析 + 推荐教案参数
 export async function POST(request: NextRequest) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const body = await request.json();
     const { playerIds, teamId, group, duration = 90, location = '室内' } = body;

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Trophy, Star, Save, User } from 'lucide-react';
+import { fetchWithAuth } from '@/lib/auth';
 
 // 类型定义
 type SkillKey = 'dribbling' | 'passing' | 'shooting' | 'defending' | 'physical' | 'tactical';
@@ -94,7 +95,7 @@ export default function AssessmentPage() {
 
   async function fetchPlayers() {
     try {
-      const response = await fetch('/api/players');
+      const response = await fetchWithAuth('/api/players');
       const data = await response.json();
       if (data.success) {
         setPlayers(data.players);
@@ -111,7 +112,7 @@ export default function AssessmentPage() {
 
   async function fetchAssessments(playerId: string) {
     try {
-      const response = await fetch(`/api/assessments?playerId=${playerId}`);
+      const response = await fetchWithAuth(`/api/assessments?playerId=${playerId}`);
       const data = await response.json();
       if (data.success) {
         setAssessments(data.assessments);
@@ -127,7 +128,7 @@ export default function AssessmentPage() {
 
     setSaving(true);
     try {
-      const response = await fetch('/api/assessments', {
+      const response = await fetchWithAuth('/api/assessments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

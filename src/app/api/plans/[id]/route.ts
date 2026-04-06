@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { prisma } from '@/lib/db';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 // 获取教案详情
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const plan = await prisma.trainingPlan.findUnique({
       where: { id: params.id },
@@ -22,6 +26,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 // 更新教案
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const body = await request.json();
 
@@ -39,6 +46,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 // 删除教案
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     await prisma.trainingPlan.delete({
       where: { id: params.id },

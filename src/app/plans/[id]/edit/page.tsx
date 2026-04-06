@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   ArrowLeft,
   Save,
@@ -89,7 +90,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
 
   async function fetchPlan() {
     try {
-      const response = await fetch(`/api/plans/${params.id}`);
+      const response = await fetchWithAuth(`/api/plans/${params.id}`);
       const data = await response.json();
 
       if (data.success) {
@@ -180,7 +181,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
     setSaving(true);
 
     try {
-      const response = await fetch(`/api/plans/${params.id}`, {
+      const response = await fetchWithAuth(`/api/plans/${params.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

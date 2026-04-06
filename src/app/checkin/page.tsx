@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   ArrowLeft,
   CheckCircle,
@@ -80,7 +81,7 @@ export default function CheckinPage() {
 
   async function fetchPlans() {
     try {
-      const response = await fetch('/api/plans?limit=20');
+      const response = await fetchWithAuth('/api/plans?limit=20');
       const data = await response.json();
       if (data.success) {
         // 只显示已发布的
@@ -95,7 +96,7 @@ export default function CheckinPage() {
 
   async function fetchPlayers() {
     try {
-      const response = await fetch('/api/players?status=training');
+      const response = await fetchWithAuth('/api/players?status=training');
       const data = await response.json();
       if (data.success) {
         setPlayers(data.players);
@@ -111,7 +112,7 @@ export default function CheckinPage() {
 
     // 获取已有的签到记录
     try {
-      const response = await fetch(`/api/checkin?planId=${plan.id}`);
+      const response = await fetchWithAuth(`/api/checkin?planId=${plan.id}`);
       const data = await response.json();
       if (data.success && data.records) {
         const recordMap: Record<string, CheckinRecord> = {};
@@ -156,7 +157,7 @@ export default function CheckinPage() {
         attendance: tempRecords[player.id] || 'present',
       }));
 
-      const response = await fetch('/api/checkin', {
+      const response = await fetchWithAuth('/api/checkin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { fetchWithAuth } from '@/lib/auth';
 
 interface Player {
   id: string;
@@ -61,7 +62,7 @@ export default function AnalyticsPage() {
 
   const fetchPlayers = useCallback(async () => {
     try {
-      const res = await fetch('/api/players');
+      const res = await fetchWithAuth('/api/players');
       const data = await res.json();
       setPlayers(data.players || data || []);
     } catch (error) {
@@ -73,9 +74,9 @@ export default function AnalyticsPage() {
     setLoading(true);
     try {
       const [recRes, analysisRes, teamRes] = await Promise.all([
-        fetch(`/api/recommendations${selectedPlayer ? `?playerId=${selectedPlayer}` : ''}`),
-        fetch(`/api/ability-analysis${selectedPlayer ? `?playerId=${selectedPlayer}` : ''}`),
-        fetch(`/api/team-recommendations${selectedPlayer ? `?playerId=${selectedPlayer}` : ''}`),
+        fetchWithAuth(`/api/recommendations${selectedPlayer ? `?playerId=${selectedPlayer}` : ''}`),
+        fetchWithAuth(`/api/ability-analysis${selectedPlayer ? `?playerId=${selectedPlayer}` : ''}`),
+        fetchWithAuth(`/api/team-recommendations${selectedPlayer ? `?playerId=${selectedPlayer}` : ''}`),
       ]);
 
       const [recData, analysisData, teamData] = await Promise.all([
@@ -113,7 +114,7 @@ export default function AnalyticsPage() {
 
     setGenerating(true);
     try {
-      const res = await fetch('/api/analytics/auto-generate', {
+      const res = await fetchWithAuth('/api/analytics/auto-generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ playerId: selectedPlayer }),
@@ -135,7 +136,7 @@ export default function AnalyticsPage() {
 
   const handleUpdateRecommendation = async (id: string, status: string) => {
     try {
-      const res = await fetch(`/api/recommendations/${id}`, {
+      const res = await fetchWithAuth(`/api/recommendations/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
@@ -151,7 +152,7 @@ export default function AnalyticsPage() {
 
   const handleTeamRecommendation = async (rec: TeamRecommendation, accepted: boolean) => {
     try {
-      const res = await fetch('/api/team-recommendations', {
+      const res = await fetchWithAuth('/api/team-recommendations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   ChevronRight,
   Plus,
@@ -64,7 +65,7 @@ export default function ParentCheckInPage() {
 
   async function fetchCheckins(playerId: string) {
     try {
-      const response = await fetch(`/api/checkins?playerId=${playerId}&limit=20`);
+      const response = await fetchWithAuth(`/api/checkins?playerId=${playerId}&limit=20`);
       const data = await response.json();
       if (data.success) {
         setCheckins(data.checkins);
@@ -80,7 +81,7 @@ export default function ParentCheckInPage() {
     if (!player) return;
 
     try {
-      const response = await fetch('/api/checkins', {
+      const response = await fetchWithAuth('/api/checkins', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

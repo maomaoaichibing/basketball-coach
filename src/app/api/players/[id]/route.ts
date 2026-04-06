@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 
 import prisma from '@/lib/db';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 // 扩展Player类型，包含技术能力字段
 interface PlayerWithSkills {
@@ -18,6 +19,9 @@ interface PlayerWithSkills {
 
 // GET /api/players/[id] - 获取学员详情
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const { id } = await params;
 
@@ -105,6 +109,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
 // PUT /api/players/[id] - 更新学员信息
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const { id } = await params;
     const body = await request.json();

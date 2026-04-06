@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   Bell,
   Send,
@@ -67,7 +68,7 @@ export default function NotificationsPage() {
       if (filter.type) params.set('type', filter.type);
       if (filter.playerId) params.set('playerId', filter.playerId);
 
-      const res = await fetch(`/api/notifications?${params}`);
+      const res = await fetchWithAuth(`/api/notifications?${params}`);
       const data = await res.json();
       setNotifications(data.notifications || []);
       setUnreadCount(data.unreadCount || 0);
@@ -79,7 +80,7 @@ export default function NotificationsPage() {
 
   const fetchPlayers = async () => {
     try {
-      const res = await fetch('/api/players?status=training');
+      const res = await fetchWithAuth('/api/players?status=training');
       const data = await res.json();
       setPlayers(data.players || []);
     } catch (error) {
@@ -89,7 +90,7 @@ export default function NotificationsPage() {
 
   const handleCreateNotification = async () => {
     try {
-      const res = await fetch('/api/notifications', {
+      const res = await fetchWithAuth('/api/notifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newNotification),
@@ -119,7 +120,7 @@ export default function NotificationsPage() {
     if (notification.status === 'read') return;
 
     try {
-      await fetch(`/api/notifications/${notification.id}`, {
+      await fetchWithAuth(`/api/notifications/${notification.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'read' }),
@@ -134,7 +135,7 @@ export default function NotificationsPage() {
     if (!confirm('确定要删除该通知吗？')) return;
 
     try {
-      await fetch(`/api/notifications/${notification.id}`, {
+      await fetchWithAuth(`/api/notifications/${notification.id}`, {
         method: 'DELETE',
       });
       fetchNotifications();

@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient, Prisma } from '@prisma/client';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 const prisma = new PrismaClient();
 
 // GET /api/match-events - 获取比赛事件列表
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
+  
   try {
     const searchParams = request.nextUrl.searchParams;
     const matchId = searchParams.get('matchId');
@@ -44,7 +48,10 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/match-events - 添加比赛事件
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest) {const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
+  
   try {
     const body = await request.json();
 
@@ -114,7 +121,10 @@ export async function POST(request: NextRequest) {
 }
 
 // DELETE /api/match-events - 删除比赛事件
-export async function DELETE(request: NextRequest) {
+export async function DELETE(request: NextRequest) {const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
+  
   try {
     const searchParams = request.nextUrl.searchParams;
     const id = searchParams.get('id');

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Plus, Package, Users, Clock, Edit2, Trash2, Check, X } from 'lucide-react';
+import { fetchWithAuth } from '@/lib/auth';
 
 // 类型定义
 type Course = {
@@ -66,9 +67,9 @@ export default function CoursesPage() {
   async function fetchData() {
     try {
       const [coursesRes, enrollmentsRes, playersRes] = await Promise.all([
-        fetch('/api/courses'),
-        fetch('/api/enrollments'),
-        fetch('/api/players'),
+        fetchWithAuth('/api/courses'),
+        fetchWithAuth('/api/enrollments'),
+        fetchWithAuth('/api/players'),
       ]);
       const coursesData = await coursesRes.json();
       const enrollmentsData = await enrollmentsRes.json();
@@ -111,7 +112,7 @@ export default function CoursesPage() {
   async function handleDeleteCourse(id: string) {
     if (!confirm('确定要删除这个课程包吗？')) return;
     try {
-      const res = await fetch(`/api/courses/${id}`, { method: 'DELETE' });
+      const res = await fetchWithAuth(`/api/courses/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
         fetchData();
@@ -130,7 +131,7 @@ export default function CoursesPage() {
     }
     try {
       const course = courses.find(c => c.id === enrollForm.courseId);
-      const res = await fetch('/api/enrollments', {
+      const res = await fetchWithAuth('/api/enrollments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

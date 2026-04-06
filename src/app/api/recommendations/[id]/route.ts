@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import prisma from '@/lib/db';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 // GET 获取推荐详情
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const { id } = params;
     const recommend = await prisma.trainingRecommend.findUnique({
@@ -23,6 +27,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 // PUT 更新推荐状态
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const { id } = params;
     const body = await request.json();
@@ -46,6 +53,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 // DELETE 删除推荐
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const { id } = params;
     await prisma.trainingRecommend.delete({

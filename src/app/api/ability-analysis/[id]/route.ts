@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import prisma from '@/lib/db';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 // GET 获取能力分析详情
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const { id } = params;
     const analysis = await prisma.abilityAnalysis.findUnique({
@@ -23,6 +27,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 // PUT 更新能力分析
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const { id } = params;
     const body = await request.json();
@@ -64,6 +71,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 // DELETE 删除能力分析
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const { id } = params;
     await prisma.abilityAnalysis.delete({

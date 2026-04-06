@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   AlertCircle,
   ArrowLeft,
@@ -132,7 +133,7 @@ export default function PlayersPage() {
       if (statusFilter !== 'all') params.set('status', statusFilter);
       if (search) params.set('search', search);
 
-      const response = await fetch(`/api/players?${params}`);
+      const response = await fetchWithAuth(`/api/players?${params}`);
       const data = await response.json();
 
       if (data.success) {
@@ -160,7 +161,7 @@ export default function PlayersPage() {
     }
 
     try {
-      const response = await fetch('/api/players', {
+      const response = await fetchWithAuth('/api/players', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -214,7 +215,7 @@ export default function PlayersPage() {
     }
 
     try {
-      const response = await fetch(`/api/players/${editingPlayer.id}`, {
+      const response = await fetchWithAuth(`/api/players/${editingPlayer.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -252,7 +253,7 @@ export default function PlayersPage() {
     }
 
     try {
-      const response = await fetch(`/api/players/${id}`, { method: 'DELETE' });
+      const response = await fetchWithAuth(`/api/players/${id}`, { method: 'DELETE' });
       const data = await response.json();
 
       if (data.success) {

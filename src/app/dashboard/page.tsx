@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { TrainingRecord } from '@/types';
+import { fetchWithAuth } from '@/lib/auth';
 import {
   Calendar,
   Users,
@@ -123,11 +124,11 @@ export default function DashboardPage() {
     try {
       setLoading(true);
       const [scheduleRes, playersRes, recordsRes, plansRes, matchesRes] = await Promise.all([
-        fetch('/api/schedules'),
-        fetch('/api/players'),
-        fetch('/api/records'),
-        fetch('/api/plans'),
-        fetch('/api/matches'),
+        fetchWithAuth('/api/schedules'),
+        fetchWithAuth('/api/players'),
+        fetchWithAuth('/api/records'),
+        fetchWithAuth('/api/plans'),
+        fetchWithAuth('/api/matches'),
       ]);
 
       const scheduleData = await scheduleRes.json();
