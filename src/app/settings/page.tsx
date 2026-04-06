@@ -439,7 +439,7 @@ export default function SettingsPage() {
         </button>
 
         <div className="text-center text-xs text-gray-400 py-4">
-          篮球青训教案系统 v4.9
+          篮球青训教案系统 v5.1
         </div>
       </main>
 

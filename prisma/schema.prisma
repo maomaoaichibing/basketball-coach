@@ -749,9 +749,9 @@ model Coach {
   // 基本信息
   name        String
   phone       String   @unique
-  email       String?
-  password    String?  // 登录密码（哈希存储）
-  role        String?  // 角色：admin/coach
+  email       String   @unique
+  password    String   // 登录密码（哈希存储）
+  role        String   @default("coach") // 角色：admin/coach
   avatar      String?  // 头像URL
 
   // 校区关联

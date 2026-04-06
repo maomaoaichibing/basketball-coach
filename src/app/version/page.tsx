@@ -16,6 +16,28 @@ import {
 // 版本历史记录
 const versions = [
   {
+    version: 'v5.1',
+    date: '2026-04-06',
+    title: '账号权限系统',
+    description: '完整的用户认证体系：登录注册、JWT鉴权、角色权限、教练管理、Token自动刷新、头像上传',
+    features: [
+      { type: 'feature', text: '登录/注册页面 — 邮箱+密码认证，bcrypt加密存储' },
+      { type: 'feature', text: 'JWT Token 鉴权 — 7天有效期 + 30天刷新宽限期' },
+      { type: 'feature', text: '角色权限控制 — admin（管理员）/ coach（教练）两种角色' },
+      { type: 'feature', text: '教练管理 — CRUD操作、权限控制、管理员重置密码' },
+      { type: 'feature', text: 'API路由认证加固 — 64/72个API路由受保护，未登录拒绝访问' },
+      { type: 'feature', text: '个人设置 — 修改个人信息、修改密码、上传头像' },
+      { type: 'feature', text: 'Token自动刷新 — 过期前5分钟自动刷新，并发请求去重' },
+      { type: 'feature', text: '头像上传 — 支持JPG/PNG/GIF/WebP，≤2MB，自动更新数据库' },
+      { type: 'feature', text: '前端集成 — UserMenu用户菜单、退出登录、移动端导航适配' },
+    ],
+    fixes: [
+      { type: 'fix', text: '修复注册接口可指定admin角色的安全漏洞' },
+      { type: 'fix', text: '修复GET /api/coaches普通教练可访问的权限漏洞' },
+      { type: 'fix', text: 'Schema优化：email/password/role字段改为required' },
+    ],
+  },
+  {
     version: 'v4.9',
     date: '2026-04-05',
     title: '全场景篮球场地图 + SVG验证强化',

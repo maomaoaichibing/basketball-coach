@@ -36,13 +36,16 @@ export async function POST(request: NextRequest) {
     // 加密密码
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // phone 是 schema required 字段，未提供时自动生成占位值
+    const coachPhone = phone || `reg_${Date.now()}`;
+
     // 创建用户
     const coach = await prisma.coach.create({
       data: {
         email,
         password: hashedPassword,
         name,
-        phone: phone || null,
+        phone: coachPhone,
         role: 'coach', // 注册固定为普通教练，防止注册 admin
         status: 'active',
       },
