@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { verifyAuth } from '@/lib/auth-middleware';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/db';
 
 // POST /api/growth-reports/generate - 自动生成成长报告
-export async function POST(request: NextRequest) {const auth = await verifyAuth(request);
+export async function POST(request: NextRequest) {
+  const auth = await verifyAuth(request);
   if (!auth.success) return auth.response;
 
-  
   try {
     const body = await request.json();
     const { playerId, periodStart, periodEnd, reportType = 'quarterly' } = body;

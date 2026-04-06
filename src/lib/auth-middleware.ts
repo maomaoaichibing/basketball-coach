@@ -4,9 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { JWT_CONFIG } from './jwt';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/db';
 
 export interface AuthPayload {
   id: string;
@@ -28,9 +26,7 @@ export interface AuthResult {
   };
 }
 
-export type AuthCheckResult =
-  | AuthResult
-  | { success: false; response: NextResponse };
+export type AuthCheckResult = AuthResult | { success: false; response: NextResponse };
 
 /**
  * 验证请求中的 JWT token
@@ -79,10 +75,7 @@ export async function verifyAuth(
     }
     return {
       success: false,
-      response: NextResponse.json(
-        { success: false, message: 'Token 无效' },
-        { status: 401 }
-      ),
+      response: NextResponse.json({ success: false, message: 'Token 无效' }, { status: 401 }),
     };
   }
 
@@ -94,20 +87,14 @@ export async function verifyAuth(
   if (!coach) {
     return {
       success: false,
-      response: NextResponse.json(
-        { success: false, message: '用户不存在' },
-        { status: 401 }
-      ),
+      response: NextResponse.json({ success: false, message: '用户不存在' }, { status: 401 }),
     };
   }
 
   if (coach.status !== 'active') {
     return {
       success: false,
-      response: NextResponse.json(
-        { success: false, message: '账号已被禁用' },
-        { status: 403 }
-      ),
+      response: NextResponse.json({ success: false, message: '账号已被禁用' }, { status: 403 }),
     };
   }
 
@@ -116,10 +103,7 @@ export async function verifyAuth(
     if (!coach.role || !options.roles.includes(coach.role)) {
       return {
         success: false,
-        response: NextResponse.json(
-          { success: false, message: '权限不足' },
-          { status: 403 }
-        ),
+        response: NextResponse.json({ success: false, message: '权限不足' }, { status: 403 }),
       };
     }
   }

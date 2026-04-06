@@ -80,7 +80,7 @@ function subscribeTokenRefresh(cb: (token: string | null) => void) {
 }
 
 function onTokenRefreshed(token: string | null) {
-  refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers.forEach(cb => cb(token));
   refreshSubscribers = [];
 }
 
@@ -108,7 +108,9 @@ async function refreshToken(): Promise<string | null> {
       const expires = new Date(Date.now() + 7 * 864e5).toUTCString();
       document.cookie = `auth_token=${encodeURIComponent(data.data.token)}; expires=${expires}; path=/; SameSite=Lax`;
       // 触发 token 更新事件（让 AuthProvider 同步）
-      window.dispatchEvent(new CustomEvent('auth-token-refreshed', { detail: { token: data.data.token } }));
+      window.dispatchEvent(
+        new CustomEvent('auth-token-refreshed', { detail: { token: data.data.token } })
+      );
       return data.data.token;
     }
     return null;
@@ -151,8 +153,8 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}): Pro
 
   if (isRefreshing) {
     // 已经在刷新中，排队等待
-    return new Promise<Response>((resolve) => {
-      subscribeTokenRefresh((newToken) => {
+    return new Promise<Response>(resolve => {
+      subscribeTokenRefresh(newToken => {
         if (newToken) {
           // 用新 token 重试原请求
           const retryHeaders: Record<string, string> = {

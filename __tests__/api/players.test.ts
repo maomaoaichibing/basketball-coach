@@ -4,10 +4,10 @@ import { createMockRequest, parseJsonResponse } from '../helpers/mockRequest';
 
 // Mock verifyAuth to always return success
 jest.mock('@/lib/auth-middleware', () => ({
-  verifyAuth: jest.fn().mockResolvedValue({
+  verifyAuth: jest.fn().mockImplementation(() => Promise.resolve({
     success: true,
     user: { id: 'coach-1', email: 'test@test.com', role: 'coach' },
-  }),
+  })),
 }));
 
 // Mock the database module

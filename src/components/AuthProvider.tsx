@@ -1,8 +1,22 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useRef, useCallback, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  ReactNode,
+} from 'react';
 
-import { AuthUser, getAuthFromStorage, saveAuthToStorage, clearAuthFromStorage, shouldRefreshToken } from '@/lib/auth';
+import {
+  AuthUser,
+  getAuthFromStorage,
+  saveAuthToStorage,
+  clearAuthFromStorage,
+  shouldRefreshToken,
+} from '@/lib/auth';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -107,32 +121,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     init();
 
     // 每 5 分钟检查一次是否需要刷新 token
-    refreshIntervalRef.current = setInterval(async () => {
-      const currentToken = localStorage.getItem('auth_token');
-      if (!currentToken) return;
+    refreshIntervalRef.current = setInterval(
+      async () => {
+        const currentToken = localStorage.getItem('auth_token');
+        if (!currentToken) return;
 
-      const newToken = await tryRefreshToken();
-      if (newToken) {
-        setToken(newToken);
-      } else if (shouldRefreshToken(currentToken)) {
-        // 刷新失败且 token 快过期了，尝试获取最新用户信息确认状态
-        try {
-          const meResponse = await fetch('/api/auth/me', {
-            headers: { Authorization: `Bearer ${currentToken}` },
-          });
-          if (!meResponse.ok) {
-            // 用户信息也获取失败，清除登录状态
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('auth_user');
-            deleteCookie('auth_token');
-            setUser(null);
-            setToken(null);
+        const newToken = await tryRefreshToken();
+        if (newToken) {
+          setToken(newToken);
+        } else if (shouldRefreshToken(currentToken)) {
+          // 刷新失败且 token 快过期了，尝试获取最新用户信息确认状态
+          try {
+            const meResponse = await fetch('/api/auth/me', {
+              headers: { Authorization: `Bearer ${currentToken}` },
+            });
+            if (!meResponse.ok) {
+              // 用户信息也获取失败，清除登录状态
+              localStorage.removeItem('auth_token');
+              localStorage.removeItem('auth_user');
+              deleteCookie('auth_token');
+              setUser(null);
+              setToken(null);
+            }
+          } catch {
+            // 网络错误，保留当前状态
           }
-        } catch {
-          // 网络错误，保留当前状态
         }
-      }
-    }, 5 * 60 * 1000); // 5 分钟
+      },
+      5 * 60 * 1000
+    ); // 5 分钟
 
     return () => {
       if (refreshIntervalRef.current) {

@@ -358,13 +358,18 @@ export default function SettingsPage() {
             {editing && (
               <div className="px-4 py-3.5 flex items-center gap-3">
                 {editMsg && (
-                  <span className={`text-sm ${editMsg.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                  <span
+                    className={`text-sm ${editMsg.type === 'success' ? 'text-green-600' : 'text-red-600'}`}
+                  >
                     {editMsg.text}
                   </span>
                 )}
                 <div className="flex-1" />
                 <button
-                  onClick={() => { setEditing(false); setEditMsg(null); }}
+                  onClick={() => {
+                    setEditing(false);
+                    setEditMsg(null);
+                  }}
                   className="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   取消
@@ -438,9 +443,7 @@ export default function SettingsPage() {
           <span className="font-medium">退出登录</span>
         </button>
 
-        <div className="text-center text-xs text-gray-400 py-4">
-          篮球青训教案系统 v5.1
-        </div>
+        <div className="text-center text-xs text-gray-400 py-4">篮球青训教案系统 v5.1</div>
       </main>
 
       {/* 修改密码弹窗 */}
@@ -512,7 +515,9 @@ export default function SettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">确认新密码</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    确认新密码
+                  </label>
                   <input
                     type="password"
                     value={confirmPassword}

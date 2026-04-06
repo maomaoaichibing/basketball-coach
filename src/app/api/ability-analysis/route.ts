@@ -4,10 +4,10 @@ import prisma from '@/lib/db';
 import { verifyAuth } from '@/lib/auth-middleware';
 
 // GET 获取能力分析列表
-export async function GET(request: NextRequest) {const auth = await verifyAuth(request);
+export async function GET(request: NextRequest) {
+  const auth = await verifyAuth(request);
   if (!auth.success) return auth.response;
 
-  
   try {
     const { searchParams } = new URL(request.url);
     const playerId = searchParams.get('playerId');
@@ -29,10 +29,10 @@ export async function GET(request: NextRequest) {const auth = await verifyAuth(r
 }
 
 // POST 创建能力分析
-export async function POST(request: NextRequest) {const auth = await verifyAuth(request);
+export async function POST(request: NextRequest) {
+  const auth = await verifyAuth(request);
   if (!auth.success) return auth.response;
 
-  
   try {
     const body = await request.json();
     const {

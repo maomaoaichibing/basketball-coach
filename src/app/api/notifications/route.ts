@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient, Prisma } from '@prisma/client';
 import { verifyAuth } from '@/lib/auth-middleware';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/db';
 
 // GET /api/notifications - 获取通知列表
-export async function GET(request: NextRequest) {const auth = await verifyAuth(request);
+export async function GET(request: NextRequest) {
+  const auth = await verifyAuth(request);
   if (!auth.success) return auth.response;
 
-  
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
@@ -47,10 +46,10 @@ export async function GET(request: NextRequest) {const auth = await verifyAuth(r
 }
 
 // POST /api/notifications - 创建通知
-export async function POST(request: NextRequest) {const auth = await verifyAuth(request);
+export async function POST(request: NextRequest) {
+  const auth = await verifyAuth(request);
   if (!auth.success) return auth.response;
 
-  
   try {
     const body = await request.json();
     const {

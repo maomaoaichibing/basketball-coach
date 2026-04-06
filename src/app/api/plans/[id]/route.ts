@@ -11,13 +11,48 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   try {
     const plan = await prisma.trainingPlan.findUnique({
       where: { id: params.id },
+      include: {
+        records: {
+          include: {
+            player: {
+              select: { id: true, name: true, group: true },
+            },
+          },
+          orderBy: { signInTime: 'asc' },
+        },
+      },
     });
 
     if (!plan) {
       return NextResponse.json({ success: false, error: '教案不存在' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, plan });
+    // 解析 playerIds 为数组
+    let parsedPlayerIds: string[] = [];
+    try {
+      parsedPlayerIds = JSON.parse(plan.playerIds || '[]');
+    } catch {
+      parsedPlayerIds = [];
+    }
+
+    // 如果有 playerIds 但没有关联的 records（兼容旧数据），补充查询学员信息
+    let playerDetails: { id: string; name: string; group: string }[] = [];
+    if (parsedPlayerIds.length > 0) {
+      const players = await prisma.player.findMany({
+        where: { id: { in: parsedPlayerIds } },
+        select: { id: true, name: true, group: true },
+      });
+      playerDetails = parsedPlayerIds
+        .map(id => players.find(p => p.id === id))
+        .filter((p): p is { id: string; name: string; group: string } => !!p);
+    }
+
+    return NextResponse.json({
+      success: true,
+      plan,
+      playerDetails,
+      records: plan.records,
+    });
   } catch (error) {
     console.error('获取教案详情失败:', error);
     return NextResponse.json({ success: false, error: '获取教案详情失败' }, { status: 500 });

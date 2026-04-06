@@ -11,10 +11,10 @@ type SkillType = keyof Pick<
 >;
 
 // 获取目标列表
-export async function GET(request: NextRequest) {const auth = await verifyAuth(request);
+export async function GET(request: NextRequest) {
+  const auth = await verifyAuth(request);
   if (!auth.success) return auth.response;
 
-  
   try {
     const { searchParams } = new URL(request.url);
     const playerId = searchParams.get('playerId');
@@ -48,10 +48,10 @@ export async function GET(request: NextRequest) {const auth = await verifyAuth(r
 }
 
 // 创建目标
-export async function POST(request: NextRequest) {const auth = await verifyAuth(request);
+export async function POST(request: NextRequest) {
+  const auth = await verifyAuth(request);
   if (!auth.success) return auth.response;
 
-  
   try {
     const body = await request.json();
     const { playerId, skillType, targetScore, targetDate } = body;

@@ -101,7 +101,8 @@ function validateAndFixActivity(
   }
 
   // 确保SVG图解存在、格式正确且是篮球场地图
-  const isCourtSVG = fixed.drillDiagram &&
+  const isCourtSVG =
+    fixed.drillDiagram &&
     fixed.drillDiagram.includes('#f5f0e6') && // 篮球场木地板底色
     fixed.drillDiagram.includes('#5c4033'); // 篮球场线颜色
   if (
@@ -184,7 +185,8 @@ function generateBasketballCourtSVG(isHalfCourt: boolean = true): string {
     // ===== 标准篮球半场图（俯视图，篮筐在底部中央） =====
     // 场地比例：宽度28m → 380px，高度15m（半场）→ 280px
     // 场地边框：左上角(10,10) 右下角(390,290)
-    const W = 390, H = 290; // 场地右下角
+    const W = 390,
+      H = 290; // 场地右下角
     const cx = 200; // 场地横向中心线
     const baseline = H; // 底线 y=290
     const sideline_l = 10; // 左边线 x=10
@@ -248,7 +250,8 @@ function generateBasketballCourtSVG(isHalfCourt: boolean = true): string {
     `;
   } else {
     // ===== 全场标准图 =====
-    const W = 780, H = 380;
+    const W = 780,
+      H = 380;
     const cx = W / 2; // 中场线
     const cy = H / 2; // 场地横向中心
     svg += `
@@ -384,7 +387,11 @@ function generateDefaultDrillDiagram(
     // 教练在边线
     svg += `<rect x="340" y="180" width="20" height="20" fill="#dc2626" stroke="white" stroke-width="2" rx="3"/>`;
     svg += `<text x="350" y="194" text-anchor="middle" font-size="10" fill="white" font-weight="bold">教</text>`;
-  } else if (formType.includes('2人一组') || formType.includes('双人') || activityName.includes('传球')) {
+  } else if (
+    formType.includes('2人一组') ||
+    formType.includes('双人') ||
+    activityName.includes('传球')
+  ) {
     // 双人训练/传球训练 - 两人面对面站位
     // 学员1
     svg += `<circle cx="120" cy="140" r="14" fill="#2563eb" stroke="white" stroke-width="2.5"/>`;

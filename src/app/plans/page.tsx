@@ -18,6 +18,7 @@ import {
   Trash2,
   Download,
   Sparkles,
+  Users,
 } from 'lucide-react';
 
 // 教案类型
@@ -36,6 +37,7 @@ type TrainingPlan = {
   generatedBy?: string;
   createdAt?: string;
   sections?: string;
+  playerIds?: string;
 };
 
 export default function PlansPage() {
@@ -244,8 +246,23 @@ export default function PlansPage() {
                     </span>
                     <span className="flex items-center gap-1">
                       <Target className="w-4 h-4" />
-                      5项内容
+                      {plan.sections ? JSON.parse(plan.sections).length : 0}项内容
                     </span>
+                    {/* 参训人数 */}
+                    {(() => {
+                      try {
+                        const ids = JSON.parse(plan.playerIds || '[]');
+                        if (ids.length > 0) {
+                          return (
+                            <span className="flex items-center gap-1 text-green-600">
+                              <Users className="w-4 h-4" />
+                              {ids.length}人
+                            </span>
+                          );
+                        }
+                      } catch { /* ignore */ }
+                      return null;
+                    })()}
                   </div>
                 </div>
 

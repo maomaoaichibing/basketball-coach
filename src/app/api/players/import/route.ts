@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as XLSX from 'xlsx';
+import { Prisma } from '@prisma/client';
 
 import prisma from '@/lib/db';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 // 学员数据接口
 interface PlayerRow {
@@ -105,6 +107,9 @@ function parseDate(value: string): Date | null {
 
 // POST /api/players/import - 批量导入学员（支持 CSV 和 XLSX）
 export async function POST(request: NextRequest) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
@@ -333,7 +338,7 @@ export async function POST(request: NextRequest) {
             defending: player.defending || 5,
             physical: player.physical || 5,
             tactical: player.tactical || 5,
-          } as any,
+          } as Prisma.PlayerCreateInput,
         });
         created.push(player.name);
       } catch (err: unknown) {

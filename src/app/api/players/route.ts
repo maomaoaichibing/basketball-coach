@@ -4,10 +4,10 @@ import prisma from '@/lib/db';
 import { verifyAuth } from '@/lib/auth-middleware';
 
 // GET /api/players - 获取所有学员
-export async function GET(request: NextRequest) {const auth = await verifyAuth(request);
+export async function GET(request: NextRequest) {
+  const auth = await verifyAuth(request);
   if (!auth.success) return auth.response;
 
-  
   try {
     const { searchParams } = new URL(request.url);
     const group = searchParams.get('group');
@@ -91,10 +91,10 @@ export async function GET(request: NextRequest) {const auth = await verifyAuth(r
 }
 
 // POST /api/players - 创建新学员
-export async function POST(request: NextRequest) {const auth = await verifyAuth(request);
+export async function POST(request: NextRequest) {
+  const auth = await verifyAuth(request);
   if (!auth.success) return auth.response;
 
-  
   try {
     const body = await request.json();
 

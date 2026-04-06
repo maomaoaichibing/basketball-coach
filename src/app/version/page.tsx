@@ -19,7 +19,8 @@ const versions = [
     version: 'v5.1',
     date: '2026-04-06',
     title: '账号权限系统',
-    description: '完整的用户认证体系：登录注册、JWT鉴权、角色权限、教练管理、Token自动刷新、头像上传',
+    description:
+      '完整的用户认证体系：登录注册、JWT鉴权、角色权限、教练管理、Token自动刷新、头像上传',
     features: [
       { type: 'feature', text: '登录/注册页面 — 邮箱+密码认证，bcrypt加密存储' },
       { type: 'feature', text: 'JWT Token 鉴权 — 7天有效期 + 30天刷新宽限期' },
@@ -55,7 +56,10 @@ const versions = [
     description: '基于真实教案标准全面优化：FIBA标准比例、动作单独列出、三级差异化训练',
     features: [
       { type: 'feature', text: 'SVG场地图重写：FIBA标准比例（28m×15m）、准确三分线、罚球区、篮筐' },
-      { type: 'feature', text: '动作单独列出：每个拉伸/动作不再笼统合并，独立描述姿势、次数、要点' },
+      {
+        type: 'feature',
+        text: '动作单独列出：每个拉伸/动作不再笼统合并，独立描述姿势、次数、要点',
+      },
       { type: 'feature', text: '基础/进阶/精英三级差异化：参考2023年暑期教案真实标准' },
       { type: 'feature', text: '训练主题支持多选（如运球+传球同时训练）' },
       { type: 'feature', text: '附加要求严格执行：AI必须遵循教练特别要求生成教案' },

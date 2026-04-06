@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { fetchWithAuth } from '@/lib/auth';
+import { useCloudVoiceRecognition } from '@/hooks/useCloudVoiceRecognition';
 import {
   ArrowLeft,
   Plus,
@@ -17,6 +18,12 @@ import {
   Sparkles,
   ChevronDown,
   ChevronUp,
+  Mic,
+  MicOff,
+  Search,
+  X,
+  Users,
+  Check,
 } from 'lucide-react';
 
 import {
@@ -26,12 +33,35 @@ import {
   type TrainingPlanOutput,
 } from '@/lib/plan-generator';
 
+// 学员类型
+interface Player {
+  id: string;
+  name: string;
+  group: string;
+  age: number;
+  status: string;
+}
+
 export default function NewPlanPage() {
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [plan, setPlan] = useState<TrainingPlanOutput | null>(null);
   const [useAI, setUseAI] = useState(false); // 是否使用AI生成
   const [configCollapsed, setConfigCollapsed] = useState(false); // 配置面板折叠状态
+
+  // 学员选择状态
+  const [allPlayers, setAllPlayers] = useState<Player[]>([]);
+  const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>([]);
+  const [playerSearch, setPlayerSearch] = useState('');
+  const [showPlayerDropdown, setShowPlayerDropdown] = useState(false);
+  const [voiceMatchResult, setVoiceMatchResult] = useState<{
+    matched: Player[];
+    unmatched: string[];
+  } | null>(null);
+  const playerDropdownRef = useRef<HTMLDivElement>(null);
+
+  // 语音识别
+  const voice = useCloudVoiceRecognition();
 
   // 表单状态
   const [form, setForm] = useState({
@@ -51,6 +81,124 @@ export default function NewPlanPage() {
   });
 
   const [focusSkills, setFocusSkills] = useState<string[]>([]);
+
+  // 加载学员列表
+  useEffect(() => {
+    async function loadPlayers() {
+      try {
+        const res = await fetchWithAuth('/api/players?status=training&limit=200');
+        const data = await res.json();
+        if (data.success) {
+          setAllPlayers(data.players);
+        }
+      } catch (err) {
+        console.error('加载学员列表失败:', err);
+      }
+    }
+    loadPlayers();
+  }, []);
+
+  // 根据年龄段过滤学员
+  const filteredPlayers = allPlayers.filter(
+    p =>
+      p.group === form.group &&
+      p.name.includes(playerSearch)
+  );
+
+  // 已选学员对象
+  const selectedPlayers = allPlayers.filter(p =>
+    selectedPlayerIds.includes(p.id)
+  );
+
+  // 点击外部关闭下拉
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (playerDropdownRef.current && !playerDropdownRef.current.contains(e.target as Node)) {
+        setShowPlayerDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // 切换学员选中
+  function togglePlayer(playerId: string) {
+    setSelectedPlayerIds(prev =>
+      prev.includes(playerId)
+        ? prev.filter(id => id !== playerId)
+        : [...prev, playerId]
+    );
+  }
+
+  // 语音录入学员
+  const handleVoicePlayerInput = useCallback(async () => {
+    try {
+      await voice.startRecording();
+    } catch (err) {
+      console.error('启动录音失败:', err);
+    }
+  }, [voice]);
+
+  useEffect(() => {
+    if (!voice.transcript) return;
+
+    // 解析语音识别结果中的学员名字
+    // 支持多种分隔符：顿号、逗号、空格、"和"、"跟"
+    const text = voice.transcript;
+    const nameParts = text
+      .replace(/[，、,，]/g, ' ')
+      .replace(/[和跟与及]/g, ' ')
+      .replace(/今天上课|今天来|到了|参加|上课/g, '')
+      .split(/\s+/)
+      .map(s => s.trim())
+      .filter(s => s.length >= 1 && s.length <= 5); // 名字长度1-5
+
+    if (nameParts.length === 0) return;
+
+    // 在当前年龄段的学员中匹配
+    const groupPlayers = allPlayers.filter(p => p.group === form.group);
+    const matched: Player[] = [];
+    const unmatched: string[] = [];
+
+    for (const name of nameParts) {
+      const found = groupPlayers.find(p => p.name === name);
+      if (found) {
+        if (!matched.some(m => m.id === found.id)) {
+          matched.push(found);
+        }
+      } else {
+        // 模糊匹配
+        const fuzzy = groupPlayers.find(p => p.name.includes(name) || name.includes(p.name));
+        if (fuzzy) {
+          if (!matched.some(m => m.id === fuzzy.id)) {
+            matched.push(fuzzy);
+          }
+        } else {
+          if (!unmatched.includes(name)) {
+            unmatched.push(name);
+          }
+        }
+      }
+    }
+
+    setVoiceMatchResult({ matched, unmatched });
+
+    // 自动选中的学员
+    if (matched.length > 0) {
+      setSelectedPlayerIds(prev => {
+        const newIds = new Set(prev);
+        matched.forEach(p => newIds.add(p.id));
+        return Array.from(newIds);
+      });
+    }
+  }, [voice.transcript, allPlayers, form.group]);
+
+  // 当学员人数变化时，同步到AI配置
+  useEffect(() => {
+    if (selectedPlayerIds.length > 0) {
+      setAiConfig(prev => ({ ...prev, playerCount: String(selectedPlayerIds.length) }));
+    }
+  }, [selectedPlayerIds]);
 
   const groups: { id: AgeGroup; name: string; age: string; desc: string }[] = [
     { id: 'U6', name: 'U6 幼儿班', age: '4-6岁', desc: '游戏为主 球性培养' },
@@ -173,13 +321,17 @@ export default function NewPlanPage() {
         body: JSON.stringify({
           ...plan,
           generatedBy: useAI ? 'ai' : 'rule',
+          playerIds: selectedPlayerIds,
         }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        alert('教案保存成功！');
+        const msg = selectedPlayerIds.length > 0
+          ? `教案保存成功！已为 ${data.attendanceCount} 名学员自动签到`
+          : '教案保存成功！';
+        alert(msg);
         // 跳转到教案详情页
         window.location.href = `/plans/${data.id}`;
       } else {
@@ -341,6 +493,176 @@ export default function NewPlanPage() {
                   </button>
                 </div>
 
+                {/* ========== 参训学员选择 ========== */}
+                <div className="mb-5">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    参训学员
+                    {selectedPlayerIds.length > 0 && (
+                      <span className="ml-2 text-xs text-orange-500 font-normal">
+                        已选 {selectedPlayerIds.length} 人
+                      </span>
+                    )}
+                  </label>
+
+                  {/* 语音录入 + 搜索栏 */}
+                  <div className="flex gap-2 mb-2">
+                    {/* 语音按钮 */}
+                    <button
+                      onClick={async () => {
+                        if (voice.isRecording) {
+                          await voice.stopRecording();
+                        } else {
+                          setVoiceMatchResult(null);
+                          await handleVoicePlayerInput();
+                        }
+                      }}
+                      disabled={voice.isRecognizing}
+                      className={`flex-shrink-0 p-2.5 rounded-lg transition-all ${
+                        voice.isRecording
+                          ? 'bg-red-500 text-white animate-pulse'
+                          : voice.isRecognizing
+                            ? 'bg-purple-100 text-purple-500'
+                            : 'bg-blue-50 text-blue-500 hover:bg-blue-100'
+                      } disabled:opacity-50`}
+                      title={voice.isRecording ? '点击停止录音' : '语音录入学员'}
+                    >
+                      {voice.isRecording ? (
+                        <MicOff className="w-5 h-5" />
+                      ) : (
+                        <Mic className="w-5 h-5" />
+                      )}
+                    </button>
+
+                    {/* 搜索输入 */}
+                    <div className="flex-1 relative" ref={playerDropdownRef}>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                          type="text"
+                          value={playerSearch}
+                          onChange={e => {
+                            setPlayerSearch(e.target.value);
+                            setShowPlayerDropdown(true);
+                          }}
+                          onFocus={() => setShowPlayerDropdown(true)}
+                          placeholder="搜索学员姓名..."
+                          className="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        {playerSearch && (
+                          <button
+                            onClick={() => {
+                              setPlayerSearch('');
+                              setShowPlayerDropdown(false);
+                            }}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* 学员下拉列表 */}
+                      {showPlayerDropdown && playerSearch && (
+                        <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                          {filteredPlayers.length === 0 ? (
+                            <div className="p-3 text-sm text-gray-500 text-center">
+                              未找到匹配的学员
+                            </div>
+                          ) : (
+                            filteredPlayers.map(p => (
+                              <button
+                                key={p.id}
+                                onClick={() => {
+                                  togglePlayer(p.id);
+                                  setPlayerSearch('');
+                                  setShowPlayerDropdown(false);
+                                }}
+                                className={`w-full px-3 py-2 text-left text-sm flex items-center justify-between hover:bg-gray-50 ${
+                                  selectedPlayerIds.includes(p.id)
+                                    ? 'bg-blue-50 text-blue-700'
+                                    : 'text-gray-700'
+                                }`}
+                              >
+                                <span>{p.name}</span>
+                                <span className="text-xs text-gray-400">{p.group} · {p.age}岁</span>
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 语音状态提示 */}
+                  {voice.isRecording && (
+                    <div className="mb-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-sm text-red-600">
+                      <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                      正在录音，请说出学员姓名...
+                    </div>
+                  )}
+                  {voice.isRecognizing && (
+                    <div className="mb-2 px-3 py-2 bg-purple-50 border border-purple-200 rounded-lg flex items-center gap-2 text-sm text-purple-600">
+                      <span className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" />
+                      正在识别语音...
+                    </div>
+                  )}
+                  {voice.error && (
+                    <div className="mb-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+                      {voice.error}
+                    </div>
+                  )}
+
+                  {/* 语音匹配结果 */}
+                  {voiceMatchResult && (
+                    <div className="mb-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-sm">
+                      <div className="text-blue-700 mb-1">语音识别结果：</div>
+                      {voiceMatchResult.matched.length > 0 && (
+                        <div className="text-green-700">
+                          ✓ 已匹配：{voiceMatchResult.matched.map(p => p.name).join('、')}
+                        </div>
+                      )}
+                      {voiceMatchResult.unmatched.length > 0 && (
+                        <div className="text-red-600 mt-1">
+                          ✗ 未找到：{voiceMatchResult.unmatched.join('、')}
+                          <span className="text-gray-500">（请手动添加）</span>
+                        </div>
+                      )}
+                      <button
+                        onClick={() => setVoiceMatchResult(null)}
+                        className="mt-1 text-blue-500 hover:text-blue-700 text-xs"
+                      >
+                        关闭提示
+                      </button>
+                    </div>
+                  )}
+
+                  {/* 已选学员列表 */}
+                  {selectedPlayers.length > 0 ? (
+                    <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-lg">
+                      {selectedPlayers.map(p => (
+                        <span
+                          key={p.id}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-sm"
+                        >
+                          {p.name}
+                          <button
+                            onClick={() => togglePlayer(p.id)}
+                            className="text-blue-400 hover:text-blue-700 ml-0.5"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-gray-400 px-1">
+                      点击搜索添加学员，或按住 🎤 语音录入
+                    </div>
+                  )}
+                </div>
+
+                {/* ========== 以下为原有配置（未修改） ========== */}
+
                 {/* 年龄段 */}
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">年龄段</label>
@@ -488,7 +810,7 @@ export default function NewPlanPage() {
                       <span className="font-medium text-sm">AI生成配置</span>
                     </div>
 
-                    {/* 学员人数 */}
+                    {/* 学员人数 - 自动从选择学员同步 */}
                     <div className="mb-3">
                       <label className="block text-xs font-medium text-gray-600 mb-1">
                         学员人数 <span className="text-orange-500">*</span>
@@ -518,6 +840,7 @@ export default function NewPlanPage() {
                       ) : (
                         <p className="mt-1 text-xs text-green-600">
                           已设置 {aiConfig.playerCount} 名学员
+                          {selectedPlayerIds.length > 0 && `（从学员选择自动同步）`}
                         </p>
                       )}
                     </div>
@@ -532,7 +855,7 @@ export default function NewPlanPage() {
                         onChange={e =>
                           setAiConfig({
                             ...aiConfig,
-                            skillLevel: e.target.value as any,
+                            skillLevel: e.target.value as 'beginner' | 'intermediate' | 'advanced',
                           })
                         }
                         className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
@@ -663,8 +986,29 @@ export default function NewPlanPage() {
                     </div>
                   </div>
 
+                  {/* 参训学员展示 */}
+                  {selectedPlayers.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-white/30">
+                      <div className="flex items-center gap-2 text-orange-100 text-sm mb-2">
+                        <Users className="w-4 h-4" />
+                        参训学员（{selectedPlayers.length}人）
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {selectedPlayers.map(p => (
+                          <span
+                            key={p.id}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 bg-white/20 rounded-full text-sm"
+                          >
+                            <Check className="w-3 h-3" />
+                            {p.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* 重点技能标签 */}
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 mt-3">
                     {(plan.focusSkills || []).map(skill => (
                       <span key={skill} className="px-2 py-1 bg-white/20 rounded text-sm">
                         {skill}
@@ -807,7 +1151,7 @@ export default function NewPlanPage() {
                     ) : (
                       <>
                         <Save className="w-5 h-5" />
-                        保存教案
+                        {selectedPlayerIds.length > 0 ? `保存教案并签到（${selectedPlayerIds.length}人）` : '保存教案'}
                       </>
                     )}
                   </button>

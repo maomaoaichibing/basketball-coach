@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { prisma } from '@/lib/db';
+import prisma from '@/lib/db';
 import { verifyAuth } from '@/lib/auth-middleware';
 
 // 批量签到/更新出勤
-export async function POST(request: NextRequest) {const auth = await verifyAuth(request);
+export async function POST(request: NextRequest) {
+  const auth = await verifyAuth(request);
   if (!auth.success) return auth.response;
 
-  
   try {
     const body = await request.json();
     const { planId, records } = body;
@@ -16,44 +16,44 @@ export async function POST(request: NextRequest) {const auth = await verifyAuth(
       return NextResponse.json({ success: false, error: '参数错误' }, { status: 400 });
     }
 
-    // 更新或创建签到记录
-    const results = [];
-    for (const record of records) {
-      const { playerId, attendance, signInTime, notes } = record;
+    // 使用事务批量签到：先查已有记录，再统一 create/update
+    const playerIds = records.map(r => r.playerId).filter(Boolean);
+    const existingRecords =
+      playerIds.length > 0
+        ? await prisma.trainingRecord.findMany({
+            where: { planId, playerId: { in: playerIds } },
+            select: { id: true, playerId: true },
+          })
+        : [];
+    const existingMap = new Map(existingRecords.map(r => [r.playerId, r.id]));
 
-      // 查找是否已有记录
-      const existing = await prisma.trainingRecord.findFirst({
-        where: {
-          planId,
-          playerId,
-        },
-      });
+    const results = await prisma.$transaction(
+      records.map(record => {
+        const { playerId, attendance, signInTime, notes } = record;
+        const existingId = existingMap.get(playerId);
 
-      if (existing) {
-        // 更新
-        const updated = await prisma.trainingRecord.update({
-          where: { id: existing.id },
-          data: {
-            attendance,
-            signInTime: signInTime ? new Date(signInTime) : null,
-            feedback: notes || existing.feedback,
-          },
-        });
-        results.push(updated);
-      } else {
-        // 创建新记录
-        const created = await prisma.trainingRecord.create({
-          data: {
-            planId,
-            playerId,
-            attendance,
-            signInTime: signInTime ? new Date(signInTime) : null,
-            feedback: notes || '',
-          },
-        });
-        results.push(created);
-      }
-    }
+        if (existingId) {
+          return prisma.trainingRecord.update({
+            where: { id: existingId },
+            data: {
+              attendance,
+              signInTime: signInTime ? new Date(signInTime) : null,
+              ...(notes ? { feedback: notes } : {}),
+            },
+          });
+        } else {
+          return prisma.trainingRecord.create({
+            data: {
+              planId,
+              playerId,
+              attendance,
+              signInTime: signInTime ? new Date(signInTime) : null,
+              feedback: notes || '',
+            },
+          });
+        }
+      })
+    );
 
     return NextResponse.json({ success: true, count: results.length });
   } catch (error) {
@@ -63,10 +63,10 @@ export async function POST(request: NextRequest) {const auth = await verifyAuth(
 }
 
 // 获取某课程的签到状态
-export async function GET(request: NextRequest) {const auth = await verifyAuth(request);
+export async function GET(request: NextRequest) {
+  const auth = await verifyAuth(request);
   if (!auth.success) return auth.response;
 
-  
   try {
     const { searchParams } = new URL(request.url);
     const planId = searchParams.get('planId');

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { verifyAuth } from '@/lib/auth-middleware';
+
 // 腾讯云一句话识别配置
 const TENCENT_SECRET_ID = process.env.TENCENT_SECRET_ID || '';
 const TENCENT_SECRET_KEY = process.env.TENCENT_SECRET_KEY || '';
@@ -118,6 +120,10 @@ function hmacSHA256Hex(key: ArrayBuffer, data: string): string {
 }
 
 export async function POST(request: NextRequest) {
+  // 认证检查 - 语音识别调用腾讯云付费接口，必须验证身份
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
     // 检查配置
     if (!TENCENT_SECRET_ID || !TENCENT_SECRET_KEY) {

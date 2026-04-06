@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { verifyAuth } from '@/lib/auth-middleware';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/db';
 
 // 预设的通知模板
 const defaultTemplates = [
@@ -109,10 +107,10 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/notification-templates - 创建通知模板
-export async function POST(request: NextRequest) {const auth = await verifyAuth(request, { roles: ['admin'] });
+export async function POST(request: NextRequest) {
+  const auth = await verifyAuth(request, { roles: ['admin'] });
   if (!auth.success) return auth.response;
 
-  
   try {
     const body = await request.json();
     const {

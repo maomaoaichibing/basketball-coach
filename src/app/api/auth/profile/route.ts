@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth-middleware';
+import prisma from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   const auth = await verifyAuth(request);
@@ -26,14 +27,8 @@ export async function PATCH(request: NextRequest) {
     if (avatar !== undefined) updateData.avatar = String(avatar).trim();
 
     if (Object.keys(updateData).length === 0) {
-      return NextResponse.json(
-        { success: false, message: '没有需要更新的字段' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: '没有需要更新的字段' }, { status: 400 });
     }
-
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient();
 
     const updated = await prisma.coach.update({
       where: { id: auth.user.id },

@@ -340,7 +340,9 @@ export default function AssessmentPage() {
                             </div>
                             <div className="grid grid-cols-3 md:grid-cols-6 gap-2 text-xs">
                               {Object.entries(skillLabels).map(([skill, label]) => {
-                                const value = (assessment as any)[skill];
+                                const value = (
+                                  assessment as unknown as { [key: string]: number | undefined }
+                                )[skill];
                                 if (!value) return null;
                                 return (
                                   <div key={skill} className="text-center">

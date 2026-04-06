@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { verifyAuth } from '@/lib/auth-middleware';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/db';
 
 // GET /api/orders/[id] - 获取单个订单
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

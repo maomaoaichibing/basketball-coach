@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { JWT_CONFIG } from '@/lib/jwt';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   try {
@@ -52,9 +50,13 @@ export async function POST(request: NextRequest) {
     });
 
     // 生成 JWT token
-    const token = jwt.sign({ id: coach.id, email: coach.email, role: coach.role }, JWT_CONFIG.secret, {
-      expiresIn: JWT_CONFIG.expiresIn,
-    });
+    const token = jwt.sign(
+      { id: coach.id, email: coach.email, role: coach.role },
+      JWT_CONFIG.secret,
+      {
+        expiresIn: JWT_CONFIG.expiresIn,
+      }
+    );
 
     return NextResponse.json({
       success: true,

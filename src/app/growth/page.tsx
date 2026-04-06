@@ -404,7 +404,9 @@ export default function GrowthPage() {
                             </div>
                             <div className="flex-1 flex items-center gap-4 text-xs">
                               {Object.entries(labels).map(([skill, label]) => {
-                                const value = (assessment as any)[skill];
+                                const value = (
+                                  assessment as unknown as { [key: string]: number | undefined }
+                                )[skill];
                                 if (!value) return null;
                                 return (
                                   <span key={skill} className="flex items-center gap-1">

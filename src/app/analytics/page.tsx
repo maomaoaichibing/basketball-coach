@@ -75,8 +75,12 @@ export default function AnalyticsPage() {
     try {
       const [recRes, analysisRes, teamRes] = await Promise.all([
         fetchWithAuth(`/api/recommendations${selectedPlayer ? `?playerId=${selectedPlayer}` : ''}`),
-        fetchWithAuth(`/api/ability-analysis${selectedPlayer ? `?playerId=${selectedPlayer}` : ''}`),
-        fetchWithAuth(`/api/team-recommendations${selectedPlayer ? `?playerId=${selectedPlayer}` : ''}`),
+        fetchWithAuth(
+          `/api/ability-analysis${selectedPlayer ? `?playerId=${selectedPlayer}` : ''}`
+        ),
+        fetchWithAuth(
+          `/api/team-recommendations${selectedPlayer ? `?playerId=${selectedPlayer}` : ''}`
+        ),
       ]);
 
       const [recData, analysisData, teamData] = await Promise.all([

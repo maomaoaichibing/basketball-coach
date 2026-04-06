@@ -41,9 +41,7 @@ export default function UserMenu() {
         <div className="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center">
           <User className="w-4 h-4" />
         </div>
-        <span className="hidden md:inline max-w-[120px] truncate">
-          {user.name || user.email}
-        </span>
+        <span className="hidden md:inline max-w-[120px] truncate">{user.name || user.email}</span>
         <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
@@ -52,12 +50,8 @@ export default function UserMenu() {
         <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
           {/* 用户信息 */}
           <div className="px-4 py-3 border-b border-gray-100">
-            <div className="font-medium text-gray-900 text-sm truncate">
-              {user.name}
-            </div>
-            <div className="text-xs text-gray-500 truncate">
-              {user.email}
-            </div>
+            <div className="font-medium text-gray-900 text-sm truncate">{user.name}</div>
+            <div className="text-xs text-gray-500 truncate">{user.email}</div>
             <div className="mt-1">
               <span className="inline-block px-2 py-0.5 text-xs bg-orange-100 text-orange-700 rounded-full">
                 {user.role === 'admin' ? '管理员' : '教练'}

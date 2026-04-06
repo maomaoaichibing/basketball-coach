@@ -92,7 +92,9 @@ export default function CoachesPage() {
 
   // 操作状态
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [submitMsg, setSubmitMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [submitMsg, setSubmitMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(
+    null
+  );
 
   // 校区列表
   const [campuses, setCampuses] = useState<{ id: string; name: string }[]>([]);
@@ -142,7 +144,9 @@ export default function CoachesPage() {
   }, [user, fetchCoaches]);
 
   // 表单操作
-  function handleFormChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
+  function handleFormChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   }
 
@@ -351,10 +355,14 @@ export default function CoachesPage() {
 
   function statusLabel(status: string) {
     switch (status) {
-      case 'active': return '在职';
-      case 'on_vacation': return '休假中';
-      case 'left': return '已离职';
-      default: return status;
+      case 'active':
+        return '在职';
+      case 'on_vacation':
+        return '休假中';
+      case 'left':
+        return '已离职';
+      default:
+        return status;
     }
   }
 
@@ -385,7 +393,9 @@ export default function CoachesPage() {
           <Shield className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h2 className="text-lg font-semibold text-gray-900 mb-2">权限不足</h2>
           <p className="text-gray-500 mb-6">教练管理功能仅对管理员开放</p>
-          <Link href="/" className="text-orange-600 hover:text-orange-700">返回首页</Link>
+          <Link href="/" className="text-orange-600 hover:text-orange-700">
+            返回首页
+          </Link>
         </main>
       </div>
     );
@@ -464,7 +474,9 @@ export default function CoachesPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-medium text-gray-900">{coach.name}</span>
-                        <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${statusBadge(coach.status)}`}>
+                        <span
+                          className={`px-2 py-0.5 text-xs rounded-full font-medium ${statusBadge(coach.status)}`}
+                        >
                           {statusLabel(coach.status)}
                         </span>
                         {coach.role === 'admin' && (
@@ -539,7 +551,10 @@ export default function CoachesPage() {
           <div className="bg-white rounded-2xl w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900">添加教练</h3>
-              <button onClick={() => setShowCreateModal(false)} className="p-1 hover:bg-gray-100 rounded-lg">
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="p-1 hover:bg-gray-100 rounded-lg"
+              >
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
@@ -615,7 +630,9 @@ export default function CoachesPage() {
                   >
                     <option value="">未分配</option>
                     {campuses.map(c => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -633,7 +650,9 @@ export default function CoachesPage() {
               </div>
 
               {submitMsg && (
-                <div className={`p-3 rounded-xl text-sm ${submitMsg.type === 'success' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                <div
+                  className={`p-3 rounded-xl text-sm ${submitMsg.type === 'success' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}
+                >
                   {submitMsg.text}
                 </div>
               )}
@@ -664,7 +683,10 @@ export default function CoachesPage() {
           <div className="bg-white rounded-2xl w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900">编辑教练</h3>
-              <button onClick={() => setShowEditModal(false)} className="p-1 hover:bg-gray-100 rounded-lg">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="p-1 hover:bg-gray-100 rounded-lg"
+              >
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
@@ -739,7 +761,9 @@ export default function CoachesPage() {
                   >
                     <option value="">未分配</option>
                     {campuses.map(c => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -756,7 +780,9 @@ export default function CoachesPage() {
               </div>
 
               {submitMsg && (
-                <div className={`p-3 rounded-xl text-sm ${submitMsg.type === 'success' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                <div
+                  className={`p-3 rounded-xl text-sm ${submitMsg.type === 'success' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}
+                >
                   {submitMsg.text}
                 </div>
               )}
@@ -787,13 +813,17 @@ export default function CoachesPage() {
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-xl">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900">重置密码</h3>
-              <button onClick={() => setShowResetPwdModal(false)} className="p-1 hover:bg-gray-100 rounded-lg">
+              <button
+                onClick={() => setShowResetPwdModal(false)}
+                className="p-1 hover:bg-gray-100 rounded-lg"
+              >
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
             <div className="px-6 py-4 space-y-4">
               <p className="text-sm text-gray-500">
-                为 <span className="font-medium text-gray-900">{resetPwdTarget.name}</span> 设置新密码：
+                为 <span className="font-medium text-gray-900">{resetPwdTarget.name}</span>{' '}
+                设置新密码：
               </p>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">新密码</label>
@@ -816,7 +846,9 @@ export default function CoachesPage() {
               </div>
 
               {submitMsg && (
-                <div className={`p-3 rounded-xl text-sm ${submitMsg.type === 'success' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                <div
+                  className={`p-3 rounded-xl text-sm ${submitMsg.type === 'success' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}
+                >
                   {submitMsg.text}
                 </div>
               )}
@@ -851,7 +883,9 @@ export default function CoachesPage() {
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">确认删除</h3>
               <p className="text-gray-500 text-sm mb-6">
-                确定要删除教练 <span className="font-medium text-gray-900">{deleteTarget.name}</span> 吗？此操作不可撤销。
+                确定要删除教练{' '}
+                <span className="font-medium text-gray-900">{deleteTarget.name}</span>{' '}
+                吗？此操作不可撤销。
               </p>
 
               {submitMsg && (
@@ -862,7 +896,10 @@ export default function CoachesPage() {
 
               <div className="flex gap-3">
                 <button
-                  onClick={() => { setShowDeleteConfirm(false); setSubmitMsg(null); }}
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setSubmitMsg(null);
+                  }}
                   className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 text-sm transition-colors"
                 >
                   取消

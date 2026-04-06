@@ -16,6 +16,10 @@ import {
   Edit,
   Sparkles,
   Copy,
+  UserCheck,
+  UserX,
+  AlertCircle,
+  ClipboardList,
 } from 'lucide-react';
 
 // 教案类型
@@ -56,12 +60,34 @@ type TrainingPlan = {
   notes?: string;
   focusSkills?: string;
   trainingProgression?: string;
+  playerIds?: string;
+};
+
+// 学员信息
+type PlayerDetail = {
+  id: string;
+  name: string;
+  group: string;
+};
+
+// 训练记录
+type TrainingRecord = {
+  id: string;
+  playerId: string | null;
+  player: { id: string; name: string; group: string } | null;
+  coachName: string | null;
+  attendance: string;
+  signInTime: string | null;
+  performance: number | null;
+  feedback: string | null;
 };
 
 export default function PlanDetailPage({ params }: { params: { id: string } }) {
   const [plan, setPlan] = useState<TrainingPlan | null>(null);
   const [loading, setLoading] = useState(true);
   const [copying, setCopying] = useState(false);
+  const [playerDetails, setPlayerDetails] = useState<PlayerDetail[]>([]);
+  const [records, setRecords] = useState<TrainingRecord[]>([]);
 
   const router = useRouter();
 
@@ -81,6 +107,8 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
           sections: data.plan.sections ? JSON.parse(data.plan.sections) : [],
         };
         setPlan(parsedPlan);
+        setPlayerDetails(data.playerDetails || []);
+        setRecords(data.records || []);
       }
     } catch (error) {
       console.error('获取教案详情失败:', error);
@@ -129,6 +157,20 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
     }
   }
 
+  // 出勤状态图标和样式
+  const getAttendanceInfo = (attendance: string) => {
+    switch (attendance) {
+      case 'present':
+        return { icon: UserCheck, label: '已签到', color: 'text-green-600', bg: 'bg-green-50 border-green-200' };
+      case 'absent':
+        return { icon: UserX, label: '缺勤', color: 'text-red-600', bg: 'bg-red-50 border-red-200' };
+      case 'late':
+        return { icon: AlertCircle, label: '迟到', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200' };
+      default:
+        return { icon: UserCheck, label: '已签到', color: 'text-green-600', bg: 'bg-green-50 border-green-200' };
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -150,9 +192,13 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
     );
   }
 
-  // 计算总时长和内容数量
+  // 统计
   const totalTime = plan.duration;
   const activityCount = plan.sections?.length || 0;
+  const totalPlayers = playerDetails.length;
+  const presentCount = records.filter(r => r.attendance === 'present').length;
+  const lateCount = records.filter(r => r.attendance === 'late').length;
+  const absentCount = records.filter(r => r.attendance === 'absent').length;
 
   // 获取环节颜色
   const getSectionColor = (category: string) => {
@@ -203,7 +249,7 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </Link>
               <div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="text-xl font-bold text-gray-900">{plan.title}</h1>
                   {plan.generatedBy === 'ai' && (
                     <span className="flex items-center gap-1 px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full">
@@ -211,8 +257,14 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                       AI生成
                     </span>
                   )}
+                  {totalPlayers > 0 && (
+                    <span className="flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
+                      <Users className="w-3 h-3" />
+                      {totalPlayers}人
+                    </span>
+                  )}
                 </div>
-                <div className="flex items-center gap-3 text-sm text-gray-500">
+                <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
                   <span>{plan.date}</span>
                   <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded-full">
                     {plan.group}
@@ -279,8 +331,12 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
             <div className="flex items-center gap-3">
               <Users className="w-5 h-5 text-green-500" />
               <div>
-                <div className="text-sm text-gray-500">适合人数</div>
-                <div className="font-semibold text-gray-900">8-12人</div>
+                <div className="text-sm text-gray-500">
+                  {totalPlayers > 0 ? '参训人数' : '适合人数'}
+                </div>
+                <div className="font-semibold text-gray-900">
+                  {totalPlayers > 0 ? `${totalPlayers}人` : '8-12人'}
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -300,6 +356,76 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
             </div>
           )}
         </div>
+
+        {/* 参训学员 */}
+        {totalPlayers > 0 && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ClipboardList className="w-5 h-5 text-green-600" />
+                <h2 className="text-lg font-semibold text-gray-900">参训学员</h2>
+              </div>
+              <div className="flex items-center gap-3 text-sm">
+                {presentCount > 0 && (
+                  <span className="flex items-center gap-1 text-green-600">
+                    <UserCheck className="w-4 h-4" />
+                    {presentCount}到
+                  </span>
+                )}
+                {lateCount > 0 && (
+                  <span className="flex items-center gap-1 text-amber-600">
+                    <AlertCircle className="w-4 h-4" />
+                    {lateCount}迟
+                  </span>
+                )}
+                {absentCount > 0 && (
+                  <span className="flex items-center gap-1 text-red-600">
+                    <UserX className="w-4 h-4" />
+                    {absentCount}缺
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="divide-y divide-gray-50">
+              {playerDetails.map((player, idx) => {
+                // 查找对应的训练记录
+                const record = records.find(r => r.playerId === player.id);
+                const attendanceInfo = record ? getAttendanceInfo(record.attendance) : null;
+                const AttendanceIcon = attendanceInfo?.icon || UserCheck;
+
+                return (
+                  <div
+                    key={player.id}
+                    className="px-6 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center text-white text-sm font-bold">
+                        {idx + 1}
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-900">{player.name}</div>
+                        <div className="text-xs text-gray-400">{player.group}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {attendanceInfo && (
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full border ${attendanceInfo.bg} ${attendanceInfo.color}`}>
+                          <AttendanceIcon className="w-3 h-3" />
+                          {attendanceInfo.label}
+                        </span>
+                      )}
+                      {record?.feedback && (
+                        <span className="text-xs text-gray-400 max-w-[120px] truncate" title={record.feedback}>
+                          {record.feedback}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* 训练内容 */}
         <div className="space-y-4">

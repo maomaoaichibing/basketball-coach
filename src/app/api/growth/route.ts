@@ -52,8 +52,10 @@ export async function GET(request: NextRequest) {
       const skills = ['dribbling', 'passing', 'shooting', 'defending', 'physical', 'tactical'];
 
       skills.forEach(skill => {
-        const latestVal = (latest as any)?.[skill] || 0;
-        const previousVal = (previous as any)?.[skill] || 0;
+        const latestVal =
+          (latest as unknown as { [key: string]: number } | undefined)?.[skill] || 0;
+        const previousVal =
+          (previous as unknown as { [key: string]: number } | undefined)?.[skill] || 0;
         trend[skill] = latestVal - previousVal;
       });
 

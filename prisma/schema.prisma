@@ -213,6 +213,10 @@ model TrainingPlan {
   // 备注
   notes       String?
 
+  // 参训学员
+  playerIds   String   @default("[]")  // JSON: ["playerId1", "playerId2"]
+  coachId     String?                    // 创建教案的教练ID
+
   // 状态
   status      String   @default("draft")  // draft/published/completed
 

@@ -19,8 +19,8 @@ jest.mock('@prisma/client', () => ({
 
 // Import after mock setup
 const { POST } = require('@/app/api/auth/login/route');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs') as jest.Mocked<typeof import('bcryptjs')>;
+const jwt = require('jsonwebtoken') as jest.Mocked<typeof import('jsonwebtoken')>;
 
 describe('POST /api/auth/login', () => {
   beforeEach(() => {
@@ -81,7 +81,7 @@ describe('POST /api/auth/login', () => {
 
   it('should return 401 when password is incorrect', async () => {
     mockPrisma.coach.findFirst.mockResolvedValue(createMockCoach());
-    (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+    bcrypt.compare.mockImplementation(() => Promise.resolve(false));
 
     const request = createMockRequest({
       email: 'test@coach.com',
@@ -99,7 +99,7 @@ describe('POST /api/auth/login', () => {
     mockPrisma.coach.findFirst.mockResolvedValue(
       createMockCoach({ status: 'inactive' })
     );
-    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    bcrypt.compare.mockImplementation(() => Promise.resolve(true));
 
     const request = createMockRequest({
       email: 'test@coach.com',
@@ -120,8 +120,8 @@ describe('POST /api/auth/login', () => {
       role: 'head_coach',
     });
     mockPrisma.coach.findFirst.mockResolvedValue(coach);
-    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-    (jwt.sign as jest.Mock).mockReturnValue('mock-jwt-token');
+    bcrypt.compare.mockImplementation(() => Promise.resolve(true));
+    jwt.sign.mockReturnValue('mock-jwt-token' as any);
 
     const request = createMockRequest({
       email: 'wang@coach.com',

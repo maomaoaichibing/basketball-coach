@@ -153,10 +153,10 @@ describe('auth - fetchWithAuth', () => {
     store['auth_token'] = 'test-token';
     const { fetchWithAuth } = getAuth();
 
-    const mockFetch = jest.fn().mockResolvedValue({
+    const mockFetch = jest.fn().mockImplementation(() => Promise.resolve({
       ok: true,
       json: async () => ({ data: 'test' }),
-    });
+    }));
     (global as any).fetch = mockFetch;
 
     await fetchWithAuth('/api/test', { method: 'GET' });
@@ -170,10 +170,10 @@ describe('auth - fetchWithAuth', () => {
   it('should not add auth header when no token', async () => {
     const { fetchWithAuth } = getAuth();
 
-    const mockFetch = jest.fn().mockResolvedValue({
+    const mockFetch = jest.fn().mockImplementation(() => Promise.resolve({
       ok: true,
       json: async () => ({ data: 'test' }),
-    });
+    }));
     (global as any).fetch = mockFetch;
 
     await fetchWithAuth('/api/test');
@@ -186,10 +186,10 @@ describe('auth - fetchWithAuth', () => {
     store['auth_token'] = 'test-token';
     const { fetchWithAuth } = getAuth();
 
-    const mockFetch = jest.fn().mockResolvedValue({
+    const mockFetch = jest.fn().mockImplementation(() => Promise.resolve({
       ok: true,
       json: async () => ({ data: 'test' }),
-    });
+    }));
     (global as any).fetch = mockFetch;
 
     await fetchWithAuth('/api/test', {

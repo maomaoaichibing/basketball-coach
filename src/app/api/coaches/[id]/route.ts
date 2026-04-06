@@ -25,19 +25,16 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     });
 
     if (!coach) {
-      return NextResponse.json(
-        { success: false, message: '教练不存在' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, message: '教练不存在' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, data: sanitizeCoach(coach as unknown as Record<string, unknown>) });
+    return NextResponse.json({
+      success: true,
+      data: sanitizeCoach(coach as unknown as Record<string, unknown>),
+    });
   } catch (error) {
     console.error('获取教练详情失败:', error);
-    return NextResponse.json(
-      { success: false, message: '获取教练详情失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: '获取教练详情失败' }, { status: 500 });
   }
 }
 
@@ -54,20 +51,14 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     // 检查是否存在
     const existing = await prisma.coach.findUnique({ where: { id } });
     if (!existing) {
-      return NextResponse.json(
-        { success: false, message: '教练不存在' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, message: '教练不存在' }, { status: 404 });
     }
 
     // 如果修改了手机号，检查唯一性
     if (phone && phone !== existing.phone) {
       const phoneExists = await prisma.coach.findUnique({ where: { phone } });
       if (phoneExists) {
-        return NextResponse.json(
-          { success: false, message: '该手机号已被使用' },
-          { status: 400 }
-        );
+        return NextResponse.json({ success: false, message: '该手机号已被使用' }, { status: 400 });
       }
     }
 
@@ -75,10 +66,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     if (email && email !== existing.email) {
       const emailExists = await prisma.coach.findFirst({ where: { email } });
       if (emailExists) {
-        return NextResponse.json(
-          { success: false, message: '该邮箱已被使用' },
-          { status: 400 }
-        );
+        return NextResponse.json({ success: false, message: '该邮箱已被使用' }, { status: 400 });
       }
     }
 
@@ -89,7 +77,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     if (email !== undefined) updateData.email = email || null;
     if (campusId !== undefined) updateData.campusId = campusId || null;
     if (specialties !== undefined) {
-      updateData.specialties = typeof specialties === 'string' ? specialties : JSON.stringify(specialties || []);
+      updateData.specialties =
+        typeof specialties === 'string' ? specialties : JSON.stringify(specialties || []);
     }
     if (status !== undefined) updateData.status = status;
     if (hireDate !== undefined) updateData.hireDate = hireDate ? new Date(hireDate) : null;
@@ -111,10 +100,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     });
   } catch (error) {
     console.error('更新教练失败:', error);
-    return NextResponse.json(
-      { success: false, message: '更新教练失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: '更新教练失败' }, { status: 500 });
   }
 }
 
@@ -128,18 +114,12 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     // 不能删除自己
     if (id === auth.user.id) {
-      return NextResponse.json(
-        { success: false, message: '不能删除自己的账号' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: '不能删除自己的账号' }, { status: 400 });
     }
 
     const existing = await prisma.coach.findUnique({ where: { id } });
     if (!existing) {
-      return NextResponse.json(
-        { success: false, message: '教练不存在' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, message: '教练不存在' }, { status: 404 });
     }
 
     await prisma.coach.delete({ where: { id } });
@@ -150,9 +130,6 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     });
   } catch (error) {
     console.error('删除教练失败:', error);
-    return NextResponse.json(
-      { success: false, message: '删除教练失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: '删除教练失败' }, { status: 500 });
   }
 }

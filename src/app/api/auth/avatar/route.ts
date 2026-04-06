@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth-middleware';
+import prisma from '@/lib/db';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 
@@ -19,10 +20,7 @@ export async function POST(request: NextRequest) {
     const file = formData.get('avatar') as File | null;
 
     if (!file) {
-      return NextResponse.json(
-        { success: false, message: '请选择头像文件' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: '请选择头像文件' }, { status: 400 });
     }
 
     // 验证文件类型
@@ -60,8 +58,6 @@ export async function POST(request: NextRequest) {
     const avatarUrl = `/uploads/avatars/${fileName}`;
 
     // 更新数据库
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient();
     await prisma.coach.update({
       where: { id: auth.user.id },
       data: { avatar: avatarUrl },
@@ -74,9 +70,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('头像上传错误:', error);
-    return NextResponse.json(
-      { success: false, message: '上传失败，请重试' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: '上传失败，请重试' }, { status: 500 });
   }
 }

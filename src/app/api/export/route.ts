@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient, TrainingPlan, Player, TrainingRecord } from '@prisma/client';
 import * as XLSX from 'xlsx';
 import { verifyAuth } from '@/lib/auth-middleware';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/db';
 
 type ExportData = Record<string, string | number>;
 type ExportRow = ExportData;

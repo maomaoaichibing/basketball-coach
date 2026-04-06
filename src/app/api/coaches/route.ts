@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth-middleware';
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/db';
 
 // 从返回数据中移除 password 字段
 function sanitizeCoach(coach: Record<string, unknown>) {
@@ -40,10 +38,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('获取教练列表失败:', error);
-    return NextResponse.json(
-      { success: false, message: '获取教练列表失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: '获取教练列表失败' }, { status: 500 });
   }
 }
 
@@ -70,10 +65,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingCoach) {
-      return NextResponse.json(
-        { success: false, message: '该手机号已被使用' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: '该手机号已被使用' }, { status: 400 });
     }
 
     // 检查邮箱是否已被使用
@@ -82,10 +74,7 @@ export async function POST(request: NextRequest) {
         where: { email },
       });
       if (existingEmail) {
-        return NextResponse.json(
-          { success: false, message: '该邮箱已被使用' },
-          { status: 400 }
-        );
+        return NextResponse.json({ success: false, message: '该邮箱已被使用' }, { status: 400 });
       }
     }
 
@@ -112,16 +101,16 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      message: '教练创建成功',
-      data: sanitizeCoach(coach as unknown as Record<string, unknown>),
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        message: '教练创建成功',
+        data: sanitizeCoach(coach as unknown as Record<string, unknown>),
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('创建教练失败:', error);
-    return NextResponse.json(
-      { success: false, message: '创建教练失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: '创建教练失败' }, { status: 500 });
   }
 }

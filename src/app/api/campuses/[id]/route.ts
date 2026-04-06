@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { verifyAuth } from '@/lib/auth-middleware';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/db';
 
 // GET /api/campuses/[id] - 获取单个校区
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

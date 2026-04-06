@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { JWT_CONFIG } from '@/lib/jwt';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,10 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (newPassword.length < 6) {
-      return NextResponse.json(
-        { success: false, message: '新密码长度至少6位' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: '新密码长度至少6位' }, { status: 400 });
     }
 
     // 获取用户
@@ -47,10 +42,7 @@ export async function POST(request: NextRequest) {
     // 验证旧密码
     const isValid = await bcrypt.compare(oldPassword, coach.password);
     if (!isValid) {
-      return NextResponse.json(
-        { success: false, message: '旧密码不正确' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: '旧密码不正确' }, { status: 400 });
     }
 
     // 加密新密码
