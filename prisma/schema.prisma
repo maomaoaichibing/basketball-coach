@@ -200,6 +200,9 @@ model TrainingPlan {
   intensity   String   @default("medium")  // low/medium/high
   restTime    Int     @default(60)  // 秒
 
+  // 学员水平
+  skillLevel  String   @default("intermediate")  // beginner/intermediate/advanced (基础/进阶/精英)
+
   // 完整教案内容（JSON格式，支持AI生成和自定义）
   sections    String   @default("[]")   // JSON: 完整的sections数组
 

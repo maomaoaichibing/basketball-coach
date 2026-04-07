@@ -16,6 +16,20 @@ import {
 // 版本历史记录
 const versions = [
   {
+    version: 'v5.4.0',
+    date: '2026-04-07',
+    title: '水平与强度分离',
+    description:
+      '学员水平和训练强度分为两个独立维度，水平=基础/进阶/精英，强度=低/中/高，分别存储和展示',
+    features: [
+      { type: 'feature', text: '数据库新增 skillLevel 字段，与 intensity 独立存储' },
+      { type: 'feature', text: '水平标签统一为：基础（青）/ 进阶（蓝）/ 精英（靛），与强度标签颜色区分' },
+      { type: 'feature', text: '强度标签统一为：低强度（绿）/ 中强度（黄）/ 高强度（红）' },
+      { type: 'feature', text: '教案创建预览、列表页、详情页统一展示两个独立标签' },
+      { type: 'feature', text: 'AI 生成时 skillLevel 存入数据库，列表和详情页可正确展示' },
+    ],
+  },
+  {
     version: 'v5.3.1',
     date: '2026-04-07',
     title: '薄弱环节分析开关',

@@ -850,7 +850,7 @@ export default function NewPlanPage() {
                     {/* 技能水平 */}
                     <div className="mb-3">
                       <label className="block text-xs font-medium text-gray-600 mb-1">
-                        学员技能水平
+                        学员水平
                       </label>
                       <select
                         value={aiConfig.skillLevel}
@@ -862,9 +862,9 @@ export default function NewPlanPage() {
                         }
                         className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
                       >
-                        <option value="beginner">初级</option>
-                        <option value="intermediate">中级</option>
-                        <option value="advanced">高级</option>
+                        <option value="beginner">基础</option>
+                        <option value="intermediate">进阶</option>
+                        <option value="advanced">精英</option>
                       </select>
                     </div>
 
@@ -976,22 +976,22 @@ export default function NewPlanPage() {
                       </p>
                     </div>
                     <div className="flex flex-col gap-2">
-                      {/* 技能水平标签（只要选了技能水平就显示，无论AI还是规则） */}
-                      {aiConfig.skillLevel && (
+                      {/* 学员水平标签 */}
+                      {plan.skillLevel && (
                         <span
                           className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            aiConfig.skillLevel === 'advanced'
-                              ? 'bg-red-500'
-                              : aiConfig.skillLevel === 'intermediate'
-                                ? 'bg-yellow-500'
-                                : 'bg-green-500'
+                            plan.skillLevel === 'advanced'
+                              ? 'bg-indigo-500'
+                              : plan.skillLevel === 'intermediate'
+                                ? 'bg-blue-500'
+                                : 'bg-cyan-500'
                           } text-white`}
                         >
-                          {aiConfig.skillLevel === 'advanced'
-                            ? '高级水平'
-                            : aiConfig.skillLevel === 'intermediate'
-                              ? '中级水平'
-                              : '初级水平'}
+                          {plan.skillLevel === 'advanced'
+                            ? '精英'
+                            : plan.skillLevel === 'intermediate'
+                              ? '进阶'
+                              : '基础'}
                         </span>
                       )}
                       {/* 训练强度标签 */}
@@ -1007,7 +1007,7 @@ export default function NewPlanPage() {
                         {plan.intensity === 'high'
                           ? '高强度'
                           : plan.intensity === 'medium'
-                            ? '中等强度'
+                            ? '中强度'
                             : '低强度'}
                       </span>
                     </div>

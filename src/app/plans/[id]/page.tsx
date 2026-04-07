@@ -54,6 +54,7 @@ type TrainingPlan = {
   theme?: string;
   objective?: string;
   intensity?: string;
+  skillLevel?: string;
   status?: string;
   generatedBy?: string;
   sections?: Section[];
@@ -294,6 +295,34 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                       {plan.theme}
                     </span>
                   )}
+                  {plan.skillLevel && (
+                    <span className={`px-2 py-0.5 text-xs rounded-full text-white ${
+                      plan.skillLevel === 'advanced'
+                        ? 'bg-indigo-500'
+                        : plan.skillLevel === 'intermediate'
+                          ? 'bg-blue-500'
+                          : 'bg-cyan-500'
+                    }`}>
+                      {plan.skillLevel === 'advanced'
+                        ? '精英'
+                        : plan.skillLevel === 'intermediate'
+                          ? '进阶'
+                          : '基础'}
+                    </span>
+                  )}
+                  <span className={`px-2 py-0.5 text-xs rounded-full text-white ${
+                    plan.intensity === 'high'
+                      ? 'bg-red-600'
+                      : plan.intensity === 'medium'
+                        ? 'bg-yellow-600'
+                        : 'bg-green-600'
+                  }`}>
+                    {plan.intensity === 'high'
+                      ? '高强度'
+                      : plan.intensity === 'medium'
+                        ? '中强度'
+                        : '低强度'}
+                  </span>
                 </div>
               </div>
             </div>

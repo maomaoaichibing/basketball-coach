@@ -44,6 +44,7 @@ export interface TrainingPlanOutput {
   theme: string;
   focusSkills: string[];
   intensity: Intensity;
+  skillLevel?: 'beginner' | 'intermediate' | 'advanced';
   sections: PlanSection[];
   notes: string;
   trainingProgression?: string; // 整体递进关系说明

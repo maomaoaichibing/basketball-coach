@@ -33,6 +33,7 @@ type TrainingPlan = {
   theme?: string;
   focusSkills?: string;
   intensity?: string;
+  skillLevel?: string;
   status?: string;
   generatedBy?: string;
   createdAt?: string;
@@ -108,6 +109,7 @@ export default function PlansPage() {
           theme: plan.theme,
           focusSkills: plan.focusSkills ? JSON.parse(plan.focusSkills) : [],
           intensity: plan.intensity || 'medium',
+          skillLevel: plan.skillLevel || 'intermediate',
           sections: plan.sections ? JSON.parse(plan.sections) : [],
           notes: '',
           generatedBy: plan.generatedBy,
@@ -226,8 +228,36 @@ export default function PlansPage() {
                     <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded-full">
                       {plan.group}
                     </span>
-                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
-                      {plan.theme}
+                    {plan.theme && (
+                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                        {plan.theme}
+                      </span>
+                    )}
+                    <span className={`px-2 py-0.5 text-xs rounded-full text-white ${
+                      plan.skillLevel === 'advanced'
+                        ? 'bg-indigo-500'
+                        : plan.skillLevel === 'intermediate'
+                          ? 'bg-blue-500'
+                          : 'bg-cyan-500'
+                    }`}>
+                      {plan.skillLevel === 'advanced'
+                        ? '精英'
+                        : plan.skillLevel === 'intermediate'
+                          ? '进阶'
+                          : '基础'}
+                    </span>
+                    <span className={`px-2 py-0.5 text-xs rounded-full text-white ${
+                      plan.intensity === 'high'
+                        ? 'bg-red-600'
+                        : plan.intensity === 'medium'
+                          ? 'bg-yellow-600'
+                          : 'bg-green-600'
+                    }`}>
+                      {plan.intensity === 'high'
+                        ? '高强度'
+                        : plan.intensity === 'medium'
+                          ? '中强度'
+                          : '低强度'}
                     </span>
                   </div>
 

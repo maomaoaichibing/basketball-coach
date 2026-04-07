@@ -1320,6 +1320,7 @@ export async function POST(request: NextRequest) {
           theme: validatedResult.theme,
           focusSkills: params.focusSkills || [],
           intensity: validatedResult.intensity as 'low' | 'medium' | 'high',
+          skillLevel: params.skillLevel || 'intermediate',
           // 兼容 segments（新三段式）和 sections（旧格式）
           sections: (validatedResult.segments || validatedResult.sections || []).map(
             (seg: unknown) => {
@@ -1385,6 +1386,7 @@ export async function POST(request: NextRequest) {
           theme: validatedResult.theme,
           focusSkills: params.focusSkills || [],
           intensity: validatedResult.intensity as 'low' | 'medium' | 'high',
+          skillLevel: params.skillLevel || 'intermediate',
           // 兼容 segments（新三段式）和 sections（旧格式）
           sections: (validatedResult.segments || validatedResult.sections || []).map(
             (seg: unknown) => {
