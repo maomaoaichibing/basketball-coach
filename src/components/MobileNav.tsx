@@ -31,6 +31,7 @@ const moreMenuItems = [
   { href: '/dashboard', icon: '🏠', label: '教练工作台' },
   { href: '/checkin', icon: '📋', label: '签到点名' },
   { href: '/training', icon: '▶️', label: '训练执行' },
+  { href: '/records', icon: '📝', label: '训练记录' },
   { href: '/goals', icon: '🎯', label: '阶段目标' },
   { href: '/growth', icon: '📈', label: '成长追踪' },
   { href: '/assessment', icon: '🏆', label: '球员评估' },
@@ -306,6 +307,7 @@ export default function MobileNav() {
               {[
                 { href: '/checkin', icon: '📋', label: '签到点名' },
                 { href: '/training', icon: '▶️', label: '训练执行' },
+                { href: '/records', icon: '📋', label: '训练记录' },
                 { href: '/goals', icon: '🎯', label: '阶段目标' },
                 { href: '/growth', icon: '📈', label: '成长追踪' },
                 { href: '/assessment', icon: '🏆', label: '球员评估' },

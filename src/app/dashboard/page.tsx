@@ -147,6 +147,34 @@ export default function DashboardPage() {
         .slice(0, 5);
       setSchedules(todaySchedules);
 
+      // 如果排课为空，尝试用今天的教案作为今日课程
+      if (todaySchedules.length === 0) {
+        const todayPlans = (plansData.plans || []).filter((p: { date?: string }) => {
+          if (!p.date) return false;
+          const planDate = new Date(p.date);
+          const today = new Date();
+          return (
+            planDate.getFullYear() === today.getFullYear() &&
+            planDate.getMonth() === today.getMonth() &&
+            planDate.getDate() === today.getDate()
+          );
+        });
+        if (todayPlans.length > 0) {
+          setSchedules(
+            todayPlans.slice(0, 5).map((p: { id: string; title?: string; group?: string; theme?: string }) => ({
+              id: p.id,
+              title: p.title || '训练课',
+              group: p.group || '',
+              startTime: '',
+              endTime: '',
+              location: '',
+              maxPlayers: 0,
+              currentCount: 0,
+            }))
+          );
+        }
+      }
+
       // 生成告警
       const playerAlerts: PlayerAlert[] = [];
       const players = playersData.players || [];
@@ -188,20 +216,47 @@ export default function DashboardPage() {
         }));
       setFeedbacks(recentRecords);
 
-      // 周统计
+      // 周统计（真实计算）
       const weekStart = new Date();
       weekStart.setDate(weekStart.getDate() - weekStart.getDay());
       weekStart.setHours(0, 0, 0, 0);
 
-      const weekRecords = (recordsData.records || []).filter(
+      const allRecords = recordsData.records || [];
+
+      // 本周训练记录
+      const weekRecords = allRecords.filter(
         (r: TrainingRecordWithPlan) => new Date(r.recordedAt) >= weekStart
       );
+
+      // 真实出勤率：本周出勤 / 本周总记录
+      const weekPresentCount = weekRecords.filter(
+        (r: { attendance: string }) => r.attendance === 'present' || r.attendance === 'late'
+      ).length;
+      const realAvgAttendance = weekRecords.length > 0
+        ? Math.round((weekPresentCount / weekRecords.length) * 100)
+        : 0;
+
+      // 真实平均表现分：本周有评分的记录
+      const weekScoredRecords = weekRecords.filter(
+        (r: { performance?: number }) => r.performance && r.performance > 0
+      );
+      const realAvgPerformance = weekScoredRecords.length > 0
+        ? (weekScoredRecords.reduce(
+            (sum: number, r: { performance?: number }) => sum + (r.performance || 0),
+            0
+          ) / weekScoredRecords.length
+        ).toFixed(1)
+        : '--';
+
+      // 本周独立教案数（按 planId 去重）
+      const weekPlanIds = new Set(weekRecords.map((r: { planId?: string }) => r.planId));
+      const weekTrainingCount = weekPlanIds.size;
 
       setStats({
         totalTrainings: (plansData.plans || []).length,
         totalStudents: players.length,
-        avgAttendance: players.length > 0 ? 85 : 0,
-        avgPerformance: 7.5,
+        avgAttendance: realAvgAttendance,
+        avgPerformance: Number(realAvgPerformance) || 0,
         newStudents: players.filter((p: PlayerWithEnrollDate) => {
           const enrollDate = new Date(p.enrollDate);
           return enrollDate >= weekStart;
@@ -402,7 +457,7 @@ export default function DashboardPage() {
               <Dumbbell className="w-4 h-4 text-blue-500" />
               最近训练记录
             </h2>
-            <Link href="/training" className="text-xs text-orange-500 flex items-center gap-1">
+            <Link href="/records" className="text-xs text-orange-500 flex items-center gap-1">
               查看全部 <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
