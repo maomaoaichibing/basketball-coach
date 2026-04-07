@@ -16,6 +16,7 @@ import {
   ChevronDown,
   ChevronRight,
   ClipboardList,
+  Download,
 } from 'lucide-react';
 
 type TrainingRecord = {
@@ -127,6 +128,36 @@ export default function RecordsPage() {
         ).toFixed(1)
       : '--';
 
+  // 导出CSV
+  function handleExportCSV() {
+    const header = ['训练日期', '教案名称', '训练主题', '学员姓名', '组别', '出勤状态', '表现评分', '教练反馈', '记录时间'];
+    const rows = records.map((r) => [
+      r.planDate ? new Date(r.planDate).toLocaleDateString('zh-CN') : '',
+      r.planTitle || '',
+      r.planTheme || '',
+      r.playerName || '',
+      r.playerGroup || '',
+      attendanceConfig[r.attendance]?.label || r.attendance,
+      r.performance ? String(r.performance) : '',
+      r.feedback || '',
+      r.recordedAt ? new Date(r.recordedAt).toLocaleString('zh-CN') : '',
+    ]);
+
+    // BOM + CSV内容，确保中文在Excel中正确显示
+    const bom = '\uFEFF';
+    const csv = bom + [header, ...rows].map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(',')).join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `训练记录_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 头部 */}
@@ -140,6 +171,13 @@ export default function RecordsPage() {
               <h1 className="text-xl font-bold text-gray-900">训练记录</h1>
               <p className="text-sm text-gray-500">共 {totalRecords} 条记录</p>
             </div>
+            <button
+              onClick={handleExportCSV}
+              className="flex items-center gap-1.5 px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium shadow-sm"
+            >
+              <Download className="w-4 h-4" />
+              导出
+            </button>
           </div>
         </div>
       </header>

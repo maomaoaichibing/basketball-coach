@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Plus, Package, Users, Clock, Edit2, Trash2, Check, X } from 'lucide-react';
+import { ArrowLeft, Plus, Package, Users, Clock, Edit2, Trash2, Check, X, AlertTriangle, Search, Filter } from 'lucide-react';
 import { fetchWithAuth } from '@/lib/auth';
 
 // 类型定义
@@ -48,6 +48,8 @@ export default function CoursesPage() {
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [showEnrollModal, setShowEnrollModal] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [searchEnroll, setSearchEnroll] = useState('');
+  const [filterEnrollStatus, setFilterEnrollStatus] = useState<string>('all');
 
   // 表单状态
   const [courseForm, setCourseForm] = useState({
@@ -356,7 +358,99 @@ export default function CoursesPage() {
 
         {/* 学员课时列表 */}
         {activeTab === 'enrollments' && (
+          <>
+            {/* 课时预警卡片 */}
+            {(() => {
+              const lowHours = enrollments.filter(
+                (e) => e.status === 'active' && e.remainingHours > 0 && e.remainingHours <= 5,
+              );
+              const expiringSoon = enrollments.filter((e) => {
+                if (!e.expireDate || e.status !== 'active') return false;
+                const daysLeft = Math.ceil(
+                  (new Date(e.expireDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+                );
+                return daysLeft <= 14 && daysLeft > 0;
+              });
+              if (lowHours.length === 0 && expiringSoon.length === 0) return null;
+              return (
+                <div className="mb-4 space-y-2">
+                  {lowHours.length > 0 && (
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertTriangle className="w-4 h-4 text-red-500" />
+                        <span className="text-sm font-medium text-red-700">
+                          课时不足预警 ({lowHours.length}人)
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {lowHours.map((e) => (
+                          <span
+                            key={e.id}
+                            className="px-2.5 py-1 bg-white border border-red-200 rounded-lg text-xs text-red-700"
+                          >
+                            {e.player?.name} - 剩余 {e.remainingHours} 课时
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {expiringSoon.length > 0 && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Clock className="w-4 h-4 text-yellow-500" />
+                        <span className="text-sm font-medium text-yellow-700">
+                          即将到期提醒 ({expiringSoon.length}人)
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {expiringSoon.map((e) => {
+                          const daysLeft = Math.ceil(
+                            (new Date(e.expireDate!).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+                          );
+                          return (
+                            <span
+                              key={e.id}
+                              className="px-2.5 py-1 bg-white border border-yellow-200 rounded-lg text-xs text-yellow-700"
+                            >
+                              {e.player?.name} - 剩余 {daysLeft} 天到期
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* 搜索和筛选 */}
+            <div className="flex gap-2 mb-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="搜索学员、课程..."
+                  value={searchEnroll}
+                  onChange={(e) => setSearchEnroll(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+                />
+              </div>
+              <select
+                value={filterEnrollStatus}
+                onChange={(e) => setFilterEnrollStatus(e.target.value)}
+                className="px-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="all">全部状态</option>
+                <option value="active">使用中</option>
+                <option value="completed">已用完</option>
+                <option value="expired">已过期</option>
+                <option value="cancelled">已取消</option>
+                <option value="low-hours">课时不足</option>
+              </select>
+            </div>
+
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
@@ -370,7 +464,24 @@ export default function CoursesPage() {
                 </tr>
               </thead>
               <tbody>
-                {enrollments.map((enrollment) => (
+                {enrollments
+                  .filter((e) => {
+                    if (filterEnrollStatus === 'low-hours') {
+                      if (e.status !== 'active' || e.remainingHours > 5) return false;
+                    } else if (filterEnrollStatus !== 'all' && e.status !== filterEnrollStatus) {
+                      return false;
+                    }
+                    if (searchEnroll) {
+                      const term = searchEnroll.toLowerCase();
+                      return (
+                        (e.player?.name || '').toLowerCase().includes(term) ||
+                        (e.course?.name || '').toLowerCase().includes(term) ||
+                        (e.player?.group || '').toLowerCase().includes(term)
+                      );
+                    }
+                    return true;
+                  })
+                  .map((enrollment) => (
                   <tr key={enrollment.id} className="border-b border-gray-50 hover:bg-gray-50">
                     <td className="p-4">
                       <div className="flex items-center gap-2">
@@ -389,11 +500,39 @@ export default function CoursesPage() {
                     <td className="p-4 text-gray-700">{enrollment.totalHours} 课时</td>
                     <td className="p-4 text-gray-700">{enrollment.usedHours} 课时</td>
                     <td className="p-4">
-                      <span
-                        className={`font-semibold ${enrollment.remainingHours <= 5 ? 'text-red-600' : 'text-green-600'}`}
-                      >
-                        {enrollment.remainingHours} 课时
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`font-semibold ${
+                            enrollment.remainingHours <= 3
+                              ? 'text-red-600'
+                              : enrollment.remainingHours <= 5
+                                ? 'text-orange-600'
+                                : 'text-green-600'
+                          }`}
+                        >
+                          {enrollment.remainingHours} 课时
+                        </span>
+                        {enrollment.status === 'active' && enrollment.remainingHours <= 5 && enrollment.remainingHours > 0 && (
+                          <AlertTriangle className="w-4 h-4 text-red-500" />
+                        )}
+                      </div>
+                      {/* 课时进度条 */}
+                      {enrollment.totalHours > 0 && (
+                        <div className="w-20 h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full ${
+                              enrollment.remainingHours <= 3
+                                ? 'bg-red-500'
+                                : enrollment.remainingHours <= 5
+                                  ? 'bg-orange-500'
+                                  : 'bg-green-500'
+                            }`}
+                            style={{
+                              width: `${Math.max(0, (enrollment.remainingHours / enrollment.totalHours) * 100)}%`,
+                            }}
+                          />
+                        </div>
+                      )}
                     </td>
                     <td className="p-4">
                       <span
@@ -402,13 +541,21 @@ export default function CoursesPage() {
                         {statusMap[enrollment.status]?.label || enrollment.status}
                       </span>
                     </td>
-                    <td className="p-4 text-gray-500 text-sm">
-                      {new Date(enrollment.purchaseDate).toLocaleDateString('zh-CN')}
+                    <td className="p-4">
+                      <div className="text-sm text-gray-700">
+                        {new Date(enrollment.purchaseDate).toLocaleDateString('zh-CN')}
+                      </div>
+                      {enrollment.expireDate && enrollment.status === 'active' && (
+                        <div className="text-xs text-gray-400">
+                          {new Date(enrollment.expireDate).toLocaleDateString('zh-CN')} 到期
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            </div>
 
             {enrollments.length === 0 && (
               <div className="p-12 text-center">
@@ -418,6 +565,7 @@ export default function CoursesPage() {
               </div>
             )}
           </div>
+          </>
         )}
       </main>
 
