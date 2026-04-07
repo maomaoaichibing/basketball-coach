@@ -17,6 +17,7 @@ import {
 // use-gesture v10 doesn't export useSwipeable directly, removed unused import
 
 import { useAuth } from '@/components/AuthProvider';
+import { fetchWithAuth } from '@/lib/auth';
 
 // 主导航项配置（底部显示）
 const mainNavItems = [
@@ -56,7 +57,7 @@ export default function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(3); // 未读通知数量（示例）
+  const [unreadCount, setUnreadCount] = useState(0);
   const pathname = usePathname();
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuth();
@@ -67,14 +68,22 @@ export default function MobileNav() {
     router.push('/login');
   };
 
-  // 获取未读通知数量（实际项目中从API获取）
+  // 获取真实未读通知数量
   useEffect(() => {
-    // 示例：模拟获取未读通知
-    const timer = setTimeout(() => {
-      setUnreadCount(Math.floor(Math.random() * 10) + 1);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [pathname]); // 页面切换时更新
+    if (!isAuthenticated) return;
+    async function fetchUnreadCount() {
+      try {
+        const res = await fetchWithAuth('/api/notifications?status=pending&limit=1');
+        if (res.ok) {
+          const data = await res.json();
+          setUnreadCount(data.total || data.notifications?.length || 0);
+        }
+      } catch {
+        // 静默失败
+      }
+    }
+    fetchUnreadCount();
+  }, [pathname, isAuthenticated]);
 
   return (
     <>

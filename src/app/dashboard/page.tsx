@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { fetchWithAuth } from '@/lib/auth';
+import { useAuth } from '@/components/AuthProvider';
 import {
   Calendar,
   Users,
@@ -247,6 +248,7 @@ function ProgressRing({ value, max = 100, size = 56, strokeWidth = 5, color = '#
 // ============ 主页面 ============
 
 export default function DashboardPage() {
+  const { user } = useAuth();
   const [schedules, setSchedules] = useState<TodaySchedule[]>([]);
   const [alerts, setAlerts] = useState<PlayerAlert[]>([]);
   const [feedbacks, setFeedbacks] = useState<RecentFeedback[]>([]);
@@ -526,6 +528,16 @@ export default function DashboardPage() {
 
   // ============ 渲染 ============
 
+  // 个性化问候语
+  const greeting = (() => {
+    const hour = new Date().getHours();
+    if (hour < 6) return '夜深了';
+    if (hour < 11) return '早上好';
+    if (hour < 14) return '中午好';
+    if (hour < 18) return '下午好';
+    return '晚上好';
+  })();
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -543,9 +555,26 @@ export default function DashboardPage() {
       <header className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between mb-2">
-            <div>
-              <h1 className="text-2xl font-bold">教练工作台</h1>
-              <p className="text-orange-100 text-sm">{todayDate}</p>
+            <div className="flex items-center gap-3">
+              {/* 头像 */}
+              {user?.avatar ? (
+                <img src={user.avatar} alt="头像" className="w-11 h-11 rounded-full object-cover border-2 border-white/30" />
+              ) : (
+                <div className="w-11 h-11 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center">
+                  <span className="text-lg font-bold">{user?.name?.charAt(0) || 'U'}</span>
+                </div>
+              )}
+              <div>
+                <h1 className="text-xl font-bold">
+                  {greeting}，{user?.name || '教练'}！
+                </h1>
+                <p className="text-orange-100 text-sm">
+                  {todayDate}
+                  {schedules.length > 0 && (
+                    <span className="ml-2">· 今天有 {schedules.length} 节课</span>
+                  )}
+                </p>
+              </div>
             </div>
             <button
               onClick={fetchDashboard}
