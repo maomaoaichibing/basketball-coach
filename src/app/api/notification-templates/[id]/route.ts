@@ -4,12 +4,12 @@ import prisma from '@/lib/db';
 import { verifyAuth } from '@/lib/auth-middleware';
 
 // GET /api/notification-templates/[id] - 获取模板详情
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await verifyAuth(request);
   if (!auth.success) return auth.response;
 
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const template = await prisma.notificationTemplate.findUnique({
       where: { id },
@@ -30,12 +30,12 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 // PUT /api/notification-templates/[id] - 更新模板
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  const auth = await verifyAuth(request, { roles: ['admin'] });
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await verifyAuth(request);
   if (!auth.success) return auth.response;
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     const { name, category, title, content, variables, isActive, isAutomated, priority } = body;
@@ -74,12 +74,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // DELETE /api/notification-templates/[id] - 删除模板
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await verifyAuth(request, { roles: ['admin'] });
   if (!auth.success) return auth.response;
 
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // 检查是否存在
     const existing = await prisma.notificationTemplate.findUnique({

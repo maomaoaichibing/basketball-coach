@@ -16,6 +16,32 @@ import {
 // 版本历史记录
 const versions = [
   {
+    version: 'v5.6.0',
+    date: '2026-04-07',
+    title: '通知系统全面升级',
+    description: '通知服务层、训练完成自动通知、模板管理、批量发送、统计面板',
+    features: [
+      { type: 'feature', text: '训练完成自动通知：训练结束后自动发送训练报告给家长' },
+      { type: 'feature', text: '通知模板管理：查看/编辑/启停通知模板' },
+      { type: 'feature', text: '批量发送通知：支持全选/多选学员，{{playerName}} 变量替换' },
+      { type: 'feature', text: '通知统计面板：发送量、已读率、状态分布、类型分布' },
+      { type: 'feature', text: '防重复发送：24小时内不重复发送同类通知' },
+    ],
+  },
+  {
+    version: 'v5.5.0',
+    date: '2026-04-07',
+    title: 'Dashboard 数据看板升级',
+    description: '出勤率/表现评分进度环、趋势图、排行榜、核心指标卡片',
+    features: [
+      { type: 'feature', text: '出勤率/表现评分进度环（自适应颜色）' },
+      { type: 'feature', text: '近7天出勤率和表现评分趋势折线图（纯 SVG）' },
+      { type: 'feature', text: '本周训练主题分布横向条形图' },
+      { type: 'feature', text: '本周学员表现排行榜 Top5' },
+      { type: 'feature', text: '核心指标卡片：在训学员/累计教案/本周课时/本周新增' },
+    ],
+  },
+  {
     version: 'v5.4.1',
     date: '2026-04-07',
     title: '训练强度手动选择',

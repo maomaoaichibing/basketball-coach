@@ -237,6 +237,9 @@ model TrainingPlan {
   // 训练记录
   records     TrainingRecord[]
 
+  // 排课关联
+  schedules    Schedule[]
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -444,6 +447,10 @@ model Schedule {
   // 适用课程包类型
   applicableCourses String @default("[]")  // JSON: ["package","monthly"]
 
+  // 关联教案（可选：排课可以直接绑定一个训练教案）
+  planId      String?
+  plan        TrainingPlan? @relation(fields: [planId], references: [id])
+
   // 备注
   notes       String?
 
@@ -454,6 +461,7 @@ model Schedule {
 
   @@index([dayOfWeek])
   @@index([status])
+  @@index([planId])
 }
 
 // 课程预约

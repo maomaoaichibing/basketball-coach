@@ -12,6 +12,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       where: { id: params.id },
       include: {
         team: { select: { id: true, name: true, coachName: true } },
+        plan: { select: { id: true, title: true, date: true, group: true, theme: true, status: true, duration: true } },
         bookings: {
           where: { status: 'confirmed' },
           include: {
@@ -60,6 +61,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       maxPlayers,
       status,
       applicableCourses,
+      planId,
       notes,
     } = body;
 
@@ -78,6 +80,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     if (status !== undefined) updateData.status = status;
     if (applicableCourses !== undefined)
       updateData.applicableCourses = JSON.stringify(applicableCourses);
+    if (planId !== undefined) updateData.planId = planId || null;
     if (notes !== undefined) updateData.notes = notes;
 
     const schedule = await prisma.schedule.update({

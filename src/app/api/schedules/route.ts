@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
       where,
       include: {
         team: { select: { id: true, name: true } },
+        plan: { select: { id: true, title: true, date: true, group: true, theme: true, status: true } },
       },
       orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
     });
@@ -58,6 +59,7 @@ export async function POST(request: NextRequest) {
       coachName,
       maxPlayers,
       applicableCourses,
+      planId,
       notes,
     } = body;
 
@@ -79,7 +81,11 @@ export async function POST(request: NextRequest) {
         coachName,
         maxPlayers: maxPlayers || 20,
         applicableCourses: JSON.stringify(applicableCourses || ['package']),
+        planId: planId || null,
         notes,
+      },
+      include: {
+        plan: { select: { id: true, title: true, date: true, group: true, theme: true, status: true } },
       },
     });
 
