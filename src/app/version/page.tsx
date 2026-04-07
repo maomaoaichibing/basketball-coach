@@ -16,6 +16,32 @@ import {
 // 版本历史记录
 const versions = [
   {
+    version: 'v5.3.0',
+    date: '2026-04-07',
+    title: '智能教案生成 — 学员短板分析',
+    description:
+      'AI生成教案时自动分析参训学员的技能评估数据，识别薄弱技能并针对性调整训练内容',
+    features: [
+      { type: 'feature', text: '学员技能短板自动分析：运球/传球/投篮/防守/体能/战术 6维度评分' },
+      { type: 'feature', text: '薄弱技能自动识别：低于6分或低于整体平均分的技能重点标注' },
+      { type: 'feature', text: '短板分析注入 AI Prompt：教案自动侧重学员薄弱环节' },
+      { type: 'feature', text: '未指定重点技能时，自动从短板中提取推荐（前3个最低分）' },
+      { type: 'feature', text: '已选学员时学员人数自动获取，无需手动填写' },
+    ],
+  },
+  {
+    version: 'v5.2.0',
+    date: '2026-04-07',
+    title: '版本管理规范化',
+    description:
+      '建立 CHANGELOG 版本记录体系，规范发版流程',
+    features: [
+      { type: 'feature', text: '创建 CHANGELOG.md，补全 v4.0 → v5.2 完整版本历史' },
+      { type: 'feature', text: 'package.json 版本号从 1.0.0 更新到 5.2.0' },
+      { type: 'feature', text: '建立发版规范：版本号递增 + CHANGELOG 记录 + 部署' },
+    ],
+  },
+  {
     version: 'v5.1',
     date: '2026-04-06',
     title: '账号权限系统',

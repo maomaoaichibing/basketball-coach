@@ -254,11 +254,12 @@ export default function NewPlanPage() {
           theme: form.themes.length > 0 ? form.themes.join('+') : undefined,
           focusSkills,
           additionalNotes: aiConfig.additionalNotes || undefined,
-          playerCount: selectedPlayerIds.length > 0
-            ? selectedPlayerIds.length
-            : aiConfig.playerCount
-              ? parseInt(aiConfig.playerCount)
-              : undefined,
+          playerCount:
+            selectedPlayerIds.length > 0
+              ? selectedPlayerIds.length
+              : aiConfig.playerCount
+                ? parseInt(aiConfig.playerCount)
+                : undefined,
           skillLevel: aiConfig.skillLevel,
           previousTraining: aiConfig.previousTraining
             ? aiConfig.previousTraining.split(/[,，]/).map(s => s.trim())

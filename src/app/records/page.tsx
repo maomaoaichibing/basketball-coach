@@ -42,7 +42,10 @@ type GroupedRecords = {
   records: TrainingRecord[];
 };
 
-const attendanceConfig: Record<string, { label: string; color: string; icon: typeof CheckCircle2 }> = {
+const attendanceConfig: Record<
+  string,
+  { label: string; color: string; icon: typeof CheckCircle2 }
+> = {
   present: { label: '出勤', color: 'text-green-600 bg-green-50', icon: CheckCircle2 },
   late: { label: '迟到', color: 'text-yellow-600 bg-yellow-50', icon: Clock },
   absent: { label: '缺勤', color: 'text-red-600 bg-red-50', icon: XCircle },
@@ -198,10 +201,7 @@ export default function RecordsPage() {
               {searchTerm || filterAttendance !== 'all' ? '没有匹配的记录' : '暂无训练记录'}
             </p>
             {!searchTerm && filterAttendance === 'all' && (
-              <Link
-                href="/plan/new"
-                className="text-orange-500 hover:underline text-sm"
-              >
+              <Link href="/plan/new" className="text-orange-500 hover:underline text-sm">
                 创建第一个教案 →
               </Link>
             )}
@@ -217,8 +217,7 @@ export default function RecordsPage() {
               const groupAvg =
                 groupScored.length > 0
                   ? (
-                      groupScored.reduce((s, r) => s + (r.performance || 0), 0) /
-                      groupScored.length
+                      groupScored.reduce((s, r) => s + (r.performance || 0), 0) / groupScored.length
                     ).toFixed(1)
                   : '--';
 
@@ -238,9 +237,7 @@ export default function RecordsPage() {
                       <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
                     )}
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-gray-900 truncate">
-                        {group.planTitle}
-                      </div>
+                      <div className="font-medium text-gray-900 truncate">{group.planTitle}</div>
                       <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />

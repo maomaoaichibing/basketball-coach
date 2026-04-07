@@ -62,7 +62,9 @@ export default function TrainingSessionPage() {
   const [submitting, setSubmitting] = useState(false);
 
   // 训练记录的本地编辑状态（key: playerId）
-  const [attendanceMap, setAttendanceMap] = useState<Record<string, 'present' | 'absent' | 'late'>>({});
+  const [attendanceMap, setAttendanceMap] = useState<Record<string, 'present' | 'absent' | 'late'>>(
+    {}
+  );
   const [feedbackMap, setFeedbackMap] = useState<Record<string, string>>({});
   const [performanceMap, setPerformanceMap] = useState<Record<string, number>>({});
   const [showFeedbackInput, setShowFeedbackInput] = useState<string | null>(null);
@@ -78,8 +80,20 @@ export default function TrainingSessionPage() {
       if (data.success) {
         // 按日期倒序排列，带参训学员的优先
         const sortedPlans = data.plans.sort((a: TrainingPlan, b: TrainingPlan) => {
-          const aHasPlayers = (() => { try { return JSON.parse(a.playerIds || '[]').length > 0; } catch { return false; } })();
-          const bHasPlayers = (() => { try { return JSON.parse(b.playerIds || '[]').length > 0; } catch { return false; } })();
+          const aHasPlayers = (() => {
+            try {
+              return JSON.parse(a.playerIds || '[]').length > 0;
+            } catch {
+              return false;
+            }
+          })();
+          const bHasPlayers = (() => {
+            try {
+              return JSON.parse(b.playerIds || '[]').length > 0;
+            } catch {
+              return false;
+            }
+          })();
           if (aHasPlayers !== bHasPlayers) return bHasPlayers ? 1 : -1;
           return new Date(b.date).getTime() - new Date(a.date).getTime();
         });
@@ -243,7 +257,13 @@ export default function TrainingSessionPage() {
             ) : (
               <div className="space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto">
                 {plans.slice(0, 20).map(plan => {
-                  const hasPlayers = (() => { try { return JSON.parse(plan.playerIds || '[]').length > 0; } catch { return false; } })();
+                  const hasPlayers = (() => {
+                    try {
+                      return JSON.parse(plan.playerIds || '[]').length > 0;
+                    } catch {
+                      return false;
+                    }
+                  })();
                   return (
                     <button
                       key={plan.id}
@@ -263,7 +283,14 @@ export default function TrainingSessionPage() {
                             {hasPlayers && (
                               <span className="flex items-center gap-0.5 text-green-600">
                                 <Users className="w-3 h-3" />
-                                {(() => { try { return JSON.parse(plan.playerIds || '[]').length; } catch { return 0; } })()}人
+                                {(() => {
+                                  try {
+                                    return JSON.parse(plan.playerIds || '[]').length;
+                                  } catch {
+                                    return 0;
+                                  }
+                                })()}
+                                人
                               </span>
                             )}
                           </div>
@@ -301,10 +328,10 @@ export default function TrainingSessionPage() {
                   /* 无参训学员 */
                   <div className="bg-white rounded-xl p-8 text-center border border-gray-100">
                     <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">该教案未选择参训学员</h3>
-                    <p className="text-gray-500 mb-4">
-                      保存教案时选择学员可自动创建签到记录
-                    </p>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      该教案未选择参训学员
+                    </h3>
+                    <p className="text-gray-500 mb-4">保存教案时选择学员可自动创建签到记录</p>
                     <Link
                       href={`/plans/${selectedPlan.id}`}
                       className="text-orange-600 hover:text-orange-700 font-medium"
@@ -343,9 +370,7 @@ export default function TrainingSessionPage() {
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                       <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                         <h2 className="font-semibold text-gray-700">学员签到</h2>
-                        <span className="text-sm text-gray-500">
-                          共 {totalPlayerCount} 人
-                        </span>
+                        <span className="text-sm text-gray-500">共 {totalPlayerCount} 人</span>
                       </div>
                       <div className="divide-y divide-gray-50">
                         {playerDetails.map((player, idx) => {
@@ -404,7 +429,9 @@ export default function TrainingSessionPage() {
 
                                   {/* 评价和反馈按钮 */}
                                   <button
-                                    onClick={() => setShowFeedbackInput(isExpanded ? null : player.id)}
+                                    onClick={() =>
+                                      setShowFeedbackInput(isExpanded ? null : player.id)
+                                    }
                                     className={`p-2 rounded-lg transition-colors ${
                                       isExpanded
                                         ? 'bg-orange-100 text-orange-600'
@@ -448,7 +475,9 @@ export default function TrainingSessionPage() {
                                     <label className="text-sm text-gray-600 mb-1">训练反馈</label>
                                     <textarea
                                       value={feedback}
-                                      onChange={e => handleFeedbackChange(player.id, e.target.value)}
+                                      onChange={e =>
+                                        handleFeedbackChange(player.id, e.target.value)
+                                      }
                                       placeholder="输入对学员本次训练的反馈..."
                                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
                                       rows={2}

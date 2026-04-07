@@ -62,7 +62,7 @@ async function analyzePlayerWeaknesses(playerIds: string[]): Promise<{
   const avgScores: Record<string, number> = {};
 
   for (const skill of skills) {
-    const sum = players.reduce((acc, p) => acc + (p[skill as keyof typeof p] as number || 5), 0);
+    const sum = players.reduce((acc, p) => acc + ((p[skill as keyof typeof p] as number) || 5), 0);
     avgScores[skill] = Math.round((sum / players.length) * 10) / 10;
   }
 
@@ -83,14 +83,14 @@ async function analyzePlayerWeaknesses(playerIds: string[]): Promise<{
   // 构建分析文本
   let weaknessText = `共${players.length}名学员的技能评估分析：\n`;
   weaknessText += `整体平均分：${skills.map(s => `${SKILL_LABELS[s]}=${avgScores[s]}`).join('、')}\n`;
-  
+
   if (weaknesses.length > 0) {
     weaknessText += `薄弱技能（建议重点训练）：${weaknesses.join('、')}\n`;
   }
   if (strongPoints.length > 0) {
     weaknessText += `优势技能：${strongPoints.join('、')}\n`;
   }
-  
+
   // 按短板排序生成训练建议
   if (weaknesses.length > 0) {
     weaknessText += `请根据以上薄弱技能，在教案中有针对性地加强训练。如果是多个薄弱技能，可以在不同训练阶段分别侧重。\n`;
@@ -104,8 +104,8 @@ interface AIResult {
   title: string;
   theme: string;
   intensity: string;
-  segments?: PlanSection[];
-  sections?: PlanSection[];
+  segments?: unknown[];
+  sections?: unknown[];
   notes: string;
   trainingProgression?: string;
 }
@@ -135,6 +135,9 @@ interface AIActivity {
   equipment?: string[];
   drillDiagram?: string;
   relatedTo?: string;
+  // 兼容 SectionActivity 的字段
+  activity?: string;
+  points?: string[];
   [key: string]: unknown;
 }
 
@@ -626,18 +629,18 @@ function fixJsonString(jsonStr: string): string {
 }
 
 // 验证和修正整个教案
-function validateAndFixPlan(plan: any, duration: number): any {
+function validateAndFixPlan(plan: AIResult, duration: number): AIResult {
   const fixed = { ...plan };
-  const sections = fixed.segments || fixed.sections || [];
+  const sections = (fixed.segments || fixed.sections || []) as unknown as AISection[];
 
   // 验证所有节次的活动
-  sections.forEach((section: any, sectionIndex: number) => {
+  sections.forEach((section: AISection, sectionIndex: number) => {
     const activities = section.activities || [];
 
     // ===== 全局强制规则 =====
 
     // 规则1：慢跑时间强制≤3分钟（适用于所有节次）
-    activities.forEach((a: any) => {
+    activities.forEach((a: AIActivity) => {
       if (a.name && (a.name.includes('慢跑') || a.name.includes('跑步'))) {
         if (a.duration > 3) {
           console.warn(
@@ -699,7 +702,7 @@ function validateAndFixPlan(plan: any, duration: number): any {
 }
 
 // 生成完整的trainingProgression说明（前后关联）
-function generateTrainingProgression(sections: any[]): string {
+function generateTrainingProgression(sections: AISection[]): string {
   // 分析各节内容，找出重点训练技能
   const warmupActivities = sections[0]?.activities || [];
   const technicalActivities =
@@ -743,9 +746,9 @@ function generateTrainingProgression(sections: any[]): string {
   // 找出热身中的相关动作
   const warmupSkillActions = warmupActivities
     .filter(
-      (a: any) => a.name.includes('运球') || a.name.includes('传球') || a.name.includes('球性')
+      (a: AIActivity) => a.name.includes('运球') || a.name.includes('传球') || a.name.includes('球性')
     )
-    .map((a: any) => a.name)
+    .map((a: AIActivity) => a.name)
     .slice(0, 2);
 
   // 生成递进式说明
@@ -762,7 +765,7 @@ function generateTrainingProgression(sections: any[]): string {
   if (technicalActivities.length > 0) {
     const techActions = technicalActivities
       .slice(0, 2)
-      .map((a: any) => a.name)
+      .map((a: AIActivity) => a.name)
       .join('、');
     progression += `\n2. 正式训练：进行${techActions}（标准技术动作），掌握正确的技术规范和动作要领；`;
   } else {
@@ -838,7 +841,11 @@ const u10LevelGuide: Record<string, string> = {
 };
 
 // 生成Prompt
-function generatePrompt(params: AIPlanParams, cases: LessonPlan[], playerAnalysis?: string): string {
+function generatePrompt(
+  params: AIPlanParams,
+  cases: LessonPlan[],
+  playerAnalysis?: string
+): string {
   const ageGroupInfo: Record<string, string> = {
     U6: '4-6岁幼儿班，注意力短暂，以游戏为主培养球性和兴趣。每个动作不超过3分钟，多重复少讲解。热身用模仿秀（木头人、动物爬行），运球只做原地高低运球和拉球，投篮只做无球脚步模仿。对抗用投篮小游戏、接力赛代替。教练多鼓励、多击掌。',
     U8: '7-8岁小学低年级，可进行基础技术训练。运球：行进间运球、基础体前变向、运双球。传球：双手胸前传球、击地传球。投篮：三步上篮脚步+持球上篮。体能：绳梯、侧滑步。有少量对抗（2v2），重点培养基本功和比赛兴趣。',
@@ -1315,15 +1322,18 @@ export async function POST(request: NextRequest) {
           intensity: validatedResult.intensity as 'low' | 'medium' | 'high',
           // 兼容 segments（新三段式）和 sections（旧格式）
           sections: (validatedResult.segments || validatedResult.sections || []).map(
-            (seg: any) => ({
-              ...seg,
-              // 移除 coachGuide 字段（不再展示）
-              activities: seg.activities?.map((act: any) => {
-                const { coachGuide, ...rest } = act;
-                return rest;
-              }),
-            })
-          ),
+            (seg: unknown) => {
+              const s = seg as Record<string, unknown>;
+              return {
+                ...s,
+                // 移除 coachGuide 字段（不再展示）
+                activities: (s.activities as unknown[] | undefined)?.map((act: unknown) => {
+                  const { coachGuide, ...rest } = act as Record<string, unknown>;
+                  return rest;
+                }),
+              };
+            }
+          ) as unknown as PlanSection[],
           notes: validatedResult.notes,
           trainingProgression: validatedResult.trainingProgression,
         };
@@ -1377,15 +1387,18 @@ export async function POST(request: NextRequest) {
           intensity: validatedResult.intensity as 'low' | 'medium' | 'high',
           // 兼容 segments（新三段式）和 sections（旧格式）
           sections: (validatedResult.segments || validatedResult.sections || []).map(
-            (seg: any) => ({
-              ...seg,
-              // 移除 coachGuide 字段（不再展示）
-              activities: seg.activities?.map((act: any) => {
-                const { coachGuide, ...rest } = act;
-                return rest;
-              }),
-            })
-          ),
+            (seg: unknown) => {
+              const s = seg as Record<string, unknown>;
+              return {
+                ...s,
+                // 移除 coachGuide 字段（不再展示）
+                activities: (s.activities as unknown[] | undefined)?.map((act: unknown) => {
+                  const { coachGuide, ...rest } = act as Record<string, unknown>;
+                  return rest;
+                }),
+              };
+            }
+          ) as unknown as PlanSection[],
           notes: validatedResult.notes,
           trainingProgression: validatedResult.trainingProgression,
         };

@@ -161,16 +161,18 @@ export default function DashboardPage() {
         });
         if (todayPlans.length > 0) {
           setSchedules(
-            todayPlans.slice(0, 5).map((p: { id: string; title?: string; group?: string; theme?: string }) => ({
-              id: p.id,
-              title: p.title || '训练课',
-              group: p.group || '',
-              startTime: '',
-              endTime: '',
-              location: '',
-              maxPlayers: 0,
-              currentCount: 0,
-            }))
+            todayPlans
+              .slice(0, 5)
+              .map((p: { id: string; title?: string; group?: string; theme?: string }) => ({
+                id: p.id,
+                title: p.title || '训练课',
+                group: p.group || '',
+                startTime: '',
+                endTime: '',
+                location: '',
+                maxPlayers: 0,
+                currentCount: 0,
+              }))
           );
         }
       }
@@ -232,21 +234,22 @@ export default function DashboardPage() {
       const weekPresentCount = weekRecords.filter(
         (r: { attendance: string }) => r.attendance === 'present' || r.attendance === 'late'
       ).length;
-      const realAvgAttendance = weekRecords.length > 0
-        ? Math.round((weekPresentCount / weekRecords.length) * 100)
-        : 0;
+      const realAvgAttendance =
+        weekRecords.length > 0 ? Math.round((weekPresentCount / weekRecords.length) * 100) : 0;
 
       // 真实平均表现分：本周有评分的记录
       const weekScoredRecords = weekRecords.filter(
         (r: { performance?: number }) => r.performance && r.performance > 0
       );
-      const realAvgPerformance = weekScoredRecords.length > 0
-        ? (weekScoredRecords.reduce(
-            (sum: number, r: { performance?: number }) => sum + (r.performance || 0),
-            0
-          ) / weekScoredRecords.length
-        ).toFixed(1)
-        : '--';
+      const realAvgPerformance =
+        weekScoredRecords.length > 0
+          ? (
+              weekScoredRecords.reduce(
+                (sum: number, r: { performance?: number }) => sum + (r.performance || 0),
+                0
+              ) / weekScoredRecords.length
+            ).toFixed(1)
+          : '--';
 
       // 本周独立教案数（按 planId 去重）
       const weekPlanIds = new Set(weekRecords.map((r: { planId?: string }) => r.planId));
