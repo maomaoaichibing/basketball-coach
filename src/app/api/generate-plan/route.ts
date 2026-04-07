@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { TrainingPlanOutput, PlanSection } from '@/lib/plan-generator';
 import { retrieveSimilarCases, allPlans, LessonPlan } from '@/lib/cases';
 import { verifyAuth } from '@/lib/auth-middleware';
+import prisma from '@/lib/db';
 
 // AI生成参数
 interface AIPlanParams {
@@ -18,8 +19,84 @@ interface AIPlanParams {
   playerCount?: number;
   skillLevel?: 'beginner' | 'intermediate' | 'advanced';
   previousTraining?: string[];
+  // 学员ID列表（用于智能短板分析）
+  playerIds?: string[];
   // 调试参数：设为 true 时返回检索到的 RAG 案例
   debug?: boolean;
+}
+
+// 技能维度中文映射
+const SKILL_LABELS: Record<string, string> = {
+  dribbling: '运球',
+  passing: '传球',
+  shooting: '投篮',
+  defending: '防守',
+  physical: '体能',
+  tactical: '战术',
+};
+
+// 分析学员技能短板，返回需要重点训练的技能
+async function analyzePlayerWeaknesses(playerIds: string[]): Promise<{
+  weaknessText: string;
+  avgScores: Record<string, number>;
+  playerCount: number;
+}> {
+  const players = await prisma.player.findMany({
+    where: { id: { in: playerIds } },
+    select: {
+      name: true,
+      dribbling: true,
+      passing: true,
+      shooting: true,
+      defending: true,
+      physical: true,
+      tactical: true,
+    },
+  });
+
+  if (players.length === 0) {
+    return { weaknessText: '', avgScores: {}, playerCount: 0 };
+  }
+
+  const skills = ['dribbling', 'passing', 'shooting', 'defending', 'physical', 'tactical'];
+  const avgScores: Record<string, number> = {};
+
+  for (const skill of skills) {
+    const sum = players.reduce((acc, p) => acc + (p[skill as keyof typeof p] as number || 5), 0);
+    avgScores[skill] = Math.round((sum / players.length) * 10) / 10;
+  }
+
+  // 找出短板（低于平均值或低于6分的技能）
+  const allAvg = Object.values(avgScores).reduce((a, b) => a + b, 0) / skills.length;
+  const weaknesses: string[] = [];
+  const strongPoints: string[] = [];
+
+  for (const [skill, avg] of Object.entries(avgScores)) {
+    const label = SKILL_LABELS[skill] || skill;
+    if (avg < 6 || avg < allAvg - 0.5) {
+      weaknesses.push(`${label}(${avg}分)`);
+    } else if (avg >= allAvg + 0.5) {
+      strongPoints.push(`${label}(${avg}分)`);
+    }
+  }
+
+  // 构建分析文本
+  let weaknessText = `共${players.length}名学员的技能评估分析：\n`;
+  weaknessText += `整体平均分：${skills.map(s => `${SKILL_LABELS[s]}=${avgScores[s]}`).join('、')}\n`;
+  
+  if (weaknesses.length > 0) {
+    weaknessText += `薄弱技能（建议重点训练）：${weaknesses.join('、')}\n`;
+  }
+  if (strongPoints.length > 0) {
+    weaknessText += `优势技能：${strongPoints.join('、')}\n`;
+  }
+  
+  // 按短板排序生成训练建议
+  if (weaknesses.length > 0) {
+    weaknessText += `请根据以上薄弱技能，在教案中有针对性地加强训练。如果是多个薄弱技能，可以在不同训练阶段分别侧重。\n`;
+  }
+
+  return { weaknessText, avgScores, playerCount: players.length };
 }
 
 // AI返回结果接口
@@ -761,7 +838,7 @@ const u10LevelGuide: Record<string, string> = {
 };
 
 // 生成Prompt
-function generatePrompt(params: AIPlanParams, cases: LessonPlan[]): string {
+function generatePrompt(params: AIPlanParams, cases: LessonPlan[], playerAnalysis?: string): string {
   const ageGroupInfo: Record<string, string> = {
     U6: '4-6岁幼儿班，注意力短暂，以游戏为主培养球性和兴趣。每个动作不超过3分钟，多重复少讲解。热身用模仿秀（木头人、动物爬行），运球只做原地高低运球和拉球，投篮只做无球脚步模仿。对抗用投篮小游戏、接力赛代替。教练多鼓励、多击掌。',
     U8: '7-8岁小学低年级，可进行基础技术训练。运球：行进间运球、基础体前变向、运双球。传球：双手胸前传球、击地传球。投篮：三步上篮脚步+持球上篮。体能：绳梯、侧滑步。有少量对抗（2v2），重点培养基本功和比赛兴趣。',
@@ -810,6 +887,7 @@ function generatePrompt(params: AIPlanParams, cases: LessonPlan[]): string {
 - 训练场地：${params.location}
 - 天气：${params.weather || '未指定'}
 - 学员人数：${params.playerCount || '8-12'}人${levelDesc}
+${playerAnalysis ? `\n## 参训学员技能分析（重要 - 根据此分析调整训练重点）\n${playerAnalysis}` : ''}
 
 ## 训练节次结构
 ${segmentDesc}
@@ -1155,7 +1233,33 @@ export async function POST(request: NextRequest) {
     });
     console.log('====================');
 
-    const prompt = generatePrompt(params, similarCases);
+    // 智能短板分析：如果有选中学员，分析其技能数据
+    let playerAnalysisText: string | undefined;
+    if (params.playerIds && params.playerIds.length > 0) {
+      const analysis = await analyzePlayerWeaknesses(params.playerIds);
+      if (analysis.playerCount > 0) {
+        playerAnalysisText = analysis.weaknessText;
+        console.log('=== 学员技能分析 ===');
+        console.log(playerAnalysisText);
+        console.log('====================');
+
+        // 如果教练没指定 focusSkills，自动从短板中提取
+        if (!params.focusSkills || params.focusSkills.length === 0) {
+          const weaknessSkills = Object.entries(analysis.avgScores)
+            .filter(([, score]) => score < 6)
+            .sort(([, a], [, b]) => a - b)
+            .slice(0, 3)
+            .map(([skill]) => SKILL_LABELS[skill])
+            .filter(Boolean);
+          if (weaknessSkills.length > 0) {
+            params.focusSkills = weaknessSkills;
+            console.log('自动提取短板作为重点训练技能:', weaknessSkills);
+          }
+        }
+      }
+    }
+
+    const prompt = generatePrompt(params, similarCases, playerAnalysisText);
 
     // 优先使用 Kimi
     if (KIMI_API_KEY) {

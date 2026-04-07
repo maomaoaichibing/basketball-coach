@@ -239,12 +239,6 @@ export default function NewPlanPage() {
 
   // 生成教案
   async function handleGenerate() {
-    // AI模式下验证人数
-    if (useAI && !aiConfig.playerCount) {
-      alert('请填写学员人数，AI将据此调整训练分组和强度');
-      return;
-    }
-
     setGenerating(true);
 
     try {
@@ -260,11 +254,17 @@ export default function NewPlanPage() {
           theme: form.themes.length > 0 ? form.themes.join('+') : undefined,
           focusSkills,
           additionalNotes: aiConfig.additionalNotes || undefined,
-          playerCount: aiConfig.playerCount ? parseInt(aiConfig.playerCount) : undefined,
+          playerCount: selectedPlayerIds.length > 0
+            ? selectedPlayerIds.length
+            : aiConfig.playerCount
+              ? parseInt(aiConfig.playerCount)
+              : undefined,
           skillLevel: aiConfig.skillLevel,
           previousTraining: aiConfig.previousTraining
             ? aiConfig.previousTraining.split(/[,，]/).map(s => s.trim())
             : undefined,
+          // 传递选中学员ID，后端自动分析技能短板
+          playerIds: selectedPlayerIds.length > 0 ? selectedPlayerIds : undefined,
         };
 
         // 调用服务端API生成教案
