@@ -18,9 +18,11 @@ interface Payment {
   id: string;
   orderId: string;
   amount: number;
-  method: string;
+  paymentMethod: string;
   status: string;
-  transactionId?: string;
+  transactionNo?: string;
+  operatorName?: string;
+  notes?: string;
   paidAt?: string;
   createdAt: string;
 }
@@ -817,6 +819,35 @@ export default function OrdersPage() {
                   </span>
                 </div>
               </div>
+
+              {/* 历史支付记录 */}
+              {selectedOrder.payments && selectedOrder.payments.length > 0 && (
+                <div className="border-t pt-4">
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">支付记录</h3>
+                  <div className="space-y-2">
+                    {selectedOrder.payments.map((p) => (
+                      <div key={p.id} className="flex items-center justify-between text-sm bg-gray-50 px-3 py-2 rounded">
+                        <div className="flex items-center gap-2">
+                          <span className={`inline-block w-2 h-2 rounded-full ${p.status === 'completed' ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                          <span className="text-gray-600">
+                            {p.paymentMethod === 'cash' ? '现金' :
+                             p.paymentMethod === 'wechat' ? '微信' :
+                             p.paymentMethod === 'alipay' ? '支付宝' :
+                             p.paymentMethod === 'bank' ? '银行转账' : '其他'}
+                          </span>
+                          {p.operatorName && <span className="text-gray-400">({p.operatorName})</span>}
+                        </div>
+                        <div className="text-right">
+                          <span className="font-medium text-green-600">¥{p.amount.toFixed(2)}</span>
+                          <div className="text-xs text-gray-400">
+                            {p.paidAt ? new Date(p.paidAt).toLocaleDateString() : new Date(p.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">支付金额</label>

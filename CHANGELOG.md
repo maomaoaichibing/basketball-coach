@@ -6,6 +6,25 @@
 
 ---
 
+## [5.6.1] - 2026-04-07
+
+### 新增
+- **支付 API 实现**：`/api/payments` 从空桩升级为完整 CRUD
+  - GET：分页查询支付记录（支持按订单ID和状态筛选）
+  - POST：创建支付记录 + 自动更新订单状态（pending → partially_paid → paid）
+  - 课程订单自动关联课时：支付成功后自动创建/更新课程购买记录
+- **订单收款弹窗增强**：展示历史支付记录（支付方式、金额、操作人、日期）
+
+### 优化
+- 清理无用依赖：移除 `zustand`（未使用）和 `tencentcloud-sdk-nodejs-common`（语音识别已自行实现签名）
+- 修正 Payment 接口字段名与后端一致（method→paymentMethod, transactionId→transactionNo）
+
+### 体验
+- Dashboard 个性化问候：头部展示教练头像、名字、基于时间的问候语、今日课程数
+- MobileNav 真实未读数：从 `Math.random()` 改为调用 `/api/notifications` 获取真实未读通知数
+
+---
+
 ## [5.6.0] - 2026-04-07
 
 ### 新增

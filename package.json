@@ -1,6 +1,6 @@
 {
   "name": "basketball-coach",
-  "version": "5.6.0",
+  "version": "5.6.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -26,10 +26,8 @@
     "react-dom": "^18",
     "tailwind-merge": "^2.2.0",
     "tencentcloud-sdk-nodejs": "^4.1.206",
-    "tencentcloud-sdk-nodejs-common": "^4.1.122",
     "uuid": "^9.0.1",
-    "xlsx": "^0.18.5",
-    "zustand": "^4.5.0"
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
