@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     await prisma.coach.update({
       where: { id: decoded.id },
-      data: { password: hashedPassword },
+      data: { password: hashedPassword, mustChangePassword: false },
     });
 
     return NextResponse.json({ success: true, message: '密码修改成功' });

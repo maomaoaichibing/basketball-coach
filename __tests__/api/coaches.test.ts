@@ -130,7 +130,7 @@ describe('POST /api/coaches', () => {
     expect(result.data.message).toContain('该邮箱已被使用');
   });
 
-  it('should create coach with default password 123456', async () => {
+  it('should create coach with random password when none provided', async () => {
     mockPrisma.coach.findUnique.mockResolvedValue(null);
     mockPrisma.coach.findFirst.mockResolvedValue(null);
     mockPrisma.coach.create.mockResolvedValue(createMockCoach({ name: '新教练' }));
@@ -141,7 +141,10 @@ describe('POST /api/coaches', () => {
 
     expect(response.status).toBe(201);
     expect(result.data.success).toBe(true);
-    expect(bcrypt.hash).toHaveBeenCalledWith('123456', 10); // default password
+    // 不设密码时生成随机8位密码，不再硬编码 123456
+    expect(bcrypt.hash).toHaveBeenCalled();
+    const hashedArg = (bcrypt.hash as jest.Mock).mock.calls.find((call: unknown[]) => typeof call[0] === 'string' && call[0].length === 8);
+    expect(hashedArg).toBeTruthy(); // 随机8位密码
   });
 
   it('should create coach with provided password', async () => {

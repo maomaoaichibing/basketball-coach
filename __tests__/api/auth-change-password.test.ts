@@ -131,7 +131,7 @@ describe('POST /api/auth/change-password', () => {
     expect(mockPrisma.coach.update).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: 'coach-1' },
-        data: { password: 'new-hashed-pwd' },
+        data: { password: 'new-hashed-pwd', mustChangePassword: false },
       })
     );
   });

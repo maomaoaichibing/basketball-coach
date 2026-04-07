@@ -1,8 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { verifyAuth } from '@/lib/auth-middleware';
 import { runAllAutoChecks } from '@/server/services/notificationService';
 
 // GET /api/notifications/check - 全量自动检查（课时不足 + 课程到期）
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const auth = await verifyAuth(request, { roles: ['admin'] });
+  if (!auth.success) return auth.response;
   try {
     const result = await runAllAutoChecks();
 

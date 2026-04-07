@@ -79,9 +79,10 @@ export async function POST(request: NextRequest) {
     }
 
     // 加密密码（如果有提供）
-    const hashedPassword = password
-      ? await bcrypt.hash(password, 10)
-      : await bcrypt.hash('123456', 10); // 默认密码，首次登录需修改
+    // 不设密码时生成随机8位密码，并标记必须修改
+    const tempPassword = password || Math.random().toString(36).slice(2, 10);
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+    const mustChangePassword = !password; // 未提供密码时强制修改
 
     const coach = await prisma.coach.create({
       data: {
@@ -89,11 +90,12 @@ export async function POST(request: NextRequest) {
         phone,
         email: email || null,
         password: hashedPassword,
+        role: role || 'coach',
+        mustChangePassword,
         campusId: campusId || null,
         specialties: JSON.stringify(specialties || []),
         hireDate: hireDate ? new Date(hireDate) : null,
         notes: notes || null,
-        role: role || 'coach',
         status: 'active',
       },
       include: {
@@ -106,6 +108,7 @@ export async function POST(request: NextRequest) {
         success: true,
         message: '教练创建成功',
         data: sanitizeCoach(coach as unknown as Record<string, unknown>),
+        ...(mustChangePassword ? { tempPassword } : {}),
       },
       { status: 201 }
     );

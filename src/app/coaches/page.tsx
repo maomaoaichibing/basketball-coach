@@ -603,7 +603,7 @@ export default function CoachesPage() {
                   name="password"
                   value={formData.password}
                   onChange={handleFormChange}
-                  placeholder="留空则默认 123456"
+                  placeholder="不填则自动生成随机密码"
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>

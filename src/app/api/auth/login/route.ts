@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     // 返回用户信息和 token
     return NextResponse.json({
       success: true,
-      message: '登录成功',
+      message: coach.mustChangePassword ? '首次登录，请修改密码' : '登录成功',
       data: {
         token,
         user: {
@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
           phone: coach.phone,
           campusId: coach.campusId,
           status: coach.status,
+          mustChangePassword: coach.mustChangePassword || false,
         },
       },
     });
