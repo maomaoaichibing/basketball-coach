@@ -434,66 +434,70 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                 </div>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                onClick={toggleFavorite}
-                className={`flex items-center gap-2 px-3 py-2 border rounded-lg transition-colors text-sm sm:text-base ${
-                  plan.isFavorite
-                    ? 'border-yellow-400 bg-yellow-50 text-yellow-700'
-                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                }`}
-                title={plan.isFavorite ? '取消收藏' : '收藏'}
-              >
-                <Star className={`w-4 h-4 ${plan.isFavorite ? 'fill-yellow-400' : ''}`} />
-                <span className="hidden sm:inline">{plan.isFavorite ? '已收藏' : '收藏'}</span>
-              </button>
-              <button
-                onClick={toggleTemplate}
-                className={`flex items-center gap-2 px-3 py-2 border rounded-lg transition-colors text-sm sm:text-base ${
-                  plan.isTemplate
-                    ? 'border-purple-400 bg-purple-50 text-purple-700'
-                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                }`}
-                title={plan.isTemplate ? '取消模板' : '存为模板'}
-              >
-                <LayoutTemplate className="w-4 h-4" />
-                <span className="hidden sm:inline">{plan.isTemplate ? '模板' : '存为模板'}</span>
-              </button>
-              <button
-                onClick={handleCopyPlan}
-                disabled={copying}
-                className="flex items-center gap-2 px-3 sm:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 text-sm sm:text-base"
-              >
-                {copying ? (
-                  <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Copy className="w-4 h-4" />
-                )}
-                <span className="hidden sm:inline">复制</span>
-              </button>
-              <Link
-                href={`/plans/${plan.id}/edit`}
-                className="flex items-center gap-2 px-3 sm:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm sm:text-base"
-              >
-                <Edit className="w-4 h-4" />
-                <span className="hidden sm:inline">编辑</span>
-              </Link>
-              <button className="flex items-center gap-2 px-3 sm:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm sm:text-base">
-                <Download className="w-4 h-4" />
-                <span className="hidden sm:inline">导出</span>
-              </button>
-              <button className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm sm:text-base">
-                <Play className="w-4 h-4" />
-                <span>开始训练</span>
-              </button>
-              <button
-                onClick={handleSaveAsCase}
-                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm sm:text-base"
-                title="将教案中的训练活动保存到案例库"
-              >
-                <Save className="w-4 h-4" />
-                <span className="hidden sm:inline">保存为案例</span>
-              </button>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              {/* 次要操作：图标按钮 */}
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={toggleFavorite}
+                  className={`p-2 rounded-lg transition-colors ${
+                    plan.isFavorite
+                      ? 'text-yellow-500 hover:bg-yellow-50'
+                      : 'text-gray-400 hover:bg-gray-100 hover:text-yellow-500'
+                  }`}
+                  title={plan.isFavorite ? '取消收藏' : '收藏'}
+                >
+                  <Star className={`w-5 h-5 ${plan.isFavorite ? 'fill-yellow-400' : ''}`} />
+                </button>
+                <button
+                  onClick={toggleTemplate}
+                  className={`p-2 rounded-lg transition-colors ${
+                    plan.isTemplate
+                      ? 'text-purple-500 hover:bg-purple-50'
+                      : 'text-gray-400 hover:bg-gray-100 hover:text-purple-500'
+                  }`}
+                  title={plan.isTemplate ? '取消模板' : '存为模板'}
+                >
+                  <LayoutTemplate className="w-5 h-5" />
+                </button>
+                <div className="w-px h-5 bg-gray-200 mx-1" />
+                <button
+                  onClick={handleCopyPlan}
+                  disabled={copying}
+                  className="p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 rounded-lg disabled:opacity-50"
+                  title="复制"
+                >
+                  {copying ? (
+                    <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Copy className="w-5 h-5" />
+                  )}
+                </button>
+                <Link
+                  href={`/plans/${plan.id}/edit`}
+                  className="p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 rounded-lg"
+                  title="编辑"
+                >
+                  <Edit className="w-5 h-5" />
+                </Link>
+                <button className="p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 rounded-lg" title="导出">
+                  <Download className="w-5 h-5" />
+                </button>
+              </div>
+              {/* 主要操作：文字按钮 */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleSaveAsCase}
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                  title="将教案中的训练活动保存到案例库"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>保存为案例</span>
+                </button>
+                <button className="flex items-center gap-1.5 px-4 py-2 text-sm bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors">
+                  <Play className="w-4 h-4" />
+                  <span>开始训练</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
