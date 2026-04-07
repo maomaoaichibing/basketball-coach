@@ -175,8 +175,8 @@ export default function GoalsPage() {
   }
 
   // 按状态分组
-  const activeGoals = goals.filter(g => g.status === 'active');
-  const achievedGoals = goals.filter(g => g.status === 'achieved');
+  const activeGoals = goals.filter((g) => g.status === 'active');
+  const achievedGoals = goals.filter((g) => g.status === 'achieved');
 
   const getProgress = (goal: Goal) => {
     return Math.min(100, Math.round((goal.currentScore / goal.targetScore) * 100));
@@ -237,12 +237,12 @@ export default function GoalsPage() {
                 </label>
                 <select
                   value={selectedPlayerId}
-                  onChange={e => setSelectedPlayerId(e.target.value)}
+                  onChange={(e) => setSelectedPlayerId(e.target.value)}
                   disabled={!!editingGoal}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100"
                 >
                   <option value="">请选择学员</option>
-                  {players.map(player => (
+                  {players.map((player) => (
                     <option key={player.id} value={player.id}>
                       {player.name} ({player.group})
                     </option>
@@ -284,7 +284,7 @@ export default function GoalsPage() {
                     min="1"
                     max="10"
                     value={targetScore}
-                    onChange={e => setTargetScore(parseInt(e.target.value))}
+                    onChange={(e) => setTargetScore(parseInt(e.target.value))}
                     className="flex-1 accent-orange-500"
                   />
                   <span className="w-12 text-center font-bold text-xl text-orange-600">
@@ -299,7 +299,7 @@ export default function GoalsPage() {
                 <input
                   type="date"
                   value={targetDate}
-                  onChange={e => setTargetDate(e.target.value)}
+                  onChange={(e) => setTargetDate(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
               </div>
@@ -344,7 +344,7 @@ export default function GoalsPage() {
                 </div>
               ) : (
                 <div className="grid gap-4">
-                  {activeGoals.map(goal => (
+                  {activeGoals.map((goal) => (
                     <div
                       key={goal.id}
                       className="bg-white rounded-xl p-5 shadow-sm border border-gray-100"
@@ -434,7 +434,7 @@ export default function GoalsPage() {
                 </h2>
 
                 <div className="grid gap-3">
-                  {achievedGoals.map(goal => (
+                  {achievedGoals.map((goal) => (
                     <div
                       key={goal.id}
                       className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 opacity-75"

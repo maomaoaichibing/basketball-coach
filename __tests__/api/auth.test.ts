@@ -2,6 +2,15 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import mockPrisma, { createMockCoach, resetPrismaMocks } from '../helpers/mockPrisma';
 import { createMockRequest, parseJsonResponse } from '../helpers/mockRequest';
 
+// Mock JWT_CONFIG to avoid env var check
+jest.mock('@/lib/jwt', () => ({
+  JWT_CONFIG: {
+    secret: 'basketball-coach-dev-secret-2024',
+    expiresIn: '7d',
+    refreshExpiresIn: '7d',
+  },
+}));
+
 // Mock bcryptjs
 jest.mock('bcryptjs', () => ({
   compare: jest.fn(),
@@ -12,9 +21,10 @@ jest.mock('jsonwebtoken', () => ({
   sign: jest.fn(),
 }));
 
-// Mock the database module (override the one in auth/login/route.ts)
-jest.mock('@prisma/client', () => ({
-  PrismaClient: jest.fn().mockImplementation(() => mockPrisma),
+// Mock the database module
+jest.mock('@/lib/db', () => ({
+  __esModule: true,
+  default: mockPrisma,
 }));
 
 // Import after mock setup
@@ -25,7 +35,6 @@ const jwt = require('jsonwebtoken') as jest.Mocked<typeof import('jsonwebtoken')
 describe('POST /api/auth/login', () => {
   beforeEach(() => {
     resetPrismaMocks();
-    process.env.JWT_SECRET = 'test-secret-key';
   });
 
   it('should return 400 when email is missing', async () => {
@@ -139,16 +148,15 @@ describe('POST /api/auth/login', () => {
     expect(result.data.data.user.id).toBe('coach-1');
 
     // Verify JWT was called with correct payload
-      // JWT_SECRET uses fallback value from the code: 'basketball-coach-dev-secret-2024'
-      expect(jwt.sign).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'coach-1',
-          email: 'wang@coach.com',
-          role: 'head_coach',
-        }),
-        'basketball-coach-dev-secret-2024',
-        { expiresIn: '7d' }
-      );
+    expect(jwt.sign).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'coach-1',
+        email: 'wang@coach.com',
+        role: 'head_coach',
+      }),
+      'basketball-coach-dev-secret-2024',
+      { expiresIn: '7d' }
+    );
   });
 
   it('should handle database errors', async () => {

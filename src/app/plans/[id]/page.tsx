@@ -20,6 +20,10 @@ import {
   UserX,
   AlertCircle,
   ClipboardList,
+  Star,
+  Bookmark,
+  LayoutTemplate,
+  Save,
 } from 'lucide-react';
 
 // 教案类型
@@ -62,6 +66,8 @@ type TrainingPlan = {
   focusSkills?: string;
   trainingProgression?: string;
   playerIds?: string;
+  isFavorite?: boolean;
+  isTemplate?: boolean;
 };
 
 // 学员信息
@@ -158,6 +164,104 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
     }
   }
 
+  // 切换收藏
+  async function toggleFavorite() {
+    if (!plan) return;
+    try {
+      const response = await fetchWithAuth(`/api/plans/${plan.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isFavorite: !plan.isFavorite }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        setPlan({ ...plan, isFavorite: !plan.isFavorite });
+      }
+    } catch (error) {
+      console.error('切换收藏失败:', error);
+    }
+  }
+
+  // 切换模板
+  async function toggleTemplate() {
+    if (!plan) return;
+    try {
+      const response = await fetchWithAuth(`/api/plans/${plan.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isTemplate: !plan.isTemplate }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        setPlan({ ...plan, isTemplate: !plan.isTemplate });
+      }
+    } catch (error) {
+      console.error('切换模板失败:', error);
+    }
+  }
+
+  // 保存为案例
+  async function handleSaveAsCase() {
+    if (!plan) return;
+
+    try {
+      // 把教案的 sections 展开成案例
+      const casesToCreate: Array<{
+        title: string;
+        category: string;
+        ageGroup: string;
+        content: string;
+        method?: string;
+        keyPoints?: string;
+        coachGuide?: string;
+        duration: number;
+        equipment: string[];
+        techType?: string;
+        tags: string[];
+      }> = [];
+
+      (plan.sections || []).forEach((section: Section) => {
+        (section.activities || []).forEach((activity) => {
+          const keyPointsStr = activity.keyPoints?.join('；') || '';
+          casesToCreate.push({
+            title: activity.name,
+            category: section.category || 'technical',
+            ageGroup: plan.group || 'U10',
+            content: activity.description,
+            method: activity.sets || activity.repetitions ? `组数: ${activity.sets || '-'} 次/时间: ${activity.repetitions || '-'}` : undefined,
+            keyPoints: keyPointsStr || undefined,
+            coachGuide: activity.coachGuide || undefined,
+            duration: activity.duration || 10,
+            equipment: activity.equipment || [],
+            techType: plan.theme || undefined,
+            tags: [plan.theme || '', section.category].filter(Boolean),
+          });
+        });
+      });
+
+      if (casesToCreate.length === 0) {
+        alert('教案没有可保存的训练活动');
+        return;
+      }
+
+      const response = await fetchWithAuth('/api/cases', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cases: casesToCreate }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        alert(`成功保存 ${result.imported} 个训练活动到案例库！`);
+      } else {
+        alert('保存失败: ' + result.error);
+      }
+    } catch (error) {
+      console.error('保存为案例失败:', error);
+      alert('保存失败');
+    }
+  }
+
   // 出勤状态图标和样式
   const getAttendanceInfo = (attendance: string) => {
     switch (attendance) {
@@ -217,9 +321,9 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
   const totalTime = plan.duration;
   const activityCount = plan.sections?.length || 0;
   const totalPlayers = playerDetails.length;
-  const presentCount = records.filter(r => r.attendance === 'present').length;
-  const lateCount = records.filter(r => r.attendance === 'late').length;
-  const absentCount = records.filter(r => r.attendance === 'absent').length;
+  const presentCount = records.filter((r) => r.attendance === 'present').length;
+  const lateCount = records.filter((r) => r.attendance === 'late').length;
+  const absentCount = records.filter((r) => r.attendance === 'absent').length;
 
   // 获取环节颜色
   const getSectionColor = (category: string) => {
@@ -296,13 +400,15 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                     </span>
                   )}
                   {plan.skillLevel && (
-                    <span className={`px-2 py-0.5 text-xs rounded-full text-white ${
-                      plan.skillLevel === 'advanced'
-                        ? 'bg-indigo-500'
-                        : plan.skillLevel === 'intermediate'
-                          ? 'bg-blue-500'
-                          : 'bg-cyan-500'
-                    }`}>
+                    <span
+                      className={`px-2 py-0.5 text-xs rounded-full text-white ${
+                        plan.skillLevel === 'advanced'
+                          ? 'bg-indigo-500'
+                          : plan.skillLevel === 'intermediate'
+                            ? 'bg-blue-500'
+                            : 'bg-cyan-500'
+                      }`}
+                    >
                       {plan.skillLevel === 'advanced'
                         ? '精英'
                         : plan.skillLevel === 'intermediate'
@@ -310,13 +416,15 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                           : '基础'}
                     </span>
                   )}
-                  <span className={`px-2 py-0.5 text-xs rounded-full text-white ${
-                    plan.intensity === 'high'
-                      ? 'bg-red-600'
-                      : plan.intensity === 'medium'
-                        ? 'bg-yellow-600'
-                        : 'bg-green-600'
-                  }`}>
+                  <span
+                    className={`px-2 py-0.5 text-xs rounded-full text-white ${
+                      plan.intensity === 'high'
+                        ? 'bg-red-600'
+                        : plan.intensity === 'medium'
+                          ? 'bg-yellow-600'
+                          : 'bg-green-600'
+                    }`}
+                  >
                     {plan.intensity === 'high'
                       ? '高强度'
                       : plan.intensity === 'medium'
@@ -327,6 +435,30 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={toggleFavorite}
+                className={`flex items-center gap-2 px-3 py-2 border rounded-lg transition-colors text-sm sm:text-base ${
+                  plan.isFavorite
+                    ? 'border-yellow-400 bg-yellow-50 text-yellow-700'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+                title={plan.isFavorite ? '取消收藏' : '收藏'}
+              >
+                <Star className={`w-4 h-4 ${plan.isFavorite ? 'fill-yellow-400' : ''}`} />
+                <span className="hidden sm:inline">{plan.isFavorite ? '已收藏' : '收藏'}</span>
+              </button>
+              <button
+                onClick={toggleTemplate}
+                className={`flex items-center gap-2 px-3 py-2 border rounded-lg transition-colors text-sm sm:text-base ${
+                  plan.isTemplate
+                    ? 'border-purple-400 bg-purple-50 text-purple-700'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+                title={plan.isTemplate ? '取消模板' : '存为模板'}
+              >
+                <LayoutTemplate className="w-4 h-4" />
+                <span className="hidden sm:inline">{plan.isTemplate ? '模板' : '存为模板'}</span>
+              </button>
               <button
                 onClick={handleCopyPlan}
                 disabled={copying}
@@ -353,6 +485,14 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
               <button className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm sm:text-base">
                 <Play className="w-4 h-4" />
                 <span>开始训练</span>
+              </button>
+              <button
+                onClick={handleSaveAsCase}
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm sm:text-base"
+                title="将教案中的训练活动保存到案例库"
+              >
+                <Save className="w-4 h-4" />
+                <span className="hidden sm:inline">保存为案例</span>
               </button>
             </div>
           </div>
@@ -438,7 +578,7 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
             <div className="divide-y divide-gray-50">
               {playerDetails.map((player, idx) => {
                 // 查找对应的训练记录
-                const record = records.find(r => r.playerId === player.id);
+                const record = records.find((r) => r.playerId === player.id);
                 const attendanceInfo = record ? getAttendanceInfo(record.attendance) : null;
                 const AttendanceIcon = attendanceInfo?.icon || UserCheck;
 

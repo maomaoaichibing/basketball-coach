@@ -205,7 +205,7 @@ export default function ParentLeavePage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {leaves.map(leave => {
+            {leaves.map((leave) => {
               const config = statusConfig[leave.status] || statusConfig.pending;
               const StatusIcon = config.icon;
 
@@ -291,7 +291,7 @@ export default function ParentLeavePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">请假类型</label>
                 <select
                   value={createForm.leaveType}
-                  onChange={e => setCreateForm({ ...createForm, leaveType: e.target.value })}
+                  onChange={(e) => setCreateForm({ ...createForm, leaveType: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 >
                   <option value="absence">请假</option>
@@ -335,7 +335,7 @@ export default function ParentLeavePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">请假原因</label>
                 <textarea
                   value={createForm.reason}
-                  onChange={e => setCreateForm({ ...createForm, reason: e.target.value })}
+                  onChange={(e) => setCreateForm({ ...createForm, reason: e.target.value })}
                   placeholder="请输入请假原因..."
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"

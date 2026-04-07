@@ -282,7 +282,7 @@ export default function SettingsPage() {
                   <input
                     type="text"
                     value={editName}
-                    onChange={e => setEditName(e.target.value)}
+                    onChange={(e) => setEditName(e.target.value)}
                     className="w-full px-2 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="姓名"
                   />
@@ -324,7 +324,7 @@ export default function SettingsPage() {
                   <input
                     type="tel"
                     value={editPhone}
-                    onChange={e => setEditPhone(e.target.value)}
+                    onChange={(e) => setEditPhone(e.target.value)}
                     className="w-full px-2 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 mt-0.5"
                     placeholder="可选"
                   />
@@ -477,7 +477,7 @@ export default function SettingsPage() {
                     <input
                       type={showOldPwd ? 'text' : 'password'}
                       value={oldPassword}
-                      onChange={e => setOldPassword(e.target.value)}
+                      onChange={(e) => setOldPassword(e.target.value)}
                       placeholder="请输入旧密码"
                       required
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 pr-10"
@@ -498,7 +498,7 @@ export default function SettingsPage() {
                     <input
                       type={showNewPwd ? 'text' : 'password'}
                       value={newPassword}
-                      onChange={e => setNewPassword(e.target.value)}
+                      onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="至少6个字符"
                       required
                       minLength={6}
@@ -521,7 +521,7 @@ export default function SettingsPage() {
                   <input
                     type="password"
                     value={confirmPassword}
-                    onChange={e => setConfirmPassword(e.target.value)}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="再次输入新密码"
                     required
                     minLength={6}

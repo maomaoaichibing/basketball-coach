@@ -386,7 +386,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {schedules.map(schedule => (
+                {schedules.map((schedule) => (
                   <div
                     key={schedule.id}
                     className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg"
@@ -426,7 +426,7 @@ export default function DashboardPage() {
               <span className="text-xs text-gray-400">{alerts.length} 条</span>
             </div>
             <div className="p-4 space-y-2">
-              {alerts.map(alert => {
+              {alerts.map((alert) => {
                 const Icon = severityIcons[alert.severity];
                 return (
                   <div
@@ -472,7 +472,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {feedbacks.map(fb => (
+                {feedbacks.map((fb) => (
                   <div key={fb.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                     <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
                       <Users className="w-4 h-4 text-blue-600" />

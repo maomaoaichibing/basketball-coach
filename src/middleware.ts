@@ -27,7 +27,7 @@ export function middleware(request: NextRequest) {
 
   // 检查是否为公开路由
   const isPublic = PUBLIC_PATHS.some(
-    path => pathname === path || (path !== '/' && pathname.startsWith(path + '/'))
+    (path) => pathname === path || (path !== '/' && pathname.startsWith(path + '/'))
   );
 
   if (isPublic) {

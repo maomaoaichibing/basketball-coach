@@ -130,7 +130,7 @@ export default function CoursesPage() {
       return;
     }
     try {
-      const course = courses.find(c => c.id === enrollForm.courseId);
+      const course = courses.find((c) => c.id === enrollForm.courseId);
       const res = await fetchWithAuth('/api/enrollments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -185,10 +185,10 @@ export default function CoursesPage() {
   }
 
   function toggleGroup(group: string) {
-    setCourseForm(prev => ({
+    setCourseForm((prev) => ({
       ...prev,
       groups: prev.groups.includes(group)
-        ? prev.groups.filter(g => g !== group)
+        ? prev.groups.filter((g) => g !== group)
         : [...prev.groups, group],
     }));
   }
@@ -273,7 +273,7 @@ export default function CoursesPage() {
         {/* 课程包列表 */}
         {activeTab === 'courses' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {courses.map(course => (
+            {courses.map((course) => (
               <div
                 key={course.id}
                 className="bg-white rounded-xl p-5 shadow-sm border border-gray-100"
@@ -323,7 +323,7 @@ export default function CoursesPage() {
                     <div className="flex justify-between">
                       <span className="text-gray-500">适用</span>
                       <div className="flex gap-1">
-                        {course.groups.map(g => (
+                        {course.groups.map((g) => (
                           <span
                             key={g}
                             className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded-full"
@@ -364,7 +364,7 @@ export default function CoursesPage() {
                 </tr>
               </thead>
               <tbody>
-                {enrollments.map(enrollment => (
+                {enrollments.map((enrollment) => (
                   <tr key={enrollment.id} className="border-b border-gray-50 hover:bg-gray-50">
                     <td className="p-4">
                       <div className="flex items-center gap-2">
@@ -439,7 +439,7 @@ export default function CoursesPage() {
                 <input
                   type="text"
                   value={courseForm.name}
-                  onChange={e => setCourseForm(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) => setCourseForm((prev) => ({ ...prev, name: e.target.value }))}
                   placeholder="如：48课时半年卡"
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
@@ -449,8 +449,8 @@ export default function CoursesPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">类型</label>
                   <select
                     value={courseForm.type}
-                    onChange={e =>
-                      setCourseForm(prev => ({
+                    onChange={(e) =>
+                      setCourseForm((prev) => ({
                         ...prev,
                         type: e.target.value,
                       }))
@@ -467,8 +467,8 @@ export default function CoursesPage() {
                   <input
                     type="number"
                     value={courseForm.totalHours}
-                    onChange={e =>
-                      setCourseForm(prev => ({
+                    onChange={(e) =>
+                      setCourseForm((prev) => ({
                         ...prev,
                         totalHours: Number(e.target.value),
                       }))
@@ -483,8 +483,8 @@ export default function CoursesPage() {
                   <input
                     type="number"
                     value={courseForm.price}
-                    onChange={e =>
-                      setCourseForm(prev => ({
+                    onChange={(e) =>
+                      setCourseForm((prev) => ({
                         ...prev,
                         price: Number(e.target.value),
                       }))
@@ -497,8 +497,8 @@ export default function CoursesPage() {
                   <input
                     type="number"
                     value={courseForm.validDays}
-                    onChange={e =>
-                      setCourseForm(prev => ({
+                    onChange={(e) =>
+                      setCourseForm((prev) => ({
                         ...prev,
                         validDays: Number(e.target.value),
                       }))
@@ -510,7 +510,7 @@ export default function CoursesPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">适用分组</label>
                 <div className="flex flex-wrap gap-2">
-                  {['U6', 'U8', 'U10', 'U12', 'U14'].map(group => (
+                  {['U6', 'U8', 'U10', 'U12', 'U14'].map((group) => (
                     <button
                       key={group}
                       onClick={() => toggleGroup(group)}
@@ -530,8 +530,8 @@ export default function CoursesPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">描述</label>
                 <textarea
                   value={courseForm.description}
-                  onChange={e =>
-                    setCourseForm(prev => ({
+                  onChange={(e) =>
+                    setCourseForm((prev) => ({
                       ...prev,
                       description: e.target.value,
                     }))
@@ -585,8 +585,8 @@ export default function CoursesPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">选择学员</label>
                 <select
                   value={enrollForm.playerId}
-                  onChange={e =>
-                    setEnrollForm(prev => ({
+                  onChange={(e) =>
+                    setEnrollForm((prev) => ({
                       ...prev,
                       playerId: e.target.value,
                     }))
@@ -594,7 +594,7 @@ export default function CoursesPage() {
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500"
                 >
                   <option value="">请选择学员</option>
-                  {players.map(player => (
+                  {players.map((player) => (
                     <option key={player.id} value={player.id}>
                       {player.name} ({player.group})
                     </option>
@@ -605,9 +605,9 @@ export default function CoursesPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">选择课程包</label>
                 <select
                   value={enrollForm.courseId}
-                  onChange={e => {
-                    const course = courses.find(c => c.id === e.target.value);
-                    setEnrollForm(prev => ({
+                  onChange={(e) => {
+                    const course = courses.find((c) => c.id === e.target.value);
+                    setEnrollForm((prev) => ({
                       ...prev,
                       courseId: e.target.value,
                       totalHours: course?.totalHours || 0,
@@ -617,8 +617,8 @@ export default function CoursesPage() {
                 >
                   <option value="">请选择课程包</option>
                   {courses
-                    .filter(c => c.status === 'active')
-                    .map(course => (
+                    .filter((c) => c.status === 'active')
+                    .map((course) => (
                       <option key={course.id} value={course.id}>
                         {course.name} - {course.totalHours}课时 ¥{course.price}
                       </option>
@@ -629,11 +629,11 @@ export default function CoursesPage() {
                 <div className="p-4 bg-orange-50 rounded-lg">
                   <div className="text-sm text-orange-800">
                     <div className="font-medium mb-1">课程信息</div>
-                    {courses.find(c => c.id === enrollForm.courseId) && (
+                    {courses.find((c) => c.id === enrollForm.courseId) && (
                       <>
                         <div>
                           有效期：
-                          {courses.find(c => c.id === enrollForm.courseId)?.validDays} 天
+                          {courses.find((c) => c.id === enrollForm.courseId)?.validDays} 天
                         </div>
                         <div>从购买之日起开始计算</div>
                       </>

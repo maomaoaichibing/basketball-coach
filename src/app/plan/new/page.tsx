@@ -102,11 +102,11 @@ export default function NewPlanPage() {
 
   // 根据年龄段过滤学员
   const filteredPlayers = allPlayers.filter(
-    p => p.group === form.group && p.name.includes(playerSearch)
+    (p) => p.group === form.group && p.name.includes(playerSearch)
   );
 
   // 已选学员对象
-  const selectedPlayers = allPlayers.filter(p => selectedPlayerIds.includes(p.id));
+  const selectedPlayers = allPlayers.filter((p) => selectedPlayerIds.includes(p.id));
 
   // 点击外部关闭下拉
   useEffect(() => {
@@ -121,8 +121,8 @@ export default function NewPlanPage() {
 
   // 切换学员选中
   function togglePlayer(playerId: string) {
-    setSelectedPlayerIds(prev =>
-      prev.includes(playerId) ? prev.filter(id => id !== playerId) : [...prev, playerId]
+    setSelectedPlayerIds((prev) =>
+      prev.includes(playerId) ? prev.filter((id) => id !== playerId) : [...prev, playerId]
     );
   }
 
@@ -146,27 +146,27 @@ export default function NewPlanPage() {
       .replace(/[和跟与及]/g, ' ')
       .replace(/今天上课|今天来|到了|参加|上课/g, '')
       .split(/\s+/)
-      .map(s => s.trim())
-      .filter(s => s.length >= 1 && s.length <= 5); // 名字长度1-5
+      .map((s) => s.trim())
+      .filter((s) => s.length >= 1 && s.length <= 5); // 名字长度1-5
 
     if (nameParts.length === 0) return;
 
     // 在当前年龄段的学员中匹配
-    const groupPlayers = allPlayers.filter(p => p.group === form.group);
+    const groupPlayers = allPlayers.filter((p) => p.group === form.group);
     const matched: Player[] = [];
     const unmatched: string[] = [];
 
     for (const name of nameParts) {
-      const found = groupPlayers.find(p => p.name === name);
+      const found = groupPlayers.find((p) => p.name === name);
       if (found) {
-        if (!matched.some(m => m.id === found.id)) {
+        if (!matched.some((m) => m.id === found.id)) {
           matched.push(found);
         }
       } else {
         // 模糊匹配
-        const fuzzy = groupPlayers.find(p => p.name.includes(name) || name.includes(p.name));
+        const fuzzy = groupPlayers.find((p) => p.name.includes(name) || name.includes(p.name));
         if (fuzzy) {
-          if (!matched.some(m => m.id === fuzzy.id)) {
+          if (!matched.some((m) => m.id === fuzzy.id)) {
             matched.push(fuzzy);
           }
         } else {
@@ -181,9 +181,9 @@ export default function NewPlanPage() {
 
     // 自动选中的学员
     if (matched.length > 0) {
-      setSelectedPlayerIds(prev => {
+      setSelectedPlayerIds((prev) => {
         const newIds = new Set(prev);
-        matched.forEach(p => newIds.add(p.id));
+        matched.forEach((p) => newIds.add(p.id));
         return Array.from(newIds);
       });
     }
@@ -192,7 +192,7 @@ export default function NewPlanPage() {
   // 当学员人数变化时，同步到AI配置
   useEffect(() => {
     if (selectedPlayerIds.length > 0) {
-      setAiConfig(prev => ({ ...prev, playerCount: String(selectedPlayerIds.length) }));
+      setAiConfig((prev) => ({ ...prev, playerCount: String(selectedPlayerIds.length) }));
     }
   }, [selectedPlayerIds]);
 
@@ -265,7 +265,7 @@ export default function NewPlanPage() {
           skillLevel: aiConfig.skillLevel,
           intensity: aiConfig.intensity,
           previousTraining: aiConfig.previousTraining
-            ? aiConfig.previousTraining.split(/[,，]/).map(s => s.trim())
+            ? aiConfig.previousTraining.split(/[,，]/).map((s) => s.trim())
             : undefined,
           // 传递选中学员ID（仅开关开启且有学员时）
           playerIds:
@@ -287,7 +287,7 @@ export default function NewPlanPage() {
         result = data.plan;
       } else {
         // 规则引擎生成
-        await new Promise(resolve => setTimeout(resolve, 800));
+        await new Promise((resolve) => setTimeout(resolve, 800));
         result = generateTrainingPlan({
           group: form.group,
           duration: form.duration,
@@ -349,8 +349,8 @@ export default function NewPlanPage() {
 
   // 技能选择切换
   function toggleSkill(skill: string) {
-    setFocusSkills(prev =>
-      prev.includes(skill) ? prev.filter(s => s !== skill) : [...prev, skill]
+    setFocusSkills((prev) =>
+      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
     );
   }
 
@@ -542,7 +542,7 @@ export default function NewPlanPage() {
                         <input
                           type="text"
                           value={playerSearch}
-                          onChange={e => {
+                          onChange={(e) => {
                             setPlayerSearch(e.target.value);
                             setShowPlayerDropdown(true);
                           }}
@@ -571,7 +571,7 @@ export default function NewPlanPage() {
                               未找到匹配的学员
                             </div>
                           ) : (
-                            filteredPlayers.map(p => (
+                            filteredPlayers.map((p) => (
                               <button
                                 key={p.id}
                                 onClick={() => {
@@ -622,7 +622,7 @@ export default function NewPlanPage() {
                       <div className="text-blue-700 mb-1">语音识别结果：</div>
                       {voiceMatchResult.matched.length > 0 && (
                         <div className="text-green-700">
-                          ✓ 已匹配：{voiceMatchResult.matched.map(p => p.name).join('、')}
+                          ✓ 已匹配：{voiceMatchResult.matched.map((p) => p.name).join('、')}
                         </div>
                       )}
                       {voiceMatchResult.unmatched.length > 0 && (
@@ -643,7 +643,7 @@ export default function NewPlanPage() {
                   {/* 已选学员列表 */}
                   {selectedPlayers.length > 0 ? (
                     <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-lg">
-                      {selectedPlayers.map(p => (
+                      {selectedPlayers.map((p) => (
                         <span
                           key={p.id}
                           className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-sm"
@@ -671,7 +671,7 @@ export default function NewPlanPage() {
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">年龄段</label>
                   <div className="grid grid-cols-1 gap-2">
-                    {groups.map(g => (
+                    {groups.map((g) => (
                       <button
                         key={g.id}
                         onClick={() => setForm({ ...form, group: g.id })}
@@ -694,7 +694,7 @@ export default function NewPlanPage() {
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">训练时长</label>
                   <div className="flex gap-2">
-                    {durations.map(d => (
+                    {durations.map((d) => (
                       <button
                         key={d}
                         onClick={() => setForm({ ...form, duration: d })}
@@ -715,16 +715,31 @@ export default function NewPlanPage() {
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">训练强度</label>
                   <div className="flex gap-2">
-                    {([
-                      { value: 'low', label: '低强度', color: 'bg-green-500', hover: 'hover:bg-green-600' },
-                      { value: 'medium', label: '中强度', color: 'bg-yellow-500', hover: 'hover:bg-yellow-600' },
-                      { value: 'high', label: '高强度', color: 'bg-red-500', hover: 'hover:bg-red-600' },
-                    ] as const).map(opt => (
+                    {(
+                      [
+                        {
+                          value: 'low',
+                          label: '低强度',
+                          color: 'bg-green-500',
+                          hover: 'hover:bg-green-600',
+                        },
+                        {
+                          value: 'medium',
+                          label: '中强度',
+                          color: 'bg-yellow-500',
+                          hover: 'hover:bg-yellow-600',
+                        },
+                        {
+                          value: 'high',
+                          label: '高强度',
+                          color: 'bg-red-500',
+                          hover: 'hover:bg-red-600',
+                        },
+                      ] as const
+                    ).map((opt) => (
                       <button
                         key={opt.value}
-                        onClick={() =>
-                          setAiConfig({ ...aiConfig, intensity: opt.value })
-                        }
+                        onClick={() => setAiConfig({ ...aiConfig, intensity: opt.value })}
                         className={`flex-1 p-2 rounded-lg text-center transition-all text-sm font-medium ${
                           aiConfig.intensity === opt.value
                             ? `${opt.color} text-white`
@@ -741,7 +756,7 @@ export default function NewPlanPage() {
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">训练场地</label>
                   <div className="flex gap-2">
-                    {locations.map(l => (
+                    {locations.map((l) => (
                       <button
                         key={l}
                         onClick={() => setForm({ ...form, location: l })}
@@ -765,13 +780,13 @@ export default function NewPlanPage() {
                   </label>
                   <select
                     value={form.weather}
-                    onChange={e => setForm({ ...form, weather: e.target.value })}
+                    onChange={(e) => setForm({ ...form, weather: e.target.value })}
                     className="w-full p-2 border border-gray-300 rounded-lg"
                   >
                     <option value="">请选择</option>
                     {weathers
-                      .filter(w => w)
-                      .map(w => (
+                      .filter((w) => w)
+                      .map((w) => (
                         <option key={w} value={w}>
                           {w}
                         </option>
@@ -786,15 +801,15 @@ export default function NewPlanPage() {
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {themes
-                      .filter(t => t)
-                      .map(t => (
+                      .filter((t) => t)
+                      .map((t) => (
                         <button
                           key={t}
                           onClick={() =>
-                            setForm(f => ({
+                            setForm((f) => ({
                               ...f,
                               themes: f.themes.includes(t)
-                                ? f.themes.filter(x => x !== t)
+                                ? f.themes.filter((x) => x !== t)
                                 : [...f.themes, t],
                             }))
                           }
@@ -816,7 +831,7 @@ export default function NewPlanPage() {
                     重点训练技能
                   </label>
                   <div className="flex flex-wrap gap-2">
-                    {skillOptions.map(s => (
+                    {skillOptions.map((s) => (
                       <button
                         key={s}
                         onClick={() => toggleSkill(s)}
@@ -851,7 +866,7 @@ export default function NewPlanPage() {
                         max="30"
                         placeholder="请填写"
                         value={aiConfig.playerCount}
-                        onChange={e =>
+                        onChange={(e) =>
                           setAiConfig({
                             ...aiConfig,
                             playerCount: e.target.value,
@@ -882,7 +897,7 @@ export default function NewPlanPage() {
                       </label>
                       <select
                         value={aiConfig.skillLevel}
-                        onChange={e =>
+                        onChange={(e) =>
                           setAiConfig({
                             ...aiConfig,
                             skillLevel: e.target.value as 'beginner' | 'intermediate' | 'advanced',
@@ -905,7 +920,7 @@ export default function NewPlanPage() {
                         type="text"
                         placeholder="如：运球, 传球"
                         value={aiConfig.previousTraining}
-                        onChange={e =>
+                        onChange={(e) =>
                           setAiConfig({
                             ...aiConfig,
                             previousTraining: e.target.value,
@@ -921,7 +936,7 @@ export default function NewPlanPage() {
                         <input
                           type="checkbox"
                           checked={aiConfig.enableWeaknessAnalysis}
-                          onChange={e =>
+                          onChange={(e) =>
                             setAiConfig({
                               ...aiConfig,
                               enableWeaknessAnalysis: e.target.checked,
@@ -948,7 +963,7 @@ export default function NewPlanPage() {
                       <textarea
                         placeholder="如：重点培养团队协作，增加趣味性..."
                         value={aiConfig.additionalNotes}
-                        onChange={e =>
+                        onChange={(e) =>
                           setAiConfig({
                             ...aiConfig,
                             additionalNotes: e.target.value,
@@ -1049,7 +1064,7 @@ export default function NewPlanPage() {
                         参训学员（{selectedPlayers.length}人）
                       </div>
                       <div className="flex flex-wrap gap-1.5">
-                        {selectedPlayers.map(p => (
+                        {selectedPlayers.map((p) => (
                           <span
                             key={p.id}
                             className="inline-flex items-center gap-1 px-2 py-0.5 bg-white/20 rounded-full text-sm"
@@ -1064,7 +1079,7 @@ export default function NewPlanPage() {
 
                   {/* 重点技能标签 */}
                   <div className="flex flex-wrap gap-2 mt-3">
-                    {(plan.focusSkills || []).map(skill => (
+                    {(plan.focusSkills || []).map((skill) => (
                       <span key={skill} className="px-2 py-1 bg-white/20 rounded text-sm">
                         {skill}
                       </span>

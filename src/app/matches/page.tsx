@@ -114,7 +114,7 @@ export default function MatchesPage() {
     }
   }
 
-  const filteredMatches = matches.filter(match => {
+  const filteredMatches = matches.filter((match) => {
     if (!searchTerm) return true;
     const term = searchTerm.toLowerCase();
     return (
@@ -127,9 +127,9 @@ export default function MatchesPage() {
 
   const stats = {
     total: matches.length,
-    wins: matches.filter(m => m.result === 'win').length,
-    losses: matches.filter(m => m.result === 'lose').length,
-    draws: matches.filter(m => m.result === 'draw').length,
+    wins: matches.filter((m) => m.result === 'win').length,
+    losses: matches.filter((m) => m.result === 'lose').length,
+    draws: matches.filter((m) => m.result === 'draw').length,
   };
 
   const resultColors: Record<string, string> = {
@@ -237,14 +237,14 @@ export default function MatchesPage() {
                 type="text"
                 placeholder="搜索比赛、对手..."
                 value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
             </div>
             <div className="flex gap-2">
               <select
                 value={selectedGroup}
-                onChange={e => setSelectedGroup(e.target.value)}
+                onChange={(e) => setSelectedGroup(e.target.value)}
                 className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
                 <option value="">全部分组</option>
@@ -256,7 +256,7 @@ export default function MatchesPage() {
               </select>
               <select
                 value={selectedResult}
-                onChange={e => setSelectedResult(e.target.value)}
+                onChange={(e) => setSelectedResult(e.target.value)}
                 className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
                 <option value="">全部结果</option>
@@ -287,7 +287,7 @@ export default function MatchesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredMatches.map(match => (
+            {filteredMatches.map((match) => (
               <Link
                 key={match.id}
                 href={`/matches/${match.id}`}
@@ -370,7 +370,7 @@ export default function MatchesPage() {
                 <input
                   type="text"
                   value={createForm.title}
-                  onChange={e => setCreateForm({ ...createForm, title: e.target.value })}
+                  onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })}
                   placeholder="如: 2024年春季联赛第三轮"
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
@@ -381,7 +381,7 @@ export default function MatchesPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">比赛类型</label>
                   <select
                     value={createForm.matchType}
-                    onChange={e =>
+                    onChange={(e) =>
                       setCreateForm({
                         ...createForm,
                         matchType: e.target.value,
@@ -399,7 +399,7 @@ export default function MatchesPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">分组</label>
                   <select
                     value={createForm.group}
-                    onChange={e => setCreateForm({ ...createForm, group: e.target.value })}
+                    onChange={(e) => setCreateForm({ ...createForm, group: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     <option value="U6">U6</option>
@@ -417,7 +417,7 @@ export default function MatchesPage() {
                   <input
                     type="datetime-local"
                     value={createForm.matchDate}
-                    onChange={e =>
+                    onChange={(e) =>
                       setCreateForm({
                         ...createForm,
                         matchDate: e.target.value,
@@ -431,7 +431,7 @@ export default function MatchesPage() {
                   <input
                     type="text"
                     value={createForm.location}
-                    onChange={e => setCreateForm({ ...createForm, location: e.target.value })}
+                    onChange={(e) => setCreateForm({ ...createForm, location: e.target.value })}
                     placeholder="如: 篮球馆"
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
@@ -443,7 +443,7 @@ export default function MatchesPage() {
                 <input
                   type="text"
                   value={createForm.opponent}
-                  onChange={e => setCreateForm({ ...createForm, opponent: e.target.value })}
+                  onChange={(e) => setCreateForm({ ...createForm, opponent: e.target.value })}
                   placeholder="如: 阳光队"
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
@@ -454,7 +454,7 @@ export default function MatchesPage() {
                 <input
                   type="text"
                   value={createForm.teamName}
-                  onChange={e => setCreateForm({ ...createForm, teamName: e.target.value })}
+                  onChange={(e) => setCreateForm({ ...createForm, teamName: e.target.value })}
                   placeholder="如: 雄鹰队"
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
@@ -465,7 +465,7 @@ export default function MatchesPage() {
                   <input
                     type="checkbox"
                     checked={createForm.isHome}
-                    onChange={e => setCreateForm({ ...createForm, isHome: e.target.checked })}
+                    onChange={(e) => setCreateForm({ ...createForm, isHome: e.target.checked })}
                     className="w-4 h-4 text-orange-500 rounded focus:ring-orange-500"
                   />
                   <span className="text-sm text-gray-700">主场比赛</span>

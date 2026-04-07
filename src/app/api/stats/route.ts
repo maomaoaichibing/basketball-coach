@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
 
     // 计算出勤率
     const totalAttendance = attendanceStats.reduce((sum, s) => sum + s._count, 0);
-    const presentCount = attendanceStats.find(s => s.attendance === 'present')?._count || 0;
+    const presentCount = attendanceStats.find((s) => s.attendance === 'present')?._count || 0;
     const attendanceRate =
       totalAttendance > 0 ? parseFloat(((presentCount / totalAttendance) * 100).toFixed(1)) : 0;
 

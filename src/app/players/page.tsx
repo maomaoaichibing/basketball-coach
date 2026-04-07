@@ -314,8 +314,8 @@ export default function PlayersPage() {
   const stats = useMemo(() => {
     return {
       total: players.length,
-      training: players.filter(p => p.status === 'training').length,
-      trial: players.filter(p => p.status === 'trial').length,
+      training: players.filter((p) => p.status === 'training').length,
+      trial: players.filter((p) => p.status === 'trial').length,
     };
   }, [players]);
 
@@ -389,8 +389,8 @@ export default function PlayersPage() {
               type="text"
               placeholder="搜索学员姓名..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               className="w-full pl-10 pr-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm sm:text-base min-h-12"
             />
           </div>
@@ -399,10 +399,10 @@ export default function PlayersPage() {
           <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
             <select
               value={groupFilter}
-              onChange={e => setGroupFilter(e.target.value)}
+              onChange={(e) => setGroupFilter(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm min-h-10 bg-white whitespace-nowrap"
             >
-              {groups.map(g => (
+              {groups.map((g) => (
                 <option key={g} value={g}>
                   {g === 'all' ? '全部分组' : g}
                 </option>
@@ -411,10 +411,10 @@ export default function PlayersPage() {
 
             <select
               value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value)}
+              onChange={(e) => setStatusFilter(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm min-h-10 bg-white whitespace-nowrap"
             >
-              {statuses.map(s => (
+              {statuses.map((s) => (
                 <option key={s.value} value={s.value}>
                   {s.label}
                 </option>
@@ -437,7 +437,7 @@ export default function PlayersPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {players.map(player => (
+            {players.map((player) => (
               <PlayerCard
                 key={player.id}
                 player={player}
@@ -556,7 +556,7 @@ function PlayerCard({ player, onLongPress, onEdit, onDelete }: PlayerCardProps) 
           href={`/players/${player.id}`}
           className="p-3 sm:p-2 hover:bg-gray-100 rounded-lg text-orange-600 active:bg-gray-200 transition-colors min-h-12 min-w-12 flex items-center justify-center flex-shrink-0"
           title="查看详情"
-          onClick={e => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
         >
           <ChevronRight className="w-5 h-5" />
         </Link>
@@ -588,7 +588,7 @@ function PlayerCard({ player, onLongPress, onEdit, onDelete }: PlayerCardProps) 
         {/* 移动端：编辑和删除按钮 */}
         <div className="flex items-center gap-1">
           <button
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               onEdit(player);
             }}
@@ -598,7 +598,7 @@ function PlayerCard({ player, onLongPress, onEdit, onDelete }: PlayerCardProps) 
             <Edit2 className="w-4 h-4" />
           </button>
           <button
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               onDelete(player.id, player.name);
             }}
@@ -791,7 +791,7 @@ function PageModals({
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="请输入学员姓名"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
@@ -805,7 +805,7 @@ function PageModals({
                 <input
                   type="date"
                   value={formData.birthDate}
-                  onChange={e => setFormData({ ...formData, birthDate: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
               </div>
@@ -816,7 +816,7 @@ function PageModals({
                   <label className="block text-sm font-medium text-gray-700 mb-1">性别</label>
                   <select
                     value={formData.gender}
-                    onChange={e => setFormData({ ...formData, gender: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   >
                     <option value="male">男</option>
@@ -827,7 +827,7 @@ function PageModals({
                   <label className="block text-sm font-medium text-gray-700 mb-1">分组</label>
                   <select
                     value={formData.group}
-                    onChange={e => setFormData({ ...formData, group: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, group: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   >
                     <option value="U6">U6 (4-6岁)</option>
@@ -845,7 +845,7 @@ function PageModals({
                   <label className="block text-sm font-medium text-gray-700 mb-1">状态</label>
                   <select
                     value={formData.status}
-                    onChange={e => setFormData({ ...formData, status: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   >
                     <option value="trial">试听中</option>
@@ -860,7 +860,7 @@ function PageModals({
                   <input
                     type="text"
                     value={formData.school}
-                    onChange={e => setFormData({ ...formData, school: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, school: e.target.value })}
                     placeholder="所在学校"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   />
@@ -876,7 +876,7 @@ function PageModals({
                     <input
                       type="text"
                       value={formData.parentName}
-                      onChange={e => setFormData({ ...formData, parentName: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, parentName: e.target.value })}
                       placeholder="请输入家长姓名"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                     />
@@ -887,7 +887,7 @@ function PageModals({
                       <input
                         type="tel"
                         value={formData.parentPhone}
-                        onChange={e => setFormData({ ...formData, parentPhone: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, parentPhone: e.target.value })}
                         placeholder="手机号码"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                       />
@@ -897,7 +897,7 @@ function PageModals({
                       <input
                         type="text"
                         value={formData.parentWechat}
-                        onChange={e => setFormData({ ...formData, parentWechat: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, parentWechat: e.target.value })}
                         placeholder="微信号"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                       />
@@ -978,12 +978,12 @@ function PageModals({
                         ? 'border-green-500 bg-green-50'
                         : 'border-gray-300 hover:border-green-400'
                     }`}
-                    onDragOver={e => {
+                    onDragOver={(e) => {
                       e.preventDefault();
                       setDragActive(true);
                     }}
                     onDragLeave={() => setDragActive(false)}
-                    onDrop={async e => {
+                    onDrop={async (e) => {
                       e.preventDefault();
                       setDragActive(false);
                       const file = e.dataTransfer.files[0];
@@ -1001,7 +1001,7 @@ function PageModals({
                           type="file"
                           accept=".csv,.txt,.xlsx,.xls"
                           className="hidden"
-                          onChange={e => {
+                          onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) handleFileUpload(file);
                           }}

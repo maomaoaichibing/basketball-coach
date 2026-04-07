@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: coaches.map(c => sanitizeCoach(c as Record<string, unknown>)),
+      data: coaches.map((c) => sanitizeCoach(c as Record<string, unknown>)),
       total: coaches.length,
     });
   } catch (error) {

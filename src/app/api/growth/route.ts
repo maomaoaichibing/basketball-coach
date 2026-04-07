@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 计算趋势（最近两次评估的差异）
-    const growthData = players.map(player => {
+    const growthData = players.map((player) => {
       const sortedAssessments = [...player.assessments].sort(
         (a, b) => new Date(b.assessedAt).getTime() - new Date(a.assessedAt).getTime()
       );
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
       const trend: Record<string, number> = {};
       const skills = ['dribbling', 'passing', 'shooting', 'defending', 'physical', 'tactical'];
 
-      skills.forEach(skill => {
+      skills.forEach((skill) => {
         const latestVal =
           (latest as unknown as { [key: string]: number } | undefined)?.[skill] || 0;
         const previousVal =
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
 
       // 计算训练出勤率
       const totalRecords = player.records.length;
-      const presentCount = player.records.filter(r => r.attendance === 'present').length;
+      const presentCount = player.records.filter((r) => r.attendance === 'present').length;
       const attendanceRate = totalRecords > 0 ? Math.round((presentCount / totalRecords) * 100) : 0;
 
       return {
@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
         presentCount,
         absentCount: totalRecords - presentCount,
         // 历史评估（用于图表）
-        assessmentHistory: sortedAssessments.slice(0, 6).map(a => ({
+        assessmentHistory: sortedAssessments.slice(0, 6).map((a) => ({
           date: a.assessedAt,
           dribbling: a.dribbling,
           passing: a.passing,

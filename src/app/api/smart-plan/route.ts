@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
       tactical: { total: 0, count: 0 },
     };
 
-    players.forEach(player => {
+    players.forEach((player) => {
       const latestAssessment = player.assessments?.[0];
       const skills = latestAssessment
         ? {
@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
       }))
       .sort((a, b) => a.avgScore - b.avgScore);
 
-    const weakestSkills = skillScores.filter(s => s.avgScore < 7).slice(0, 3);
+    const weakestSkills = skillScores.filter((s) => s.avgScore < 7).slice(0, 3);
     const mainWeakness = weakestSkills[0]?.skill || 'physical';
 
     // 3. 获取最近训练记录，避免重复
@@ -184,8 +184,8 @@ export async function POST(request: NextRequest) {
       select: { theme: true, focusSkills: true },
     });
 
-    const recentThemes = recentPlans.map(p => p.theme).filter(Boolean);
-    const recentFocusSkills = recentPlans.flatMap(p => {
+    const recentThemes = recentPlans.map((p) => p.theme).filter(Boolean);
+    const recentFocusSkills = recentPlans.flatMap((p) => {
       try {
         return JSON.parse(p.focusSkills || '[]');
       } catch {
@@ -195,11 +195,11 @@ export async function POST(request: NextRequest) {
 
     // 4. 生成推荐
     const recommendation = skillRecommendations[mainWeakness] || skillRecommendations.physical;
-    const focusSkills = recommendation.skills.filter(s => !recentFocusSkills.includes(s));
+    const focusSkills = recommendation.skills.filter((s) => !recentFocusSkills.includes(s));
     const finalFocusSkills = focusSkills.length > 0 ? focusSkills : recommendation.skills;
 
     // 5. 学员个人建议
-    const playerInsights = players.map(player => {
+    const playerInsights = players.map((player) => {
       const latestAssessment = player.assessments?.[0];
       const skills = latestAssessment
         ? {
@@ -273,14 +273,14 @@ export async function POST(request: NextRequest) {
         skillAnalysis: {
           scores: skillScores,
           weakestSkills,
-          recommendation: `全班${weakestSkills.length > 0 ? weakestSkills.map(s => `${s.label}(${s.avgScore}分)`).join('、') : '各项能力'}需要重点提升`,
+          recommendation: `全班${weakestSkills.length > 0 ? weakestSkills.map((s) => `${s.label}(${s.avgScore}分)`).join('、') : '各项能力'}需要重点提升`,
         },
         // 推荐教案参数（可直接传给 generate-plan）
         planParams,
         // 推荐理由
         reasons: [
-          `班级最弱项：${skillLabels[mainWeakness]}（平均${skillScores.find(s => s.skill === mainWeakness)?.avgScore || 0}分）`,
-          ...weakestSkills.slice(1).map(s => `${s.label}也需要加强（${s.avgScore}分）`),
+          `班级最弱项：${skillLabels[mainWeakness]}（平均${skillScores.find((s) => s.skill === mainWeakness)?.avgScore || 0}分）`,
+          ...weakestSkills.slice(1).map((s) => `${s.label}也需要加强（${s.avgScore}分）`),
           recentThemes.length > 0
             ? `已避开最近训练主题：${recentThemes.slice(0, 3).join('、')}`
             : '',

@@ -223,11 +223,11 @@ export default function AnalyticsPage() {
             <div className="flex items-center gap-3">
               <select
                 value={selectedPlayer}
-                onChange={e => setSelectedPlayer(e.target.value)}
+                onChange={(e) => setSelectedPlayer(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">全部学员</option>
-                {players.map(player => (
+                {players.map((player) => (
                   <option key={player.id} value={player.id}>
                     {player.name} ({player.group})
                   </option>
@@ -300,7 +300,7 @@ export default function AnalyticsPage() {
                     <p className="text-sm text-gray-400 mt-2">选择学员后点击「生成分析」获取推荐</p>
                   </div>
                 ) : (
-                  recommendations.map(rec => (
+                  recommendations.map((rec) => (
                     <div
                       key={rec.id}
                       className="bg-white rounded-xl p-5 shadow-sm border border-gray-100"
@@ -378,7 +378,7 @@ export default function AnalyticsPage() {
                     </p>
                   </div>
                 ) : (
-                  analyses.map(analysis => {
+                  analyses.map((analysis) => {
                     const dimensions = JSON.parse(analysis.dimensions || '{}') || {};
                     const progress = JSON.parse(analysis.progress || '{}') || {};
                     const strengths = JSON.parse(analysis.strengths || '[]') || [];
@@ -484,7 +484,7 @@ export default function AnalyticsPage() {
                     <p className="text-sm text-gray-400 mt-2">系统会根据学员能力自动生成分班建议</p>
                   </div>
                 ) : (
-                  teamRecommendations.map(rec => (
+                  teamRecommendations.map((rec) => (
                     <div
                       key={rec.id}
                       className="bg-white rounded-xl p-5 shadow-sm border border-gray-100"

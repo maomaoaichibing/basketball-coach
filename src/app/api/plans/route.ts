@@ -66,12 +66,12 @@ export async function POST(request: NextRequest) {
         select: { id: true, name: true },
       });
 
-      const playerMap = new Map(players.map(p => [p.id, p.name]));
+      const playerMap = new Map(players.map((p) => [p.id, p.name]));
 
       // 批量创建训练记录
       const recordData = parsedPlayerIds
-        .filter(id => playerMap.has(id))
-        .map(id => ({
+        .filter((id) => playerMap.has(id))
+        .map((id) => ({
           planId: plan.id,
           playerId: id,
           coachId: coachId,
@@ -106,8 +106,21 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const group = searchParams.get('group');
     const limit = parseInt(searchParams.get('limit') || '10');
+    const favorite = searchParams.get('favorite');
+    const template = searchParams.get('template');
+    const search = searchParams.get('search');
 
-    const where = group ? { group } : {};
+    const where: Record<string, unknown> = {};
+
+    if (group) where.group = group;
+    if (favorite === 'true') where.isFavorite = true;
+    if (template === 'true') where.isTemplate = true;
+    if (search) {
+      where.OR = [
+        { title: { contains: search } },
+        { theme: { contains: search } },
+      ];
+    }
 
     const plans = await prisma.trainingPlan.findMany({
       where,

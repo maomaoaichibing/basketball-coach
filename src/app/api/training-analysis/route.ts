@@ -47,13 +47,13 @@ export async function GET(request: NextRequest) {
 
     // 3. 出勤统计
     const totalRecords = records.length;
-    const presentCount = records.filter(r => r.attendance === 'present').length;
-    const absentCount = records.filter(r => r.attendance === 'absent').length;
-    const lateCount = records.filter(r => r.attendance === 'late').length;
+    const presentCount = records.filter((r) => r.attendance === 'present').length;
+    const absentCount = records.filter((r) => r.attendance === 'absent').length;
+    const lateCount = records.filter((r) => r.attendance === 'late').length;
 
     // 4. 表现趋势（最近10次）
     const performanceTrend = records
-      .filter(r => r.performance !== null)
+      .filter((r) => r.performance !== null)
       .slice(0, 10)
       .reverse()
       .map((r, i) => ({

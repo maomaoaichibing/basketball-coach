@@ -161,14 +161,14 @@ export default function ParentCheckInPage() {
             <div className="w-px h-10 bg-gray-200"></div>
             <div>
               <div className="text-2xl font-bold text-green-600">
-                {checkins.filter(c => c.checkInType === 'training').length}
+                {checkins.filter((c) => c.checkInType === 'training').length}
               </div>
               <div className="text-sm text-gray-500">训练</div>
             </div>
             <div className="w-px h-10 bg-gray-200"></div>
             <div>
               <div className="text-2xl font-bold text-blue-600">
-                {checkins.filter(c => c.checkInType === 'homework').length}
+                {checkins.filter((c) => c.checkInType === 'homework').length}
               </div>
               <div className="text-sm text-gray-500">作业</div>
             </div>
@@ -201,7 +201,7 @@ export default function ParentCheckInPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {checkins.map(checkin => (
+            {checkins.map((checkin) => (
               <div
                 key={checkin.id}
                 className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
@@ -290,7 +290,7 @@ export default function ParentCheckInPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">打卡类型</label>
                 <select
                   value={createForm.checkInType}
-                  onChange={e =>
+                  onChange={(e) =>
                     setCreateForm({
                       ...createForm,
                       checkInType: e.target.value,
@@ -311,7 +311,7 @@ export default function ParentCheckInPage() {
                 <input
                   type="number"
                   value={createForm.duration}
-                  onChange={e =>
+                  onChange={(e) =>
                     setCreateForm({
                       ...createForm,
                       duration: parseInt(e.target.value) || 0,
@@ -325,7 +325,7 @@ export default function ParentCheckInPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">打卡描述</label>
                 <textarea
                   value={createForm.content}
-                  onChange={e => setCreateForm({ ...createForm, content: e.target.value })}
+                  onChange={(e) => setCreateForm({ ...createForm, content: e.target.value })}
                   placeholder="记录训练内容..."
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -337,7 +337,7 @@ export default function ParentCheckInPage() {
                 <input
                   type="text"
                   value={createForm.location}
-                  onChange={e => setCreateForm({ ...createForm, location: e.target.value })}
+                  onChange={(e) => setCreateForm({ ...createForm, location: e.target.value })}
                   placeholder="如: 篮球馆"
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />

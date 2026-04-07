@@ -58,7 +58,7 @@ export function useMediaRecorder(): MediaRecorderReturn {
       mediaRecorderRef.current = mediaRecorder;
 
       // 收集数据块
-      mediaRecorder.ondataavailable = event => {
+      mediaRecorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0) {
           chunksRef.current.push(event.data);
         }
@@ -69,7 +69,7 @@ export function useMediaRecorder(): MediaRecorderReturn {
         const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
         setAudioBlob(blob);
         // 停止所有 tracks
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
       };
 
       // 开始录音
@@ -91,7 +91,7 @@ export function useMediaRecorder(): MediaRecorderReturn {
 
   // 停止录音
   const stopRecording = useCallback(async (): Promise<Blob | null> => {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') {
         resolve(null);
         return;

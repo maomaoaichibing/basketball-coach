@@ -33,7 +33,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         ...course,
         groups: JSON.parse(course.groups as string),
       },
-      enrollments: enrollments.map(e => ({
+      enrollments: enrollments.map((e) => ({
         ...e,
         recordIds: JSON.parse((e.recordIds as string) || '[]'),
       })),

@@ -19,8 +19,7 @@ const versions = [
     version: 'v5.4.1',
     date: '2026-04-07',
     title: '训练强度手动选择',
-    description:
-      'AI 生成配置新增训练强度选择器，教练可在生成前指定低/中/高强度',
+    description: 'AI 生成配置新增训练强度选择器，教练可在生成前指定低/中/高强度',
     features: [
       { type: 'feature', text: '新增训练强度三按钮选择器（低强度绿/中强度黄/高强度红）' },
       { type: 'feature', text: 'AI prompt 加入强度指导，按指定强度调整训练量和休息' },
@@ -35,7 +34,10 @@ const versions = [
       '学员水平和训练强度分为两个独立维度，水平=基础/进阶/精英，强度=低/中/高，分别存储和展示',
     features: [
       { type: 'feature', text: '数据库新增 skillLevel 字段，与 intensity 独立存储' },
-      { type: 'feature', text: '水平标签统一为：基础（青）/ 进阶（蓝）/ 精英（靛），与强度标签颜色区分' },
+      {
+        type: 'feature',
+        text: '水平标签统一为：基础（青）/ 进阶（蓝）/ 精英（靛），与强度标签颜色区分',
+      },
       { type: 'feature', text: '强度标签统一为：低强度（绿）/ 中强度（黄）/ 高强度（红）' },
       { type: 'feature', text: '教案创建预览、列表页、详情页统一展示两个独立标签' },
       { type: 'feature', text: 'AI 生成时 skillLevel 存入数据库，列表和详情页可正确展示' },
@@ -45,8 +47,7 @@ const versions = [
     version: 'v5.3.1',
     date: '2026-04-07',
     title: '薄弱环节分析开关',
-    description:
-      '教案生成页新增开关控制是否根据学员薄弱环节生成教案，前期学员数据不足时可关闭',
+    description: '教案生成页新增开关控制是否根据学员薄弱环节生成教案，前期学员数据不足时可关闭',
     features: [
       { type: 'feature', text: '新增「根据学员薄弱环节生成教案」开关，默认关闭' },
       { type: 'feature', text: '开关关闭时不传学员数据给AI，避免无意义分析' },
@@ -57,8 +58,7 @@ const versions = [
     version: 'v5.3.0',
     date: '2026-04-07',
     title: '智能教案生成 — 学员短板分析',
-    description:
-      'AI生成教案时自动分析参训学员的技能评估数据，识别薄弱技能并针对性调整训练内容',
+    description: 'AI生成教案时自动分析参训学员的技能评估数据，识别薄弱技能并针对性调整训练内容',
     features: [
       { type: 'feature', text: '学员技能短板自动分析：运球/传球/投篮/防守/体能/战术 6维度评分' },
       { type: 'feature', text: '薄弱技能自动识别：低于6分或低于整体平均分的技能重点标注' },
@@ -71,8 +71,7 @@ const versions = [
     version: 'v5.2.0',
     date: '2026-04-07',
     title: '版本管理规范化',
-    description:
-      '建立 CHANGELOG 版本记录体系，规范发版流程',
+    description: '建立 CHANGELOG 版本记录体系，规范发版流程',
     features: [
       { type: 'feature', text: '创建 CHANGELOG.md，补全 v4.0 → v5.2 完整版本历史' },
       { type: 'feature', text: 'package.json 版本号从 1.0.0 更新到 5.2.0' },

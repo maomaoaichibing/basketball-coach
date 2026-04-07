@@ -148,8 +148,8 @@ export default function FeedbackPage() {
   };
 
   const handleSelectPlayer = (playerId: string) => {
-    setSelectedPlayers(prev =>
-      prev.includes(playerId) ? prev.filter(id => id !== playerId) : [...prev, playerId]
+    setSelectedPlayers((prev) =>
+      prev.includes(playerId) ? prev.filter((id) => id !== playerId) : [...prev, playerId]
     );
   };
 
@@ -157,7 +157,7 @@ export default function FeedbackPage() {
     if (selectedPlayers.length === players.length) {
       setSelectedPlayers([]);
     } else {
-      setSelectedPlayers(players.map(p => p.id));
+      setSelectedPlayers(players.map((p) => p.id));
     }
   };
 
@@ -209,7 +209,7 @@ export default function FeedbackPage() {
   };
 
   const getAttendanceInfo = (attendance: string) => {
-    return attendanceOptions.find(a => a.value === attendance) || attendanceOptions[0];
+    return attendanceOptions.find((a) => a.value === attendance) || attendanceOptions[0];
   };
 
   // 按日期分组记录
@@ -291,7 +291,7 @@ export default function FeedbackPage() {
                   选择教案 <span className="text-red-500">*</span>
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {plans.slice(0, 6).map(plan => (
+                  {plans.slice(0, 6).map((plan) => (
                     <button
                       key={plan.id}
                       onClick={() => handleSelectPlan(plan)}
@@ -324,7 +324,7 @@ export default function FeedbackPage() {
                   </button>
                 </div>
                 <div className="grid grid-cols-3 md:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-2 bg-gray-50 rounded-lg">
-                  {players.map(player => (
+                  {players.map((player) => (
                     <button
                       key={player.id}
                       onClick={() => handleSelectPlayer(player.id)}
@@ -349,7 +349,7 @@ export default function FeedbackPage() {
                 <input
                   type="text"
                   value={coachName}
-                  onChange={e => setCoachName(e.target.value)}
+                  onChange={(e) => setCoachName(e.target.value)}
                   placeholder="请输入教练姓名"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
@@ -359,7 +359,7 @@ export default function FeedbackPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">出勤情况</label>
                 <div className="grid grid-cols-3 gap-3">
-                  {attendanceOptions.map(option => {
+                  {attendanceOptions.map((option) => {
                     const Icon = option.icon;
                     return (
                       <button
@@ -387,7 +387,7 @@ export default function FeedbackPage() {
                     { key: 'performance', label: '表现' },
                     { key: 'effort', label: '努力程度' },
                     { key: 'attitude', label: '态度' },
-                  ].map(item => (
+                  ].map((item) => (
                     <div key={item.key}>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-sm text-gray-600">{item.label}</span>
@@ -400,7 +400,7 @@ export default function FeedbackPage() {
                         min="1"
                         max="10"
                         value={formData[item.key as keyof typeof formData] as number}
-                        onChange={e =>
+                        onChange={(e) =>
                           setFormData({
                             ...formData,
                             [item.key]: parseInt(e.target.value),
@@ -419,7 +419,7 @@ export default function FeedbackPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">综合评价</label>
                   <textarea
                     value={formData.feedback}
-                    onChange={e => setFormData({ ...formData, feedback: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, feedback: e.target.value })}
                     placeholder="描述本次训练的整体情况..."
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
@@ -430,7 +430,7 @@ export default function FeedbackPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">亮点</label>
                   <textarea
                     value={formData.highlights}
-                    onChange={e => setFormData({ ...formData, highlights: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, highlights: e.target.value })}
                     placeholder="学员表现好的地方..."
                     rows={2}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
@@ -441,7 +441,7 @@ export default function FeedbackPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">问题</label>
                   <textarea
                     value={formData.issues}
-                    onChange={e => setFormData({ ...formData, issues: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, issues: e.target.value })}
                     placeholder="需要改进的地方..."
                     rows={2}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
@@ -452,7 +452,7 @@ export default function FeedbackPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">课后作业</label>
                   <textarea
                     value={formData.homework}
-                    onChange={e => setFormData({ ...formData, homework: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, homework: e.target.value })}
                     placeholder="布置课后练习内容..."
                     rows={2}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
@@ -498,7 +498,7 @@ export default function FeedbackPage() {
                     })}
                   </h3>
                   <div className="space-y-3">
-                    {dayRecords.map(record => {
+                    {dayRecords.map((record) => {
                       const attendance = getAttendanceInfo(record.attendance);
                       const AttendanceIcon = attendance.icon;
                       return (

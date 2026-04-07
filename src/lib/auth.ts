@@ -80,7 +80,7 @@ function subscribeTokenRefresh(cb: (token: string | null) => void) {
 }
 
 function onTokenRefreshed(token: string | null) {
-  refreshSubscribers.forEach(cb => cb(token));
+  refreshSubscribers.forEach((cb) => cb(token));
   refreshSubscribers = [];
 }
 
@@ -153,8 +153,8 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}): Pro
 
   if (isRefreshing) {
     // 已经在刷新中，排队等待
-    return new Promise<Response>(resolve => {
-      subscribeTokenRefresh(newToken => {
+    return new Promise<Response>((resolve) => {
+      subscribeTokenRefresh((newToken) => {
         if (newToken) {
           // 用新 token 重试原请求
           const retryHeaders: Record<string, string> = {

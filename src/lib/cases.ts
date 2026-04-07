@@ -52,7 +52,7 @@ function loadPlans(): LessonPlan[] {
   console.log(`[RAG] 使用内置教案数据 (${builtIn.length} 条)`);
 
   // 调试：检查第一条 U10 数据的关键词匹配
-  const u10Sample = builtIn.find(p => p.age_group === 'U10');
+  const u10Sample = builtIn.find((p) => p.age_group === 'U10');
   if (u10Sample) {
     console.log(
       `[RAG] U10样本: tech_type="${u10Sample.tech_type}", content前30字="${u10Sample.content?.substring(0, 30)}"`
@@ -83,27 +83,27 @@ export function retrieveSimilarCases(params: {
   // 按年龄组筛选
   if (ageGroup) {
     const before = results.length;
-    results = results.filter(p => p.age_group === ageGroup);
+    results = results.filter((p) => p.age_group === ageGroup);
     console.log(`[RAG] 年龄组筛选: ${ageGroup}, ${before} -> ${results.length}`);
   }
 
   // 按分类筛选
   if (category) {
     const before = results.length;
-    results = results.filter(p => p.category === category);
+    results = results.filter((p) => p.category === category);
     console.log(`[RAG] 分类筛选: ${category}, ${before} -> ${results.length}`);
   }
 
   // 按技术类型筛选
   if (techType) {
     const before = results.length;
-    results = results.filter(p => p.tech_type.toLowerCase().includes(techType.toLowerCase()));
+    results = results.filter((p) => p.tech_type.toLowerCase().includes(techType.toLowerCase()));
     console.log(`[RAG] 技术类型筛选: ${techType}, ${before} -> ${results.length}`);
   }
 
   // 按时长筛选 (误差2分钟)
   if (duration) {
-    results = results.filter(p => Math.abs(p.duration - duration) <= 2);
+    results = results.filter((p) => Math.abs(p.duration - duration) <= 2);
   }
 
   // 按关键词搜索 (content, method, coach_guide)
@@ -112,13 +112,13 @@ export function retrieveSimilarCases(params: {
     const before = results.length;
     const keywords = keyword.toLowerCase().split(/\s+/).filter(Boolean);
     console.log(`[RAG] 关键词列表: ${JSON.stringify(keywords)}`);
-    const filtered = results.filter(p => {
+    const filtered = results.filter((p) => {
       const searchableText = [p.content, p.method, p.tech_type, p.game_name]
         .filter(Boolean)
         .join(' ')
         .toLowerCase();
       // 只要任意一个关键词匹配即可
-      return keywords.some(kw => searchableText.includes(kw));
+      return keywords.some((kw) => searchableText.includes(kw));
     });
     console.log(`[RAG] 关键词筛选: "${keyword}", ${before} -> ${filtered.length}`);
     if (filtered.length > 0) {
@@ -137,7 +137,7 @@ export function retrieveSimilarCases(params: {
  * 获取特定年龄组的随机案例
  */
 export function getRandomCases(ageGroup: string, count: number = 3): LessonPlan[] {
-  const filtered = allPlans.filter(p => p.age_group === ageGroup);
+  const filtered = allPlans.filter((p) => p.age_group === ageGroup);
   const shuffled = [...filtered].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
 }
@@ -150,10 +150,10 @@ export function getCasesByCategory(
   ageGroup?: string,
   limit: number = 5
 ): LessonPlan[] {
-  let results = allPlans.filter(p => p.category === category);
+  let results = allPlans.filter((p) => p.category === category);
 
   if (ageGroup) {
-    results = results.filter(p => p.age_group === ageGroup);
+    results = results.filter((p) => p.age_group === ageGroup);
   }
 
   return results.slice(0, limit);
@@ -166,21 +166,21 @@ export function getStats() {
   return {
     total: allPlans.length,
     byAgeGroup: {
-      U6: allPlans.filter(p => p.age_group === 'U6').length,
-      U8: allPlans.filter(p => p.age_group === 'U8').length,
-      U10: allPlans.filter(p => p.age_group === 'U10').length,
-      U12: allPlans.filter(p => p.age_group === 'U12').length,
-      U14: allPlans.filter(p => p.age_group === 'U14').length,
+      U6: allPlans.filter((p) => p.age_group === 'U6').length,
+      U8: allPlans.filter((p) => p.age_group === 'U8').length,
+      U10: allPlans.filter((p) => p.age_group === 'U10').length,
+      U12: allPlans.filter((p) => p.age_group === 'U12').length,
+      U14: allPlans.filter((p) => p.age_group === 'U14').length,
     },
     byCategory: {
-      warmup: allPlans.filter(p => p.category === 'warmup').length,
-      etiquette: allPlans.filter(p => p.category === 'etiquette').length,
-      technical: allPlans.filter(p => p.category === 'technical').length,
-      physical: allPlans.filter(p => p.category === 'physical').length,
-      tactical: allPlans.filter(p => p.category === 'tactical').length,
-      game: allPlans.filter(p => p.category === 'game').length,
-      cooldown: allPlans.filter(p => p.category === 'cooldown').length,
-      other: allPlans.filter(p => p.category === 'other').length,
+      warmup: allPlans.filter((p) => p.category === 'warmup').length,
+      etiquette: allPlans.filter((p) => p.category === 'etiquette').length,
+      technical: allPlans.filter((p) => p.category === 'technical').length,
+      physical: allPlans.filter((p) => p.category === 'physical').length,
+      tactical: allPlans.filter((p) => p.category === 'tactical').length,
+      game: allPlans.filter((p) => p.category === 'game').length,
+      cooldown: allPlans.filter((p) => p.category === 'cooldown').length,
+      other: allPlans.filter((p) => p.category === 'other').length,
     },
   };
 }

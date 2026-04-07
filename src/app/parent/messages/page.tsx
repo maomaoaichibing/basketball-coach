@@ -98,7 +98,7 @@ export default function ParentMessagesPage() {
     }
   }
 
-  const unreadCount = messages.filter(m => !m.isRead && m.receiverId.includes('guardian')).length;
+  const unreadCount = messages.filter((m) => !m.isRead && m.receiverId.includes('guardian')).length;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -138,7 +138,7 @@ export default function ParentMessagesPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {messages.map(message => {
+            {messages.map((message) => {
               const isOwn = message.senderType === 'guardian';
 
               return (
@@ -189,8 +189,8 @@ export default function ParentMessagesPage() {
             <input
               type="text"
               value={newMessage}
-              onChange={e => setNewMessage(e.target.value)}
-              onKeyPress={e => e.key === 'Enter' && handleSendMessage()}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder="输入消息..."
               className="flex-1 px-4 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500"
             />

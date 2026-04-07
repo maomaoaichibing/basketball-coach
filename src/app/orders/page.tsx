@@ -191,7 +191,7 @@ export default function OrdersPage() {
 
     // 如果选择了课程，自动填充信息
     if (field === 'courseId' && value) {
-      const course = courses.find(c => c.id === value);
+      const course = courses.find((c) => c.id === value);
       if (course) {
         items[index] = {
           ...items[index],
@@ -221,7 +221,7 @@ export default function OrdersPage() {
     try {
       // 设置学员信息
       if (newOrder.playerId) {
-        const player = players.find(p => p.id === newOrder.playerId);
+        const player = players.find((p) => p.id === newOrder.playerId);
         if (player) {
           newOrder.customerName = player.name;
           newOrder.customerPhone = player.parentPhone || '';
@@ -437,12 +437,12 @@ export default function OrdersPage() {
             type="text"
             placeholder="搜索订单号/客户姓名/电话"
             value={filter.search}
-            onChange={e => setFilter({ ...filter, search: e.target.value })}
+            onChange={(e) => setFilter({ ...filter, search: e.target.value })}
             className="px-3 py-2 border rounded-lg flex-1 min-w-[200px]"
           />
           <select
             value={filter.status}
-            onChange={e => setFilter({ ...filter, status: e.target.value })}
+            onChange={(e) => setFilter({ ...filter, status: e.target.value })}
             className="px-3 py-2 border rounded-lg"
           >
             <option value="">全部状态</option>
@@ -453,7 +453,7 @@ export default function OrdersPage() {
           </select>
           <select
             value={filter.type}
-            onChange={e => setFilter({ ...filter, type: e.target.value })}
+            onChange={(e) => setFilter({ ...filter, type: e.target.value })}
             className="px-3 py-2 border rounded-lg"
           >
             <option value="">全部类型</option>
@@ -511,7 +511,7 @@ export default function OrdersPage() {
                   </td>
                 </tr>
               ) : (
-                orders.map(order => (
+                orders.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3">
                       <div className="text-sm font-medium text-gray-900">{order.orderNo}</div>
@@ -592,11 +592,11 @@ export default function OrdersPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">学员</label>
                   <select
                     value={newOrder.playerId}
-                    onChange={e => setNewOrder({ ...newOrder, playerId: e.target.value })}
+                    onChange={(e) => setNewOrder({ ...newOrder, playerId: e.target.value })}
                     className="w-full px-3 py-2 border rounded-lg"
                   >
                     <option value="">请选择学员</option>
-                    {players.map(player => (
+                    {players.map((player) => (
                       <option key={player.id} value={player.id}>
                         {player.name} ({player.parentPhone || '无电话'})
                       </option>
@@ -607,7 +607,7 @@ export default function OrdersPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">订单类型</label>
                   <select
                     value={newOrder.type}
-                    onChange={e => setNewOrder({ ...newOrder, type: e.target.value })}
+                    onChange={(e) => setNewOrder({ ...newOrder, type: e.target.value })}
                     className="w-full px-3 py-2 border rounded-lg"
                   >
                     <option value="course">课程购买</option>
@@ -625,7 +625,7 @@ export default function OrdersPage() {
                   <input
                     type="text"
                     value={newOrder.customerName}
-                    onChange={e => setNewOrder({ ...newOrder, customerName: e.target.value })}
+                    onChange={(e) => setNewOrder({ ...newOrder, customerName: e.target.value })}
                     className="w-full px-3 py-2 border rounded-lg"
                     placeholder="非学员客户请填写"
                   />
@@ -635,7 +635,7 @@ export default function OrdersPage() {
                   <input
                     type="text"
                     value={newOrder.customerPhone}
-                    onChange={e =>
+                    onChange={(e) =>
                       setNewOrder({
                         ...newOrder,
                         customerPhone: e.target.value,
@@ -654,7 +654,7 @@ export default function OrdersPage() {
                   <input
                     type="date"
                     value={newOrder.validFrom}
-                    onChange={e => setNewOrder({ ...newOrder, validFrom: e.target.value })}
+                    onChange={(e) => setNewOrder({ ...newOrder, validFrom: e.target.value })}
                     className="w-full px-3 py-2 border rounded-lg"
                   />
                 </div>
@@ -663,7 +663,7 @@ export default function OrdersPage() {
                   <input
                     type="date"
                     value={newOrder.validUntil}
-                    onChange={e => setNewOrder({ ...newOrder, validUntil: e.target.value })}
+                    onChange={(e) => setNewOrder({ ...newOrder, validUntil: e.target.value })}
                     className="w-full px-3 py-2 border rounded-lg"
                   />
                 </div>
@@ -686,13 +686,13 @@ export default function OrdersPage() {
                     <div key={index} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                       <select
                         value={item.courseId}
-                        onChange={e => handleItemChange(index, 'courseId', e.target.value)}
+                        onChange={(e) => handleItemChange(index, 'courseId', e.target.value)}
                         className="flex-1 px-3 py-2 border rounded-lg"
                       >
                         <option value="">选择课程包</option>
                         {courses
-                          .filter(c => c.type === 'package' || c.type === 'monthly')
-                          .map(course => (
+                          .filter((c) => c.type === 'package' || c.type === 'monthly')
+                          .map((course) => (
                             <option key={course.id} value={course.id}>
                               {course.name} - ¥{course.price} ({course.totalHours}课时)
                             </option>
@@ -701,7 +701,7 @@ export default function OrdersPage() {
                       <input
                         type="number"
                         value={item.quantity}
-                        onChange={e =>
+                        onChange={(e) =>
                           handleItemChange(index, 'quantity', parseInt(e.target.value) || 1)
                         }
                         className="w-20 px-2 py-2 border rounded-lg text-center"
@@ -739,7 +739,7 @@ export default function OrdersPage() {
                 <input
                   type="number"
                   value={newOrder.discountAmount}
-                  onChange={e =>
+                  onChange={(e) =>
                     setNewOrder({
                       ...newOrder,
                       discountAmount: parseFloat(e.target.value) || 0,
@@ -756,7 +756,7 @@ export default function OrdersPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">备注</label>
                 <textarea
                   value={newOrder.notes}
-                  onChange={e => setNewOrder({ ...newOrder, notes: e.target.value })}
+                  onChange={(e) => setNewOrder({ ...newOrder, notes: e.target.value })}
                   className="w-full px-3 py-2 border rounded-lg"
                   rows={2}
                 />
@@ -823,7 +823,7 @@ export default function OrdersPage() {
                 <input
                   type="number"
                   value={payment.amount}
-                  onChange={e =>
+                  onChange={(e) =>
                     setPayment({
                       ...payment,
                       amount: parseFloat(e.target.value) || 0,
@@ -840,7 +840,7 @@ export default function OrdersPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">支付方式</label>
                 <select
                   value={payment.paymentMethod}
-                  onChange={e => setPayment({ ...payment, paymentMethod: e.target.value })}
+                  onChange={(e) => setPayment({ ...payment, paymentMethod: e.target.value })}
                   className="w-full px-3 py-2 border rounded-lg"
                 >
                   <option value="cash">现金</option>
@@ -856,7 +856,7 @@ export default function OrdersPage() {
                 <input
                   type="text"
                   value={payment.transactionNo}
-                  onChange={e => setPayment({ ...payment, transactionNo: e.target.value })}
+                  onChange={(e) => setPayment({ ...payment, transactionNo: e.target.value })}
                   className="w-full px-3 py-2 border rounded-lg"
                   placeholder="微信/支付宝交易号"
                 />
@@ -867,7 +867,7 @@ export default function OrdersPage() {
                 <input
                   type="text"
                   value={payment.operatorName}
-                  onChange={e => setPayment({ ...payment, operatorName: e.target.value })}
+                  onChange={(e) => setPayment({ ...payment, operatorName: e.target.value })}
                   className="w-full px-3 py-2 border rounded-lg"
                   placeholder="收款操作人姓名"
                 />

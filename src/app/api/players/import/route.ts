@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
       }
 
       headers = data[0].map((h: unknown) => String(h || '').trim());
-      rows = data.slice(1).filter(row => row && row.some((cell: unknown) => cell !== ''));
+      rows = data.slice(1).filter((row) => row && row.some((cell: unknown) => cell !== ''));
     } else {
       // 解析 CSV 文件
       const text = await file.text();
@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
       }
 
       // 解析表头
-      headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+      headers = lines[0].split(',').map((h) => h.trim().replace(/"/g, ''));
 
       // 解析数据行
       for (let i = 1; i < lines.length; i++) {
@@ -165,15 +165,17 @@ export async function POST(request: NextRequest) {
         if (!line) continue;
 
         // 处理CSV引号
-        const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+        const values = line.split(',').map((v) => v.trim().replace(/"/g, ''));
         rows.push(values);
       }
     }
 
     // 验证必要字段
     const requiredIndexes: Record<string, number> = {
-      name: headers.findIndex(h => ['姓名', 'name', '姓名*'].includes(h)),
-      birthDate: headers.findIndex(h => ['出生日期', 'birthDate', '生日', '出生日期*'].includes(h)),
+      name: headers.findIndex((h) => ['姓名', 'name', '姓名*'].includes(h)),
+      birthDate: headers.findIndex((h) =>
+        ['出生日期', 'birthDate', '生日', '出生日期*'].includes(h)
+      ),
     };
 
     if (requiredIndexes.name === -1 || requiredIndexes.birthDate === -1) {
@@ -185,20 +187,22 @@ export async function POST(request: NextRequest) {
 
     // 找到可选字段索引
     const fieldIndexes: Record<string, number> = {
-      gender: headers.findIndex(h => ['性别', 'gender'].includes(h)),
-      group: headers.findIndex(h => ['分组', 'group', '组别'].includes(h)),
-      status: headers.findIndex(h => ['状态', 'status'].includes(h)),
-      school: headers.findIndex(h => ['学校', 'school'].includes(h)),
-      parentName: headers.findIndex(h => ['家长姓名', 'parentName', '监护人'].includes(h)),
-      parentPhone: headers.findIndex(h => ['联系电话', 'parentPhone', '电话', '手机'].includes(h)),
-      parentWechat: headers.findIndex(h => ['微信', 'wechat', 'Wechat'].includes(h)),
+      gender: headers.findIndex((h) => ['性别', 'gender'].includes(h)),
+      group: headers.findIndex((h) => ['分组', 'group', '组别'].includes(h)),
+      status: headers.findIndex((h) => ['状态', 'status'].includes(h)),
+      school: headers.findIndex((h) => ['学校', 'school'].includes(h)),
+      parentName: headers.findIndex((h) => ['家长姓名', 'parentName', '监护人'].includes(h)),
+      parentPhone: headers.findIndex((h) =>
+        ['联系电话', 'parentPhone', '电话', '手机'].includes(h)
+      ),
+      parentWechat: headers.findIndex((h) => ['微信', 'wechat', 'Wechat'].includes(h)),
       // 技术能力字段
-      dribbling: headers.findIndex(h => ['运球', 'dribbling'].includes(h)),
-      passing: headers.findIndex(h => ['传球', 'passing'].includes(h)),
-      shooting: headers.findIndex(h => ['投篮', 'shooting'].includes(h)),
-      defending: headers.findIndex(h => ['防守', 'defending'].includes(h)),
-      physical: headers.findIndex(h => ['体能', 'physical'].includes(h)),
-      tactical: headers.findIndex(h => ['战术', 'tactical'].includes(h)),
+      dribbling: headers.findIndex((h) => ['运球', 'dribbling'].includes(h)),
+      passing: headers.findIndex((h) => ['传球', 'passing'].includes(h)),
+      shooting: headers.findIndex((h) => ['投篮', 'shooting'].includes(h)),
+      defending: headers.findIndex((h) => ['防守', 'defending'].includes(h)),
+      physical: headers.findIndex((h) => ['体能', 'physical'].includes(h)),
+      tactical: headers.findIndex((h) => ['战术', 'tactical'].includes(h)),
     };
 
     // 解析数据行
@@ -207,7 +211,7 @@ export async function POST(request: NextRequest) {
 
     for (let i = 0; i < rows.length; i++) {
       const values = rows[i];
-      if (!values || values.every(v => !v)) continue;
+      if (!values || values.every((v) => !v)) continue;
 
       const name = String(values[requiredIndexes.name] || '').trim();
       const birthDateStr = String(values[requiredIndexes.birthDate] || '').trim();
@@ -359,8 +363,8 @@ export async function POST(request: NextRequest) {
       createdNames: created,
       skippedNames: skipped,
       errors: [
-        ...errors.map(e => ({ ...e, type: 'parse' })),
-        ...failed.map(f => ({ ...f, type: 'create' })),
+        ...errors.map((e) => ({ ...e, type: 'parse' })),
+        ...failed.map((f) => ({ ...f, type: 'create' })),
       ],
       message: `成功导入 ${created.length} 名学员${skipped.length > 0 ? `，跳过 ${skipped.length} 名重复学员` : ''}${failed.length > 0 ? `，${failed.length} 名失败` : ''}`,
     });

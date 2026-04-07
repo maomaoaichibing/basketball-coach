@@ -85,7 +85,7 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
   });
 
   useEffect(() => {
-    params.then(p => {
+    params.then((p) => {
       setReportId(p.id);
       fetchReport(p.id);
     });
@@ -408,7 +408,7 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
                     <input
                       type="text"
                       value={s}
-                      onChange={e => {
+                      onChange={(e) => {
                         const newStrengths = [...editForm.strengths];
                         newStrengths[i] = e.target.value;
                         setEditForm({ ...editForm, strengths: newStrengths });
@@ -469,7 +469,7 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
                     <input
                       type="text"
                       value={s}
-                      onChange={e => {
+                      onChange={(e) => {
                         const newImprovements = [...editForm.improvements];
                         newImprovements[i] = e.target.value;
                         setEditForm({
@@ -534,7 +534,7 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
                   <input
                     type="text"
                     value={g}
-                    onChange={e => {
+                    onChange={(e) => {
                       const newGoals = [...editForm.goals];
                       newGoals[i] = e.target.value;
                       setEditForm({ ...editForm, goals: newGoals });
@@ -588,7 +588,7 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
           {isEditing ? (
             <textarea
               value={editForm.summary}
-              onChange={e => setEditForm({ ...editForm, summary: e.target.value })}
+              onChange={(e) => setEditForm({ ...editForm, summary: e.target.value })}
               placeholder="请输入教练评语..."
               rows={4}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"

@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     // 解析JSON字段
-    const parsedReports = reports.map(report => ({
+    const parsedReports = reports.map((report) => ({
       ...report,
       abilities: JSON.parse(report.abilities || '{}'),
       trainingStats: JSON.parse(report.trainingStats || '{}'),

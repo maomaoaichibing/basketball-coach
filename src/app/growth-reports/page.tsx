@@ -135,7 +135,7 @@ export default function GrowthReportsPage() {
       return;
     }
 
-    const selected = players.find(p => p.id === createForm.playerId);
+    const selected = players.find((p) => p.id === createForm.playerId);
     if (selected) {
       setCreateForm({ ...createForm, playerName: selected.name });
     }
@@ -204,7 +204,7 @@ export default function GrowthReportsPage() {
     }
   }
 
-  const filteredReports = reports.filter(report => {
+  const filteredReports = reports.filter((report) => {
     if (!searchTerm) return true;
     const term = searchTerm.toLowerCase();
     return (
@@ -267,17 +267,17 @@ export default function GrowthReportsPage() {
                 type="text"
                 placeholder="搜索报告标题或学员姓名..."
                 value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
             </div>
             <select
               value={selectedPlayer}
-              onChange={e => setSelectedPlayer(e.target.value)}
+              onChange={(e) => setSelectedPlayer(e.target.value)}
               className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <option value="">全部学员</option>
-              {players.map(player => (
+              {players.map((player) => (
                 <option key={player.id} value={player.id}>
                   {player.name}
                 </option>
@@ -305,7 +305,7 @@ export default function GrowthReportsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredReports.map(report => (
+            {filteredReports.map((report) => (
               <Link
                 key={report.id}
                 href={`/growth-reports/${report.id}`}
@@ -396,8 +396,8 @@ export default function GrowthReportsPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">选择学员 *</label>
                   <select
                     value={createForm.playerId}
-                    onChange={e => {
-                      const selected = players.find(p => p.id === e.target.value);
+                    onChange={(e) => {
+                      const selected = players.find((p) => p.id === e.target.value);
                       setCreateForm({
                         ...createForm,
                         playerId: e.target.value,
@@ -407,7 +407,7 @@ export default function GrowthReportsPage() {
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     <option value="">选择学员</option>
-                    {players.map(player => (
+                    {players.map((player) => (
                       <option key={player.id} value={player.id}>
                         {player.name} ({player.group})
                       </option>
@@ -423,7 +423,7 @@ export default function GrowthReportsPage() {
                     <input
                       type="date"
                       value={createForm.periodStart}
-                      onChange={e =>
+                      onChange={(e) =>
                         setCreateForm({
                           ...createForm,
                           periodStart: e.target.value,
@@ -439,7 +439,7 @@ export default function GrowthReportsPage() {
                     <input
                       type="date"
                       value={createForm.periodEnd}
-                      onChange={e =>
+                      onChange={(e) =>
                         setCreateForm({
                           ...createForm,
                           periodEnd: e.target.value,
@@ -454,7 +454,7 @@ export default function GrowthReportsPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">报告类型</label>
                   <select
                     value={createForm.reportType}
-                    onChange={e =>
+                    onChange={(e) =>
                       setCreateForm({
                         ...createForm,
                         reportType: e.target.value,

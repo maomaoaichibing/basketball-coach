@@ -276,7 +276,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
               <input
                 type="text"
                 value={form.title}
-                onChange={e => setForm({ ...form, title: e.target.value })}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 placeholder="输入教案标题"
               />
@@ -287,7 +287,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
               <input
                 type="date"
                 value={form.date}
-                onChange={e => setForm({ ...form, date: e.target.value })}
+                onChange={(e) => setForm({ ...form, date: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               />
             </div>
@@ -296,7 +296,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
               <label className="block text-sm font-medium text-gray-700 mb-1">训练时长</label>
               <select
                 value={form.duration}
-                onChange={e => setForm({ ...form, duration: parseInt(e.target.value) })}
+                onChange={(e) => setForm({ ...form, duration: parseInt(e.target.value) })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               >
                 <option value={60}>60分钟</option>
@@ -309,7 +309,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
               <label className="block text-sm font-medium text-gray-700 mb-1">训练场地</label>
               <select
                 value={form.location}
-                onChange={e => setForm({ ...form, location: e.target.value })}
+                onChange={(e) => setForm({ ...form, location: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               >
                 <option value="室内">室内</option>
@@ -321,7 +321,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
               <label className="block text-sm font-medium text-gray-700 mb-1">天气</label>
               <select
                 value={form.weather}
-                onChange={e => setForm({ ...form, weather: e.target.value })}
+                onChange={(e) => setForm({ ...form, weather: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               >
                 <option value="">不限定</option>
@@ -336,7 +336,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
               <label className="block text-sm font-medium text-gray-700 mb-1">训练主题</label>
               <select
                 value={form.theme}
-                onChange={e => setForm({ ...form, theme: e.target.value })}
+                onChange={(e) => setForm({ ...form, theme: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               >
                 <option value="">选择主题</option>
@@ -355,7 +355,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
               <label className="block text-sm font-medium text-gray-700 mb-1">备注</label>
               <textarea
                 value={form.notes}
-                onChange={e => setForm({ ...form, notes: e.target.value })}
+                onChange={(e) => setForm({ ...form, notes: e.target.value })}
                 rows={2}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 placeholder="训练注意事项..."
@@ -392,10 +392,10 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
                     <GripVertical className="w-5 h-5 text-gray-300" />
                     <select
                       value={section.category}
-                      onChange={e => updateSection(sectionIndex, 'category', e.target.value)}
+                      onChange={(e) => updateSection(sectionIndex, 'category', e.target.value)}
                       className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm"
                     >
-                      {categories.map(cat => (
+                      {categories.map((cat) => (
                         <option key={cat.id} value={cat.id}>
                           {cat.label}
                         </option>
@@ -404,7 +404,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
                     <input
                       type="text"
                       value={section.name}
-                      onChange={e => updateSection(sectionIndex, 'name', e.target.value)}
+                      onChange={(e) => updateSection(sectionIndex, 'name', e.target.value)}
                       placeholder="环节名称"
                       className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg"
                     />
@@ -413,7 +413,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
                       <input
                         type="number"
                         value={section.duration}
-                        onChange={e =>
+                        onChange={(e) =>
                           updateSection(sectionIndex, 'duration', parseInt(e.target.value) || 0)
                         }
                         className="w-16 px-2 py-1.5 border border-gray-300 rounded-lg text-center"
@@ -440,7 +440,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
                           <input
                             type="text"
                             value={activity.name}
-                            onChange={e =>
+                            onChange={(e) =>
                               updateActivity(sectionIndex, activityIndex, 'name', e.target.value)
                             }
                             placeholder="活动名称"
@@ -449,7 +449,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
                           <input
                             type="number"
                             value={activity.duration}
-                            onChange={e =>
+                            onChange={(e) =>
                               updateActivity(
                                 sectionIndex,
                                 activityIndex,
@@ -470,7 +470,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
                         </div>
                         <textarea
                           value={activity.description}
-                          onChange={e =>
+                          onChange={(e) =>
                             updateActivity(
                               sectionIndex,
                               activityIndex,

@@ -87,7 +87,7 @@ async function hashSHA256(data: string): Promise<string> {
   const buffer = encoder.encode(data);
   const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
   return Array.from(new Uint8Array(hashBuffer))
-    .map(b => b.toString(16).padStart(2, '0'))
+    .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
 }
 

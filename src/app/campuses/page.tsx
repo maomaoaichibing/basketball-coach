@@ -218,7 +218,7 @@ export default function CampusesPage() {
             ...coachForm,
             specialties: coachForm.specialties
               .split(',')
-              .map(s => s.trim())
+              .map((s) => s.trim())
               .filter(Boolean),
           }),
         });
@@ -351,7 +351,7 @@ export default function CampusesPage() {
                     暂无校区，点击右上角添加
                   </div>
                 ) : (
-                  campuses.map(campus => (
+                  campuses.map((campus) => (
                     <div key={campus.id} className="bg-white rounded-lg shadow p-5">
                       <div className="flex items-start justify-between mb-3">
                         <div>
@@ -457,7 +457,7 @@ export default function CampusesPage() {
                         </td>
                       </tr>
                     ) : (
-                      courts.map(court => (
+                      courts.map((court) => (
                         <tr key={court.id} className="hover:bg-gray-50">
                           <td className="px-4 py-3 text-sm font-medium text-gray-900">
                             {court.name}
@@ -509,7 +509,7 @@ export default function CampusesPage() {
                         </td>
                       </tr>
                     ) : (
-                      coaches.map(coach => (
+                      coaches.map((coach) => (
                         <tr key={coach.id} className="hover:bg-gray-50">
                           <td className="px-4 py-3 text-sm font-medium text-gray-900">
                             {coach.name}
@@ -560,7 +560,7 @@ export default function CampusesPage() {
                     <input
                       type="text"
                       value={campusForm.name}
-                      onChange={e => setCampusForm({ ...campusForm, name: e.target.value })}
+                      onChange={(e) => setCampusForm({ ...campusForm, name: e.target.value })}
                       className="w-full px-3 py-2 border rounded-lg"
                     />
                   </div>
@@ -571,7 +571,7 @@ export default function CampusesPage() {
                     <input
                       type="text"
                       value={campusForm.code}
-                      onChange={e => setCampusForm({ ...campusForm, code: e.target.value })}
+                      onChange={(e) => setCampusForm({ ...campusForm, code: e.target.value })}
                       className="w-full px-3 py-2 border rounded-lg"
                       disabled={!!editingItem}
                     />
@@ -581,7 +581,7 @@ export default function CampusesPage() {
                     <input
                       type="text"
                       value={campusForm.address}
-                      onChange={e =>
+                      onChange={(e) =>
                         setCampusForm({
                           ...campusForm,
                           address: e.target.value,
@@ -595,7 +595,7 @@ export default function CampusesPage() {
                     <input
                       type="text"
                       value={campusForm.phone}
-                      onChange={e => setCampusForm({ ...campusForm, phone: e.target.value })}
+                      onChange={(e) => setCampusForm({ ...campusForm, phone: e.target.value })}
                       className="w-full px-3 py-2 border rounded-lg"
                     />
                   </div>
@@ -604,7 +604,7 @@ export default function CampusesPage() {
                     <input
                       type="text"
                       value={campusForm.managerName}
-                      onChange={e =>
+                      onChange={(e) =>
                         setCampusForm({
                           ...campusForm,
                           managerName: e.target.value,
@@ -621,7 +621,7 @@ export default function CampusesPage() {
                       <input
                         type="time"
                         value={campusForm.openTime}
-                        onChange={e =>
+                        onChange={(e) =>
                           setCampusForm({
                             ...campusForm,
                             openTime: e.target.value,
@@ -637,7 +637,7 @@ export default function CampusesPage() {
                       <input
                         type="time"
                         value={campusForm.closeTime}
-                        onChange={e =>
+                        onChange={(e) =>
                           setCampusForm({
                             ...campusForm,
                             closeTime: e.target.value,
@@ -660,7 +660,7 @@ export default function CampusesPage() {
                     <input
                       type="text"
                       value={courtForm.name}
-                      onChange={e => setCourtForm({ ...courtForm, name: e.target.value })}
+                      onChange={(e) => setCourtForm({ ...courtForm, name: e.target.value })}
                       className="w-full px-3 py-2 border rounded-lg"
                       placeholder="如: 1号场"
                     />
@@ -671,11 +671,11 @@ export default function CampusesPage() {
                     </label>
                     <select
                       value={courtForm.campusId}
-                      onChange={e => setCourtForm({ ...courtForm, campusId: e.target.value })}
+                      onChange={(e) => setCourtForm({ ...courtForm, campusId: e.target.value })}
                       className="w-full px-3 py-2 border rounded-lg"
                     >
                       <option value="">请选择校区</option>
-                      {campuses.map(c => (
+                      {campuses.map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.name}
                         </option>
@@ -687,7 +687,7 @@ export default function CampusesPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">类型</label>
                       <select
                         value={courtForm.type}
-                        onChange={e => setCourtForm({ ...courtForm, type: e.target.value })}
+                        onChange={(e) => setCourtForm({ ...courtForm, type: e.target.value })}
                         className="w-full px-3 py-2 border rounded-lg"
                       >
                         <option value="indoor">室内</option>
@@ -699,7 +699,7 @@ export default function CampusesPage() {
                       <input
                         type="number"
                         value={courtForm.capacity}
-                        onChange={e =>
+                        onChange={(e) =>
                           setCourtForm({
                             ...courtForm,
                             capacity: parseInt(e.target.value) || 20,
@@ -720,7 +720,7 @@ export default function CampusesPage() {
                     <input
                       type="text"
                       value={coachForm.name}
-                      onChange={e => setCoachForm({ ...coachForm, name: e.target.value })}
+                      onChange={(e) => setCoachForm({ ...coachForm, name: e.target.value })}
                       className="w-full px-3 py-2 border rounded-lg"
                     />
                   </div>
@@ -729,7 +729,7 @@ export default function CampusesPage() {
                     <input
                       type="text"
                       value={coachForm.phone}
-                      onChange={e => setCoachForm({ ...coachForm, phone: e.target.value })}
+                      onChange={(e) => setCoachForm({ ...coachForm, phone: e.target.value })}
                       className="w-full px-3 py-2 border rounded-lg"
                     />
                   </div>
@@ -737,11 +737,11 @@ export default function CampusesPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">所属校区</label>
                     <select
                       value={coachForm.campusId}
-                      onChange={e => setCoachForm({ ...coachForm, campusId: e.target.value })}
+                      onChange={(e) => setCoachForm({ ...coachForm, campusId: e.target.value })}
                       className="w-full px-3 py-2 border rounded-lg"
                     >
                       <option value="">无</option>
-                      {campuses.map(c => (
+                      {campuses.map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.name}
                         </option>
@@ -753,7 +753,7 @@ export default function CampusesPage() {
                     <input
                       type="text"
                       value={coachForm.specialties}
-                      onChange={e =>
+                      onChange={(e) =>
                         setCoachForm({
                           ...coachForm,
                           specialties: e.target.value,

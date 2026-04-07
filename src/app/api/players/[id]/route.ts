@@ -80,9 +80,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       _count: true,
     });
 
-    const presentCount = attendanceStats.find(s => s.attendance === 'present')?._count || 0;
-    const absentCount = attendanceStats.find(s => s.attendance === 'absent')?._count || 0;
-    const lateCount = attendanceStats.find(s => s.attendance === 'late')?._count || 0;
+    const presentCount = attendanceStats.find((s) => s.attendance === 'present')?._count || 0;
+    const absentCount = attendanceStats.find((s) => s.attendance === 'absent')?._count || 0;
+    const lateCount = attendanceStats.find((s) => s.attendance === 'late')?._count || 0;
     const attendanceRate =
       totalTrainings > 0 ? Math.round((presentCount / totalTrainings) * 100) : 0;
 

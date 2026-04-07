@@ -166,7 +166,7 @@ export default function SmartPlanPage() {
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
               <h2 className="font-semibold text-gray-900 mb-4">选择训练班级</h2>
               <div className="grid grid-cols-5 gap-3">
-                {groups.map(group => (
+                {groups.map((group) => (
                   <button
                     key={group}
                     onClick={() => setSelectedGroup(group)}
@@ -241,7 +241,7 @@ export default function SmartPlanPage() {
 
               {/* 技能条 */}
               <div className="space-y-3 mb-6">
-                {data.skillAnalysis.scores.map(skill => (
+                {data.skillAnalysis.scores.map((skill) => (
                   <div key={skill.skill} className="space-y-1">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-600">{skill.label}</span>
@@ -297,7 +297,7 @@ export default function SmartPlanPage() {
                 </h2>
               </div>
               <div className="divide-y divide-gray-100">
-                {data.playerInsights.map(insight => (
+                {data.playerInsights.map((insight) => (
                   <div key={insight.id} className="px-6 py-4">
                     <div className="flex items-start justify-between">
                       <div>

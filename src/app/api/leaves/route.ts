@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     // 解析JSON字段
-    const parsedLeaves = leaves.map(leave => ({
+    const parsedLeaves = leaves.map((leave) => ({
       ...leave,
       dates: JSON.parse(leave.dates || '[]'),
       scheduleIds: JSON.parse(leave.scheduleIds || '[]'),

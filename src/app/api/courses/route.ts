@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 解析 JSON 字段
-    const parsedCourses = courses.map(course => ({
+    const parsedCourses = courses.map((course) => ({
       ...course,
       groups: JSON.parse((course.groups as string) || '[]'),
     }));
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     let filteredCourses = parsedCourses;
     if (group) {
       filteredCourses = parsedCourses.filter(
-        c => c.groups.length === 0 || c.groups.includes(group)
+        (c) => c.groups.length === 0 || c.groups.includes(group)
       );
     }
 

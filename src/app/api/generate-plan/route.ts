@@ -83,7 +83,7 @@ async function analyzePlayerWeaknesses(playerIds: string[]): Promise<{
 
   // 构建分析文本
   let weaknessText = `共${players.length}名学员的技能评估分析：\n`;
-  weaknessText += `整体平均分：${skills.map(s => `${SKILL_LABELS[s]}=${avgScores[s]}`).join('、')}\n`;
+  weaknessText += `整体平均分：${skills.map((s) => `${SKILL_LABELS[s]}=${avgScores[s]}`).join('、')}\n`;
 
   if (weaknesses.length > 0) {
     weaknessText += `薄弱技能（建议重点训练）：${weaknesses.join('、')}\n`;
@@ -707,12 +707,12 @@ function generateTrainingProgression(sections: AISection[]): string {
   // 分析各节内容，找出重点训练技能
   const warmupActivities = sections[0]?.activities || [];
   const technicalActivities =
-    sections.find(s => s.name === '第二节')?.activities ||
-    sections.find(s => s.category === 'technical')?.activities ||
+    sections.find((s) => s.name === '第二节')?.activities ||
+    sections.find((s) => s.category === 'technical')?.activities ||
     [];
   const gameActivities =
-    sections.find(s => s.name === '第三节')?.activities ||
-    sections.find(s => s.category === 'game')?.activities ||
+    sections.find((s) => s.name === '第三节')?.activities ||
+    sections.find((s) => s.category === 'game')?.activities ||
     [];
 
   // 从活动名称中提取重点技能
@@ -747,7 +747,8 @@ function generateTrainingProgression(sections: AISection[]): string {
   // 找出热身中的相关动作
   const warmupSkillActions = warmupActivities
     .filter(
-      (a: AIActivity) => a.name.includes('运球') || a.name.includes('传球') || a.name.includes('球性')
+      (a: AIActivity) =>
+        a.name.includes('运球') || a.name.includes('传球') || a.name.includes('球性')
     )
     .map((a: AIActivity) => a.name)
     .slice(0, 2);
@@ -888,12 +889,13 @@ function generatePrompt(
     medium: '中强度：正常训练节奏，适度休息，适合日常训练。技术动作规范为主，体能训练穿插其中。',
     high: '高强度：训练量大，组间休息短，节奏紧凑。增加体能负荷和对抗强度，适合赛前集训或体能强化。每个动作时间饱满，减少空闲等待。',
   };
-  const intensityLabel = params.intensity === 'low' ? '低强度' : params.intensity === 'high' ? '高强度' : '中强度';
+  const intensityLabel =
+    params.intensity === 'low' ? '低强度' : params.intensity === 'high' ? '高强度' : '中强度';
   const intensityText = intensityDesc[params.intensity || 'medium'] || intensityDesc['medium'];
 
   // 训练节次结构
   const segmentDesc = segments
-    .map(s => `- ${s.name}（${s.minutes}分钟）：${s.description}`)
+    .map((s) => `- ${s.name}（${s.minutes}分钟）：${s.description}`)
     .join('\n');
 
   return `你是一位专业的篮球青训教练，请根据以下要求生成篮球训练教案。
@@ -1159,7 +1161,7 @@ async function callAIAPI(
     max_tokens: 8000,
   });
 
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const url = new URL(apiUrl);
     const options = {
       hostname: url.hostname,
@@ -1174,9 +1176,9 @@ async function callAIAPI(
       agent: new https.Agent({ rejectUnauthorized: false }),
     };
 
-    const req = https.request(options, res => {
+    const req = https.request(options, (res) => {
       let data = '';
-      res.on('data', chunk => {
+      res.on('data', (chunk) => {
         data += chunk;
       });
       res.on('end', () => {
@@ -1206,7 +1208,7 @@ async function callAIAPI(
       });
     });
 
-    req.on('error', e => {
+    req.on('error', (e) => {
       resolve({ success: false, error: e.message });
     });
 

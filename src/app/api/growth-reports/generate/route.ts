@@ -78,11 +78,11 @@ export async function POST(request: NextRequest) {
 
     // 计算训练统计
     const totalSessions = trainingRecords.length;
-    const attendance = trainingRecords.filter(r => r.attendance === 'present').length;
+    const attendance = trainingRecords.filter((r) => r.attendance === 'present').length;
     const attendanceRate = totalSessions > 0 ? Math.round((attendance / totalSessions) * 100) : 0;
     const avgPerformance =
       trainingRecords.reduce((sum, r) => sum + (r.performance || 0), 0) /
-      (trainingRecords.filter(r => r.performance).length || 1);
+      (trainingRecords.filter((r) => r.performance).length || 1);
 
     const trainingStats = {
       totalSessions,
@@ -93,14 +93,14 @@ export async function POST(request: NextRequest) {
     };
 
     // 计算比赛统计
-    const matchIds = Array.from(new Set(matchEvents.map(e => e.matchId)));
+    const matchIds = Array.from(new Set(matchEvents.map((e) => e.matchId)));
     const totalMatches = matchIds.length;
     let wins = 0;
     let totalPoints = 0;
     let totalRebounds = 0;
     let totalAssists = 0;
 
-    matchEvents.forEach(event => {
+    matchEvents.forEach((event) => {
       if (event.eventType === 'score') {
         totalPoints += event.points || 0;
       } else if (event.eventType === 'rebound') {
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
         id: { in: matchIds },
       },
     });
-    wins = matches.filter(m => m.result === 'win').length;
+    wins = matches.filter((m) => m.result === 'win').length;
 
     const matchStats = {
       totalMatches,
@@ -141,8 +141,8 @@ export async function POST(request: NextRequest) {
 
     // 排序找出强项和弱项
     const sortedAbilities = [...skillAbilities].sort((a, b) => b.value - a.value);
-    const strengths = sortedAbilities.slice(0, 2).map(s => `${s.name}能力表现良好`);
-    const improvements = sortedAbilities.slice(-2).map(s => `需要加强${s.name}训练`);
+    const strengths = sortedAbilities.slice(0, 2).map((s) => `${s.name}能力表现良好`);
+    const improvements = sortedAbilities.slice(-2).map((s) => `需要加强${s.name}训练`);
 
     // 整体评分
     const overallRating = Math.round(

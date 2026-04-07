@@ -124,9 +124,9 @@ export default function InteractionPage() {
     }
   }
 
-  const pendingLeaves = leaves.filter(l => l.status === 'pending').length;
-  const unreadMessages = messages.filter(m => !m.isRead).length;
-  const recentCheckins = checkins.filter(c => !c.coachFeedback).length;
+  const pendingLeaves = leaves.filter((l) => l.status === 'pending').length;
+  const unreadMessages = messages.filter((m) => !m.isRead).length;
+  const recentCheckins = checkins.filter((c) => !c.coachFeedback).length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -230,12 +230,12 @@ export default function InteractionPage() {
                 {/* 请假申请列表 */}
                 {activeTab === 'leaves' && (
                   <div className="space-y-4">
-                    {leaves.filter(l => l.status === 'pending').length === 0 ? (
+                    {leaves.filter((l) => l.status === 'pending').length === 0 ? (
                       <div className="text-center py-8 text-gray-500">暂无待审批的请假申请</div>
                     ) : (
                       leaves
-                        .filter(l => l.status === 'pending')
-                        .map(leave => (
+                        .filter((l) => l.status === 'pending')
+                        .map((leave) => (
                           <div key={leave.id} className="border border-gray-100 rounded-xl p-4">
                             <div className="flex items-start justify-between mb-3">
                               <div>
@@ -300,7 +300,7 @@ export default function InteractionPage() {
                     {checkins.length === 0 ? (
                       <div className="text-center py-8 text-gray-500">暂无训练打卡记录</div>
                     ) : (
-                      checkins.map(checkin => (
+                      checkins.map((checkin) => (
                         <div
                           key={checkin.id}
                           className="border border-gray-100 rounded-xl overflow-hidden"
@@ -358,7 +358,7 @@ export default function InteractionPage() {
                                   type="text"
                                   placeholder="添加点评..."
                                   className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                  onKeyPress={e => {
+                                  onKeyPress={(e) => {
                                     if (e.key === 'Enter') {
                                       handleFeedback(
                                         checkin.id,
@@ -368,7 +368,7 @@ export default function InteractionPage() {
                                   }}
                                 />
                                 <button
-                                  onClick={e => {
+                                  onClick={(e) => {
                                     const input = (
                                       e.target as HTMLButtonElement
                                     ).parentElement?.querySelector('input');
@@ -395,7 +395,7 @@ export default function InteractionPage() {
                     {messages.length === 0 ? (
                       <div className="text-center py-8 text-gray-500">暂无未读消息</div>
                     ) : (
-                      messages.map(message => (
+                      messages.map((message) => (
                         <div key={message.id} className="border border-gray-100 rounded-xl p-4">
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex items-center gap-2">

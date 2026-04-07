@@ -90,11 +90,11 @@ export default function TrainingAnalysisPage() {
               <Filter className="w-4 h-4 text-gray-400" />
               <select
                 value={group}
-                onChange={e => setGroup(e.target.value)}
+                onChange={(e) => setGroup(e.target.value)}
                 className="px-3 py-2 border rounded-lg"
               >
                 <option value="">全部分组</option>
-                {groups.map(g => (
+                {groups.map((g) => (
                   <option key={g} value={g}>
                     {g}
                   </option>

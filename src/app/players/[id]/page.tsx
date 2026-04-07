@@ -390,7 +390,7 @@ export default function PlayerDetailPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {(
               ['dribbling', 'passing', 'shooting', 'defending', 'physical', 'tactical'] as const
-            ).map(skill => {
+            ).map((skill) => {
               const score = player[skill];
               return (
                 <div key={skill} className="space-y-2">
@@ -486,7 +486,7 @@ export default function PlayerDetailPage() {
                 {player.records.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">暂无训练记录</div>
                 ) : (
-                  player.records.map(record => {
+                  player.records.map((record) => {
                     const attendance =
                       attendanceLabels[record.attendance] || attendanceLabels.present;
                     return (
@@ -535,7 +535,7 @@ export default function PlayerDetailPage() {
                 {player.assessments.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">暂无评估记录</div>
                 ) : (
-                  player.assessments.map(assessment => (
+                  player.assessments.map((assessment) => (
                     <div key={assessment.id} className="p-4 bg-gray-50 rounded-lg">
                       <div className="flex items-center justify-between mb-3">
                         <div className="text-sm text-gray-500">
@@ -557,7 +557,7 @@ export default function PlayerDetailPage() {
                             'physical',
                             'tactical',
                           ] as const
-                        ).map(skill => {
+                        ).map((skill) => {
                           const score = assessment[skill];
                           if (!score) return null;
                           return (
@@ -583,7 +583,7 @@ export default function PlayerDetailPage() {
                 {player.goals.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">暂无阶段目标</div>
                 ) : (
-                  player.goals.map(goal => (
+                  player.goals.map((goal) => (
                     <div key={goal.id} className="p-4 bg-gray-50 rounded-lg">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
@@ -643,7 +643,7 @@ export default function PlayerDetailPage() {
               联系信息
             </h2>
             <div className="space-y-3">
-              {player.guardians?.map(guardian => (
+              {player.guardians?.map((guardian) => (
                 <div
                   key={guardian.id}
                   className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg"
@@ -701,7 +701,7 @@ export default function PlayerDetailPage() {
                       type="text"
                       required
                       value={editForm.name}
-                      onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
@@ -710,7 +710,7 @@ export default function PlayerDetailPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">性别</label>
                     <select
                       value={editForm.gender}
-                      onChange={e => setEditForm({ ...editForm, gender: e.target.value })}
+                      onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     >
                       <option value="male">男</option>
@@ -726,7 +726,7 @@ export default function PlayerDetailPage() {
                       type="date"
                       required
                       value={editForm.birthDate}
-                      onChange={e => setEditForm({ ...editForm, birthDate: e.target.value })}
+                      onChange={(e) => setEditForm({ ...editForm, birthDate: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
@@ -735,7 +735,7 @@ export default function PlayerDetailPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">分组</label>
                     <select
                       value={editForm.group}
-                      onChange={e => setEditForm({ ...editForm, group: e.target.value })}
+                      onChange={(e) => setEditForm({ ...editForm, group: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     >
                       <option value="U6">U6 (4-6岁)</option>
@@ -750,7 +750,7 @@ export default function PlayerDetailPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">状态</label>
                     <select
                       value={editForm.status}
-                      onChange={e => setEditForm({ ...editForm, status: e.target.value })}
+                      onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     >
                       <option value="training">在训</option>
@@ -765,7 +765,7 @@ export default function PlayerDetailPage() {
                     <input
                       type="text"
                       value={editForm.school}
-                      onChange={e => setEditForm({ ...editForm, school: e.target.value })}
+                      onChange={(e) => setEditForm({ ...editForm, school: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
@@ -774,7 +774,7 @@ export default function PlayerDetailPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">位置</label>
                     <select
                       value={editForm.position}
-                      onChange={e => setEditForm({ ...editForm, position: e.target.value })}
+                      onChange={(e) => setEditForm({ ...editForm, position: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     >
                       <option value="">未设置</option>
@@ -794,7 +794,7 @@ export default function PlayerDetailPage() {
                       <input
                         type="number"
                         value={editForm.height}
-                        onChange={e => setEditForm({ ...editForm, height: e.target.value })}
+                        onChange={(e) => setEditForm({ ...editForm, height: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                       />
                     </div>
@@ -805,7 +805,7 @@ export default function PlayerDetailPage() {
                       <input
                         type="number"
                         value={editForm.weight}
-                        onChange={e => setEditForm({ ...editForm, weight: e.target.value })}
+                        onChange={(e) => setEditForm({ ...editForm, weight: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                       />
                     </div>
@@ -816,7 +816,7 @@ export default function PlayerDetailPage() {
                     <input
                       type="text"
                       value={editForm.parentName}
-                      onChange={e => setEditForm({ ...editForm, parentName: e.target.value })}
+                      onChange={(e) => setEditForm({ ...editForm, parentName: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
@@ -826,7 +826,7 @@ export default function PlayerDetailPage() {
                     <input
                       type="tel"
                       value={editForm.parentPhone}
-                      onChange={e => setEditForm({ ...editForm, parentPhone: e.target.value })}
+                      onChange={(e) => setEditForm({ ...editForm, parentPhone: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
@@ -836,7 +836,7 @@ export default function PlayerDetailPage() {
                     <input
                       type="text"
                       value={editForm.parentWechat}
-                      onChange={e => setEditForm({ ...editForm, parentWechat: e.target.value })}
+                      onChange={(e) => setEditForm({ ...editForm, parentWechat: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
@@ -846,7 +846,7 @@ export default function PlayerDetailPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">整体评估</label>
                     <textarea
                       value={editForm.overallAssessment}
-                      onChange={e =>
+                      onChange={(e) =>
                         setEditForm({ ...editForm, overallAssessment: e.target.value })
                       }
                       rows={4}
@@ -868,7 +868,7 @@ export default function PlayerDetailPage() {
                           min="1"
                           max="10"
                           value={editForm.dribbling}
-                          onChange={e =>
+                          onChange={(e) =>
                             setEditForm({ ...editForm, dribbling: parseInt(e.target.value) || 5 })
                           }
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -881,7 +881,7 @@ export default function PlayerDetailPage() {
                           min="1"
                           max="10"
                           value={editForm.passing}
-                          onChange={e =>
+                          onChange={(e) =>
                             setEditForm({ ...editForm, passing: parseInt(e.target.value) || 5 })
                           }
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -894,7 +894,7 @@ export default function PlayerDetailPage() {
                           min="1"
                           max="10"
                           value={editForm.shooting}
-                          onChange={e =>
+                          onChange={(e) =>
                             setEditForm({ ...editForm, shooting: parseInt(e.target.value) || 5 })
                           }
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -907,7 +907,7 @@ export default function PlayerDetailPage() {
                           min="1"
                           max="10"
                           value={editForm.defending}
-                          onChange={e =>
+                          onChange={(e) =>
                             setEditForm({ ...editForm, defending: parseInt(e.target.value) || 5 })
                           }
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -920,7 +920,7 @@ export default function PlayerDetailPage() {
                           min="1"
                           max="10"
                           value={editForm.physical}
-                          onChange={e =>
+                          onChange={(e) =>
                             setEditForm({ ...editForm, physical: parseInt(e.target.value) || 5 })
                           }
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -933,7 +933,7 @@ export default function PlayerDetailPage() {
                           min="1"
                           max="10"
                           value={editForm.tactical}
-                          onChange={e =>
+                          onChange={(e) =>
                             setEditForm({ ...editForm, tactical: parseInt(e.target.value) || 5 })
                           }
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"

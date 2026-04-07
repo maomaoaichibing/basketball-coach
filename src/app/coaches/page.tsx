@@ -329,7 +329,7 @@ export default function CoachesPage() {
   }
 
   // 筛选
-  const filteredCoaches = coaches.filter(c => {
+  const filteredCoaches = coaches.filter((c) => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -435,7 +435,7 @@ export default function CoachesPage() {
             <input
               type="text"
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="搜索姓名、手机号、邮箱..."
               className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
             />
@@ -459,7 +459,7 @@ export default function CoachesPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {filteredCoaches.map(coach => (
+            {filteredCoaches.map((coach) => (
               <div
                 key={coach.id}
                 className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow"
@@ -629,7 +629,7 @@ export default function CoachesPage() {
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   >
                     <option value="">未分配</option>
-                    {campuses.map(c => (
+                    {campuses.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name}
                       </option>
@@ -760,7 +760,7 @@ export default function CoachesPage() {
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   >
                     <option value="">未分配</option>
-                    {campuses.map(c => (
+                    {campuses.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name}
                       </option>
@@ -831,7 +831,7 @@ export default function CoachesPage() {
                   <input
                     type={showNewPwd ? 'text' : 'password'}
                     value={newPassword}
-                    onChange={e => setNewPassword(e.target.value)}
+                    onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="至少6个字符"
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 pr-10"
                   />

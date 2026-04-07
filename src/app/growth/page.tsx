@@ -44,7 +44,7 @@ type Player = {
 function RadarChart({ abilities, size = 200 }: { abilities: Player['abilities']; size?: number }) {
   const labels = ['运球', '传球', '投篮', '防守', '体能', '战术'];
   const keys = ['dribbling', 'passing', 'shooting', 'defending', 'physical', 'tactical'];
-  const values = keys.map(k => abilities[k as keyof typeof abilities] || 5);
+  const values = keys.map((k) => abilities[k as keyof typeof abilities] || 5);
 
   const cx = size / 2;
   const cy = size / 2;
@@ -65,12 +65,12 @@ function RadarChart({ abilities, size = 200 }: { abilities: Player['abilities'];
 
   // 数据点多边形
   const dataPoints = values.map((v, i) => getPoint(i, v));
-  const polygonPoints = dataPoints.map(p => `${p.x},${p.y}`).join(' ');
+  const polygonPoints = dataPoints.map((p) => `${p.x},${p.y}`).join(' ');
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="mx-auto">
       {/* 网格线 */}
-      {gridLevels.map(level => {
+      {gridLevels.map((level) => {
         const points = keys
           .map((_, i) => {
             const p = getPoint(i, level);
@@ -215,7 +215,7 @@ export default function GrowthPage() {
     graduated: '结业',
   };
 
-  const groups = Array.from(new Set(players.map(p => p.group))).sort();
+  const groups = Array.from(new Set(players.map((p) => p.group))).sort();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -232,11 +232,11 @@ export default function GrowthPage() {
             {/* 筛选 */}
             <select
               value={selectedGroup}
-              onChange={e => setSelectedGroup(e.target.value)}
+              onChange={(e) => setSelectedGroup(e.target.value)}
               className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <option value="all">全部年龄段</option>
-              {groups.map(g => (
+              {groups.map((g) => (
                 <option key={g} value={g}>
                   {g}
                 </option>
@@ -264,7 +264,7 @@ export default function GrowthPage() {
             {/* 左侧：学员列表 */}
             <div className="lg:col-span-1 space-y-4">
               <h2 className="font-semibold text-gray-700">学员 ({players.length})</h2>
-              {players.map(player => (
+              {players.map((player) => (
                 <div
                   key={player.id}
                   onClick={() => setSelectedPlayer(player)}

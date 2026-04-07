@@ -139,7 +139,7 @@ export default function SchedulePage() {
   }
 
   const groupedByDay = Array.from({ length: 7 }, (_, i) =>
-    schedules.filter(s => s.dayOfWeek === i)
+    schedules.filter((s) => s.dayOfWeek === i)
   );
 
   if (loading) {
@@ -179,7 +179,7 @@ export default function SchedulePage() {
 
       <main className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-          {groups.map(g => (
+          {groups.map((g) => (
             <button
               key={g}
               onClick={() => setSelectedGroup(g)}
@@ -208,7 +208,7 @@ export default function SchedulePage() {
                 {daySchedules.length === 0 ? (
                   <div className="text-center py-8 text-gray-400 text-sm">无课程安排</div>
                 ) : (
-                  daySchedules.map(schedule => (
+                  daySchedules.map((schedule) => (
                     <div
                       key={schedule.id}
                       className="p-3 bg-orange-50 rounded-lg border border-orange-100 hover:shadow-md transition-shadow"
@@ -228,7 +228,7 @@ export default function SchedulePage() {
                         </span>
                         <div className="flex gap-1">
                           <button
-                            onClick={e => {
+                            onClick={(e) => {
                               e.stopPropagation();
                               editSchedule(schedule);
                             }}
@@ -237,7 +237,7 @@ export default function SchedulePage() {
                             <Edit2 className="w-3 h-3 text-gray-500" />
                           </button>
                           <button
-                            onClick={e => {
+                            onClick={(e) => {
                               e.stopPropagation();
                               handleDelete(schedule.id);
                             }}
@@ -279,7 +279,7 @@ export default function SchedulePage() {
                 <input
                   type="text"
                   value={form.title}
-                  onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))}
+                  onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
                   placeholder="如：U10 周六训练课"
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500"
                 />
@@ -289,12 +289,12 @@ export default function SchedulePage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">年龄段</label>
                   <select
                     value={form.group}
-                    onChange={e => setForm(prev => ({ ...prev, group: e.target.value }))}
+                    onChange={(e) => setForm((prev) => ({ ...prev, group: e.target.value }))}
                     className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500"
                   >
                     {groups
-                      .filter(g => g !== 'all')
-                      .map(g => (
+                      .filter((g) => g !== 'all')
+                      .map((g) => (
                         <option key={g} value={g}>
                           {g}
                         </option>
@@ -305,8 +305,8 @@ export default function SchedulePage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">星期</label>
                   <select
                     value={form.dayOfWeek}
-                    onChange={e =>
-                      setForm(prev => ({
+                    onChange={(e) =>
+                      setForm((prev) => ({
                         ...prev,
                         dayOfWeek: parseInt(e.target.value),
                       }))
@@ -327,8 +327,8 @@ export default function SchedulePage() {
                   <input
                     type="time"
                     value={form.startTime}
-                    onChange={e =>
-                      setForm(prev => ({
+                    onChange={(e) =>
+                      setForm((prev) => ({
                         ...prev,
                         startTime: e.target.value,
                       }))
@@ -341,7 +341,7 @@ export default function SchedulePage() {
                   <input
                     type="time"
                     value={form.endTime}
-                    onChange={e => setForm(prev => ({ ...prev, endTime: e.target.value }))}
+                    onChange={(e) => setForm((prev) => ({ ...prev, endTime: e.target.value }))}
                     className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
@@ -351,7 +351,7 @@ export default function SchedulePage() {
                 <input
                   type="text"
                   value={form.location}
-                  onChange={e => setForm(prev => ({ ...prev, location: e.target.value }))}
+                  onChange={(e) => setForm((prev) => ({ ...prev, location: e.target.value }))}
                   placeholder="如：篮球场1号馆"
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500"
                 />
@@ -361,7 +361,7 @@ export default function SchedulePage() {
                 <input
                   type="text"
                   value={form.coachName}
-                  onChange={e => setForm(prev => ({ ...prev, coachName: e.target.value }))}
+                  onChange={(e) => setForm((prev) => ({ ...prev, coachName: e.target.value }))}
                   placeholder="如：张教练"
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500"
                 />
@@ -371,8 +371,8 @@ export default function SchedulePage() {
                 <input
                   type="number"
                   value={form.maxPlayers}
-                  onChange={e =>
-                    setForm(prev => ({
+                  onChange={(e) =>
+                    setForm((prev) => ({
                       ...prev,
                       maxPlayers: parseInt(e.target.value),
                     }))

@@ -43,7 +43,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         select: { id: true, name: true, group: true },
       });
       playerDetails = parsedPlayerIds
-        .map(id => players.find(p => p.id === id))
+        .map((id) => players.find((p) => p.id === id))
         .filter((p): p is { id: string; name: string; group: string } => !!p);
     }
 
@@ -70,6 +70,34 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const plan = await prisma.trainingPlan.update({
       where: { id: params.id },
       data: body,
+    });
+
+    return NextResponse.json({ success: true, plan });
+  } catch (error) {
+    console.error('更新教案失败:', error);
+    return NextResponse.json({ success: false, error: '更新教案失败' }, { status: 500 });
+  }
+}
+
+// 部分更新教案（收藏、模板等）
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
+  try {
+    const body = await request.json();
+    const { isFavorite, isTemplate, status, title, notes } = body;
+
+    const updateData: Record<string, unknown> = {};
+    if (typeof isFavorite === 'boolean') updateData.isFavorite = isFavorite;
+    if (typeof isTemplate === 'boolean') updateData.isTemplate = isTemplate;
+    if (status) updateData.status = status;
+    if (title) updateData.title = title;
+    if (notes !== undefined) updateData.notes = notes;
+
+    const plan = await prisma.trainingPlan.update({
+      where: { id: params.id },
+      data: updateData,
     });
 
     return NextResponse.json({ success: true, plan });

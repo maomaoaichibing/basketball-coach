@@ -130,7 +130,7 @@ export default function CheckinPage() {
         setRecords({});
         // 全部设为出勤
         const temp: Record<string, string> = {};
-        players.forEach(p => {
+        players.forEach((p) => {
           temp[p.id] = 'present';
         });
         setTempRecords(temp);
@@ -141,7 +141,7 @@ export default function CheckinPage() {
   }
 
   function handleAttendance(playerId: string, attendance: string) {
-    setTempRecords(prev => ({
+    setTempRecords((prev) => ({
       ...prev,
       [playerId]: attendance,
     }));
@@ -152,7 +152,7 @@ export default function CheckinPage() {
 
     setSaving(true);
     try {
-      const recordsList = players.map(player => ({
+      const recordsList = players.map((player) => ({
         playerId: player.id,
         attendance: tempRecords[player.id] || 'present',
       }));
@@ -183,14 +183,14 @@ export default function CheckinPage() {
 
   function markAllPresent() {
     const temp: Record<string, string> = {};
-    players.forEach(p => {
+    players.forEach((p) => {
       temp[p.id] = 'present';
     });
     setTempRecords(temp);
   }
 
   function getAttendanceCount(type: string) {
-    return Object.values(tempRecords).filter(v => v === type).length;
+    return Object.values(tempRecords).filter((v) => v === type).length;
   }
 
   // 按班级分组学员
@@ -259,7 +259,7 @@ export default function CheckinPage() {
         {/* 统计卡片 */}
         {selectedPlan && (
           <div className="grid grid-cols-3 gap-4 mb-6">
-            {attendanceOptions.map(option => {
+            {attendanceOptions.map((option) => {
               const count = getAttendanceCount(option.value);
               const Icon = option.icon;
               return (
@@ -301,7 +301,7 @@ export default function CheckinPage() {
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {plans.map(plan => (
+                {plans.map((plan) => (
                   <button
                     key={plan.id}
                     onClick={() => selectPlan(plan)}
@@ -365,7 +365,7 @@ export default function CheckinPage() {
                       {group} ({groupPlayers.length}人)
                     </h3>
                     <div className="grid gap-3">
-                      {groupPlayers.map(player => {
+                      {groupPlayers.map((player) => {
                         const currentAttendance = tempRecords[player.id] || 'present';
                         const existingRecord = records[player.id];
 
@@ -388,7 +388,7 @@ export default function CheckinPage() {
 
                             {/* 出勤状态 */}
                             <div className="flex items-center gap-2">
-                              {attendanceOptions.map(option => {
+                              {attendanceOptions.map((option) => {
                                 const Icon = option.icon;
                                 const isSelected = currentAttendance === option.value;
                                 return (

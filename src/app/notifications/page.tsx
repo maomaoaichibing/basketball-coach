@@ -247,7 +247,7 @@ export default function NotificationsPage() {
         <div className="bg-white rounded-lg shadow p-4 flex flex-wrap gap-4">
           <select
             value={filter.status}
-            onChange={e => setFilter({ ...filter, status: e.target.value })}
+            onChange={(e) => setFilter({ ...filter, status: e.target.value })}
             className="px-3 py-2 border rounded-lg"
           >
             <option value="">全部状态</option>
@@ -257,7 +257,7 @@ export default function NotificationsPage() {
           </select>
           <select
             value={filter.type}
-            onChange={e => setFilter({ ...filter, type: e.target.value })}
+            onChange={(e) => setFilter({ ...filter, type: e.target.value })}
             className="px-3 py-2 border rounded-lg"
           >
             <option value="">全部类型</option>
@@ -268,11 +268,11 @@ export default function NotificationsPage() {
           </select>
           <select
             value={filter.playerId}
-            onChange={e => setFilter({ ...filter, playerId: e.target.value })}
+            onChange={(e) => setFilter({ ...filter, playerId: e.target.value })}
             className="px-3 py-2 border rounded-lg"
           >
             <option value="">全部学员</option>
-            {players.map(player => (
+            {players.map((player) => (
               <option key={player.id} value={player.id}>
                 {player.name}
               </option>
@@ -299,7 +299,7 @@ export default function NotificationsPage() {
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
-              {notifications.map(notification => (
+              {notifications.map((notification) => (
                 <div
                   key={notification.id}
                   className={`p-4 hover:bg-gray-50 transition-colors ${
@@ -376,7 +376,7 @@ export default function NotificationsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">学员</label>
                 <select
                   value={newNotification.playerId}
-                  onChange={e =>
+                  onChange={(e) =>
                     setNewNotification({
                       ...newNotification,
                       playerId: e.target.value,
@@ -385,7 +385,7 @@ export default function NotificationsPage() {
                   className="w-full px-3 py-2 border rounded-lg"
                 >
                   <option value="">请选择学员</option>
-                  {players.map(player => (
+                  {players.map((player) => (
                     <option key={player.id} value={player.id}>
                       {player.name} {player.parentPhone ? `(${player.parentPhone})` : ''}
                     </option>
@@ -397,7 +397,7 @@ export default function NotificationsPage() {
                 <input
                   type="text"
                   value={newNotification.guardianName}
-                  onChange={e =>
+                  onChange={(e) =>
                     setNewNotification({
                       ...newNotification,
                       guardianName: e.target.value,
@@ -411,7 +411,7 @@ export default function NotificationsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">通知类型</label>
                 <select
                   value={newNotification.type}
-                  onChange={e =>
+                  onChange={(e) =>
                     setNewNotification({
                       ...newNotification,
                       type: e.target.value,
@@ -430,7 +430,7 @@ export default function NotificationsPage() {
                 <input
                   type="text"
                   value={newNotification.title}
-                  onChange={e =>
+                  onChange={(e) =>
                     setNewNotification({
                       ...newNotification,
                       title: e.target.value,
@@ -444,7 +444,7 @@ export default function NotificationsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">通知内容</label>
                 <textarea
                   value={newNotification.content}
-                  onChange={e =>
+                  onChange={(e) =>
                     setNewNotification({
                       ...newNotification,
                       content: e.target.value,

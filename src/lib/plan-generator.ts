@@ -1421,13 +1421,13 @@ function selectActivities(
 
   // 优先选择匹配类别的活动
   const preferred = pool.filter(
-    a =>
+    (a) =>
       a.difficulty <= maxDifficulty &&
       (preferredCategories.includes(a.category) || preferredCategories.length === 0)
   );
 
   const others = pool.filter(
-    a => a.difficulty <= maxDifficulty && !preferredCategories.includes(a.category)
+    (a) => a.difficulty <= maxDifficulty && !preferredCategories.includes(a.category)
   );
 
   const sorted = [...preferred, ...others];

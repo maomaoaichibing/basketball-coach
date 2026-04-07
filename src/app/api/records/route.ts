@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 格式化数据
-    const formattedRecords = records.map(r => ({
+    const formattedRecords = records.map((r) => ({
       id: r.id,
       playerId: r.playerId,
       playerName: r.player?.name,

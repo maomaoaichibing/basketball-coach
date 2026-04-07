@@ -134,9 +134,9 @@ export default function ParentPage() {
 
   function getAttendanceStats(records: TrainingRecord[]) {
     const total = records.length;
-    const present = records.filter(r => r.attendance === 'present').length;
-    const late = records.filter(r => r.attendance === 'late').length;
-    const absent = records.filter(r => r.attendance === 'absent').length;
+    const present = records.filter((r) => r.attendance === 'present').length;
+    const late = records.filter((r) => r.attendance === 'late').length;
+    const absent = records.filter((r) => r.attendance === 'absent').length;
     return { total, present, late, absent };
   }
 
@@ -180,7 +180,7 @@ export default function ParentPage() {
                   <input
                     type="tel"
                     value={phone}
-                    onChange={e => setPhone(e.target.value)}
+                    onChange={(e) => setPhone(e.target.value)}
                     placeholder="请输入手机号"
                     className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   />
@@ -277,7 +277,7 @@ export default function ParentPage() {
           <div className="lg:col-span-1">
             <h2 className="font-semibold text-gray-700 mb-4">我的孩子</h2>
             <div className="space-y-2">
-              {players.map(player => (
+              {players.map((player) => (
                 <button
                   key={player.id}
                   onClick={() => setSelectedPlayer(player)}
@@ -340,7 +340,7 @@ export default function ParentPage() {
                           <span className="font-medium text-green-800">剩余课时</span>
                         </div>
                         <span className="text-2xl font-bold text-green-700">
-                          {selectedPlayer.enrollments.filter(e => e.status === 'active')[0]
+                          {selectedPlayer.enrollments.filter((e) => e.status === 'active')[0]
                             ?.remainingHours || 0}
                         </span>
                       </div>
@@ -390,7 +390,7 @@ export default function ParentPage() {
                           label: '战术',
                           value: selectedPlayer.latestAssessment.tactical,
                         },
-                      ].map(item => (
+                      ].map((item) => (
                         <div key={item.key} className="text-center">
                           <div className="text-2xl font-bold text-orange-600">
                             {item.value || '-'}

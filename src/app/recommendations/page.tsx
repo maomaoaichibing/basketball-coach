@@ -160,10 +160,10 @@ export default function RecommendationsPage() {
             <label className="text-sm font-medium text-gray-700">选择学员:</label>
             <select
               value={selectedPlayer}
-              onChange={e => setSelectedPlayer(e.target.value)}
+              onChange={(e) => setSelectedPlayer(e.target.value)}
               className="flex-1 px-3 py-2 border rounded-lg"
             >
-              {players.map(player => (
+              {players.map((player) => (
                 <option key={player.id} value={player.id}>
                   {player.name} ({player.group})
                 </option>
@@ -188,8 +188,8 @@ export default function RecommendationsPage() {
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {['dribbling', 'passing', 'shooting', 'defending', 'physical', 'tactical'].map(
-                skill => {
-                  const player = players.find(p => p.id === selectedPlayer);
+                (skill) => {
+                  const player = players.find((p) => p.id === selectedPlayer);
                   const score = (player?.[skill as keyof Player] as number) || 5;
                   return (
                     <div key={skill} className="text-center">

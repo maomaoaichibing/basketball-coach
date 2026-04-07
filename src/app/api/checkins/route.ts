@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     // 解析JSON字段
-    const parsedCheckins = checkins.map(checkin => ({
+    const parsedCheckins = checkins.map((checkin) => ({
       ...checkin,
       mediaUrls: JSON.parse((checkin.mediaUrls as unknown as string) || '[]'),
     }));

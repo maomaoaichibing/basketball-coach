@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 格式化数据
-    const formattedTeams = teams.map(t => ({
+    const formattedTeams = teams.map((t) => ({
       id: t.id,
       name: t.name,
       group: t.group,

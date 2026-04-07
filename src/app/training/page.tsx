@@ -149,15 +149,15 @@ export default function TrainingSessionPage() {
   }
 
   function handleAttendanceChange(playerId: string, status: 'present' | 'absent' | 'late') {
-    setAttendanceMap(prev => ({ ...prev, [playerId]: status }));
+    setAttendanceMap((prev) => ({ ...prev, [playerId]: status }));
   }
 
   function handlePerformanceChange(playerId: string, score: number) {
-    setPerformanceMap(prev => ({ ...prev, [playerId]: score }));
+    setPerformanceMap((prev) => ({ ...prev, [playerId]: score }));
   }
 
   function handleFeedbackChange(playerId: string, feedback: string) {
-    setFeedbackMap(prev => ({ ...prev, [playerId]: feedback }));
+    setFeedbackMap((prev) => ({ ...prev, [playerId]: feedback }));
   }
 
   // 保存签到记录
@@ -166,12 +166,12 @@ export default function TrainingSessionPage() {
 
     setSubmitting(true);
     try {
-      const playerIds = playerDetails.map(p => p.id);
+      const playerIds = playerDetails.map((p) => p.id);
       const updatedCount = Object.keys(attendanceMap).length;
 
       // 批量更新签到记录（PATCH 单个记录）
       for (const playerId of playerIds) {
-        const existingRecord = records.find(r => r.playerId === playerId);
+        const existingRecord = records.find((r) => r.playerId === playerId);
         const attendance = attendanceMap[playerId] || 'present';
         const feedback = feedbackMap[playerId] || null;
         const performance = performanceMap[playerId] || null;
@@ -215,9 +215,9 @@ export default function TrainingSessionPage() {
   }
 
   // 统计
-  const presentCount = Object.values(attendanceMap).filter(v => v === 'present').length;
-  const lateCount = Object.values(attendanceMap).filter(v => v === 'late').length;
-  const absentCount = Object.values(attendanceMap).filter(v => v === 'absent').length;
+  const presentCount = Object.values(attendanceMap).filter((v) => v === 'present').length;
+  const lateCount = Object.values(attendanceMap).filter((v) => v === 'late').length;
+  const absentCount = Object.values(attendanceMap).filter((v) => v === 'absent').length;
   const totalPlayerCount = playerDetails.length;
 
   if (loading) {
@@ -256,7 +256,7 @@ export default function TrainingSessionPage() {
               </div>
             ) : (
               <div className="space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto">
-                {plans.slice(0, 20).map(plan => {
+                {plans.slice(0, 20).map((plan) => {
                   const hasPlayers = (() => {
                     try {
                       return JSON.parse(plan.playerIds || '[]').length > 0;
@@ -454,7 +454,7 @@ export default function TrainingSessionPage() {
                                       表现评分 (1-10)
                                     </label>
                                     <div className="flex items-center gap-1 mt-1">
-                                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(score => (
+                                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((score) => (
                                         <button
                                           key={score}
                                           onClick={() => handlePerformanceChange(player.id, score)}
@@ -475,7 +475,7 @@ export default function TrainingSessionPage() {
                                     <label className="text-sm text-gray-600 mb-1">训练反馈</label>
                                     <textarea
                                       value={feedback}
-                                      onChange={e =>
+                                      onChange={(e) =>
                                         handleFeedbackChange(player.id, e.target.value)
                                       }
                                       placeholder="输入对学员本次训练的反馈..."

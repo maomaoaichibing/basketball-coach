@@ -40,7 +40,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       attendanceRate:
         player.records.length > 0
           ? Math.round(
-              (player.records.filter(r => r.attendance === 'present').length /
+              (player.records.filter((r) => r.attendance === 'present').length /
                 player.records.length) *
                 100
             )

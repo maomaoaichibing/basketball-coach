@@ -367,7 +367,7 @@ export default function Home() {
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">选择训练年龄段</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            {groups.map(group => (
+            {groups.map((group) => (
               <button
                 key={group.id}
                 onClick={() => setSelectedGroup(group.id)}
@@ -423,7 +423,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {recentPlans.slice(0, 3).map(plan => (
+              {recentPlans.slice(0, 3).map((plan) => (
                 <Link
                   key={plan.id}
                   href={`/plans/${plan.id}`}

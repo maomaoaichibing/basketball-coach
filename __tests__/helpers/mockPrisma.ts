@@ -1,55 +1,58 @@
 // Prisma Client mock for testing
+const m = (name: string) => ({
+  findMany: jest.fn(),
+  findUnique: jest.fn(),
+  findFirst: jest.fn(),
+  create: jest.fn(),
+  createMany: jest.fn(),
+  update: jest.fn(),
+  delete: jest.fn(),
+  deleteMany: jest.fn(),
+  count: jest.fn(),
+  groupBy: jest.fn(),
+  aggregate: jest.fn(),
+  upsert: jest.fn(),
+});
+
 const mockPrisma = {
-  player: {
-    findMany: jest.fn(),
-    findUnique: jest.fn(),
-    findFirst: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    count: jest.fn(),
-  },
-  coach: {
-    findMany: jest.fn(),
-    findUnique: jest.fn(),
-    findFirst: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-  },
-  guardian: {
-    create: jest.fn(),
-    findMany: jest.fn(),
-  },
-  trainingRecord: {
-    findMany: jest.fn(),
-    create: jest.fn(),
-    count: jest.fn(),
-  },
-  assessment: {
-    findMany: jest.fn(),
-    create: jest.fn(),
-    count: jest.fn(),
-  },
-  team: {
-    findMany: jest.fn(),
-    findUnique: jest.fn(),
-    create: jest.fn(),
-  },
-  course: {
-    findMany: jest.fn(),
-    findUnique: jest.fn(),
-    create: jest.fn(),
-  },
-  enrollment: {
-    findMany: jest.fn(),
-    create: jest.fn(),
-  },
+  player: m('player'),
+  coach: m('coach'),
+  guardian: m('guardian'),
+  playerGoal: m('playerGoal'),
+  playerAssessment: m('playerAssessment'),
+  assessment: m('assessment'),
+  trainingRecord: m('trainingRecord'),
+  trainingPlan: m('trainingPlan'),
+  team: m('team'),
+  course: m('course'),
+  courseEnrollment: m('courseEnrollment'),
+  enrollment: m('enrollment'),
+  campus: m('campus'),
+  court: m('court'),
+  schedule: m('schedule'),
+  booking: m('booking'),
+  order: m('order'),
+  orderItem: m('orderItem'),
+  payment: m('payment'),
+  checkIn: m('checkIn'),
+  checkInLike: m('checkInLike'),
+  leave: m('leave'),
+  match: m('match'),
+  matchEvent: m('matchEvent'),
+  message: m('message'),
+  notification: m('notification'),
+  notificationTemplate: m('notificationTemplate'),
+  growthReport: m('growthReport'),
+  abilityAnalysis: m('abilityAnalysis'),
+  trainingRecommend: m('trainingRecommend'),
+  teamRecommendation: m('teamRecommendation'),
   $connect: jest.fn(),
   $disconnect: jest.fn(),
+  $transaction: jest.fn((ops: unknown[]) => Promise.all(ops)),
 };
 
 export default mockPrisma;
+export { mockPrisma as prisma };
 
 // Helper to reset all mocks
 export function resetPrismaMocks() {
@@ -58,7 +61,7 @@ export function resetPrismaMocks() {
 }
 
 // Helper to create a mock player
-export function createMockPlayer(overrides = {}) {
+export function createMockPlayer(overrides: Record<string, unknown> = {}) {
   return {
     id: 'player-1',
     name: '测试学员',
@@ -84,13 +87,13 @@ export function createMockPlayer(overrides = {}) {
     tactical: 5,
     teamId: null,
     team: null,
+    campusId: null,
     guardians: [],
     records: [],
     assessments: [],
-    _count: {
-      records: 10,
-      assessments: 3,
-    },
+    enrollments: [],
+    courses: [],
+    _count: { records: 10, assessments: 3 },
     createdAt: '2024-09-01T00:00:00.000Z',
     updatedAt: '2024-09-01T00:00:00.000Z',
     ...overrides,
@@ -98,7 +101,7 @@ export function createMockPlayer(overrides = {}) {
 }
 
 // Helper to create a mock coach
-export function createMockCoach(overrides = {}) {
+export function createMockCoach(overrides: Record<string, unknown> = {}) {
   return {
     id: 'coach-1',
     email: 'test@coach.com',
@@ -109,8 +112,19 @@ export function createMockCoach(overrides = {}) {
     campusId: 'campus-1',
     status: 'active',
     avatar: null,
+    specialties: '[]',
+    campus: { id: 'campus-1', name: '测试校区' },
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
     ...overrides,
+  };
+}
+
+// Helper to create auth response
+export function createAuthSuccess(coach = createMockCoach()) {
+  return {
+    success: true as const,
+    coach,
+    response: null as unknown as never,
   };
 }

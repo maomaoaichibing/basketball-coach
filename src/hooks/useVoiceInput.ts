@@ -93,7 +93,7 @@ export function useVoiceInput(): VoiceInputReturn {
       }
 
       if (finalTranscript) {
-        setTranscript(prev => prev + finalTranscript);
+        setTranscript((prev) => prev + finalTranscript);
       }
       setInterimTranscript(interimTranscript);
     };
@@ -188,7 +188,7 @@ export function parseVoiceCommand(transcript: string): {
     // 提取技能关键词
     const skills: string[] = [];
     const skillKeywords = ['运球', '传球', '投篮', '防守', '体能', '战术'];
-    skillKeywords.forEach(skill => {
+    skillKeywords.forEach((skill) => {
       if (text.includes(skill)) {
         skills.push(skill);
       }

@@ -223,6 +223,10 @@ model TrainingPlan {
   // 状态
   status      String   @default("draft")  // draft/published/completed
 
+  // 收藏和模板
+  isFavorite  Boolean  @default(false)  // 收藏
+  isTemplate  Boolean  @default(false)  // 是否为模板
+
   // 生成方式
   generatedBy String   @default("rule")  // rule/ai
 
@@ -1185,6 +1189,61 @@ model AbilityAnalysis {
 
   @@index([playerId])
   @@index([periodStart])
+}
+
+// ============================================
+// 案例库（训练案例）
+// ============================================
+
+// 训练案例（可导入/手动创建，用于 RAG 检索和教案生成）
+model TrainingCase {
+  id          String   @id @default(uuid())
+
+  // 基本信息
+  title       String   // 案例标题
+  category    String   // warmup/technical/tactical/game/cooldown/physical/etiquette
+  subCategory String?  // 细分分类
+
+  // 适用范围
+  ageGroup    String   @default("U10")  // U6/U8/U10/U12/U14
+  skillLevel  String   @default("intermediate")  // beginner/intermediate/advanced
+
+  // 训练内容
+  content     String   // 主要内容描述
+  method      String?  // 训练方法
+  keyPoints   String?  // 要点目的
+  coachGuide  String?  // 教练引导语
+
+  // 参数
+  duration    Int      @default(10)  // 建议时长(分钟)
+  difficulty  Int      @default(1)  // 难度1-5
+  equipment   String   @default("[]")  // JSON: 所需器材
+  minPlayers  Int      @default(1)
+  maxPlayers  Int      @default(20)
+
+  // 标签
+  techType    String?  // 技术类型: 运球/传球/投篮/防守/体能
+  tags        String   @default("[]")  // JSON: ["团队配合", "快攻"]
+
+  // 来源
+  source      String   @default("manual")  // manual/import/ai
+  sourceUrl   String?  // 导入来源
+
+  // 使用统计
+  usageCount  Int      @default(0)  // 被引用次数
+  isFavorite  Boolean  @default(false)
+
+  // 教练ID
+  coachId     String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([ageGroup])
+  @@index([techType])
+  @@index([source])
+  @@index([isFavorite])
 }
 
 // ============================================

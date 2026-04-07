@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       quarterScores: JSON.parse(match.quarterScores || '[]'),
       players: JSON.parse(match.players || '[]'),
       playerStats: JSON.parse(match.playerStats || '[]'),
-      events: match.events.map(event => ({
+      events: match.events.map((event) => ({
         ...event,
       })),
     };

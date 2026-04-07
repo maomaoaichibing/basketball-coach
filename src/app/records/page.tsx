@@ -82,7 +82,7 @@ export default function RecordsPage() {
 
   // 按教案分组
   const grouped = records
-    .filter(r => {
+    .filter((r) => {
       if (filterAttendance !== 'all' && r.attendance !== filterAttendance) return false;
       if (searchTerm) {
         const term = searchTerm.toLowerCase();
@@ -97,7 +97,7 @@ export default function RecordsPage() {
     })
     .reduce<GroupedRecords[]>((acc, r) => {
       const planId = r.planId || 'unknown';
-      const existing = acc.find(g => g.planId === planId);
+      const existing = acc.find((g) => g.planId === planId);
       if (existing) {
         existing.records.push(r);
       } else {
@@ -114,16 +114,16 @@ export default function RecordsPage() {
 
   // 统计
   const totalRecords = records.length;
-  const presentCount = records.filter(r => r.attendance === 'present').length;
-  const lateCount = records.filter(r => r.attendance === 'late').length;
-  const absentCount = records.filter(r => r.attendance === 'absent').length;
+  const presentCount = records.filter((r) => r.attendance === 'present').length;
+  const lateCount = records.filter((r) => r.attendance === 'late').length;
+  const absentCount = records.filter((r) => r.attendance === 'absent').length;
   const avgPerformance =
-    records.filter(r => r.performance && r.performance > 0).length > 0
+    records.filter((r) => r.performance && r.performance > 0).length > 0
       ? (
           records
-            .filter(r => r.performance && r.performance > 0)
+            .filter((r) => r.performance && r.performance > 0)
             .reduce((sum, r) => sum + (r.performance || 0), 0) /
-          records.filter(r => r.performance && r.performance > 0).length
+          records.filter((r) => r.performance && r.performance > 0).length
         ).toFixed(1)
       : '--';
 
@@ -173,13 +173,13 @@ export default function RecordsPage() {
               type="text"
               placeholder="搜索学员、教案..."
               value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
             />
           </div>
           <select
             value={filterAttendance}
-            onChange={e => setFilterAttendance(e.target.value)}
+            onChange={(e) => setFilterAttendance(e.target.value)}
             className="px-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
             <option value="all">全部</option>
@@ -208,12 +208,12 @@ export default function RecordsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {grouped.map(group => {
+            {grouped.map((group) => {
               const isExpanded = expandedPlan === group.planId;
-              const groupPresent = group.records.filter(r => r.attendance === 'present').length;
-              const groupLate = group.records.filter(r => r.attendance === 'late').length;
-              const groupAbsent = group.records.filter(r => r.attendance === 'absent').length;
-              const groupScored = group.records.filter(r => r.performance && r.performance > 0);
+              const groupPresent = group.records.filter((r) => r.attendance === 'present').length;
+              const groupLate = group.records.filter((r) => r.attendance === 'late').length;
+              const groupAbsent = group.records.filter((r) => r.attendance === 'absent').length;
+              const groupScored = group.records.filter((r) => r.performance && r.performance > 0);
               const groupAvg =
                 groupScored.length > 0
                   ? (
@@ -263,7 +263,7 @@ export default function RecordsPage() {
                   {/* 展开后的记录列表 */}
                   {isExpanded && (
                     <div className="border-t border-gray-100">
-                      {group.records.map(record => {
+                      {group.records.map((record) => {
                         const attConfig =
                           attendanceConfig[record.attendance] || attendanceConfig.present;
                         const AttIcon = attConfig.icon;

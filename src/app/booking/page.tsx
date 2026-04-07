@@ -89,8 +89,8 @@ export default function BookingPage() {
       if (data.success) {
         setSuccess(true);
         // 更新本地状态
-        setSchedules(prev =>
-          prev.map(s =>
+        setSchedules((prev) =>
+          prev.map((s) =>
             s.id === selectedSchedule.id ? { ...s, currentCount: s.currentCount + 1 } : s
           )
         );
@@ -177,7 +177,7 @@ export default function BookingPage() {
                 选择课程
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {schedules.map(schedule => (
+                {schedules.map((schedule) => (
                   <button
                     key={schedule.id}
                     onClick={() => setSelectedSchedule(schedule)}
@@ -229,7 +229,7 @@ export default function BookingPage() {
                 选择学员
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {players.map(player => (
+                {players.map((player) => (
                   <button
                     key={player.id}
                     onClick={() => setSelectedPlayer(player)}

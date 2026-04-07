@@ -61,9 +61,9 @@ export async function GET(request: NextRequest) {
     // 计算统计数据
     const stats = {
       total: orders.length,
-      pending: orders.filter(o => o.status === 'pending').length,
-      partiallyPaid: orders.filter(o => o.status === 'partially_paid').length,
-      paid: orders.filter(o => o.status === 'paid').length,
+      pending: orders.filter((o) => o.status === 'pending').length,
+      partiallyPaid: orders.filter((o) => o.status === 'partially_paid').length,
+      paid: orders.filter((o) => o.status === 'paid').length,
       totalAmount: orders.reduce((sum, o) => sum + o.totalAmount, 0),
       paidAmount: orders.reduce((sum, o) => sum + o.paidAmount, 0),
       pendingAmount: orders.reduce((sum, o) => sum + o.pendingAmount, 0),

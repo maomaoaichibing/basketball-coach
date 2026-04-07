@@ -87,7 +87,7 @@ export default function StatsPage() {
             </div>
             <select
               value={period}
-              onChange={e => setPeriod(e.target.value)}
+              onChange={(e) => setPeriod(e.target.value)}
               className="px-4 py-2 border rounded-lg"
             >
               <option value="day">今日</option>
@@ -219,7 +219,7 @@ export default function StatsPage() {
                 <PieChart className="w-5 h-5 text-gray-400" />
               </div>
               <div className="space-y-3">
-                {stats.playersByGroup.map(item => {
+                {stats.playersByGroup.map((item) => {
                   const percentage =
                     stats.overview.totalPlayers > 0
                       ? ((item._count / stats.overview.totalPlayers) * 100).toFixed(1)

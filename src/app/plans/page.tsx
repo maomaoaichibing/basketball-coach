@@ -19,6 +19,9 @@ import {
   Download,
   Sparkles,
   Users,
+  Star,
+  Bookmark,
+  LayoutTemplate,
 } from 'lucide-react';
 
 // 教案类型
@@ -39,6 +42,8 @@ type TrainingPlan = {
   createdAt?: string;
   sections?: string;
   playerIds?: string;
+  isFavorite?: boolean;
+  isTemplate?: boolean;
 };
 
 export default function PlansPage() {
@@ -48,6 +53,8 @@ export default function PlansPage() {
   const [groupFilter, setGroupFilter] = useState('all');
   const [themeFilter, setThemeFilter] = useState('all');
   const [copyingId, setCopyingId] = useState<string | null>(null);
+  const [favoriteFilter, setFavoriteFilter] = useState(false);
+  const [templateFilter, setTemplateFilter] = useState(false);
 
   const router = useRouter();
 
@@ -133,9 +140,59 @@ export default function PlansPage() {
     }
   }
 
-  const filteredPlans = plans.filter(p => {
+  // 切换收藏
+  async function toggleFavorite(plan: TrainingPlan, e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      const newValue = !plan.isFavorite;
+      const response = await fetchWithAuth(`/api/plans/${plan.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isFavorite: newValue }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setPlans((prev) =>
+          prev.map((p) => (p.id === plan.id ? { ...p, isFavorite: newValue } : p))
+        );
+      }
+    } catch (error) {
+      console.error('切换收藏失败:', error);
+    }
+  }
+
+  // 切换模板
+  async function toggleTemplate(plan: TrainingPlan, e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      const newValue = !plan.isTemplate;
+      const response = await fetchWithAuth(`/api/plans/${plan.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isTemplate: newValue }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setPlans((prev) =>
+          prev.map((p) => (p.id === plan.id ? { ...p, isTemplate: newValue } : p))
+        );
+      }
+    } catch (error) {
+      console.error('切换模板失败:', error);
+    }
+  }
+
+  const filteredPlans = plans.filter((p) => {
     if (groupFilter !== 'all' && p.group !== groupFilter) return false;
     if (themeFilter !== 'all' && p.theme !== themeFilter) return false;
+    if (favoriteFilter && !p.isFavorite) return false;
+    if (templateFilter && !p.isTemplate) return false;
     if (search && !p.title.includes(search)) return false;
     return true;
   });
@@ -183,17 +240,17 @@ export default function PlansPage() {
               type="text"
               placeholder="搜索教案..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             />
           </div>
 
           <select
             value={groupFilter}
-            onChange={e => setGroupFilter(e.target.value)}
+            onChange={(e) => setGroupFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg"
           >
-            {groups.map(g => (
+            {groups.map((g) => (
               <option key={g} value={g}>
                 {g === 'all' ? '全部分组' : g}
               </option>
@@ -202,20 +259,46 @@ export default function PlansPage() {
 
           <select
             value={themeFilter}
-            onChange={e => setThemeFilter(e.target.value)}
+            onChange={(e) => setThemeFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg"
           >
-            {themes.map(t => (
+            {themes.map((t) => (
               <option key={t} value={t}>
                 {t === 'all' ? '全部主题' : t}
               </option>
             ))}
           </select>
+
+          <button
+            onClick={() => setFavoriteFilter(!favoriteFilter)}
+            className={`flex items-center gap-1 px-3 py-2 border rounded-lg transition-colors ${
+              favoriteFilter
+                ? 'border-yellow-400 bg-yellow-50 text-yellow-700'
+                : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            <Star
+              className={`w-4 h-4 ${favoriteFilter ? 'fill-yellow-400 text-yellow-400' : ''}`}
+            />
+            收藏
+          </button>
+
+          <button
+            onClick={() => setTemplateFilter(!templateFilter)}
+            className={`flex items-center gap-1 px-3 py-2 border rounded-lg transition-colors ${
+              templateFilter
+                ? 'border-purple-400 bg-purple-50 text-purple-700'
+                : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            <LayoutTemplate className="w-4 h-4" />
+            模板
+          </button>
         </div>
 
         {/* 教案列表 */}
         <div className="space-y-3">
-          {filteredPlans.map(plan => (
+          {filteredPlans.map((plan) => (
             <Link
               key={plan.id}
               href={`/plans/${plan.id}`}
@@ -233,26 +316,36 @@ export default function PlansPage() {
                         {plan.theme}
                       </span>
                     )}
-                    <span className={`px-2 py-0.5 text-xs rounded-full text-white ${
-                      plan.skillLevel === 'advanced'
-                        ? 'bg-indigo-500'
-                        : plan.skillLevel === 'intermediate'
-                          ? 'bg-blue-500'
-                          : 'bg-cyan-500'
-                    }`}>
+                    {plan.isTemplate && (
+                      <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full flex items-center gap-1">
+                        <LayoutTemplate className="w-3 h-3" />
+                        模板
+                      </span>
+                    )}
+                    <span
+                      className={`px-2 py-0.5 text-xs rounded-full text-white ${
+                        plan.skillLevel === 'advanced'
+                          ? 'bg-indigo-500'
+                          : plan.skillLevel === 'intermediate'
+                            ? 'bg-blue-500'
+                            : 'bg-cyan-500'
+                      }`}
+                    >
                       {plan.skillLevel === 'advanced'
                         ? '精英'
                         : plan.skillLevel === 'intermediate'
                           ? '进阶'
                           : '基础'}
                     </span>
-                    <span className={`px-2 py-0.5 text-xs rounded-full text-white ${
-                      plan.intensity === 'high'
-                        ? 'bg-red-600'
-                        : plan.intensity === 'medium'
-                          ? 'bg-yellow-600'
-                          : 'bg-green-600'
-                    }`}>
+                    <span
+                      className={`px-2 py-0.5 text-xs rounded-full text-white ${
+                        plan.intensity === 'high'
+                          ? 'bg-red-600'
+                          : plan.intensity === 'medium'
+                            ? 'bg-yellow-600'
+                            : 'bg-green-600'
+                      }`}
+                    >
                       {plan.intensity === 'high'
                         ? '高强度'
                         : plan.intensity === 'medium'
@@ -301,7 +394,33 @@ export default function PlansPage() {
                 {/* 操作按钮 */}
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={e => handleCopyPlan(plan, e)}
+                    onClick={(e) => toggleFavorite(plan, e)}
+                    className="p-2 hover:bg-yellow-50 rounded-lg transition-colors"
+                    title={plan.isFavorite ? '取消收藏' : '收藏'}
+                  >
+                    <Star
+                      className={`w-4 h-4 ${
+                        plan.isFavorite
+                          ? 'fill-yellow-400 text-yellow-400'
+                          : 'text-gray-300 hover:text-yellow-400'
+                      }`}
+                    />
+                  </button>
+                  <button
+                    onClick={(e) => toggleTemplate(plan, e)}
+                    className={`p-2 rounded-lg transition-colors ${
+                      plan.isTemplate ? 'hover:bg-purple-50' : 'hover:bg-gray-100'
+                    }`}
+                    title={plan.isTemplate ? '取消模板' : '存为模板'}
+                  >
+                    <Bookmark
+                      className={`w-4 h-4 ${
+                        plan.isTemplate ? 'text-purple-500' : 'text-gray-300 hover:text-purple-400'
+                      }`}
+                    />
+                  </button>
+                  <button
+                    onClick={(e) => handleCopyPlan(plan, e)}
                     disabled={copyingId === plan.id}
                     className="p-2 hover:bg-gray-100 rounded-lg disabled:opacity-50"
                     title="复制"
@@ -313,21 +432,21 @@ export default function PlansPage() {
                     )}
                   </button>
                   <button
-                    onClick={e => e.preventDefault()}
+                    onClick={(e) => e.preventDefault()}
                     className="p-2 hover:bg-gray-100 rounded-lg"
                     title="编辑"
                   >
                     <Edit className="w-4 h-4 text-gray-400" />
                   </button>
                   <button
-                    onClick={e => e.preventDefault()}
+                    onClick={(e) => e.preventDefault()}
                     className="p-2 hover:bg-gray-100 rounded-lg"
                     title="导出"
                   >
                     <Download className="w-4 h-4 text-gray-400" />
                   </button>
                   <button
-                    onClick={e => e.preventDefault()}
+                    onClick={(e) => e.preventDefault()}
                     className="p-2 hover:bg-gray-100 rounded-lg"
                     title="更多"
                   >

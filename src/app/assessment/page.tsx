@@ -195,7 +195,7 @@ export default function AssessmentPage() {
             <div className="lg:col-span-1">
               <h2 className="font-semibold text-gray-700 mb-4">选择学员</h2>
               <div className="space-y-2">
-                {players.map(player => (
+                {players.map((player) => (
                   <button
                     key={player.id}
                     onClick={() => setSelectedPlayer(player)}
@@ -238,7 +238,7 @@ export default function AssessmentPage() {
 
                     {/* 能力评分 */}
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-                      {(Object.keys(skillLabels) as Array<SkillKey>).map(skill => (
+                      {(Object.keys(skillLabels) as Array<SkillKey>).map((skill) => (
                         <div key={skill} className="space-y-2">
                           <label className="text-sm font-medium text-gray-700">
                             {skillLabels[skill]}
@@ -249,7 +249,7 @@ export default function AssessmentPage() {
                               min="1"
                               max="10"
                               value={scores[skill]}
-                              onChange={e =>
+                              onChange={(e) =>
                                 setScores({
                                   ...scores,
                                   [skill]: parseInt(e.target.value),
@@ -285,7 +285,7 @@ export default function AssessmentPage() {
                         <input
                           type="text"
                           value={assessor}
-                          onChange={e => setAssessor(e.target.value)}
+                          onChange={(e) => setAssessor(e.target.value)}
                           placeholder="输入评估人姓名"
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                         />
@@ -295,7 +295,7 @@ export default function AssessmentPage() {
                         <input
                           type="text"
                           value={notes}
-                          onChange={e => setNotes(e.target.value)}
+                          onChange={(e) => setNotes(e.target.value)}
                           placeholder="简短的评估备注"
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                         />
@@ -328,7 +328,7 @@ export default function AssessmentPage() {
                       <p className="text-gray-500 text-center py-4">暂无评估记录</p>
                     ) : (
                       <div className="space-y-3">
-                        {assessments.slice(0, 5).map(assessment => (
+                        {assessments.slice(0, 5).map((assessment) => (
                           <div key={assessment.id} className="p-4 bg-gray-50 rounded-xl">
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-sm text-gray-500">

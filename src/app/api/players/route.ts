@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 转换数据格式
-    const formattedPlayers = players.map(p => {
+    const formattedPlayers = players.map((p) => {
       // 计算年龄
       const birth = new Date(p.birthDate);
       const age = Math.floor((Date.now() - birth.getTime()) / (365.25 * 24 * 60 * 60 * 1000));

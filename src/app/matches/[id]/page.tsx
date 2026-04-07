@@ -105,7 +105,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
   });
 
   useEffect(() => {
-    params.then(p => {
+    params.then((p) => {
       setMatchId(p.id);
       fetchMatch(p.id);
     });
@@ -178,7 +178,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
     if (!match) return;
 
     try {
-      const selectedPlayer = players.find(p => p.id === eventForm.playerId);
+      const selectedPlayer = players.find((p) => p.id === eventForm.playerId);
 
       const response = await fetchWithAuth('/api/match-events', {
         method: 'POST',
@@ -292,7 +292,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
 
   // 计算球员统计数据
   const playerStatsMap: Record<string, any> = {};
-  match.events.forEach(event => {
+  match.events.forEach((event) => {
     if (event.playerId) {
       if (!playerStatsMap[event.playerId]) {
         playerStatsMap[event.playerId] = {
@@ -389,7 +389,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                   <input
                     type="number"
                     value={editForm.homeScore}
-                    onChange={e =>
+                    onChange={(e) =>
                       setEditForm({
                         ...editForm,
                         homeScore: parseInt(e.target.value) || 0,
@@ -418,7 +418,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                   <input
                     type="number"
                     value={editForm.opponentScore}
-                    onChange={e =>
+                    onChange={(e) =>
                       setEditForm({
                         ...editForm,
                         opponentScore: parseInt(e.target.value) || 0,
@@ -647,7 +647,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                   <label className="block text-sm font-medium text-gray-700 mb-1">节次</label>
                   <select
                     value={eventForm.quarter}
-                    onChange={e =>
+                    onChange={(e) =>
                       setEventForm({
                         ...eventForm,
                         quarter: parseInt(e.target.value),
@@ -666,7 +666,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                   <input
                     type="text"
                     value={eventForm.eventTime}
-                    onChange={e => setEventForm({ ...eventForm, eventTime: e.target.value })}
+                    onChange={(e) => setEventForm({ ...eventForm, eventTime: e.target.value })}
                     placeholder="12:34"
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
@@ -675,11 +675,11 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                   <label className="block text-sm font-medium text-gray-700 mb-1">球员</label>
                   <select
                     value={eventForm.playerId}
-                    onChange={e => setEventForm({ ...eventForm, playerId: e.target.value })}
+                    onChange={(e) => setEventForm({ ...eventForm, playerId: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     <option value="">选择球员</option>
-                    {players.map(player => (
+                    {players.map((player) => (
                       <option key={player.id} value={player.id}>
                         {player.name}
                       </option>
@@ -692,7 +692,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                 <label className="block text-sm font-medium text-gray-700 mb-1">事件类型</label>
                 <select
                   value={eventForm.eventType}
-                  onChange={e => setEventForm({ ...eventForm, eventType: e.target.value })}
+                  onChange={(e) => setEventForm({ ...eventForm, eventType: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 >
                   <option value="score">得分</option>
@@ -711,7 +711,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                   <label className="block text-sm font-medium text-gray-700 mb-1">得分</label>
                   <select
                     value={eventForm.points}
-                    onChange={e =>
+                    onChange={(e) =>
                       setEventForm({
                         ...eventForm,
                         points: parseInt(e.target.value),
@@ -731,7 +731,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                 <input
                   type="text"
                   value={eventForm.description}
-                  onChange={e => setEventForm({ ...eventForm, description: e.target.value })}
+                  onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })}
                   placeholder="事件描述（可选）"
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />

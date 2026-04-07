@@ -109,7 +109,7 @@ export default function VoicePlanPage() {
         });
         setSelectedPlayers(players);
         setStep('confirm');
-        speak(`找到${players.length}位学员：${players.map(p => p.name).join('、')}`);
+        speak(`找到${players.length}位学员：${players.map((p) => p.name).join('、')}`);
       } else {
         setError(`未找到名为"${name}"的学员`);
         speak(`抱歉，未找到名为${name}的学员`);
@@ -130,14 +130,14 @@ export default function VoicePlanPage() {
         let players: Player[] = data.players;
 
         if (ageGroup) {
-          players = players.filter(p => p.group.toUpperCase() === ageGroup.toUpperCase());
+          players = players.filter((p) => p.group.toUpperCase() === ageGroup.toUpperCase());
         }
 
         if (skills && skills.length > 0) {
           players = players
-            .map(p => {
+            .map((p) => {
               const weakSkills: string[] = [];
-              skills.forEach(skill => {
+              skills.forEach((skill) => {
                 const skillKey = skillToKey(skill);
                 if (skillKey && (p[skillKey as keyof Player] as number) < 5) {
                   weakSkills.push(skill);
@@ -145,7 +145,7 @@ export default function VoicePlanPage() {
               });
               return { ...p, weakSkills };
             })
-            .filter(p => p.weakSkills && p.weakSkills.length > 0);
+            .filter((p) => p.weakSkills && p.weakSkills.length > 0);
         }
 
         if (players.length === 0) {
@@ -215,7 +215,7 @@ export default function VoicePlanPage() {
           duration: 90,
           focusSkills: mainPlayer.weakSkills || ['运球'],
           playerCount: selectedPlayers.length,
-          playerNames: selectedPlayers.map(p => p.name),
+          playerNames: selectedPlayers.map((p) => p.name),
         }),
       });
 
@@ -228,7 +228,7 @@ export default function VoicePlanPage() {
           body: JSON.stringify({
             ...data.plan,
             generatedBy: 'ai',
-            title: `${mainPlayer.group}训练教案 - ${selectedPlayers.map(p => p.name).join('、')}`,
+            title: `${mainPlayer.group}训练教案 - ${selectedPlayers.map((p) => p.name).join('、')}`,
           }),
         });
 
@@ -237,7 +237,7 @@ export default function VoicePlanPage() {
         if (saveData.success) {
           setGeneratedPlanId(saveData.id);
           setStep('success');
-          speak(`教案生成成功！已为${selectedPlayers.map(p => p.name).join('、')}创建训练教案`);
+          speak(`教案生成成功！已为${selectedPlayers.map((p) => p.name).join('、')}创建训练教案`);
         } else {
           throw new Error('保存教案失败');
         }
@@ -254,10 +254,10 @@ export default function VoicePlanPage() {
   }
 
   function togglePlayer(player: Player) {
-    setSelectedPlayers(prev => {
-      const isSelected = prev.some(p => p.id === player.id);
+    setSelectedPlayers((prev) => {
+      const isSelected = prev.some((p) => p.id === player.id);
       if (isSelected) {
-        return prev.filter(p => p.id !== player.id);
+        return prev.filter((p) => p.id !== player.id);
       } else {
         return [...prev, player];
       }
@@ -347,13 +347,13 @@ export default function VoicePlanPage() {
                     handleStopRecording();
                   }
                 }}
-                onTouchStart={e => {
+                onTouchStart={(e) => {
                   e.preventDefault();
                   if (!voice.isRecording && !voice.isRecognizing && voice.isSupported) {
                     handleStartRecording();
                   }
                 }}
-                onTouchEnd={e => {
+                onTouchEnd={(e) => {
                   e.preventDefault();
                   if (voice.isRecording) {
                     handleStopRecording();
@@ -494,11 +494,11 @@ export default function VoicePlanPage() {
                 </div>
 
                 <div className="space-y-2">
-                  {parsedCommand.players.map(player => (
+                  {parsedCommand.players.map((player) => (
                     <div
                       key={player.id}
                       className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                        selectedPlayers.some(p => p.id === player.id)
+                        selectedPlayers.some((p) => p.id === player.id)
                           ? 'border-orange-500 bg-orange-50'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
@@ -508,7 +508,7 @@ export default function VoicePlanPage() {
                         <div className="flex items-center gap-3">
                           <div
                             className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                              selectedPlayers.some(p => p.id === player.id)
+                              selectedPlayers.some((p) => p.id === player.id)
                                 ? 'bg-orange-500 text-white'
                                 : 'bg-gray-100 text-gray-600'
                             }`}
@@ -557,7 +557,7 @@ export default function VoicePlanPage() {
             <Loader2 className="w-16 h-16 mx-auto text-orange-500 animate-spin" />
             <p className="mt-6 text-lg font-medium text-gray-900">正在生成教案...</p>
             <p className="mt-2 text-sm text-gray-500">
-              正在分析 {selectedPlayers.map(p => p.name).join('、')} 的学习进度
+              正在分析 {selectedPlayers.map((p) => p.name).join('、')} 的学习进度
             </p>
           </div>
         )}
@@ -571,7 +571,7 @@ export default function VoicePlanPage() {
               </div>
               <p className="mt-6 text-xl font-bold text-gray-900">教案生成成功！</p>
               <p className="mt-2 text-gray-500">
-                已为 {selectedPlayers.map(p => p.name).join('、')} 创建训练教案
+                已为 {selectedPlayers.map((p) => p.name).join('、')} 创建训练教案
               </p>
             </div>
 

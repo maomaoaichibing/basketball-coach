@@ -81,7 +81,7 @@ export default function MobileNav() {
       {/* 移动端底部导航栏 */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-bottom">
         <div className="flex items-center justify-around h-14">
-          {mainNavItems.map(item => {
+          {mainNavItems.map((item) => {
             const isActive =
               pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
             const Icon = item.icon;
@@ -203,7 +203,7 @@ export default function MobileNav() {
                 </button>
               </div>
               <div className="grid grid-cols-4 gap-3">
-                {moreMenuItems.map(item => (
+                {moreMenuItems.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
@@ -325,7 +325,7 @@ export default function MobileNav() {
                 { href: '/growth-reports', icon: '📄', label: '成长档案' },
                 { href: '/analytics', icon: '✨', label: '智能分析' },
                 { href: '/smart-plan', icon: '🧠', label: '智能教案' },
-              ].map(item => (
+              ].map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}

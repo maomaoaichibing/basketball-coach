@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 解析 recordIds JSON
-    const parsedEnrollments = enrollments.map(e => ({
+    const parsedEnrollments = enrollments.map((e) => ({
       ...e,
       recordIds: JSON.parse((e.recordIds as string) || '[]'),
     }));

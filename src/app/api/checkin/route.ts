@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 使用事务批量签到：先查已有记录，再统一 create/update
-    const playerIds = records.map(r => r.playerId).filter(Boolean);
+    const playerIds = records.map((r) => r.playerId).filter(Boolean);
     const existingRecords =
       playerIds.length > 0
         ? await prisma.trainingRecord.findMany({
@@ -25,10 +25,10 @@ export async function POST(request: NextRequest) {
             select: { id: true, playerId: true },
           })
         : [];
-    const existingMap = new Map(existingRecords.map(r => [r.playerId, r.id]));
+    const existingMap = new Map(existingRecords.map((r) => [r.playerId, r.id]));
 
     const results = await prisma.$transaction(
-      records.map(record => {
+      records.map((record) => {
         const { playerId, attendance, signInTime, notes } = record;
         const existingId = existingMap.get(playerId);
 

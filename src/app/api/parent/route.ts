@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 批量查询：收集所有 playerIds，一次查完所有关联数据（避免 N+1）
-    const playerIds = players.map(p => p.id);
+    const playerIds = players.map((p) => p.id);
 
     const [allRecords, allAssessments, allGoals, allEnrollments] = await Promise.all([
       // 所有学员最近10条训练记录
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     // 获取每个学员的最新完整评估记录
-    const assessmentDates = allAssessments.map(a => a._max.assessedAt).filter(Boolean) as Date[];
+    const assessmentDates = allAssessments.map((a) => a._max.assessedAt).filter(Boolean) as Date[];
     const fullAssessments =
       assessmentDates.length > 0
         ? await prisma.playerAssessment.findMany({
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
       if (list.length < 10) list.push(r);
     }
 
-    const assessmentByPlayer = new Map(fullAssessments.map(a => [a.playerId, a]));
+    const assessmentByPlayer = new Map(fullAssessments.map((a) => [a.playerId, a]));
 
     const goalsByPlayer = new Map<string, typeof allGoals>();
     for (const g of allGoals) {
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 组装结果
-    const playersWithRecords = players.map(player => {
+    const playersWithRecords = players.map((player) => {
       const records = recordsByPlayer.get(player.id) || [];
       const latestAssessment = assessmentByPlayer.get(player.id) || null;
       const activeGoals = goalsByPlayer.get(player.id) || [];
@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
         ...player,
         injuries: JSON.parse((player.injuries as unknown as string) || '[]'),
         tags: JSON.parse((player.tags as unknown as string) || '[]'),
-        records: records.map(r => ({
+        records: records.map((r) => ({
           ...r,
           skillScores: r.skillScores ? JSON.parse(r.skillScores as unknown as string) : null,
         })),
@@ -152,7 +152,7 @@ export async function GET(request: NextRequest) {
             }
           : null,
         activeGoals,
-        enrollments: enrollments.map(e => ({
+        enrollments: enrollments.map((e) => ({
           ...e,
           recordIds: JSON.parse((e.recordIds as unknown as string) || '[]'),
         })),
