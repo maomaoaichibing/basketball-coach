@@ -78,6 +78,7 @@ export default function NewPlanPage() {
     playerCount: '',
     skillLevel: 'intermediate' as 'beginner' | 'intermediate' | 'advanced',
     previousTraining: '',
+    enableWeaknessAnalysis: false, // 是否根据学员薄弱环节生成教案
   });
 
   const [focusSkills, setFocusSkills] = useState<string[]>([]);
@@ -264,8 +265,11 @@ export default function NewPlanPage() {
           previousTraining: aiConfig.previousTraining
             ? aiConfig.previousTraining.split(/[,，]/).map(s => s.trim())
             : undefined,
-          // 传递选中学员ID，后端自动分析技能短板
-          playerIds: selectedPlayerIds.length > 0 ? selectedPlayerIds : undefined,
+          // 传递选中学员ID（仅开关开启且有学员时）
+          playerIds:
+            aiConfig.enableWeaknessAnalysis && selectedPlayerIds.length > 0
+              ? selectedPlayerIds
+              : undefined,
         };
 
         // 调用服务端API生成教案
@@ -881,6 +885,31 @@ export default function NewPlanPage() {
                         }
                         className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
                       />
+                    </div>
+
+                    {/* 薄弱环节分析开关 */}
+                    <div>
+                      <label className="flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={aiConfig.enableWeaknessAnalysis}
+                          onChange={e =>
+                            setAiConfig({
+                              ...aiConfig,
+                              enableWeaknessAnalysis: e.target.checked,
+                            })
+                          }
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <span className="text-xs font-medium text-gray-700">
+                          根据学员薄弱环节生成教案
+                        </span>
+                      </label>
+                      <p className="text-xs text-gray-400 mt-1 ml-6">
+                        {selectedPlayerIds.length === 0
+                          ? '需先选择参训学员'
+                          : `已选 ${selectedPlayerIds.length} 名学员，将分析其技能短板并针对性调整训练内容`}
+                      </p>
                     </div>
 
                     {/* 其他要求 */}

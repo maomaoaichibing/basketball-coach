@@ -16,6 +16,18 @@ import {
 // 版本历史记录
 const versions = [
   {
+    version: 'v5.3.1',
+    date: '2026-04-07',
+    title: '薄弱环节分析开关',
+    description:
+      '教案生成页新增开关控制是否根据学员薄弱环节生成教案，前期学员数据不足时可关闭',
+    features: [
+      { type: 'feature', text: '新增「根据学员薄弱环节生成教案」开关，默认关闭' },
+      { type: 'feature', text: '开关关闭时不传学员数据给AI，避免无意义分析' },
+      { type: 'feature', text: '开关状态提示：未选学员时提示需先选择，已选时显示学员数量' },
+    ],
+  },
+  {
     version: 'v5.3.0',
     date: '2026-04-07',
     title: '智能教案生成 — 学员短板分析',
