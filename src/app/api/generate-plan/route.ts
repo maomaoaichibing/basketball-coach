@@ -18,6 +18,7 @@ interface AIPlanParams {
   additionalNotes?: string;
   playerCount?: number;
   skillLevel?: 'beginner' | 'intermediate' | 'advanced';
+  intensity?: 'low' | 'medium' | 'high';
   previousTraining?: string[];
   // 学员ID列表（用于智能短板分析）
   playerIds?: string[];
@@ -881,6 +882,15 @@ function generatePrompt(
     ? `\n## U10级别说明（${levelLabel}）\n${u10LevelGuide[levelLabel] || ''}\n`
     : '';
 
+  // 强度描述
+  const intensityDesc: Record<string, string> = {
+    low: '低强度：以游戏化、趣味性为主，训练量小，组间休息充分，适合恢复性训练或初次接触的学员。减少体能负荷，增加趣味互动。',
+    medium: '中强度：正常训练节奏，适度休息，适合日常训练。技术动作规范为主，体能训练穿插其中。',
+    high: '高强度：训练量大，组间休息短，节奏紧凑。增加体能负荷和对抗强度，适合赛前集训或体能强化。每个动作时间饱满，减少空闲等待。',
+  };
+  const intensityLabel = params.intensity === 'low' ? '低强度' : params.intensity === 'high' ? '高强度' : '中强度';
+  const intensityText = intensityDesc[params.intensity || 'medium'] || intensityDesc['medium'];
+
   // 训练节次结构
   const segmentDesc = segments
     .map(s => `- ${s.name}（${s.minutes}分钟）：${s.description}`)
@@ -903,6 +913,7 @@ ${segmentDesc}
 - 训练主题：${params.theme || '根据年龄段特点自动确定'}${params.theme && params.theme.includes('+') ? '\n（教练选择了多个主题，教案中需要同时覆盖这些主题的训练内容，可以将不同主题分配到不同时间段或进行组合训练）' : ''}
 - 重点训练技能：${params.focusSkills?.join('、') || '根据年龄段特点自动确定'}
 - 技能水平：${isU10 ? levelLabel + '（' + u10LevelGuide[levelLabel] + '）' : params.skillLevel || 'intermediate'}
+- 训练强度：${intensityLabel}（${intensityText}）
 ${params.previousTraining?.length ? `- 最近训练内容：${params.previousTraining.join('、')}（避免重复或进阶）` : ''}
 ${params.additionalNotes ? `- 教练特别要求（必须严格执行）：${params.additionalNotes}\n（以上要求是教练明确的训练需求，必须在教案中完整体现，不能忽略！\n如果教练要求"运球和传球结合"，则教案中必须有运球传球结合的练习！）` : ''}
 
@@ -914,7 +925,7 @@ ${casesText ? `## 参考案例（来自真实教学数据）\n${casesText}\n` : 
   "theme": "训练主题",
   "objective": "训练目标（1-2句话）",
   "level": "${isU10 ? levelLabel : 'N/A'}",
-  "intensity": "low/medium/high",
+  "intensity": "${params.intensity || 'medium'}",
   "segments": [
     {
       "name": "第一节",
@@ -1319,7 +1330,7 @@ export async function POST(request: NextRequest) {
           weather: params.weather,
           theme: validatedResult.theme,
           focusSkills: params.focusSkills || [],
-          intensity: validatedResult.intensity as 'low' | 'medium' | 'high',
+          intensity: (params.intensity || validatedResult.intensity) as 'low' | 'medium' | 'high',
           skillLevel: params.skillLevel || 'intermediate',
           // 兼容 segments（新三段式）和 sections（旧格式）
           sections: (validatedResult.segments || validatedResult.sections || []).map(
@@ -1385,7 +1396,7 @@ export async function POST(request: NextRequest) {
           weather: params.weather,
           theme: validatedResult.theme,
           focusSkills: params.focusSkills || [],
-          intensity: validatedResult.intensity as 'low' | 'medium' | 'high',
+          intensity: (params.intensity || validatedResult.intensity) as 'low' | 'medium' | 'high',
           skillLevel: params.skillLevel || 'intermediate',
           // 兼容 segments（新三段式）和 sections（旧格式）
           sections: (validatedResult.segments || validatedResult.sections || []).map(

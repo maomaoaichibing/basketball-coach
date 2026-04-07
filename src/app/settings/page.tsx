@@ -443,7 +443,7 @@ export default function SettingsPage() {
           <span className="font-medium">退出登录</span>
         </button>
 
-        <div className="text-center text-xs text-gray-400 py-4">篮球青训教案系统 v5.4.0</div>
+        <div className="text-center text-xs text-gray-400 py-4">篮球青训教案系统 v5.4.1</div>
       </main>
 
       {/* 修改密码弹窗 */}

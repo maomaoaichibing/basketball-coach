@@ -77,6 +77,7 @@ export default function NewPlanPage() {
     additionalNotes: '',
     playerCount: '',
     skillLevel: 'intermediate' as 'beginner' | 'intermediate' | 'advanced',
+    intensity: 'medium' as 'low' | 'medium' | 'high',
     previousTraining: '',
     enableWeaknessAnalysis: false, // 是否根据学员薄弱环节生成教案
   });
@@ -262,6 +263,7 @@ export default function NewPlanPage() {
                 ? parseInt(aiConfig.playerCount)
                 : undefined,
           skillLevel: aiConfig.skillLevel,
+          intensity: aiConfig.intensity,
           previousTraining: aiConfig.previousTraining
             ? aiConfig.previousTraining.split(/[,，]/).map(s => s.trim())
             : undefined,
@@ -704,6 +706,32 @@ export default function NewPlanPage() {
                       >
                         <Clock className="w-4 h-4" />
                         {d}分钟
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 训练强度 */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">训练强度</label>
+                  <div className="flex gap-2">
+                    {([
+                      { value: 'low', label: '低强度', color: 'bg-green-500', hover: 'hover:bg-green-600' },
+                      { value: 'medium', label: '中强度', color: 'bg-yellow-500', hover: 'hover:bg-yellow-600' },
+                      { value: 'high', label: '高强度', color: 'bg-red-500', hover: 'hover:bg-red-600' },
+                    ] as const).map(opt => (
+                      <button
+                        key={opt.value}
+                        onClick={() =>
+                          setAiConfig({ ...aiConfig, intensity: opt.value })
+                        }
+                        className={`flex-1 p-2 rounded-lg text-center transition-all text-sm font-medium ${
+                          aiConfig.intensity === opt.value
+                            ? `${opt.color} text-white`
+                            : `bg-gray-100 text-gray-700 ${opt.hover}`
+                        }`}
+                      >
+                        {opt.label}
                       </button>
                     ))}
                   </div>

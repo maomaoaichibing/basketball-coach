@@ -16,6 +16,18 @@ import {
 // 版本历史记录
 const versions = [
   {
+    version: 'v5.4.1',
+    date: '2026-04-07',
+    title: '训练强度手动选择',
+    description:
+      'AI 生成配置新增训练强度选择器，教练可在生成前指定低/中/高强度',
+    features: [
+      { type: 'feature', text: '新增训练强度三按钮选择器（低强度绿/中强度黄/高强度红）' },
+      { type: 'feature', text: 'AI prompt 加入强度指导，按指定强度调整训练量和休息' },
+      { type: 'feature', text: 'API 新增 intensity 参数，优先使用教练指定值' },
+    ],
+  },
+  {
     version: 'v5.4.0',
     date: '2026-04-07',
     title: '水平与强度分离',
