@@ -96,6 +96,46 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
+// PATCH /api/records/[id] - 部分更新训练记录（签到/反馈）
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await verifyAuth(request);
+  if (!auth.success) return auth.response;
+
+  try {
+    const { id } = params;
+    const body = await request.json();
+
+    const existing = await prisma.trainingRecord.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ success: false, error: '训练记录不存在' }, { status: 404 });
+    }
+
+    const record = await prisma.trainingRecord.update({
+      where: { id },
+      data: {
+        attendance: body.attendance ?? undefined,
+        performance: body.performance ?? undefined,
+        effort: body.effort ?? undefined,
+        attitude: body.attitude ?? undefined,
+        feedback: body.feedback ?? undefined,
+        highlights: body.highlights ?? undefined,
+        issues: body.issues ?? undefined,
+        improvements: body.improvements ?? undefined,
+        skillScores: body.skillScores ? JSON.stringify(body.skillScores) : undefined,
+        signOutTime: body.signOutTime ? new Date(body.signOutTime) : undefined,
+      },
+    });
+
+    return NextResponse.json({ success: true, record });
+  } catch (error) {
+    console.error('更新训练记录失败:', error);
+    return NextResponse.json({ success: false, error: '更新训练记录失败' }, { status: 500 });
+  }
+}
+
 // DELETE /api/records/[id] - 删除训练记录
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   const auth = await verifyAuth(request);

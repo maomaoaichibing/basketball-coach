@@ -3,18 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { fetchWithAuth } from '@/lib/auth';
-import {
-  ArrowLeft,
-  Plus,
-  Calendar,
-  Clock,
-  MapPin,
-  Users,
-  Check,
-  X,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
+import { Plus, Calendar, Users, Check, ArrowLeft, Clock, MapPin } from 'lucide-react';
 
 type Schedule = {
   id: string;

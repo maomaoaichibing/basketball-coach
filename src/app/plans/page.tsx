@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { fetchWithAuth } from '@/lib/auth';
@@ -63,11 +63,7 @@ export default function PlansPage() {
     '对抗比赛',
   ];
 
-  useEffect(() => {
-    fetchPlans();
-  }, []);
-
-  async function fetchPlans() {
+  const fetchPlans = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetchWithAuth('/api/plans?limit=50');
@@ -77,7 +73,7 @@ export default function PlansPage() {
         // 解析 focusSkills
         const parsedPlans = data.plans.map((plan: TrainingPlan) => ({
           ...plan,
-          focusSkills: plan.focusSkills ? JSON.parse(plan.focusSkills) : [],
+          focusSkills: plan.focusSkills ? JSON.parse(plan.focusSkills as string) : [],
         }));
         setPlans(parsedPlans);
       }
@@ -86,7 +82,11 @@ export default function PlansPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    fetchPlans();
+  }, [fetchPlans]);
 
   // 复制教案
   async function handleCopyPlan(plan: TrainingPlan, e: React.MouseEvent) {
@@ -260,7 +260,9 @@ export default function PlansPage() {
                             </span>
                           );
                         }
-                      } catch { /* ignore */ }
+                      } catch {
+                        /* ignore */
+                      }
                       return null;
                     })()}
                   </div>

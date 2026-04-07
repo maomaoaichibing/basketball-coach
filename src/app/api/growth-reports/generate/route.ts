@@ -166,10 +166,11 @@ export async function POST(request: NextRequest) {
       case 'monthly':
         title = `${startDate.getFullYear()}年${startDate.getMonth() + 1}月成长报告`;
         break;
-      case 'quarterly':
+      case 'quarterly': {
         const quarter = Math.ceil((startDate.getMonth() + 1) / 3);
         title = `${startDate.getFullYear()}年第${quarter}季度成长报告`;
         break;
+      }
       case 'yearly':
         title = `${startDate.getFullYear()}年度成长报告`;
         break;

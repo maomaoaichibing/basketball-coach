@@ -134,11 +134,11 @@ export async function GET(request: NextRequest) {
 
       return {
         ...player,
-        injuries: JSON.parse((player.injuries as string) || '[]'),
-        tags: JSON.parse((player.tags as string) || '[]'),
+        injuries: JSON.parse((player.injuries as unknown as string) || '[]'),
+        tags: JSON.parse((player.tags as unknown as string) || '[]'),
         records: records.map(r => ({
           ...r,
-          skillScores: r.skillScores ? JSON.parse(r.skillScores) : null,
+          skillScores: r.skillScores ? JSON.parse(r.skillScores as unknown as string) : null,
         })),
         latestAssessment: latestAssessment
           ? {
@@ -154,7 +154,7 @@ export async function GET(request: NextRequest) {
         activeGoals,
         enrollments: enrollments.map(e => ({
           ...e,
-          recordIds: JSON.parse((e.recordIds as string) || '[]'),
+          recordIds: JSON.parse((e.recordIds as unknown as string) || '[]'),
         })),
       };
     });

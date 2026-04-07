@@ -120,8 +120,8 @@ export async function GET(request: NextRequest) {
 
     // 解构并行结果
     const [totalPlayers, activePlayers, trialPlayers, newPlayersThisPeriod] = playerCounts;
-    const totalIncome = periodIncome._sum.amount || 0;
-    const monthIncome = monthIncomeData._sum.amount || 0;
+    const totalIncome = (periodIncome._sum.amount as number) || 0;
+    const monthIncome = (monthIncomeData._sum.amount as number) || 0;
     const [totalOrders, pendingOrders, paidOrders, ordersThisPeriod] = orderCounts;
     const [totalRecords, recordsThisPeriod] = recordCounts;
 
@@ -132,8 +132,8 @@ export async function GET(request: NextRequest) {
       totalAttendance > 0 ? parseFloat(((presentCount / totalAttendance) * 100).toFixed(1)) : 0;
 
     // 课时消耗
-    const totalHoursRemaining = enrollmentStats._sum.remainingHours || 0;
-    const totalHoursUsed = enrollmentStats._sum.usedHours || 0;
+    const totalHoursRemaining = (enrollmentStats._sum.remainingHours as number) || 0;
+    const totalHoursUsed = (enrollmentStats._sum.usedHours as number) || 0;
 
     // 收入趋势 - 内存分组（7次查询 → 1次查询 + JS分组）
     const incomeByDay = new Map<string, number>();

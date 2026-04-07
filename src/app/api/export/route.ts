@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient, TrainingPlan, Player, TrainingRecord } from '@prisma/client';
+import { TrainingPlan, Player, TrainingRecord } from '@prisma/client';
 import * as XLSX from 'xlsx';
 import { verifyAuth } from '@/lib/auth-middleware';
 import prisma from '@/lib/db';

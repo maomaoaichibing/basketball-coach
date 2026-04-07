@@ -20,7 +20,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       success: true,
       checkin: {
         ...checkin,
-        mediaUrls: JSON.parse(checkin.mediaUrls || '[]'),
+        mediaUrls: JSON.parse((checkin.mediaUrls as unknown as string) || '[]'),
       },
     });
   } catch (error) {

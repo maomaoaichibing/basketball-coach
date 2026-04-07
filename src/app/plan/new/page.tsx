@@ -100,15 +100,11 @@ export default function NewPlanPage() {
 
   // 根据年龄段过滤学员
   const filteredPlayers = allPlayers.filter(
-    p =>
-      p.group === form.group &&
-      p.name.includes(playerSearch)
+    p => p.group === form.group && p.name.includes(playerSearch)
   );
 
   // 已选学员对象
-  const selectedPlayers = allPlayers.filter(p =>
-    selectedPlayerIds.includes(p.id)
-  );
+  const selectedPlayers = allPlayers.filter(p => selectedPlayerIds.includes(p.id));
 
   // 点击外部关闭下拉
   useEffect(() => {
@@ -124,9 +120,7 @@ export default function NewPlanPage() {
   // 切换学员选中
   function togglePlayer(playerId: string) {
     setSelectedPlayerIds(prev =>
-      prev.includes(playerId)
-        ? prev.filter(id => id !== playerId)
-        : [...prev, playerId]
+      prev.includes(playerId) ? prev.filter(id => id !== playerId) : [...prev, playerId]
     );
   }
 
@@ -328,9 +322,10 @@ export default function NewPlanPage() {
       const data = await response.json();
 
       if (data.success) {
-        const msg = selectedPlayerIds.length > 0
-          ? `教案保存成功！已为 ${data.attendanceCount} 名学员自动签到`
-          : '教案保存成功！';
+        const msg =
+          selectedPlayerIds.length > 0
+            ? `教案保存成功！已为 ${data.attendanceCount} 名学员自动签到`
+            : '教案保存成功！';
         alert(msg);
         // 跳转到教案详情页
         window.location.href = `/plans/${data.id}`;
@@ -584,7 +579,9 @@ export default function NewPlanPage() {
                                 }`}
                               >
                                 <span>{p.name}</span>
-                                <span className="text-xs text-gray-400">{p.group} · {p.age}岁</span>
+                                <span className="text-xs text-gray-400">
+                                  {p.group} · {p.age}岁
+                                </span>
                               </button>
                             ))
                           )}
@@ -1151,7 +1148,9 @@ export default function NewPlanPage() {
                     ) : (
                       <>
                         <Save className="w-5 h-5" />
-                        {selectedPlayerIds.length > 0 ? `保存教案并签到（${selectedPlayerIds.length}人）` : '保存教案'}
+                        {selectedPlayerIds.length > 0
+                          ? `保存教案并签到（${selectedPlayerIds.length}人）`
+                          : '保存教案'}
                       </>
                     )}
                   </button>

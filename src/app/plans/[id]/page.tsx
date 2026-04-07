@@ -161,13 +161,33 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
   const getAttendanceInfo = (attendance: string) => {
     switch (attendance) {
       case 'present':
-        return { icon: UserCheck, label: '已签到', color: 'text-green-600', bg: 'bg-green-50 border-green-200' };
+        return {
+          icon: UserCheck,
+          label: '已签到',
+          color: 'text-green-600',
+          bg: 'bg-green-50 border-green-200',
+        };
       case 'absent':
-        return { icon: UserX, label: '缺勤', color: 'text-red-600', bg: 'bg-red-50 border-red-200' };
+        return {
+          icon: UserX,
+          label: '缺勤',
+          color: 'text-red-600',
+          bg: 'bg-red-50 border-red-200',
+        };
       case 'late':
-        return { icon: AlertCircle, label: '迟到', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200' };
+        return {
+          icon: AlertCircle,
+          label: '迟到',
+          color: 'text-amber-600',
+          bg: 'bg-amber-50 border-amber-200',
+        };
       default:
-        return { icon: UserCheck, label: '已签到', color: 'text-green-600', bg: 'bg-green-50 border-green-200' };
+        return {
+          icon: UserCheck,
+          label: '已签到',
+          color: 'text-green-600',
+          bg: 'bg-green-50 border-green-200',
+        };
     }
   };
 
@@ -409,13 +429,18 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                     </div>
                     <div className="flex items-center gap-2">
                       {attendanceInfo && (
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full border ${attendanceInfo.bg} ${attendanceInfo.color}`}>
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full border ${attendanceInfo.bg} ${attendanceInfo.color}`}
+                        >
                           <AttendanceIcon className="w-3 h-3" />
                           {attendanceInfo.label}
                         </span>
                       )}
                       {record?.feedback && (
-                        <span className="text-xs text-gray-400 max-w-[120px] truncate" title={record.feedback}>
+                        <span
+                          className="text-xs text-gray-400 max-w-[120px] truncate"
+                          title={record.feedback}
+                        >
                           {record.feedback}
                         </span>
                       )}

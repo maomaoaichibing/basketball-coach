@@ -2,8 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Play, Users, CheckCircle, Clock, ClipboardList } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { fetchWithAuth } from '@/lib/auth';
+import {
+  ArrowLeft,
+  Play,
+  Users,
+  CheckCircle,
+  Clock,
+  ClipboardList,
+  UserCheck,
+  UserX,
+  AlertCircle,
+  Save,
+  MessageSquare,
+  Star,
+} from 'lucide-react';
 
 // 类型定义
 type TrainingPlan = {
@@ -14,51 +28,62 @@ type TrainingPlan = {
   group: string;
   location: string;
   theme?: string;
+  playerIds?: string;
+  generatedBy?: string;
 };
 
-type Player = {
+type PlayerDetail = {
   id: string;
   name: string;
   group: string;
 };
 
-type AttendanceRecord = {
-  playerId: string;
-  attendance: 'present' | 'absent' | 'late';
-  performance?: number;
-  effort?: number;
-  attitude?: number;
-  feedback?: string;
+type TrainingRecord = {
+  id: string;
+  playerId: string | null;
+  player: { id: string; name: string; group: string } | null;
+  attendance: string;
+  signInTime: string | null;
+  performance: number | null;
+  effort: number | null;
+  attitude: number | null;
+  feedback: string | null;
+  highlights: string | null;
+  issues: string | null;
 };
 
 export default function TrainingSessionPage() {
+  const router = useRouter();
   const [plans, setPlans] = useState<TrainingPlan[]>([]);
-  const [players, setPlayers] = useState<Player[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<TrainingPlan | null>(null);
-  const [selectedGroup, setSelectedGroup] = useState<string>('');
-  const [attendance, setAttendance] = useState<Record<string, AttendanceRecord>>({});
+  const [playerDetails, setPlayerDetails] = useState<PlayerDetail[]>([]);
+  const [records, setRecords] = useState<TrainingRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+
+  // 训练记录的本地编辑状态（key: playerId）
+  const [attendanceMap, setAttendanceMap] = useState<Record<string, 'present' | 'absent' | 'late'>>({});
+  const [feedbackMap, setFeedbackMap] = useState<Record<string, string>>({});
+  const [performanceMap, setPerformanceMap] = useState<Record<string, number>>({});
+  const [showFeedbackInput, setShowFeedbackInput] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPlans();
-    fetchPlayers();
   }, []);
 
   async function fetchPlans() {
     try {
-      const response = await fetchWithAuth('/api/plans');
+      const response = await fetchWithAuth('/api/plans?limit=50');
       const data = await response.json();
       if (data.success) {
-        const parsedPlans = data.plans.map(
-          (plan: TrainingPlan & { focusSkills?: string; sections?: string }) => ({
-            ...plan,
-            focusSkills: plan.focusSkills ? JSON.parse(plan.focusSkills) : [],
-            sections: plan.sections ? JSON.parse(plan.sections) : [],
-          })
-        );
-        setPlans(parsedPlans);
+        // 按日期倒序排列，带参训学员的优先
+        const sortedPlans = data.plans.sort((a: TrainingPlan, b: TrainingPlan) => {
+          const aHasPlayers = (() => { try { return JSON.parse(a.playerIds || '[]').length > 0; } catch { return false; } })();
+          const bHasPlayers = (() => { try { return JSON.parse(b.playerIds || '[]').length > 0; } catch { return false; } })();
+          if (aHasPlayers !== bHasPlayers) return bHasPlayers ? 1 : -1;
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+        });
+        setPlans(sortedPlans);
       }
     } catch (error) {
       console.error('获取教案失败:', error);
@@ -67,100 +92,124 @@ export default function TrainingSessionPage() {
     }
   }
 
-  async function fetchPlayers() {
+  // 选择教案后，加载参训学员和已有签到记录
+  async function handleSelectPlan(plan: TrainingPlan) {
+    setSelectedPlan(plan);
+
     try {
-      const response = await fetchWithAuth('/api/players');
+      // 获取教案详情（包含 playerDetails 和 records）
+      const response = await fetchWithAuth(`/api/plans/${plan.id}`);
       const data = await response.json();
+
       if (data.success) {
-        setPlayers(data.players);
-        // 默认选中第一个分组
-        if (data.players.length > 0) {
-          const groups = Array.from(new Set(data.players.map((p: Player) => p.group))) as string[];
-          setSelectedGroup(groups[0] || '');
+        setPlayerDetails(data.playerDetails || []);
+        setRecords(data.records || []);
+
+        // 初始化签到状态 map
+        const attMap: Record<string, 'present' | 'absent' | 'late'> = {};
+        const fbMap: Record<string, string> = {};
+        const perfMap: Record<string, number> = {};
+
+        for (const record of (data.records || []) as TrainingRecord[]) {
+          if (record.playerId) {
+            attMap[record.playerId] = record.attendance as 'present' | 'absent' | 'late';
+            if (record.feedback) fbMap[record.playerId] = record.feedback;
+            if (record.performance) perfMap[record.playerId] = record.performance;
+          }
         }
+
+        // 对于没有签到记录的学员，默认设为 present
+        for (const player of (data.playerDetails || []) as PlayerDetail[]) {
+          if (!attMap[player.id]) {
+            attMap[player.id] = 'present';
+          }
+        }
+
+        setAttendanceMap(attMap);
+        setFeedbackMap(fbMap);
+        setPerformanceMap(perfMap);
       }
     } catch (error) {
-      console.error('获取学员失败:', error);
+      console.error('获取教案详情失败:', error);
     }
   }
 
-  const groups = Array.from(new Set(players.map(p => p.group))).sort();
-  const filteredPlayers = selectedGroup ? players.filter(p => p.group === selectedGroup) : players;
-
   function handleAttendanceChange(playerId: string, status: 'present' | 'absent' | 'late') {
-    setAttendance(prev => ({
-      ...prev,
-      [playerId]: {
-        ...prev[playerId],
-        playerId,
-        attendance: status,
-      },
-    }));
+    setAttendanceMap(prev => ({ ...prev, [playerId]: status }));
   }
 
-  async function handleSubmit() {
+  function handlePerformanceChange(playerId: string, score: number) {
+    setPerformanceMap(prev => ({ ...prev, [playerId]: score }));
+  }
+
+  function handleFeedbackChange(playerId: string, feedback: string) {
+    setFeedbackMap(prev => ({ ...prev, [playerId]: feedback }));
+  }
+
+  // 保存签到记录
+  async function handleSave() {
     if (!selectedPlan) return;
 
     setSubmitting(true);
     try {
-      const records = Object.values(attendance);
-      if (records.length === 0) {
-        alert('请至少选择一个学员');
-        return;
+      const playerIds = playerDetails.map(p => p.id);
+      const updatedCount = Object.keys(attendanceMap).length;
+
+      // 批量更新签到记录（PATCH 单个记录）
+      for (const playerId of playerIds) {
+        const existingRecord = records.find(r => r.playerId === playerId);
+        const attendance = attendanceMap[playerId] || 'present';
+        const feedback = feedbackMap[playerId] || null;
+        const performance = performanceMap[playerId] || null;
+
+        if (existingRecord) {
+          // 更新已有记录
+          await fetchWithAuth(`/api/records/${existingRecord.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              attendance,
+              feedback,
+              performance,
+            }),
+          });
+        } else {
+          // 创建新记录（理论上 Phase A 已创建，这里是兜底）
+          await fetchWithAuth('/api/records', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              planId: selectedPlan.id,
+              playerId,
+              attendance,
+              feedback,
+              performance,
+            }),
+          });
+        }
       }
 
-      // 为每个签到学员创建训练记录
-      for (const record of records) {
-        await fetchWithAuth('/api/records', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            planId: selectedPlan.id,
-            playerId: record.playerId,
-            attendance: record.attendance,
-            performance: record.performance,
-            effort: record.effort,
-            attitude: record.attitude,
-            feedback: record.feedback,
-            coachName: '教练',
-          }),
-        });
-      }
-
-      setSubmitted(true);
+      // 刷新记录
+      await handleSelectPlan(selectedPlan);
+      alert(`已保存 ${updatedCount} 名学员的训练记录`);
     } catch (error) {
-      alert('提交失败');
+      console.error('保存失败:', error);
+      alert('保存失败，请重试');
     } finally {
       setSubmitting(false);
     }
   }
 
-  const presentCount = Object.values(attendance).filter(r => r.attendance === 'present').length;
+  // 统计
+  const presentCount = Object.values(attendanceMap).filter(v => v === 'present').length;
+  const lateCount = Object.values(attendanceMap).filter(v => v === 'late').length;
+  const absentCount = Object.values(attendanceMap).filter(v => v === 'absent').length;
+  const totalPlayerCount = playerDetails.length;
 
-  if (submitted) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-md">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="w-8 h-8 text-green-600" />
-          </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">训练记录已保存</h2>
-          <p className="text-gray-500 mb-6">已为 {presentCount} 名学员创建训练记录</p>
-          <div className="flex gap-3">
-            <Link
-              href="/feedback"
-              className="flex-1 py-3 bg-orange-500 text-white rounded-xl font-semibold text-center"
-            >
-              查看课后反馈
-            </Link>
-            <Link
-              href="/"
-              className="flex-1 py-3 border border-gray-200 text-gray-700 rounded-xl font-semibold text-center"
-            >
-              返回首页
-            </Link>
-          </div>
-        </div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
       </div>
     );
   }
@@ -179,29 +228,26 @@ export default function TrainingSessionPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* 左侧：教案选择 */}
-            <div className="lg:col-span-1">
-              <h2 className="font-semibold text-gray-700 mb-4">选择教案</h2>
-              {plans.length === 0 ? (
-                <div className="bg-white rounded-xl p-6 text-center border border-gray-100">
-                  <ClipboardList className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500 mb-3">暂无教案</p>
-                  <Link href="/plan/new" className="text-orange-500 hover:underline text-sm">
-                    去生成教案
-                  </Link>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {plans.slice(0, 10).map(plan => (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* 左侧：教案选择 */}
+          <div className="lg:col-span-1">
+            <h2 className="font-semibold text-gray-700 mb-4">选择教案</h2>
+            {plans.length === 0 ? (
+              <div className="bg-white rounded-xl p-6 text-center border border-gray-100">
+                <ClipboardList className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500 mb-3">暂无教案</p>
+                <Link href="/plan/new" className="text-orange-500 hover:underline text-sm">
+                  去生成教案
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto">
+                {plans.slice(0, 20).map(plan => {
+                  const hasPlayers = (() => { try { return JSON.parse(plan.playerIds || '[]').length > 0; } catch { return false; } })();
+                  return (
                     <button
                       key={plan.id}
-                      onClick={() => setSelectedPlan(plan)}
+                      onClick={() => handleSelectPlan(plan)}
                       className={`w-full p-4 rounded-xl text-left transition-all ${
                         selectedPlan?.id === plan.id
                           ? 'bg-orange-50 border-2 border-orange-500'
@@ -209,146 +255,253 @@ export default function TrainingSessionPage() {
                       }`}
                     >
                       <div className="flex items-start justify-between">
-                        <div>
-                          <div className="font-medium text-gray-900">{plan.title}</div>
-                          <div className="text-sm text-gray-500 mt-1">
-                            {new Date(plan.date).toLocaleDateString()} · {plan.duration}分钟
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-gray-900 truncate">{plan.title}</div>
+                          <div className="text-sm text-gray-500 mt-1 flex items-center gap-2 flex-wrap">
+                            <span>{new Date(plan.date).toLocaleDateString()}</span>
+                            <span>{plan.duration}分钟</span>
+                            {hasPlayers && (
+                              <span className="flex items-center gap-0.5 text-green-600">
+                                <Users className="w-3 h-3" />
+                                {(() => { try { return JSON.parse(plan.playerIds || '[]').length; } catch { return 0; } })()}人
+                              </span>
+                            )}
                           </div>
                         </div>
-                        <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full">
+                        <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full ml-2 shrink-0">
                           {plan.group}
                         </span>
                       </div>
                     </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* 右侧：签到 */}
-            <div className="lg:col-span-2">
-              {selectedPlan ? (
-                <div className="space-y-6">
-                  {/* 已选教案 */}
-                  <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Play className="w-5 h-5" />
-                      <span className="text-orange-100 text-sm">当前训练</span>
-                    </div>
-                    <h2 className="text-xl font-bold mb-1">{selectedPlan.title}</h2>
-                    <div className="flex items-center gap-4 text-orange-100 text-sm">
-                      <span>{new Date(selectedPlan.date).toLocaleDateString()}</span>
-                      <span>{selectedPlan.duration}分钟</span>
-                      <span>{selectedPlan.location}</span>
-                    </div>
-                  </div>
-
-                  {/* 分组筛选 */}
-                  <div className="flex items-center justify-between">
-                    <h2 className="font-semibold text-gray-700">学员签到</h2>
-                    <div className="flex gap-2">
-                      {groups.map(group => (
-                        <button
-                          key={group}
-                          onClick={() => setSelectedGroup(group)}
-                          className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                            selectedGroup === group
-                              ? 'bg-orange-500 text-white'
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                          }`}
-                        >
-                          {group}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* 学员列表 */}
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-                      <span className="text-gray-700">
-                        已签到: <span className="font-bold text-orange-600">{presentCount}</span> /{' '}
-                        {filteredPlayers.length}
-                      </span>
-                    </div>
-                    <div className="divide-y divide-gray-100">
-                      {filteredPlayers.map(player => {
-                        const record = attendance[player.id];
-                        return (
-                          <div key={player.id} className="p-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center text-white font-bold">
-                                {player.name.charAt(0)}
-                              </div>
-                              <span className="font-medium text-gray-900">{player.name}</span>
-                            </div>
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => handleAttendanceChange(player.id, 'present')}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                  record?.attendance === 'present'
-                                    ? 'bg-green-500 text-white'
-                                    : 'bg-green-50 text-green-600 hover:bg-green-100'
-                                }`}
-                              >
-                                出勤
-                              </button>
-                              <button
-                                onClick={() => handleAttendanceChange(player.id, 'late')}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                  record?.attendance === 'late'
-                                    ? 'bg-yellow-500 text-white'
-                                    : 'bg-yellow-50 text-yellow-600 hover:bg-yellow-100'
-                                }`}
-                              >
-                                迟到
-                              </button>
-                              <button
-                                onClick={() => handleAttendanceChange(player.id, 'absent')}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                  record?.attendance === 'absent'
-                                    ? 'bg-red-500 text-white'
-                                    : 'bg-red-50 text-red-600 hover:bg-red-100'
-                                }`}
-                              >
-                                缺勤
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* 提交按钮 */}
-                  <button
-                    onClick={handleSubmit}
-                    disabled={submitting || Object.keys(attendance).length === 0}
-                    className="w-full py-4 bg-orange-500 text-white rounded-xl font-semibold hover:bg-orange-600 disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {submitting ? (
-                      <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                        保存中...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle className="w-5 h-5" />
-                        完成训练记录
-                      </>
-                    )}
-                  </button>
-                </div>
-              ) : (
-                <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
-                  <Play className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">选择教案开始训练</h3>
-                  <p className="text-gray-500">请从左侧选择一个教案，然后进行签到</p>
-                </div>
-              )}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        )}
+
+          {/* 右侧：签到管理 */}
+          <div className="lg:col-span-2">
+            {selectedPlan ? (
+              <div className="space-y-6">
+                {/* 已选教案 */}
+                <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Play className="w-5 h-5" />
+                    <span className="text-orange-100 text-sm">当前训练</span>
+                  </div>
+                  <h2 className="text-xl font-bold mb-1">{selectedPlan.title}</h2>
+                  <div className="flex items-center gap-4 text-orange-100 text-sm flex-wrap">
+                    <span>{new Date(selectedPlan.date).toLocaleDateString()}</span>
+                    <span>{selectedPlan.duration}分钟</span>
+                    <span>{selectedPlan.location}</span>
+                  </div>
+                </div>
+
+                {totalPlayerCount === 0 ? (
+                  /* 无参训学员 */
+                  <div className="bg-white rounded-xl p-8 text-center border border-gray-100">
+                    <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">该教案未选择参训学员</h3>
+                    <p className="text-gray-500 mb-4">
+                      保存教案时选择学员可自动创建签到记录
+                    </p>
+                    <Link
+                      href={`/plans/${selectedPlan.id}`}
+                      className="text-orange-600 hover:text-orange-700 font-medium"
+                    >
+                      查看教案详情
+                    </Link>
+                  </div>
+                ) : (
+                  <>
+                    {/* 签到统计 */}
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                        <div className="flex items-center justify-center gap-1 text-green-600 mb-1">
+                          <UserCheck className="w-4 h-4" />
+                          <span className="text-sm font-medium">出勤</span>
+                        </div>
+                        <div className="text-2xl font-bold text-green-700">{presentCount}</div>
+                      </div>
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-center">
+                        <div className="flex items-center justify-center gap-1 text-amber-600 mb-1">
+                          <AlertCircle className="w-4 h-4" />
+                          <span className="text-sm font-medium">迟到</span>
+                        </div>
+                        <div className="text-2xl font-bold text-amber-700">{lateCount}</div>
+                      </div>
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
+                        <div className="flex items-center justify-center gap-1 text-red-600 mb-1">
+                          <UserX className="w-4 h-4" />
+                          <span className="text-sm font-medium">缺勤</span>
+                        </div>
+                        <div className="text-2xl font-bold text-red-700">{absentCount}</div>
+                      </div>
+                    </div>
+
+                    {/* 学员列表 */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                      <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                        <h2 className="font-semibold text-gray-700">学员签到</h2>
+                        <span className="text-sm text-gray-500">
+                          共 {totalPlayerCount} 人
+                        </span>
+                      </div>
+                      <div className="divide-y divide-gray-50">
+                        {playerDetails.map((player, idx) => {
+                          const attendance = attendanceMap[player.id] || 'present';
+                          const feedback = feedbackMap[player.id] || '';
+                          const performance = performanceMap[player.id] || 0;
+                          const isExpanded = showFeedbackInput === player.id;
+
+                          return (
+                            <div key={player.id} className="hover:bg-gray-50 transition-colors">
+                              <div className="p-4 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center text-white font-bold text-sm">
+                                    {player.name.charAt(0)}
+                                  </div>
+                                  <div>
+                                    <div className="font-medium text-gray-900">{player.name}</div>
+                                    <div className="text-xs text-gray-400">{player.group}</div>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  {/* 签到按钮 */}
+                                  <div className="flex gap-1">
+                                    <button
+                                      onClick={() => handleAttendanceChange(player.id, 'present')}
+                                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                                        attendance === 'present'
+                                          ? 'bg-green-500 text-white'
+                                          : 'bg-green-50 text-green-600 hover:bg-green-100'
+                                      }`}
+                                    >
+                                      到
+                                    </button>
+                                    <button
+                                      onClick={() => handleAttendanceChange(player.id, 'late')}
+                                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                                        attendance === 'late'
+                                          ? 'bg-yellow-500 text-white'
+                                          : 'bg-yellow-50 text-yellow-600 hover:bg-yellow-100'
+                                      }`}
+                                    >
+                                      迟
+                                    </button>
+                                    <button
+                                      onClick={() => handleAttendanceChange(player.id, 'absent')}
+                                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                                        attendance === 'absent'
+                                          ? 'bg-red-500 text-white'
+                                          : 'bg-red-50 text-red-600 hover:bg-red-100'
+                                      }`}
+                                    >
+                                      缺
+                                    </button>
+                                  </div>
+
+                                  {/* 评价和反馈按钮 */}
+                                  <button
+                                    onClick={() => setShowFeedbackInput(isExpanded ? null : player.id)}
+                                    className={`p-2 rounded-lg transition-colors ${
+                                      isExpanded
+                                        ? 'bg-orange-100 text-orange-600'
+                                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                    }`}
+                                    title="训练反馈"
+                                  >
+                                    <MessageSquare className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* 展开的反馈区域 */}
+                              {isExpanded && (
+                                <div className="px-4 pb-4 pl-17 space-y-3">
+                                  {/* 表现评分 */}
+                                  <div>
+                                    <label className="text-sm text-gray-600 mb-1 flex items-center gap-1">
+                                      <Star className="w-3 h-3 text-amber-500" />
+                                      表现评分 (1-10)
+                                    </label>
+                                    <div className="flex items-center gap-1 mt-1">
+                                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(score => (
+                                        <button
+                                          key={score}
+                                          onClick={() => handlePerformanceChange(player.id, score)}
+                                          className={`w-7 h-7 rounded text-xs font-medium transition-colors ${
+                                            performance >= score
+                                              ? 'bg-amber-400 text-white'
+                                              : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                          }`}
+                                        >
+                                          {score}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  {/* 文字反馈 */}
+                                  <div>
+                                    <label className="text-sm text-gray-600 mb-1">训练反馈</label>
+                                    <textarea
+                                      value={feedback}
+                                      onChange={e => handleFeedbackChange(player.id, e.target.value)}
+                                      placeholder="输入对学员本次训练的反馈..."
+                                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                                      rows={2}
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* 操作按钮 */}
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleSave}
+                        disabled={submitting}
+                        className="flex-1 py-4 bg-orange-500 text-white rounded-xl font-semibold hover:bg-orange-600 disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        {submitting ? (
+                          <>
+                            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                            保存中...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-5 h-5" />
+                            保存训练记录
+                          </>
+                        )}
+                      </button>
+                      <Link
+                        href={`/plans/${selectedPlan.id}`}
+                        className="px-6 py-4 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 flex items-center justify-center gap-2"
+                      >
+                        <ClipboardList className="w-5 h-5" />
+                        查看教案
+                      </Link>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
+                <Play className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">选择教案开始训练</h3>
+                <p className="text-gray-500">从左侧选择一个教案，管理学员签到和训练反馈</p>
+                <p className="text-sm text-gray-400 mt-2">带参训学员的教案会自动加载签到状态</p>
+              </div>
+            )}
+          </div>
+        </div>
       </main>
     </div>
   );

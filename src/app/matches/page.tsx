@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { fetchWithAuth } from '@/lib/auth';
@@ -57,11 +57,7 @@ export default function MatchesPage() {
     isHome: true,
   });
 
-  useEffect(() => {
-    fetchMatches();
-  }, [selectedGroup, selectedResult]);
-
-  async function fetchMatches() {
+  const fetchMatches = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -79,7 +75,11 @@ export default function MatchesPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [selectedGroup, selectedResult]);
+
+  useEffect(() => {
+    fetchMatches();
+  }, [fetchMatches]);
 
   async function handleCreateMatch() {
     try {

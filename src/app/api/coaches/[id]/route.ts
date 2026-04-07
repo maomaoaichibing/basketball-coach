@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth-middleware';
 import prisma from '@/lib/db';
-import bcrypt from 'bcryptjs';
 
-// 从返回数据中移除 password 字段
+// 从返回数据中移除敏感字段
 function sanitizeCoach(coach: Record<string, unknown>) {
-  const { password, updatedAt, ...safe } = coach;
+  const { ...safe } = coach;
   return safe;
 }
 

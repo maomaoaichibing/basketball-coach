@@ -92,8 +92,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         ...player,
         age,
         avgAbility: avgAbility.toFixed(1),
-        tags: JSON.parse(player.tags || '[]'),
-        injuries: JSON.parse(player.injuries || '[]'),
+        tags: JSON.parse((player.tags as unknown as string) || '[]'),
+        injuries: JSON.parse((player.injuries as unknown as string) || '[]'),
         totalTrainings,
         attendanceRate,
         presentCount,
@@ -187,8 +187,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       success: true,
       player: {
         ...player,
-        tags: JSON.parse(player.tags || '[]'),
-        injuries: JSON.parse(player.injuries || '[]'),
+        tags: JSON.parse((player.tags as unknown as string) || '[]'),
+        injuries: JSON.parse((player.injuries as unknown as string) || '[]'),
       },
     });
   } catch (error) {

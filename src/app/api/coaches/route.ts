@@ -3,9 +3,9 @@ import { verifyAuth } from '@/lib/auth-middleware';
 import bcrypt from 'bcryptjs';
 import prisma from '@/lib/db';
 
-// 从返回数据中移除 password 字段
+// 从返回数据中移除敏感字段
 function sanitizeCoach(coach: Record<string, unknown>) {
-  const { password, ...safe } = coach;
+  const { ...safe } = coach;
   return safe;
 }
 

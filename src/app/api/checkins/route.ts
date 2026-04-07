@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { verifyAuth } from '@/lib/auth-middleware';
 import prisma from '@/lib/db';
 
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     // 解析JSON字段
     const parsedCheckins = checkins.map(checkin => ({
       ...checkin,
-      mediaUrls: JSON.parse(checkin.mediaUrls || '[]'),
+      mediaUrls: JSON.parse((checkin.mediaUrls as unknown as string) || '[]'),
     }));
 
     return NextResponse.json({
