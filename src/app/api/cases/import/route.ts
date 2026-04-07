@@ -38,7 +38,7 @@ export async function PUT(request: NextRequest) {
     const createData = source.map((p) => ({
       title: `${p.tech_type || '训练'} - ${p.part || p.content?.substring(0, 20) || '活动'}`,
       category: p.category || 'technical',
-      subCategory: ((p as unknown) as Record<string, unknown>).subCategory as string || null,
+      subCategory: ((p as unknown as Record<string, unknown>).subCategory as string) || null,
       ageGroup: p.age_group || 'U10',
       skillLevel: 'intermediate',
       content: p.content || '',

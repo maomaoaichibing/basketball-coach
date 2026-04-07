@@ -32,6 +32,7 @@ type PlayerStat = {
   steals: number;
   blocks: number;
   fouls: number;
+  turnovers: number;
   minutes?: number;
 };
 
@@ -291,7 +292,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
   }
 
   // 计算球员统计数据
-  const playerStatsMap: Record<string, any> = {};
+  const playerStatsMap: Record<string, PlayerStat> = {};
   match.events.forEach((event) => {
     if (event.playerId) {
       if (!playerStatsMap[event.playerId]) {

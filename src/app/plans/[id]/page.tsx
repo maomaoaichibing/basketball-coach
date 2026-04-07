@@ -228,7 +228,10 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
             category: section.category || 'technical',
             ageGroup: plan.group || 'U10',
             content: activity.description,
-            method: activity.sets || activity.repetitions ? `组数: ${activity.sets || '-'} 次/时间: ${activity.repetitions || '-'}` : undefined,
+            method:
+              activity.sets || activity.repetitions
+                ? `组数: ${activity.sets || '-'} 次/时间: ${activity.repetitions || '-'}`
+                : undefined,
             keyPoints: keyPointsStr || undefined,
             coachGuide: activity.coachGuide || undefined,
             duration: activity.duration || 10,
@@ -479,7 +482,10 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                 >
                   <Edit className="w-5 h-5" />
                 </Link>
-                <button className="p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 rounded-lg" title="导出">
+                <button
+                  className="p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 rounded-lg"
+                  title="导出"
+                >
                   <Download className="w-5 h-5" />
                 </button>
               </div>
@@ -493,10 +499,13 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                   <Save className="w-4 h-4" />
                   <span>保存为案例</span>
                 </button>
-                <button className="flex items-center gap-1.5 px-4 py-2 text-sm bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors">
+                <Link
+                  href={`/training?planId=${plan.id}`}
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
+                >
                   <Play className="w-4 h-4" />
                   <span>开始训练</span>
-                </button>
+                </Link>
               </div>
             </div>
           </div>

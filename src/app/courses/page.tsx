@@ -6,6 +6,12 @@ import { ArrowLeft, Plus, Package, Users, Clock, Edit2, Trash2, Check, X } from 
 import { fetchWithAuth } from '@/lib/auth';
 
 // 类型定义
+type Player = {
+  id: string;
+  name: string;
+  group: string;
+};
+
 type Course = {
   id: string;
   name: string;
@@ -22,7 +28,7 @@ type Course = {
 type Enrollment = {
   id: string;
   playerId: string;
-  player: { id: string; name: string; group: string };
+  player: Player;
   courseId: string;
   course: { id: string; name: string; type: string; totalHours: number };
   totalHours: number;
@@ -36,7 +42,7 @@ type Enrollment = {
 export default function CoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
-  const [players, setPlayers] = useState<any[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'courses' | 'enrollments'>('courses');
   const [showCourseModal, setShowCourseModal] = useState(false);

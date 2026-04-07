@@ -167,9 +167,7 @@ export default function LibraryPage() {
       minPlayers: c.minPlayers,
       maxPlayers: c.maxPlayers,
       techType: c.techType || '',
-      tags: Array.isArray(JSON.parse(c.tags || '[]'))
-        ? JSON.parse(c.tags).join(', ')
-        : c.tags,
+      tags: Array.isArray(JSON.parse(c.tags || '[]')) ? JSON.parse(c.tags).join(', ') : c.tags,
     });
     setShowForm(true);
   }
@@ -182,10 +180,16 @@ export default function LibraryPage() {
       const payload = {
         ...form,
         equipment: form.equipment
-          ? form.equipment.split(/[,，]/).map((s) => s.trim()).filter(Boolean)
+          ? form.equipment
+              .split(/[,，]/)
+              .map((s) => s.trim())
+              .filter(Boolean)
           : [],
         tags: form.tags
-          ? form.tags.split(/[,，]/).map((s) => s.trim()).filter(Boolean)
+          ? form.tags
+              .split(/[,，]/)
+              .map((s) => s.trim())
+              .filter(Boolean)
           : [],
       };
 
@@ -439,9 +443,7 @@ export default function LibraryPage() {
                           {c.techType}
                         </span>
                       )}
-                      {c.isFavorite && (
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      )}
+                      {c.isFavorite && <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />}
                     </div>
 
                     <p className="text-sm text-gray-600 mb-2 line-clamp-2">{c.content}</p>
@@ -580,11 +582,13 @@ export default function LibraryPage() {
                     onChange={(e) => setForm({ ...form, ageGroup: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   >
-                    {groups.filter((g) => g !== 'all').map((g) => (
-                      <option key={g} value={g}>
-                        {g}
-                      </option>
-                    ))}
+                    {groups
+                      .filter((g) => g !== 'all')
+                      .map((g) => (
+                        <option key={g} value={g}>
+                          {g}
+                        </option>
+                      ))}
                   </select>
                 </div>
 
@@ -716,7 +720,9 @@ export default function LibraryPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">器材（逗号分隔）</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  器材（逗号分隔）
+                </label>
                 <input
                   type="text"
                   value={form.equipment}
@@ -727,7 +733,9 @@ export default function LibraryPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">标签（逗号分隔）</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  标签（逗号分隔）
+                </label>
                 <input
                   type="text"
                   value={form.tags}
@@ -766,7 +774,10 @@ export default function LibraryPage() {
           <div className="bg-white rounded-2xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold">导入案例</h2>
-              <button onClick={() => setShowImport(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+              <button
+                onClick={() => setShowImport(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>

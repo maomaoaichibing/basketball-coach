@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { fetchWithAuth } from '@/lib/auth';
 import {
   ArrowLeft,
@@ -17,6 +17,7 @@ import {
   Save,
   MessageSquare,
   Star,
+  CheckCircle2,
 } from 'lucide-react';
 
 // 类型定义
@@ -52,8 +53,12 @@ type TrainingRecord = {
   issues: string | null;
 };
 
-export default function TrainingSessionPage() {
+// 训练执行页面内容（需要 useSearchParams 的部分）
+function TrainingSessionContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const autoPlanId = searchParams.get('planId');
+
   const [plans, setPlans] = useState<TrainingPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<TrainingPlan | null>(null);
   const [playerDetails, setPlayerDetails] = useState<PlayerDetail[]>([]);
@@ -68,10 +73,30 @@ export default function TrainingSessionPage() {
   const [feedbackMap, setFeedbackMap] = useState<Record<string, string>>({});
   const [performanceMap, setPerformanceMap] = useState<Record<string, number>>({});
   const [showFeedbackInput, setShowFeedbackInput] = useState<string | null>(null);
+  const [planSections, setPlanSections] = useState<Array<{
+    category: string;
+    name: string;
+    duration: number;
+    activities: Array<{ name: string; duration: number }>;
+  }>>([]);
+
+  const [trainingStatus, setTrainingStatus] = useState<'idle' | 'active' | 'completed'>('idle');
+  const [completedSections, setCompletedSections] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     fetchPlans();
   }, []);
+
+  // 自动加载 URL 中指定的教案
+  useEffect(() => {
+    if (autoPlanId && plans.length > 0 && !selectedPlan) {
+      const targetPlan = plans.find((p) => p.id === autoPlanId);
+      if (targetPlan) {
+        handleSelectPlan(targetPlan);
+        setTrainingStatus('active');
+      }
+    }
+  }, [autoPlanId, plans]);
 
   async function fetchPlans() {
     try {
@@ -118,6 +143,15 @@ export default function TrainingSessionPage() {
       if (data.success) {
         setPlayerDetails(data.playerDetails || []);
         setRecords(data.records || []);
+
+        // 解析教案 sections 用于展示训练进度
+        try {
+          const plan = data.plan;
+          const sections = plan.sections ? JSON.parse(plan.sections) : [];
+          setPlanSections(sections);
+        } catch {
+          setPlanSections([]);
+        }
 
         // 初始化签到状态 map
         const attMap: Record<string, 'present' | 'absent' | 'late'> = {};
@@ -214,7 +248,27 @@ export default function TrainingSessionPage() {
     }
   }
 
-  // 统计
+  // 标记环节完成
+  function toggleSectionComplete(index: number) {
+    setCompletedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
+  }
+
+  // 结束训练
+  function handleEndTraining() {
+    setTrainingStatus('completed');
+    // 自动保存
+    if (selectedPlan && playerDetails.length > 0) {
+      handleSave();
+    }
+  }
   const presentCount = Object.values(attendanceMap).filter((v) => v === 'present').length;
   const lateCount = Object.values(attendanceMap).filter((v) => v === 'late').length;
   const absentCount = Object.values(attendanceMap).filter((v) => v === 'absent').length;
@@ -310,14 +364,38 @@ export default function TrainingSessionPage() {
           <div className="lg:col-span-2">
             {selectedPlan ? (
               <div className="space-y-6">
-                {/* 已选教案 */}
-                <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Play className="w-5 h-5" />
-                    <span className="text-orange-100 text-sm">当前训练</span>
+                {/* 已选教案 + 训练状态 */}
+                <div className={`rounded-xl p-6 text-white ${trainingStatus === 'completed' ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gradient-to-r from-orange-500 to-orange-600'}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      {trainingStatus === 'completed' ? (
+                        <CheckCircle2 className="w-5 h-5" />
+                      ) : (
+                        <Play className="w-5 h-5" />
+                      )}
+                      <span className="text-sm opacity-80">
+                        {trainingStatus === 'completed' ? '训练已完成' : trainingStatus === 'active' ? '训练进行中' : '当前训练'}
+                      </span>
+                    </div>
+                    {trainingStatus === 'active' && (
+                      <button
+                        onClick={handleEndTraining}
+                        className="px-3 py-1 bg-white/20 hover:bg-white/30 text-white text-sm rounded-lg transition-colors"
+                      >
+                        结束训练
+                      </button>
+                    )}
+                    {trainingStatus === 'completed' && (
+                      <Link
+                        href={`/plans/${selectedPlan.id}`}
+                        className="px-3 py-1 bg-white/20 hover:bg-white/30 text-white text-sm rounded-lg transition-colors"
+                      >
+                        查看教案
+                      </Link>
+                    )}
                   </div>
                   <h2 className="text-xl font-bold mb-1">{selectedPlan.title}</h2>
-                  <div className="flex items-center gap-4 text-orange-100 text-sm flex-wrap">
+                  <div className="flex items-center gap-4 text-sm opacity-80 flex-wrap">
                     <span>{new Date(selectedPlan.date).toLocaleDateString()}</span>
                     <span>{selectedPlan.duration}分钟</span>
                     <span>{selectedPlan.location}</span>
@@ -491,6 +569,64 @@ export default function TrainingSessionPage() {
                       </div>
                     </div>
 
+                    {/* 教案环节进度 */}
+                    {planSections.length > 0 && (
+                      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                          <h2 className="font-semibold text-gray-700">训练环节</h2>
+                          <span className="text-sm text-gray-500">
+                            {completedSections.size}/{planSections.length} 完成
+                          </span>
+                        </div>
+                        <div className="divide-y divide-gray-50">
+                          {planSections.map((section, index) => {
+                            const isDone = completedSections.has(index);
+                            const sectionColorMap: Record<string, string> = {
+                              warmup: 'bg-blue-100 text-blue-700',
+                              ball_familiarity: 'bg-amber-100 text-amber-700',
+                              technical: 'bg-orange-100 text-orange-700',
+                              physical: 'bg-red-100 text-red-700',
+                              tactical: 'bg-purple-100 text-purple-700',
+                              game: 'bg-green-100 text-green-700',
+                              cooldown: 'bg-gray-100 text-gray-700',
+                              etiquette: 'bg-pink-100 text-pink-700',
+                            };
+                            const categoryLabel: Record<string, string> = {
+                              warmup: '热身', technical: '技术', tactical: '战术',
+                              game: '对抗', cooldown: '放松', etiquette: '礼仪',
+                              ball_familiarity: '球性', physical: '体能',
+                            };
+
+                            return (
+                              <button
+                                key={index}
+                                onClick={() => toggleSectionComplete(index)}
+                                className={`w-full p-4 flex items-center gap-3 text-left transition-colors hover:bg-gray-50 ${isDone ? 'opacity-60' : ''}`}
+                              >
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${isDone ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                                  {isDone ? <CheckCircle className="w-4 h-4" /> : index + 1}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className={`font-medium ${isDone ? 'line-through text-gray-400' : 'text-gray-900'}`}>
+                                    {section.name}
+                                  </div>
+                                  <div className="text-xs text-gray-500 mt-0.5 flex items-center gap-2">
+                                    <Clock className="w-3 h-3" />
+                                    {section.duration}分钟
+                                    {section.category && (
+                                      <span className={`px-1.5 py-0.5 text-xs rounded ${sectionColorMap[section.category] || 'bg-gray-100 text-gray-600'}`}>
+                                        {categoryLabel[section.category] || section.category}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
                     {/* 操作按钮 */}
                     <div className="flex gap-3">
                       <button
@@ -533,5 +669,18 @@ export default function TrainingSessionPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+// 页面导出 - 用 Suspense 包裹以支持 useSearchParams
+export default function TrainingSessionPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+      </div>
+    }>
+      <TrainingSessionContent />
+    </Suspense>
   );
 }

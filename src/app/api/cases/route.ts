@@ -150,10 +150,7 @@ export async function PUT(request: NextRequest) {
     }
 
     if (casesData.length > 200) {
-      return NextResponse.json(
-        { success: false, error: '单次最多导入200条案例' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: '单次最多导入200条案例' }, { status: 400 });
     }
 
     const coachId = auth.coach?.id || null;

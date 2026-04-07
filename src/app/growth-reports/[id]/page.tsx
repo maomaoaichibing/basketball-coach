@@ -315,7 +315,7 @@ export default function GrowthReportDetailPage({ params }: { params: Promise<{ i
             </h3>
             <div className="space-y-4">
               {report.abilities &&
-                Object.entries(report.abilities).map(([key, value]: [string, any], index) => (
+                Object.entries(report.abilities).map(([key, value]: [string, number], index) => (
                   <div key={key}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-sm font-medium text-gray-700">

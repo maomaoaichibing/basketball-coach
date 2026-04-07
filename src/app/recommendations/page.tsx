@@ -37,12 +37,22 @@ interface Recommendation {
   alternatives?: string[];
 }
 
+interface PlayerInfo {
+  name: string;
+  abilities: {
+    technical: Record<string, number>;
+    tactical: Record<string, number>;
+    physical: Record<string, number>;
+    mental: Record<string, number>;
+  };
+}
+
 export default function RecommendationsPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedPlayer, setSelectedPlayer] = useState<string>('');
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(false);
-  const [playerInfo, setPlayerInfo] = useState<any>(null);
+  const [playerInfo, setPlayerInfo] = useState<PlayerInfo | null>(null);
 
   useEffect(() => {
     fetchPlayers();

@@ -846,7 +846,8 @@ const u10LevelGuide: Record<string, string> = {
 function generatePrompt(
   params: AIPlanParams,
   cases: LessonPlan[],
-  playerAnalysis?: string
+  playerAnalysis?: string,
+  dbCasesText?: string
 ): string {
   const ageGroupInfo: Record<string, string> = {
     U6: '4-6岁幼儿班，注意力短暂，以游戏为主培养球性和兴趣。每个动作不超过3分钟，多重复少讲解。热身用模仿秀（木头人、动物爬行），运球只做原地高低运球和拉球，投篮只做无球脚步模仿。对抗用投篮小游戏、接力赛代替。教练多鼓励、多击掌。',
@@ -920,6 +921,7 @@ ${params.previousTraining?.length ? `- 最近训练内容：${params.previousTra
 ${params.additionalNotes ? `- 教练特别要求（必须严格执行）：${params.additionalNotes}\n（以上要求是教练明确的训练需求，必须在教案中完整体现，不能忽略！\n如果教练要求"运球和传球结合"，则教案中必须有运球传球结合的练习！）` : ''}
 
 ${casesText ? `## 参考案例（来自真实教学数据）\n${casesText}\n` : ''}
+${dbCasesText ? `## 教练案例库（教练自行录入的优秀案例，请重点参考）\n${dbCasesText}\n请参考以上教练案例库中的训练方法、要点和教练引导语，结合本次训练要求生成教案。可以借鉴好的训练设计，但要根据实际学员情况调整难度和内容。\n` : ''}
 
 ## 输出格式（严格JSON）
 {
@@ -1240,6 +1242,56 @@ export async function POST(request: NextRequest) {
       limit: 5,
     });
 
+    // RAG 2.0: 同时从数据库案例库(TrainingCase)中检索
+    let dbCases: Array<{ id: string; title: string; category: string; content: string; keyPoints: string | null; coachGuide: string | null; duration: number; techType: string | null; ageGroup: string; tags: string }> = [];
+    try {
+      const searchTerms = searchKeyword.split(/\s+/).filter((t) => t.length > 0);
+      const caseWhere: Record<string, unknown> = {
+        ageGroup: params.group,
+      };
+
+      if (searchTerms.length > 0) {
+        caseWhere.OR = searchTerms.flatMap((term) => [
+          { title: { contains: term } },
+          { content: { contains: term } },
+          { techType: { contains: term } },
+          { tags: { contains: term } },
+          { category: { contains: term } },
+        ]);
+      }
+
+      dbCases = await prisma.trainingCase.findMany({
+        where: caseWhere,
+        take: 5,
+        orderBy: { usageCount: 'desc' },
+      });
+
+      // 增加案例使用次数
+      if (dbCases.length > 0) {
+        await prisma.trainingCase.updateMany({
+          where: { id: { in: dbCases.map((c) => c.id) } },
+          data: { usageCount: { increment: 1 } },
+        });
+      }
+    } catch (e) {
+      console.error('数据库案例库检索失败:', e);
+    }
+
+    // 合并 RAG 结果到 prompt 中
+    // dbCases 会通过 casesText 注入到 prompt
+    const dbCasesText = dbCases.length > 0
+      ? '\n### 用户案例库（教练自行录入的优秀案例）\n' +
+        dbCases
+          .map((c, i) => {
+            let text = `案例${i + 1}: ${c.title} [${c.ageGroup}/${c.category}${c.techType ? '/' + c.techType : ''}] ${c.duration}分钟\n`;
+            text += `  内容：${c.content}\n`;
+            if (c.keyPoints) text += `  要点：${c.keyPoints}\n`;
+            if (c.coachGuide) text += `  教练引导：${c.coachGuide}\n`;
+            return text;
+          })
+          .join('\n')
+      : '';
+
     // 调试日志：输出检索到的案例
     console.log('=== RAG 案例检索 ===');
     console.log('检索参数:', {
@@ -1279,7 +1331,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const prompt = generatePrompt(params, similarCases, playerAnalysisText);
+    const prompt = generatePrompt(params, similarCases, playerAnalysisText, dbCasesText);
 
     // 优先使用 Kimi
     if (KIMI_API_KEY) {

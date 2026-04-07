@@ -79,6 +79,22 @@ export function useCloudVoiceRecognition(): VoiceRecognitionReturn {
     return result;
   }, []);
 
+  // 清理录音资源
+  const cleanup = useCallback(() => {
+    if (processorRef.current) {
+      processorRef.current.disconnect();
+      processorRef.current = null;
+    }
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+      audioContextRef.current.close().catch(() => {});
+      audioContextRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+  }, []);
+
   // 开始录音
   const startRecording = useCallback(async () => {
     if (!isSupported) {
@@ -146,7 +162,7 @@ export function useCloudVoiceRecognition(): VoiceRecognitionReturn {
       }
       cleanup();
     }
-  }, [isSupported, downsample, float32ToInt16]);
+  }, [isSupported, downsample, float32ToInt16, cleanup]);
 
   // 停止录音并识别
   const stopRecording = useCallback(async (): Promise<string | null> => {
@@ -221,23 +237,7 @@ export function useCloudVoiceRecognition(): VoiceRecognitionReturn {
           resolve(null);
         });
     });
-  }, []);
-
-  // 清理录音资源
-  const cleanup = useCallback(() => {
-    if (processorRef.current) {
-      processorRef.current.disconnect();
-      processorRef.current = null;
-    }
-    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-      audioContextRef.current.close().catch(() => {});
-      audioContextRef.current = null;
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
-  }, []);
+  }, [cleanup]);
 
   // 重置状态
   const reset = useCallback(() => {

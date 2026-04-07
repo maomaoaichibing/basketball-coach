@@ -116,10 +116,7 @@ export async function GET(request: NextRequest) {
     if (favorite === 'true') where.isFavorite = true;
     if (template === 'true') where.isTemplate = true;
     if (search) {
-      where.OR = [
-        { title: { contains: search } },
-        { theme: { contains: search } },
-      ];
+      where.OR = [{ title: { contains: search } }, { theme: { contains: search } }];
     }
 
     const plans = await prisma.trainingPlan.findMany({

@@ -58,43 +58,8 @@ export default function VoicePlanPage() {
 
   const voice = useCloudVoiceRecognition();
 
-  // 开始录音
-  const handleStartRecording = useCallback(async () => {
-    setError(null);
-    setRecognizedText('');
-    await voice.startRecording();
-  }, [voice]);
-
-  // 停止录音并处理结果
-  const handleStopRecording = useCallback(async () => {
-    setError(null);
-    const text = await voice.stopRecording();
-
-    if (text) {
-      setRecognizedText(text);
-      processRecognizedText(text);
-    }
-  }, [voice]);
-
-  // 处理识别结果
-  const processRecognizedText = (text: string) => {
-    const parsed = parseVoiceCommand(text);
-    console.log('解析结果:', parsed);
-
-    if (parsed.action === 'attendance' && parsed.playerName) {
-      queryPlayers(parsed.playerName);
-    } else if (parsed.action === 'create_plan') {
-      queryAllPlayers(parsed.ageGroup, parsed.skills);
-    } else {
-      setParsedCommand(parsed);
-      if (parsed.action === 'unknown' || !parsed.playerName) {
-        setError('没有识别到有效指令，请再说一遍');
-      }
-    }
-  };
-
   // 查询学员
-  async function queryPlayers(name: string) {
+  const queryPlayers = useCallback(async (name: string) => {
     try {
       const response = await fetch(`/api/players?q=${encodeURIComponent(name)}`);
       const data = await response.json();
@@ -118,10 +83,10 @@ export default function VoicePlanPage() {
       console.error('查询学员失败:', err);
       setError('查询学员失败，请重试');
     }
-  }
+  }, [recognizedText, speak]);
 
   // 查询所有学员
-  async function queryAllPlayers(ageGroup?: string, skills?: string[]) {
+  const queryAllPlayers = useCallback(async (ageGroup?: string, skills?: string[]) => {
     try {
       const response = await fetchWithAuth('/api/players');
       const data = await response.json();
@@ -170,7 +135,42 @@ export default function VoicePlanPage() {
       console.error('查询学员失败:', err);
       setError('查询学员失败，请重试');
     }
-  }
+  }, [recognizedText, speak]);
+
+  // 处理识别结果
+  const processRecognizedText = useCallback((text: string) => {
+    const parsed = parseVoiceCommand(text);
+    console.log('解析结果:', parsed);
+
+    if (parsed.action === 'attendance' && parsed.playerName) {
+      queryPlayers(parsed.playerName);
+    } else if (parsed.action === 'create_plan') {
+      queryAllPlayers(parsed.ageGroup, parsed.skills);
+    } else {
+      setParsedCommand(parsed);
+      if (parsed.action === 'unknown' || !parsed.playerName) {
+        setError('没有识别到有效指令，请再说一遍');
+      }
+    }
+  }, [queryPlayers, queryAllPlayers]);
+
+  // 开始录音
+  const handleStartRecording = useCallback(async () => {
+    setError(null);
+    setRecognizedText('');
+    await voice.startRecording();
+  }, [voice]);
+
+  // 停止录音并处理结果
+  const handleStopRecording = useCallback(async () => {
+    setError(null);
+    const text = await voice.stopRecording();
+
+    if (text) {
+      setRecognizedText(text);
+      processRecognizedText(text);
+    }
+  }, [voice, processRecognizedText]);
 
   function skillToKey(skill: string): string {
     const map: Record<string, string> = {

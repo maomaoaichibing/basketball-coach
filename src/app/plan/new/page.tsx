@@ -84,6 +84,19 @@ export default function NewPlanPage() {
 
   const [focusSkills, setFocusSkills] = useState<string[]>([]);
 
+  // 模板选择状态
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [templates, setTemplates] = useState<Array<{
+    id: string;
+    title: string;
+    group: string;
+    theme?: string;
+    duration: number;
+    location: string;
+    skillLevel?: string;
+    sections?: string;
+  }>>([]);
+
   // 加载学员列表
   useEffect(() => {
     async function loadPlayers() {
@@ -98,6 +111,22 @@ export default function NewPlanPage() {
       }
     }
     loadPlayers();
+  }, []);
+
+  // 加载模板列表
+  useEffect(() => {
+    async function loadTemplates() {
+      try {
+        const res = await fetchWithAuth('/api/plans?template=true&limit=20');
+        const data = await res.json();
+        if (data.success) {
+          setTemplates(data.plans || []);
+        }
+      } catch (err) {
+        console.error('加载模板列表失败:', err);
+      }
+    }
+    loadTemplates();
   }, []);
 
   // 根据年龄段过滤学员
@@ -238,6 +267,60 @@ export default function NewPlanPage() {
     '中考体育',
   ];
   const skillOptions = ['运球', '传球', '投篮', '防守', '体能', '战术'];
+
+  // 从模板创建教案
+  function handleUseTemplate(template: typeof templates[0]) {
+    try {
+      // 解析模板的 sections
+      let parsedSections: any[] = [];
+      try {
+        parsedSections = template.sections ? JSON.parse(template.sections) : [];
+      } catch {
+        parsedSections = [];
+      }
+
+      // 提取主题
+      let themeStr = template.theme || '';
+      let themeArr: string[] = themeStr ? themeStr.split('+') : [];
+
+      // 更新表单
+      setForm((f) => ({
+        ...f,
+        group: template.group as AgeGroup,
+        duration: template.duration,
+        location: template.location as Location,
+        themes: themeArr,
+      }));
+
+      if (template.skillLevel) {
+        setAiConfig((c) => ({ ...c, skillLevel: template.skillLevel as 'beginner' | 'intermediate' | 'advanced' }));
+      }
+
+      // 如果模板有 sections，直接设为教案结果
+      if (parsedSections.length > 0) {
+        setPlan({
+          title: template.title,
+          group: template.group as AgeGroup,
+          date: new Date().toISOString(),
+          duration: template.duration,
+          location: template.location as Location,
+          theme: themeStr,
+          focusSkills: themeArr,
+          skillLevel: (template.skillLevel || 'intermediate') as 'beginner' | 'intermediate' | 'advanced',
+          intensity: 'medium',
+          trainingProgression: '',
+          sections: parsedSections,
+          notes: '',
+        });
+      }
+
+      setShowTemplateModal(false);
+      setConfigCollapsed(false);
+    } catch (err) {
+      console.error('使用模板失败:', err);
+      alert('使用模板失败');
+    }
+  }
 
   // 生成教案
   async function handleGenerate() {
@@ -472,27 +555,37 @@ export default function NewPlanPage() {
                 {/* 桌面端标题栏 */}
                 <div className="hidden lg:flex items-center justify-between mb-4">
                   <h2 className="font-semibold text-gray-900">训练配置</h2>
-                  {/* 生成模式切换 */}
-                  <button
-                    onClick={() => setUseAI(!useAI)}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                      useAI
-                        ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                  >
-                    {useAI ? (
-                      <>
-                        <Sparkles className="w-4 h-4" />
-                        AI生成
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="w-4 h-4" />
-                        规则生成
-                      </>
-                    )}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {/* 从模板创建 */}
+                    <button
+                      onClick={() => setShowTemplateModal(true)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-600 rounded-lg text-sm font-medium hover:bg-purple-100 transition-colors"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      从模板创建
+                    </button>
+                    {/* 生成模式切换 */}
+                    <button
+                      onClick={() => setUseAI(!useAI)}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                        useAI
+                          ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      {useAI ? (
+                        <>
+                          <Sparkles className="w-4 h-4" />
+                          AI生成
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="w-4 h-4" />
+                          规则生成
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 {/* ========== 参训学员选择 ========== */}
@@ -1248,6 +1341,72 @@ export default function NewPlanPage() {
           </div>
         </div>
       </main>
+
+      {/* 从模板创建 - 模态框 */}
+      {showTemplateModal && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/50 z-50"
+            onClick={() => setShowTemplateModal(false)}
+          />
+          <div className="fixed inset-x-4 top-[10%] bottom-[10%] bg-white rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden mx-auto max-w-2xl">
+            <div className="p-4 border-b border-gray-100 flex items-center justify-between shrink-0">
+              <h3 className="font-semibold text-gray-900">选择教案模板</h3>
+              <button
+                onClick={() => setShowTemplateModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              {templates.length === 0 ? (
+                <div className="text-center py-12">
+                  <Sparkles className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500 mb-2">暂无模板</p>
+                  <p className="text-sm text-gray-400">
+                    在教案详情页点击「存为模板」即可创建模板
+                  </p>
+                  <button
+                    onClick={() => setShowTemplateModal(false)}
+                    className="mt-4 px-4 py-2 bg-orange-500 text-white rounded-lg text-sm hover:bg-orange-600"
+                  >
+                    返回
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {templates.map((tpl) => (
+                    <button
+                      key={tpl.id}
+                      onClick={() => handleUseTemplate(tpl)}
+                      className="w-full p-4 rounded-xl text-left border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-gray-900 truncate">{tpl.title}</div>
+                          <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
+                            <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 text-xs rounded">
+                              {tpl.group}
+                            </span>
+                            <span>{tpl.duration}分钟</span>
+                            <span>{tpl.location}</span>
+                            {tpl.theme && <span>· {tpl.theme}</span>}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 text-purple-500 shrink-0 ml-2">
+                          <Check className="w-4 h-4" />
+                          <span className="text-sm">使用</span>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

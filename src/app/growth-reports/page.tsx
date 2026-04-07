@@ -20,22 +20,29 @@ import {
 } from 'lucide-react';
 
 type AbilityMetrics = {
-  technical?: Record<string, number>;
-  tactical?: Record<string, number>;
-  physical?: Record<string, number>;
-  mental?: Record<string, number>;
+  dribbling: number;
+  passing: number;
+  shooting: number;
+  defending: number;
+  physical: number;
+  tactical: number;
 };
 
 type TrainingStats = {
-  totalHours?: number;
+  totalSessions?: number;
   attendanceRate?: number;
+  avgPerformance?: number;
+  totalHours?: number;
   skillImprovements?: string[];
 };
 
 type MatchStats = {
-  gamesPlayed?: number;
-  avgScore?: number;
-  performanceRating?: number;
+  totalMatches: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  avgScore: string;
+  winRate?: number;
 };
 
 type GrowthReport = {
@@ -67,6 +74,20 @@ type AbilityDimensions = {
   tactical: number;
 };
 
+type PreviewData = {
+  title: string;
+  playerName: string;
+  periodStart: string;
+  periodEnd: string;
+  reportType: string;
+  abilities: AbilityMetrics;
+  trainingStats: TrainingStats;
+  matchStats: MatchStats;
+  strengths: string[];
+  improvements: string[];
+  overallRating: number;
+};
+
 type Player = {
   id: string;
   name: string;
@@ -82,7 +103,7 @@ export default function GrowthReportsPage() {
   const [selectedPlayer, setSelectedPlayer] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [previewData, setPreviewData] = useState<any>(null);
+  const [previewData, setPreviewData] = useState<PreviewData | null>(null);
 
   // 创建表单状态
   const [createForm, setCreateForm] = useState({
@@ -347,7 +368,7 @@ export default function GrowthReportsPage() {
                   {report.abilities &&
                     Object.entries(report.abilities)
                       .slice(0, 6)
-                      .map(([key, value]: [string, any]) => (
+                      .map(([key, value]: [string, number]) => (
                         <div key={key} className="text-center">
                           <div className="text-lg font-bold text-orange-600">{value}</div>
                           <div className="text-xs text-gray-400">{key}</div>
@@ -496,12 +517,14 @@ export default function GrowthReportsPage() {
                   <h4 className="text-sm font-medium text-gray-700 mb-2">能力数据</h4>
                   <div className="grid grid-cols-6 gap-2">
                     {previewData?.abilities &&
-                      Object.entries(previewData.abilities).map(([key, value]: [string, any]) => (
-                        <div key={key} className="text-center bg-blue-50 rounded-lg p-2">
-                          <div className="text-lg font-bold text-blue-600">{value}</div>
-                          <div className="text-xs text-gray-500">{key}</div>
-                        </div>
-                      ))}
+                      Object.entries(previewData.abilities).map(
+                        ([key, value]: [string, number]) => (
+                          <div key={key} className="text-center bg-blue-50 rounded-lg p-2">
+                            <div className="text-lg font-bold text-blue-600">{value}</div>
+                            <div className="text-xs text-gray-500">{key}</div>
+                          </div>
+                        )
+                      )}
                   </div>
                 </div>
 
