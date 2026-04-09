@@ -35,6 +35,14 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       parsedPlayerIds = [];
     }
 
+    // 解析 JSON 字符串字段为数组
+    let parsedSections = [];
+    try {
+      parsedSections = JSON.parse(plan.sections || '[]');
+    } catch {
+      parsedSections = [];
+    }
+
     // 如果有 playerIds 但没有关联的 records（兼容旧数据），补充查询学员信息
     let playerDetails: { id: string; name: string; group: string }[] = [];
     if (parsedPlayerIds.length > 0) {
@@ -49,7 +57,10 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     return NextResponse.json({
       success: true,
-      plan,
+      plan: {
+        ...plan,
+        sections: parsedSections,
+      },
       playerDetails,
       records: plan.records,
     });
