@@ -16,6 +16,44 @@ import {
 // 版本历史记录
 const versions = [
   {
+    version: 'v5.8.2',
+    date: '2026-04-09',
+    title: '教案生成 Prompt 大幅强化 + 详情页崩溃修复',
+    description: '战术库扩充到60+个，动作描述6要素强制标签，时间匹配强化',
+    features: [
+      { type: 'fix', text: '教案详情页客户端崩溃：API 返回 sections 为 JSON 字符串导致前端 .map() 报错' },
+      { type: 'feature', text: '战术库扩充：从15个扩充到60+个（完整进攻/防守/个人战术体系）' },
+      { type: 'feature', text: '新增战术：反跑配合、高低位策应、突分配合、破盯人/联防/紧逼、个人攻防、挡拆防守等' },
+      { type: 'improvement', text: '动作描述强制6个【】标签：姿势/动作/发力/次数/形式/要点目的' },
+      { type: 'improvement', text: '时间匹配增加❌错误 vs ✅正确对比示例，强化 AI 遵守度' },
+      { type: 'improvement', text: '运球/传球/投篮/防守各类动作增加精确细节要求（左右手、次数、路线）' },
+    ],
+  },
+  {
+    version: 'v5.8.1',
+    date: '2026-04-09',
+    title: '教案生成 JSON 截断修复',
+    description: '解决 Kimi 模型输出被截断导致教案生成失败的问题',
+    features: [
+      { type: 'fix', text: 'Kimi 模型从 moonshot-v1-8k 升级到 moonshot-v1-32k' },
+      { type: 'fix', text: 'max_tokens 从 8000 提升到 16000' },
+      { type: 'feature', text: '新增 tryRepairTruncatedJson() 函数：智能修复被截断的 JSON 输出' },
+    ],
+  },
+  {
+    version: 'v5.8.0',
+    date: '2026-04-09',
+    title: '教案生成大幅优化',
+    description: '热身压缩到5分钟、动作6要素描述、时间匹配计算、动作细节精确化',
+    features: [
+      { type: 'improvement', text: '热身环节优化：慢跑+拉伸严格控制在5分钟内' },
+      { type: 'improvement', text: '动作描述6要素：姿势、动作、发力、时间/次数、形式、要点目的' },
+      { type: 'improvement', text: 'duration 计算方法：确保标注时间与实际训练量匹配' },
+      { type: 'improvement', text: '动作细节细化：运球/传球/投篮/防守各类增加精确要求' },
+      { type: 'feature', text: '战术库扩充：进攻战术（快攻/阵地配合/整体进攻/破防守/固定战术）+ 防守战术' },
+    ],
+  },
+  {
     version: 'v5.6.0',
     date: '2026-04-07',
     title: '通知系统全面升级',
