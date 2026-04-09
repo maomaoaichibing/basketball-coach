@@ -4,22 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { fetchWithAuth } from '@/lib/auth';
-import {
-  ArrowLeft,
-  Edit2,
-  Phone,
-  Mail,
-  Calendar,
-  MapPin,
-  Users,
-  TrendingUp,
-  Activity,
-  Target,
-  ChevronRight,
-  Star,
-  Clock,
-  X,
-} from 'lucide-react';
+import { ArrowLeft, Edit2, Phone, Calendar, Users, TrendingUp, Target, X } from 'lucide-react';
 
 // 类型定义
 type Player = {

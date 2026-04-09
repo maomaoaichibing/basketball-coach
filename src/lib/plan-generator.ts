@@ -1230,7 +1230,7 @@ export function generateTrainingPlan(params: {
   theme?: string;
   focusSkills?: string[];
 }): TrainingPlanOutput {
-  const { group, duration: _duration, location, weather, theme, focusSkills = [] } = params;
+  const { group, location, weather, theme, focusSkills = [] } = params;
 
   const config = AGE_GROUP_CONFIG[group];
 

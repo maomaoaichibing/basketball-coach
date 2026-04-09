@@ -31,6 +31,7 @@ import {
   type AgeGroup,
   type Location,
   type TrainingPlanOutput,
+  type PlanSection,
 } from '@/lib/plan-generator';
 
 // 学员类型
@@ -86,16 +87,18 @@ export default function NewPlanPage() {
 
   // 模板选择状态
   const [showTemplateModal, setShowTemplateModal] = useState(false);
-  const [templates, setTemplates] = useState<Array<{
-    id: string;
-    title: string;
-    group: string;
-    theme?: string;
-    duration: number;
-    location: string;
-    skillLevel?: string;
-    sections?: string;
-  }>>([]);
+  const [templates, setTemplates] = useState<
+    Array<{
+      id: string;
+      title: string;
+      group: string;
+      theme?: string;
+      duration: number;
+      location: string;
+      skillLevel?: string;
+      sections?: string;
+    }>
+  >([]);
 
   // 加载学员列表
   useEffect(() => {
@@ -269,10 +272,10 @@ export default function NewPlanPage() {
   const skillOptions = ['运球', '传球', '投篮', '防守', '体能', '战术'];
 
   // 从模板创建教案
-  function handleUseTemplate(template: typeof templates[0]) {
+  function handleUseTemplate(template: (typeof templates)[0]) {
     try {
       // 解析模板的 sections
-      let parsedSections: any[] = [];
+      let parsedSections: PlanSection[] = [];
       try {
         parsedSections = template.sections ? JSON.parse(template.sections) : [];
       } catch {
@@ -280,8 +283,8 @@ export default function NewPlanPage() {
       }
 
       // 提取主题
-      let themeStr = template.theme || '';
-      let themeArr: string[] = themeStr ? themeStr.split('+') : [];
+      const themeStr = template.theme || '';
+      const themeArr: string[] = themeStr ? themeStr.split('+') : [];
 
       // 更新表单
       setForm((f) => ({
@@ -293,7 +296,10 @@ export default function NewPlanPage() {
       }));
 
       if (template.skillLevel) {
-        setAiConfig((c) => ({ ...c, skillLevel: template.skillLevel as 'beginner' | 'intermediate' | 'advanced' }));
+        setAiConfig((c) => ({
+          ...c,
+          skillLevel: template.skillLevel as 'beginner' | 'intermediate' | 'advanced',
+        }));
       }
 
       // 如果模板有 sections，直接设为教案结果
@@ -306,7 +312,10 @@ export default function NewPlanPage() {
           location: template.location as Location,
           theme: themeStr,
           focusSkills: themeArr,
-          skillLevel: (template.skillLevel || 'intermediate') as 'beginner' | 'intermediate' | 'advanced',
+          skillLevel: (template.skillLevel || 'intermediate') as
+            | 'beginner'
+            | 'intermediate'
+            | 'advanced',
           intensity: 'medium',
           trainingProgression: '',
           sections: parsedSections,
@@ -1364,9 +1373,7 @@ export default function NewPlanPage() {
                 <div className="text-center py-12">
                   <Sparkles className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                   <p className="text-gray-500 mb-2">暂无模板</p>
-                  <p className="text-sm text-gray-400">
-                    在教案详情页点击「存为模板」即可创建模板
-                  </p>
+                  <p className="text-sm text-gray-400">在教案详情页点击「存为模板」即可创建模板</p>
                   <button
                     onClick={() => setShowTemplateModal(false)}
                     className="mt-4 px-4 py-2 bg-orange-500 text-white rounded-lg text-sm hover:bg-orange-600"

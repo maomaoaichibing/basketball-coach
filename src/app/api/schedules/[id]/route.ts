@@ -12,7 +12,17 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       where: { id: params.id },
       include: {
         team: { select: { id: true, name: true, coachName: true } },
-        plan: { select: { id: true, title: true, date: true, group: true, theme: true, status: true, duration: true } },
+        plan: {
+          select: {
+            id: true,
+            title: true,
+            date: true,
+            group: true,
+            theme: true,
+            status: true,
+            duration: true,
+          },
+        },
         bookings: {
           where: { status: 'confirmed' },
           include: {

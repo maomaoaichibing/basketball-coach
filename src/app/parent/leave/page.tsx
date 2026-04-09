@@ -4,15 +4,7 @@ import { useState, useEffect, ComponentType } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { fetchWithAuth } from '@/lib/auth';
-import {
-  ChevronRight,
-  Plus,
-  Calendar,
-  Clock,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-} from 'lucide-react';
+import { ChevronRight, Plus, Calendar, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 type Leave = {
   id: string;
@@ -56,7 +48,7 @@ export default function ParentLeavePage() {
     } else {
       router.push('/parent');
     }
-  }, []);
+  }, [router]);
 
   async function fetchLeaves(playerId: string) {
     try {

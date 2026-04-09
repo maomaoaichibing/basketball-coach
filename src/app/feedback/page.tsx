@@ -6,19 +6,13 @@ import { fetchWithAuth } from '@/lib/auth';
 import {
   ArrowLeft,
   Plus,
-  Search,
   ClipboardList,
-  Calendar,
   Download,
-  Clock,
-  Users,
   Star,
-  ChevronRight,
   CheckCircle,
   XCircle,
   AlertCircle,
   Save,
-  Eye,
 } from 'lucide-react';
 
 // 类型定义
@@ -89,7 +83,6 @@ export default function FeedbackPage() {
   const [records, setRecords] = useState<FeedbackRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [viewMode, setViewMode] = useState<'list' | 'form'>('list');
 
   // 表单状态
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);

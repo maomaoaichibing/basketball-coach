@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchWithAuth } from '@/lib/auth';
 
 interface OrderItem {
@@ -119,13 +119,7 @@ export default function OrdersPage() {
     notes: '',
   });
 
-  useEffect(() => {
-    fetchOrders();
-    fetchCourses();
-    fetchPlayers();
-  }, [filter]);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -141,9 +135,9 @@ export default function OrdersPage() {
       console.error('获取订单失败:', error);
     }
     setLoading(false);
-  };
+  }, [filter]);
 
-  const fetchCourses = async () => {
+  const fetchCourses = useCallback(async () => {
     try {
       const res = await fetchWithAuth('/api/courses?status=active');
       const data = await res.json();
@@ -151,9 +145,9 @@ export default function OrdersPage() {
     } catch (error) {
       console.error('获取课程失败:', error);
     }
-  };
+  }, []);
 
-  const fetchPlayers = async () => {
+  const fetchPlayers = useCallback(async () => {
     try {
       const res = await fetchWithAuth('/api/players?status=training');
       const data = await res.json();
@@ -161,7 +155,13 @@ export default function OrdersPage() {
     } catch (error) {
       console.error('获取学员失败:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchOrders();
+    fetchCourses();
+    fetchPlayers();
+  }, [filter, fetchOrders, fetchCourses, fetchPlayers]);
 
   const handleAddItem = () => {
     setNewOrder({
@@ -826,21 +826,35 @@ export default function OrdersPage() {
                   <h3 className="text-sm font-medium text-gray-700 mb-2">支付记录</h3>
                   <div className="space-y-2">
                     {selectedOrder.payments.map((p) => (
-                      <div key={p.id} className="flex items-center justify-between text-sm bg-gray-50 px-3 py-2 rounded">
+                      <div
+                        key={p.id}
+                        className="flex items-center justify-between text-sm bg-gray-50 px-3 py-2 rounded"
+                      >
                         <div className="flex items-center gap-2">
-                          <span className={`inline-block w-2 h-2 rounded-full ${p.status === 'completed' ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                          <span
+                            className={`inline-block w-2 h-2 rounded-full ${p.status === 'completed' ? 'bg-green-500' : 'bg-gray-400'}`}
+                          ></span>
                           <span className="text-gray-600">
-                            {p.paymentMethod === 'cash' ? '现金' :
-                             p.paymentMethod === 'wechat' ? '微信' :
-                             p.paymentMethod === 'alipay' ? '支付宝' :
-                             p.paymentMethod === 'bank' ? '银行转账' : '其他'}
+                            {p.paymentMethod === 'cash'
+                              ? '现金'
+                              : p.paymentMethod === 'wechat'
+                                ? '微信'
+                                : p.paymentMethod === 'alipay'
+                                  ? '支付宝'
+                                  : p.paymentMethod === 'bank'
+                                    ? '银行转账'
+                                    : '其他'}
                           </span>
-                          {p.operatorName && <span className="text-gray-400">({p.operatorName})</span>}
+                          {p.operatorName && (
+                            <span className="text-gray-400">({p.operatorName})</span>
+                          )}
                         </div>
                         <div className="text-right">
                           <span className="font-medium text-green-600">¥{p.amount.toFixed(2)}</span>
                           <div className="text-xs text-gray-400">
-                            {p.paidAt ? new Date(p.paidAt).toLocaleDateString() : new Date(p.createdAt).toLocaleDateString()}
+                            {p.paidAt
+                              ? new Date(p.paidAt).toLocaleDateString()
+                              : new Date(p.createdAt).toLocaleDateString()}
                           </div>
                         </div>
                       </div>

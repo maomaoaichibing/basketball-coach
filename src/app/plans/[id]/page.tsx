@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { fetchWithAuth } from '@/lib/auth';
@@ -98,31 +98,26 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
 
   const router = useRouter();
 
-  useEffect(() => {
-    fetchPlan();
-  }, [params.id]);
-
-  async function fetchPlan() {
+  const fetchPlan = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetchWithAuth(`/api/plans/${params.id}`);
       const data = await response.json();
 
       if (data.success) {
-        const parsedPlan = {
-          ...data.plan,
-          sections: data.plan.sections ? JSON.parse(data.plan.sections) : [],
-        };
-        setPlan(parsedPlan);
-        setPlayerDetails(data.playerDetails || []);
-        setRecords(data.records || []);
+        setPlan(data.plan);
       }
     } catch (error) {
-      console.error('获取教案详情失败:', error);
+      console.error('获取教案失败:', error);
+      alert('获取教案失败');
     } finally {
       setLoading(false);
     }
-  }
+  }, [params.id]);
+
+  useEffect(() => {
+    fetchPlan();
+  }, [fetchPlan]);
 
   // 复制教案
   async function handleCopyPlan() {

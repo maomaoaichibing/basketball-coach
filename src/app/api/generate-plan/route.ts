@@ -644,32 +644,47 @@ function validateAndFixPlan(plan: AIResult, duration: number): AIResult {
 
     // 规则1：慢跑+拉伸总时间强制≤5分钟（适用于第一节）
     if (sectionIndex === 0) {
-      const warmupActivities = activities.filter(a => 
-        a.name && (a.name.includes('慢跑') || a.name.includes('跑步') || 
-                   a.name.includes('拉伸') || a.name.includes('伸展'))
+      const warmupActivities = activities.filter(
+        (a) =>
+          a.name &&
+          (a.name.includes('慢跑') ||
+            a.name.includes('跑步') ||
+            a.name.includes('拉伸') ||
+            a.name.includes('伸展'))
       );
       const warmupTotalTime = warmupActivities.reduce((sum, a) => sum + (a.duration || 0), 0);
-      
+
       // 如果慢跑+拉伸超过5分钟，需要调整
-      const jogActivity = activities.find(a => a.name && (a.name.includes('慢跑') || a.name.includes('跑步')));
-      const stretchActivities = activities.filter(a => a.name && (a.name.includes('拉伸') || a.name.includes('伸展')));
-      
+      const jogActivity = activities.find(
+        (a) => a.name && (a.name.includes('慢跑') || a.name.includes('跑步'))
+      );
+      const stretchActivities = activities.filter(
+        (a) => a.name && (a.name.includes('拉伸') || a.name.includes('伸展'))
+      );
+
       if (jogActivity && warmupTotalTime > 5) {
         // 慢跑固定2分钟
         const oldJogTime = jogActivity.duration;
         jogActivity.duration = 2;
         console.warn(`⚠️ [第一节] 慢跑"${jogActivity.name}"时间${oldJogTime}分钟，强制调整为2分钟`);
-        
+
         // 剩余时间分配给拉伸（每个拉伸动作约1分钟）
         const remainingTime = 3; // 5分钟总预算 - 2分钟慢跑
-        const stretchTimePerActivity = Math.max(1, Math.floor(remainingTime / Math.max(1, stretchActivities.length)));
-        stretchActivities.forEach(a => {
+        const stretchTimePerActivity = Math.max(
+          1,
+          Math.floor(remainingTime / Math.max(1, stretchActivities.length))
+        );
+        stretchActivities.forEach((a) => {
           a.duration = stretchTimePerActivity;
         });
-        console.warn(`⚠️ [第一节] 拉伸动作调整为每个${stretchTimePerActivity}分钟，总计${stretchTimePerActivity * stretchActivities.length}分钟`);
+        console.warn(
+          `⚠️ [第一节] 拉伸动作调整为每个${stretchTimePerActivity}分钟，总计${stretchTimePerActivity * stretchActivities.length}分钟`
+        );
       } else if (jogActivity && jogActivity.duration > 2) {
         // 单独慢跑超过2分钟也要调整
-        console.warn(`⚠️ [第一节] 慢跑"${jogActivity.name}"时间${jogActivity.duration}分钟，强制调整为2分钟`);
+        console.warn(
+          `⚠️ [第一节] 慢跑"${jogActivity.name}"时间${jogActivity.duration}分钟，强制调整为2分钟`
+        );
         jogActivity.duration = 2;
       }
     }

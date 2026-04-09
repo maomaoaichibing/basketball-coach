@@ -54,105 +54,122 @@ export default function VoicePlanPage() {
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
   const [generatedPlanId, setGeneratedPlanId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [speaking, setSpeaking] = useState(false);
 
   const voice = useCloudVoiceRecognition();
 
-  // 查询学员
-  const queryPlayers = useCallback(async (name: string) => {
-    try {
-      const response = await fetch(`/api/players?q=${encodeURIComponent(name)}`);
-      const data = await response.json();
+  const speak = useCallback((text: string) => {
+    if (!('speechSynthesis' in window)) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'zh-CN';
+    utterance.rate = 1.1;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+  }, []);
 
-      if (data.success && data.players && data.players.length > 0) {
-        const players: Player[] = data.players;
-        setParsedCommand({
-          action: 'attendance',
-          playerName: name,
-          players,
-          raw: recognizedText,
-        });
-        setSelectedPlayers(players);
-        setStep('confirm');
-        speak(`找到${players.length}位学员：${players.map((p) => p.name).join('、')}`);
-      } else {
-        setError(`未找到名为"${name}"的学员`);
-        speak(`抱歉，未找到名为${name}的学员`);
+  // 查询学员
+  const queryPlayers = useCallback(
+    async (name: string) => {
+      try {
+        const response = await fetch(`/api/players?q=${encodeURIComponent(name)}`);
+        const data = await response.json();
+
+        if (data.success && data.players && data.players.length > 0) {
+          const players: Player[] = data.players;
+          setParsedCommand({
+            action: 'attendance',
+            playerName: name,
+            players,
+            raw: recognizedText,
+          });
+          setSelectedPlayers(players);
+          setStep('confirm');
+          speak(`找到${players.length}位学员：${players.map((p) => p.name).join('、')}`);
+        } else {
+          setError(`未找到名为"${name}"的学员`);
+          speak(`抱歉，未找到名为${name}的学员`);
+        }
+      } catch (err) {
+        console.error('查询学员失败:', err);
+        setError('查询学员失败，请重试');
       }
-    } catch (err) {
-      console.error('查询学员失败:', err);
-      setError('查询学员失败，请重试');
-    }
-  }, [recognizedText, speak]);
+    },
+    [recognizedText, speak]
+  );
 
   // 查询所有学员
-  const queryAllPlayers = useCallback(async (ageGroup?: string, skills?: string[]) => {
-    try {
-      const response = await fetchWithAuth('/api/players');
-      const data = await response.json();
+  const queryAllPlayers = useCallback(
+    async (ageGroup?: string, skills?: string[]) => {
+      try {
+        const response = await fetchWithAuth('/api/players');
+        const data = await response.json();
 
-      if (data.success && data.players && data.players.length > 0) {
-        let players: Player[] = data.players;
+        if (data.success && data.players && data.players.length > 0) {
+          let players: Player[] = data.players;
 
-        if (ageGroup) {
-          players = players.filter((p) => p.group.toUpperCase() === ageGroup.toUpperCase());
+          if (ageGroup) {
+            players = players.filter((p) => p.group.toUpperCase() === ageGroup.toUpperCase());
+          }
+
+          if (skills && skills.length > 0) {
+            players = players
+              .map((p) => {
+                const weakSkills: string[] = [];
+                skills.forEach((skill) => {
+                  const skillKey = skillToKey(skill);
+                  if (skillKey && (p[skillKey as keyof Player] as number) < 5) {
+                    weakSkills.push(skill);
+                  }
+                });
+                return { ...p, weakSkills };
+              })
+              .filter((p) => p.weakSkills && p.weakSkills.length > 0);
+          }
+
+          if (players.length === 0) {
+            players = data.players.filter((p: Player) => p.group === 'U10').slice(0, 5);
+          }
+
+          setParsedCommand({
+            action: 'create_plan',
+            players,
+            ageGroup,
+            skills,
+            raw: recognizedText,
+          });
+          setSelectedPlayers(players);
+          setStep('confirm');
+          speak(`将为${players.length}位学员生成教案`);
+        } else {
+          setError('系统中没有学员数据');
+          speak('抱歉，系统中还没有学员数据');
         }
-
-        if (skills && skills.length > 0) {
-          players = players
-            .map((p) => {
-              const weakSkills: string[] = [];
-              skills.forEach((skill) => {
-                const skillKey = skillToKey(skill);
-                if (skillKey && (p[skillKey as keyof Player] as number) < 5) {
-                  weakSkills.push(skill);
-                }
-              });
-              return { ...p, weakSkills };
-            })
-            .filter((p) => p.weakSkills && p.weakSkills.length > 0);
-        }
-
-        if (players.length === 0) {
-          players = data.players.filter((p: Player) => p.group === 'U10').slice(0, 5);
-        }
-
-        setParsedCommand({
-          action: 'create_plan',
-          players,
-          ageGroup,
-          skills,
-          raw: recognizedText,
-        });
-        setSelectedPlayers(players);
-        setStep('confirm');
-        speak(`将为${players.length}位学员生成教案`);
-      } else {
-        setError('系统中没有学员数据');
-        speak('抱歉，系统中还没有学员数据');
+      } catch (err) {
+        console.error('查询学员失败:', err);
+        setError('查询学员失败，请重试');
       }
-    } catch (err) {
-      console.error('查询学员失败:', err);
-      setError('查询学员失败，请重试');
-    }
-  }, [recognizedText, speak]);
+    },
+    [recognizedText, speak]
+  );
 
   // 处理识别结果
-  const processRecognizedText = useCallback((text: string) => {
-    const parsed = parseVoiceCommand(text);
-    console.log('解析结果:', parsed);
+  const processRecognizedText = useCallback(
+    (text: string) => {
+      const parsed = parseVoiceCommand(text);
+      console.log('解析结果:', parsed);
 
-    if (parsed.action === 'attendance' && parsed.playerName) {
-      queryPlayers(parsed.playerName);
-    } else if (parsed.action === 'create_plan') {
-      queryAllPlayers(parsed.ageGroup, parsed.skills);
-    } else {
-      setParsedCommand(parsed);
-      if (parsed.action === 'unknown' || !parsed.playerName) {
-        setError('没有识别到有效指令，请再说一遍');
+      if (parsed.action === 'attendance' && parsed.playerName) {
+        queryPlayers(parsed.playerName);
+      } else if (parsed.action === 'create_plan') {
+        queryAllPlayers(parsed.ageGroup, parsed.skills);
+      } else {
+        setParsedCommand(parsed);
+        if (parsed.action === 'unknown' || !parsed.playerName) {
+          setError('没有识别到有效指令，请再说一遍');
+        }
       }
-    }
-  }, [queryPlayers, queryAllPlayers]);
+    },
+    [queryPlayers, queryAllPlayers]
+  );
 
   // 开始录音
   const handleStartRecording = useCallback(async () => {
@@ -185,18 +202,6 @@ export default function VoicePlanPage() {
   }
 
   // 语音播报
-  function speak(text: string) {
-    if (!('speechSynthesis' in window)) return;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'zh-CN';
-    utterance.rate = 1.1;
-    utterance.onstart = () => setSpeaking(true);
-    utterance.onend = () => setSpeaking(false);
-    utterance.onerror = () => setSpeaking(false);
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
-  }
-
   // 生成教案
   async function handleGeneratePlan() {
     if (selectedPlayers.length === 0) return;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchWithAuth } from '@/lib/auth';
 import {
   Users,
@@ -9,8 +9,6 @@ import {
   Calendar,
   Ticket,
   DollarSign,
-  UserPlus,
-  Activity,
   BarChart3,
   PieChart,
 } from 'lucide-react';
@@ -44,11 +42,7 @@ export default function StatsPage() {
   const [period, setPeriod] = useState('month');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchStats();
-  }, [period]);
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetchWithAuth(`/api/stats?period=${period}`);
@@ -58,7 +52,11 @@ export default function StatsPage() {
       console.error('获取统计数据失败:', error);
     }
     setLoading(false);
-  };
+  }, [period]);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('zh-CN', {

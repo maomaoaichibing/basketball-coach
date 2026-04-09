@@ -130,7 +130,17 @@ export default function RecordsPage() {
 
   // 导出CSV
   function handleExportCSV() {
-    const header = ['训练日期', '教案名称', '训练主题', '学员姓名', '组别', '出勤状态', '表现评分', '教练反馈', '记录时间'];
+    const header = [
+      '训练日期',
+      '教案名称',
+      '训练主题',
+      '学员姓名',
+      '组别',
+      '出勤状态',
+      '表现评分',
+      '教练反馈',
+      '记录时间',
+    ];
     const rows = records.map((r) => [
       r.planDate ? new Date(r.planDate).toLocaleDateString('zh-CN') : '',
       r.planTitle || '',
@@ -145,7 +155,11 @@ export default function RecordsPage() {
 
     // BOM + CSV内容，确保中文在Excel中正确显示
     const bom = '\uFEFF';
-    const csv = bom + [header, ...rows].map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(',')).join('\n');
+    const csv =
+      bom +
+      [header, ...rows]
+        .map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(','))
+        .join('\n');
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);

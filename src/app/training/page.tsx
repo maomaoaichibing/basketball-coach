@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { fetchWithAuth } from '@/lib/auth';
 import {
   ArrowLeft,
@@ -55,7 +55,6 @@ type TrainingRecord = {
 
 // 训练执行页面内容（需要 useSearchParams 的部分）
 function TrainingSessionContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const autoPlanId = searchParams.get('planId');
 
@@ -73,12 +72,14 @@ function TrainingSessionContent() {
   const [feedbackMap, setFeedbackMap] = useState<Record<string, string>>({});
   const [performanceMap, setPerformanceMap] = useState<Record<string, number>>({});
   const [showFeedbackInput, setShowFeedbackInput] = useState<string | null>(null);
-  const [planSections, setPlanSections] = useState<Array<{
-    category: string;
-    name: string;
-    duration: number;
-    activities: Array<{ name: string; duration: number }>;
-  }>>([]);
+  const [planSections, setPlanSections] = useState<
+    Array<{
+      category: string;
+      name: string;
+      duration: number;
+      activities: Array<{ name: string; duration: number }>;
+    }>
+  >([]);
 
   const [trainingStatus, setTrainingStatus] = useState<'idle' | 'active' | 'completed'>('idle');
   const [completedSections, setCompletedSections] = useState<Set<number>>(new Set());
@@ -96,7 +97,7 @@ function TrainingSessionContent() {
         setTrainingStatus('active');
       }
     }
-  }, [autoPlanId, plans]);
+  }, [autoPlanId, plans, selectedPlan]);
 
   async function fetchPlans() {
     try {
@@ -365,7 +366,9 @@ function TrainingSessionContent() {
             {selectedPlan ? (
               <div className="space-y-6">
                 {/* 已选教案 + 训练状态 */}
-                <div className={`rounded-xl p-6 text-white ${trainingStatus === 'completed' ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gradient-to-r from-orange-500 to-orange-600'}`}>
+                <div
+                  className={`rounded-xl p-6 text-white ${trainingStatus === 'completed' ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gradient-to-r from-orange-500 to-orange-600'}`}
+                >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       {trainingStatus === 'completed' ? (
@@ -374,7 +377,11 @@ function TrainingSessionContent() {
                         <Play className="w-5 h-5" />
                       )}
                       <span className="text-sm opacity-80">
-                        {trainingStatus === 'completed' ? '训练已完成' : trainingStatus === 'active' ? '训练进行中' : '当前训练'}
+                        {trainingStatus === 'completed'
+                          ? '训练已完成'
+                          : trainingStatus === 'active'
+                            ? '训练进行中'
+                            : '当前训练'}
                       </span>
                     </div>
                     {trainingStatus === 'active' && (
@@ -451,7 +458,7 @@ function TrainingSessionContent() {
                         <span className="text-sm text-gray-500">共 {totalPlayerCount} 人</span>
                       </div>
                       <div className="divide-y divide-gray-50">
-                        {playerDetails.map((player, idx) => {
+                        {playerDetails.map((player, _idx) => {
                           const attendance = attendanceMap[player.id] || 'present';
                           const feedback = feedbackMap[player.id] || '';
                           const performance = performanceMap[player.id] || 0;
@@ -592,9 +599,14 @@ function TrainingSessionContent() {
                               etiquette: 'bg-pink-100 text-pink-700',
                             };
                             const categoryLabel: Record<string, string> = {
-                              warmup: '热身', technical: '技术', tactical: '战术',
-                              game: '对抗', cooldown: '放松', etiquette: '礼仪',
-                              ball_familiarity: '球性', physical: '体能',
+                              warmup: '热身',
+                              technical: '技术',
+                              tactical: '战术',
+                              game: '对抗',
+                              cooldown: '放松',
+                              etiquette: '礼仪',
+                              ball_familiarity: '球性',
+                              physical: '体能',
                             };
 
                             return (
@@ -603,18 +615,24 @@ function TrainingSessionContent() {
                                 onClick={() => toggleSectionComplete(index)}
                                 className={`w-full p-4 flex items-center gap-3 text-left transition-colors hover:bg-gray-50 ${isDone ? 'opacity-60' : ''}`}
                               >
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${isDone ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                                <div
+                                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${isDone ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-500'}`}
+                                >
                                   {isDone ? <CheckCircle className="w-4 h-4" /> : index + 1}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <div className={`font-medium ${isDone ? 'line-through text-gray-400' : 'text-gray-900'}`}>
+                                  <div
+                                    className={`font-medium ${isDone ? 'line-through text-gray-400' : 'text-gray-900'}`}
+                                  >
                                     {section.name}
                                   </div>
                                   <div className="text-xs text-gray-500 mt-0.5 flex items-center gap-2">
                                     <Clock className="w-3 h-3" />
                                     {section.duration}分钟
                                     {section.category && (
-                                      <span className={`px-1.5 py-0.5 text-xs rounded ${sectionColorMap[section.category] || 'bg-gray-100 text-gray-600'}`}>
+                                      <span
+                                        className={`px-1.5 py-0.5 text-xs rounded ${sectionColorMap[section.category] || 'bg-gray-100 text-gray-600'}`}
+                                      >
                                         {categoryLabel[section.category] || section.category}
                                       </span>
                                     )}
@@ -675,11 +693,13 @@ function TrainingSessionContent() {
 // 页面导出 - 用 Suspense 包裹以支持 useSearchParams
 export default function TrainingSessionPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+        </div>
+      }
+    >
       <TrainingSessionContent />
     </Suspense>
   );

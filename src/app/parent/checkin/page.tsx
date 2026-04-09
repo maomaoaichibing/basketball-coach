@@ -4,17 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { fetchWithAuth } from '@/lib/auth';
-import {
-  ChevronRight,
-  Plus,
-  Camera,
-  MapPin,
-  Clock,
-  Heart,
-  MessageCircle,
-  Award,
-  Calendar,
-} from 'lucide-react';
+import { ChevronRight, Plus, Camera, MapPin, Clock, Heart, MessageCircle } from 'lucide-react';
 
 type CheckIn = {
   id: string;
@@ -61,7 +51,7 @@ export default function ParentCheckInPage() {
     } else {
       router.push('/parent');
     }
-  }, []);
+  }, [router]);
 
   async function fetchCheckins(playerId: string) {
     try {

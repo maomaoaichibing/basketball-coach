@@ -41,7 +41,7 @@ export default function ParentMessagesPage() {
     } else {
       router.push('/parent');
     }
-  }, []);
+  }, [router]);
 
   async function fetchMessages(playerId: string) {
     try {

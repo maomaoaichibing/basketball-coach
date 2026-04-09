@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { fetchWithAuth } from '@/lib/auth';
@@ -22,7 +22,6 @@ import {
   Timer,
   UserCheck,
   Link as LinkIcon,
-  Unlink,
 } from 'lucide-react';
 
 // 类型定义
@@ -41,7 +40,15 @@ type Schedule = {
   status: string;
   planId?: string;
   team?: { id: string; name: string };
-  plan?: { id: string; title: string; date: string; group: string; theme: string | null; status: string; duration: number } | null;
+  plan?: {
+    id: string;
+    title: string;
+    date: string;
+    group: string;
+    theme: string | null;
+    status: string;
+    duration: number;
+  } | null;
 };
 
 type TodaySchedule = Schedule & {
@@ -99,15 +106,7 @@ export default function SchedulePage() {
     planId: '',
   });
 
-  useEffect(() => {
-    if (view === 'week') {
-      fetchSchedules();
-    } else {
-      fetchTodaySchedules();
-    }
-  }, [selectedGroup, view]);
-
-  async function fetchSchedules() {
+  const fetchSchedules = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -120,9 +119,9 @@ export default function SchedulePage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [selectedGroup]);
 
-  async function fetchTodaySchedules() {
+  const fetchTodaySchedules = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetchWithAuth('/api/schedules/today');
@@ -133,7 +132,15 @@ export default function SchedulePage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    if (view === 'week') {
+      fetchSchedules();
+    } else {
+      fetchTodaySchedules();
+    }
+  }, [view, fetchSchedules, fetchTodaySchedules]);
 
   async function fetchAvailablePlans() {
     try {
@@ -166,7 +173,7 @@ export default function SchedulePage() {
       } else {
         alert(data.error);
       }
-    } catch (error) {
+    } catch {
       alert('保存失败');
     }
   }
@@ -179,9 +186,8 @@ export default function SchedulePage() {
       if (data.success) {
         if (view === 'week') fetchSchedules();
         else fetchTodaySchedules();
-      }
-      else alert(data.error);
-    } catch (error) {
+      } else alert(data.error);
+    } catch {
       alert('删除失败');
     }
   }
@@ -313,7 +319,9 @@ export default function SchedulePage() {
               key={g}
               onClick={() => setSelectedGroup(g)}
               className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
-                selectedGroup === g ? 'bg-orange-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-100'
+                selectedGroup === g
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-100'
               }`}
             >
               {g === 'all' ? '全部' : g}
@@ -429,15 +437,24 @@ export default function SchedulePage() {
                       <div className="flex gap-4 mb-3">
                         <div className="flex items-center gap-1">
                           <CheckCircle2 className="w-4 h-4 text-green-500" />
-                          <span className="text-sm text-gray-600">出勤 <strong className="text-green-600">{schedule.planStats.present}</strong></span>
+                          <span className="text-sm text-gray-600">
+                            出勤{' '}
+                            <strong className="text-green-600">{schedule.planStats.present}</strong>
+                          </span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Timer className="w-4 h-4 text-yellow-500" />
-                          <span className="text-sm text-gray-600">迟到 <strong className="text-yellow-600">{schedule.planStats.late}</strong></span>
+                          <span className="text-sm text-gray-600">
+                            迟到{' '}
+                            <strong className="text-yellow-600">{schedule.planStats.late}</strong>
+                          </span>
                         </div>
                         <div className="flex items-center gap-1">
                           <XCircle className="w-4 h-4 text-red-500" />
-                          <span className="text-sm text-gray-600">缺勤 <strong className="text-red-600">{schedule.planStats.absent}</strong></span>
+                          <span className="text-sm text-gray-600">
+                            缺勤{' '}
+                            <strong className="text-red-600">{schedule.planStats.absent}</strong>
+                          </span>
                         </div>
                         <span className="text-sm text-gray-400">
                           共 {schedule.planStats.total} 人
@@ -452,21 +469,27 @@ export default function SchedulePage() {
                               record.attendance === 'present'
                                 ? 'bg-green-50 border border-green-200'
                                 : record.attendance === 'late'
-                                ? 'bg-yellow-50 border border-yellow-200'
-                                : 'bg-red-50 border border-red-200'
+                                  ? 'bg-yellow-50 border border-yellow-200'
+                                  : 'bg-red-50 border border-red-200'
                             }`}
                           >
-                            <div className="font-medium text-gray-900 truncate">{record.playerName}</div>
+                            <div className="font-medium text-gray-900 truncate">
+                              {record.playerName}
+                            </div>
                             <div
                               className={`text-xs mt-0.5 ${
                                 record.attendance === 'present'
                                   ? 'text-green-600'
                                   : record.attendance === 'late'
-                                  ? 'text-yellow-600'
-                                  : 'text-red-600'
+                                    ? 'text-yellow-600'
+                                    : 'text-red-600'
                               }`}
                             >
-                              {record.attendance === 'present' ? '已到' : record.attendance === 'late' ? '迟到' : '缺勤'}
+                              {record.attendance === 'present'
+                                ? '已到'
+                                : record.attendance === 'late'
+                                  ? '迟到'
+                                  : '缺勤'}
                               {record.performance && ` · ${record.performance}分`}
                             </div>
                           </div>
@@ -501,12 +524,16 @@ export default function SchedulePage() {
               <div
                 key={dayIndex}
                 className={`bg-white rounded-xl shadow-sm border min-h-[400px] ${
-                  dayIndex === today.getDay() ? 'border-orange-300 ring-2 ring-orange-100' : 'border-gray-100'
+                  dayIndex === today.getDay()
+                    ? 'border-orange-300 ring-2 ring-orange-100'
+                    : 'border-gray-100'
                 }`}
               >
-                <div className={`p-4 border-b text-center ${
-                  dayIndex === today.getDay() ? 'border-orange-100' : 'border-gray-100'
-                }`}>
+                <div
+                  className={`p-4 border-b text-center ${
+                    dayIndex === today.getDay() ? 'border-orange-100' : 'border-gray-100'
+                  }`}
+                >
                   <div className="flex items-center justify-center gap-2">
                     <div
                       className={`text-lg font-bold ${
@@ -516,7 +543,9 @@ export default function SchedulePage() {
                       {dayNames[dayIndex]}
                     </div>
                     {dayIndex === today.getDay() && (
-                      <span className="px-1.5 py-0.5 bg-orange-500 text-white text-xs rounded-full">今天</span>
+                      <span className="px-1.5 py-0.5 bg-orange-500 text-white text-xs rounded-full">
+                        今天
+                      </span>
                     )}
                   </div>
                   <div className="text-sm text-gray-500">{daySchedules.length} 节课</div>
@@ -530,7 +559,9 @@ export default function SchedulePage() {
                         key={schedule.id}
                         className="p-3 bg-orange-50 rounded-lg border border-orange-100 hover:shadow-md transition-shadow"
                       >
-                        <div className="text-sm font-medium text-gray-900 mb-1">{schedule.title}</div>
+                        <div className="text-sm font-medium text-gray-900 mb-1">
+                          {schedule.title}
+                        </div>
                         <div className="flex items-center gap-1 text-xs text-gray-500 mb-1">
                           <Clock className="w-3 h-3" />
                           {schedule.startTime}-{schedule.endTime}

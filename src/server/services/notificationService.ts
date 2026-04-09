@@ -152,17 +152,16 @@ export async function onTrainingCompleted(
 /**
  * 课时不足检查 - 给剩余课时 <= 阈值的学员家长发通知
  */
-export async function checkLowHours(threshold: number = 5): Promise<{ sent: number; details: string[] }> {
+export async function checkLowHours(
+  threshold: number = 5
+): Promise<{ sent: number; details: string[] }> {
   const details: string[] = [];
   let sent = 0;
 
   const lowHourEnrollments = await prisma.courseEnrollment.findMany({
     where: {
       status: 'active',
-      AND: [
-        { remainingHours: { lte: threshold } },
-        { remainingHours: { gt: 0 } },
-      ],
+      AND: [{ remainingHours: { lte: threshold } }, { remainingHours: { gt: 0 } }],
     },
     include: {
       player: { include: { guardians: true } },
@@ -212,7 +211,9 @@ export async function checkLowHours(threshold: number = 5): Promise<{ sent: numb
 /**
  * 课程即将过期检查
  */
-export async function checkExpiringCourses(daysBeforeExpiry: number = 7): Promise<{ sent: number; details: string[] }> {
+export async function checkExpiringCourses(
+  daysBeforeExpiry: number = 7
+): Promise<{ sent: number; details: string[] }> {
   const details: string[] = [];
   let sent = 0;
 
@@ -302,7 +303,10 @@ export async function sendBulkNotification(data: {
       where: { id: playerId },
       include: { guardians: true },
     });
-    if (!player) { skipped++; continue; }
+    if (!player) {
+      skipped++;
+      continue;
+    }
 
     const guardian = player.guardians[0];
     await createNotification({
@@ -363,10 +367,14 @@ export async function getNotificationStats(): Promise<{
   });
 
   const byType: Record<string, number> = {};
-  typeGroups.forEach((g) => { byType[g.type] = g._count; });
+  typeGroups.forEach((g) => {
+    byType[g.type] = g._count;
+  });
 
   const byChannel: Record<string, number> = {};
-  channelGroups.forEach((g) => { byChannel[g.channel] = g._count; });
+  channelGroups.forEach((g) => {
+    byChannel[g.channel] = g._count;
+  });
 
   return {
     total,

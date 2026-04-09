@@ -9,8 +9,6 @@ import {
   Sparkles,
   Users,
   Target,
-  TrendingDown,
-  TrendingUp,
   ChevronRight,
   AlertTriangle,
   CheckCircle,
@@ -55,15 +53,6 @@ type SmartPlanData = {
   reasons: string[];
   playerInsights: PlayerInsight[];
   suggestedActivities: string[];
-};
-
-const skillLabels: Record<string, string> = {
-  dribbling: '运球',
-  passing: '传球',
-  shooting: '投篮',
-  defending: '防守',
-  physical: '体能',
-  tactical: '战术',
 };
 
 const skillColors: Record<string, string> = {

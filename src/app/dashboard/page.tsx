@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { fetchWithAuth } from '@/lib/auth';
 import { useAuth } from '@/components/AuthProvider';
@@ -8,7 +8,6 @@ import {
   Calendar,
   Users,
   ClipboardList,
-  Clock,
   ChevronRight,
   AlertCircle,
   CheckCircle2,
@@ -134,7 +133,11 @@ const groupColors: Record<string, { bg: string; text: string; light: string }> =
 
 // ============ SVG 图表组件 ============
 
-function MiniLineChart({ data, color = '#f97316', height = 48 }: {
+function MiniLineChart({
+  data,
+  color = '#f97316',
+  height = 48,
+}: {
   data: number[];
   color?: string;
   height?: number;
@@ -165,17 +168,31 @@ function MiniLineChart({ data, color = '#f97316', height = 48 }: {
         </linearGradient>
       </defs>
       <path d={areaPath} fill={`url(#grad-${color.replace('#', '')})`} />
-      <path d={linePath} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d={linePath}
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
       {data.map((v, i) => {
         const x = padding + (i / (data.length - 1)) * (width - padding * 2);
         const y = height - padding - ((v - min) / range) * (height - padding * 2);
-        return <circle key={i} cx={x} cy={y} r="2.5" fill="white" stroke={color} strokeWidth="1.5" />;
+        return (
+          <circle key={i} cx={x} cy={y} r="2.5" fill="white" stroke={color} strokeWidth="1.5" />
+        );
       })}
     </svg>
   );
 }
 
-function MiniBarChart({ data, labels, color = '#3b82f6', height = 64 }: {
+function MiniBarChart({
+  data,
+  labels,
+  color = '#3b82f6',
+  height = 64,
+}: {
   data: number[];
   labels?: string[];
   color?: string;
@@ -195,16 +212,20 @@ function MiniBarChart({ data, labels, color = '#3b82f6', height = 64 }: {
               opacity: 0.7 + (v / max) * 0.3,
             }}
           />
-          {labels && (
-            <span className="text-[9px] text-gray-400">{labels[i]}</span>
-          )}
+          {labels && <span className="text-[9px] text-gray-400">{labels[i]}</span>}
         </div>
       ))}
     </div>
   );
 }
 
-function ProgressRing({ value, max = 100, size = 56, strokeWidth = 5, color = '#22c55e' }: {
+function ProgressRing({
+  value,
+  max = 100,
+  size = 56,
+  strokeWidth = 5,
+  color = '#22c55e',
+}: {
   value: number;
   max?: number;
   size?: number;
@@ -218,7 +239,14 @@ function ProgressRing({ value, max = 100, size = 56, strokeWidth = 5, color = '#
 
   return (
     <svg width={size} height={size} className="transform -rotate-90">
-      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#e5e7eb" strokeWidth={strokeWidth} />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke="#e5e7eb"
+        strokeWidth={strokeWidth}
+      />
       <circle
         cx={size / 2}
         cy={size / 2}
@@ -268,8 +296,12 @@ export default function DashboardPage() {
   const [weeklyAttendanceData, setWeeklyAttendanceData] = useState<number[]>([]);
   const [weeklyPerformanceData, setWeeklyPerformanceData] = useState<number[]>([]);
   const [weekDayLabels, setWeekDayLabels] = useState<string[]>([]);
-  const [themeDistribution, setThemeDistribution] = useState<{ name: string; count: number; color: string }[]>([]);
-  const [topPlayers, setTopPlayers] = useState<{ name: string; group: string; avgPerformance: number; attendance: number; sessions: number }[]>([]);
+  const [themeDistribution, setThemeDistribution] = useState<
+    { name: string; count: number; color: string }[]
+  >([]);
+  const [topPlayers, setTopPlayers] = useState<
+    { name: string; group: string; avgPerformance: number; attendance: number; sessions: number }[]
+  >([]);
   const [totalTrainingMinutes, setTotalTrainingMinutes] = useState(0);
 
   useEffect(() => {
@@ -329,18 +361,16 @@ export default function DashboardPage() {
         });
         if (todayPlans.length > 0) {
           setSchedules(
-            todayPlans
-              .slice(0, 5)
-              .map((p: { id: string; title?: string; group?: string }) => ({
-                id: p.id,
-                title: p.title || '训练课',
-                group: p.group || '',
-                startTime: '',
-                endTime: '',
-                location: '',
-                maxPlayers: 0,
-                currentCount: 0,
-              }))
+            todayPlans.slice(0, 5).map((p: { id: string; title?: string; group?: string }) => ({
+              id: p.id,
+              title: p.title || '训练课',
+              group: p.group || '',
+              startTime: '',
+              endTime: '',
+              location: '',
+              maxPlayers: 0,
+              currentCount: 0,
+            }))
           );
         }
       }
@@ -394,12 +424,14 @@ export default function DashboardPage() {
       );
       const realAvgPerformance =
         weekScoredRecords.length > 0
-          ? Number((
-              weekScoredRecords.reduce(
-                (sum: number, r: TrainingRecord) => sum + (r.performance || 0),
-                0
-              ) / weekScoredRecords.length
-            ).toFixed(1))
+          ? Number(
+              (
+                weekScoredRecords.reduce(
+                  (sum: number, r: TrainingRecord) => sum + (r.performance || 0),
+                  0
+                ) / weekScoredRecords.length
+              ).toFixed(1)
+            )
           : 0;
 
       setStats({
@@ -432,7 +464,9 @@ export default function DashboardPage() {
         const present = dayRecords.filter(
           (r: TrainingRecord) => r.attendance === 'present' || r.attendance === 'late'
         ).length;
-        dailyAttendance.push(dayRecords.length > 0 ? Math.round((present / dayRecords.length) * 100) : 0);
+        dailyAttendance.push(
+          dayRecords.length > 0 ? Math.round((present / dayRecords.length) * 100) : 0
+        );
         dailyLabels.push(dayNamesShort[dayStart.getDay()]);
       }
       setWeeklyAttendanceData(dailyAttendance);
@@ -452,7 +486,9 @@ export default function DashboardPage() {
           return d >= dayStart && d < dayEnd && r.performance && r.performance > 0;
         });
         if (dayRecords.length > 0) {
-          const avg = dayRecords.reduce((sum: number, r: TrainingRecord) => sum + (r.performance || 0), 0) / dayRecords.length;
+          const avg =
+            dayRecords.reduce((sum: number, r: TrainingRecord) => sum + (r.performance || 0), 0) /
+            dayRecords.length;
           dailyPerformance.push(Number(avg.toFixed(1)));
         } else {
           dailyPerformance.push(0);
@@ -462,7 +498,15 @@ export default function DashboardPage() {
 
       // 3. 本周训练主题分布
       const themeCounts: Record<string, number> = {};
-      const themeColors = ['#f97316', '#3b82f6', '#8b5cf6', '#22c55e', '#ef4444', '#06b6d4', '#eab308'];
+      const themeColors = [
+        '#f97316',
+        '#3b82f6',
+        '#8b5cf6',
+        '#22c55e',
+        '#ef4444',
+        '#06b6d4',
+        '#eab308',
+      ];
       weekRecords.forEach((r: TrainingRecord) => {
         const theme = r.plan?.theme || r.plan?.title || '未分类';
         if (theme && theme.length < 20) {
@@ -481,7 +525,10 @@ export default function DashboardPage() {
       );
 
       // 4. 学员表现排行榜 Top 5
-      const playerPerformance: Record<string, { name: string; group: string; totalPerf: number; count: number; presentCount: number }> = {};
+      const playerPerformance: Record<
+        string,
+        { name: string; group: string; totalPerf: number; count: number; presentCount: number }
+      > = {};
       weekRecords.forEach((r: TrainingRecord) => {
         if (!r.playerId || !r.playerName) return;
         if (!playerPerformance[r.playerId]) {
@@ -558,7 +605,11 @@ export default function DashboardPage() {
             <div className="flex items-center gap-3">
               {/* 头像 */}
               {user?.avatar ? (
-                <img src={user.avatar} alt="头像" className="w-11 h-11 rounded-full object-cover border-2 border-white/30" />
+                <img
+                  src={user.avatar}
+                  alt="头像"
+                  className="w-11 h-11 rounded-full object-cover border-2 border-white/30"
+                />
               ) : (
                 <div className="w-11 h-11 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center">
                   <span className="text-lg font-bold">{user?.name?.charAt(0) || 'U'}</span>
@@ -588,7 +639,6 @@ export default function DashboardPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-
         {/* ===== 核心指标卡片 ===== */}
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
@@ -597,18 +647,41 @@ export default function DashboardPage() {
                 <div className="text-xs text-gray-500">本周出勤率</div>
                 <div className="text-2xl font-bold text-gray-900 mt-1">{stats.avgAttendance}%</div>
               </div>
-              <ProgressRing value={stats.avgAttendance} size={56} strokeWidth={5}
-                color={stats.avgAttendance >= 80 ? '#22c55e' : stats.avgAttendance >= 60 ? '#f59e0b' : '#ef4444'} />
+              <ProgressRing
+                value={stats.avgAttendance}
+                size={56}
+                strokeWidth={5}
+                color={
+                  stats.avgAttendance >= 80
+                    ? '#22c55e'
+                    : stats.avgAttendance >= 60
+                      ? '#f59e0b'
+                      : '#ef4444'
+                }
+              />
             </div>
           </div>
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xs text-gray-500">平均表现评分</div>
-                <div className="text-2xl font-bold text-gray-900 mt-1">{stats.avgPerformance || '--'}</div>
+                <div className="text-2xl font-bold text-gray-900 mt-1">
+                  {stats.avgPerformance || '--'}
+                </div>
               </div>
-              <ProgressRing value={(stats.avgPerformance || 0) * 10} max={100} size={56} strokeWidth={5}
-                color={stats.avgPerformance >= 7 ? '#3b82f6' : stats.avgPerformance >= 5 ? '#f59e0b' : '#ef4444'} />
+              <ProgressRing
+                value={(stats.avgPerformance || 0) * 10}
+                max={100}
+                size={56}
+                strokeWidth={5}
+                color={
+                  stats.avgPerformance >= 7
+                    ? '#3b82f6'
+                    : stats.avgPerformance >= 5
+                      ? '#f59e0b'
+                      : '#ef4444'
+                }
+              />
             </div>
           </div>
         </div>
@@ -633,7 +706,9 @@ export default function DashboardPage() {
             <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-1">
               <Timer className="w-4 h-4 text-purple-600" />
             </div>
-            <div className="text-lg font-bold text-gray-900">{Math.round(totalTrainingMinutes / 60)}</div>
+            <div className="text-lg font-bold text-gray-900">
+              {Math.round(totalTrainingMinutes / 60)}
+            </div>
             <div className="text-[10px] text-gray-500">本周课时</div>
           </div>
           <div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 text-center">
@@ -668,7 +743,9 @@ export default function DashboardPage() {
                 <MiniLineChart data={weeklyAttendanceData} color="#22c55e" height={48} />
                 <div className="flex justify-between mt-1">
                   {weekDayLabels.map((d, i) => (
-                    <span key={i} className="text-[9px] text-gray-400">{d}</span>
+                    <span key={i} className="text-[9px] text-gray-400">
+                      {d}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -677,7 +754,9 @@ export default function DashboardPage() {
                 <MiniLineChart data={weeklyPerformanceData} color="#3b82f6" height={48} />
                 <div className="flex justify-between mt-1">
                   {weekDayLabels.map((d, i) => (
-                    <span key={i} className="text-[9px] text-gray-400">{d}</span>
+                    <span key={i} className="text-[9px] text-gray-400">
+                      {d}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -710,10 +789,15 @@ export default function DashboardPage() {
                         <div className="w-16 bg-gray-100 rounded-full h-1.5">
                           <div
                             className="h-1.5 rounded-full transition-all"
-                            style={{ width: `${(t.count / maxCount) * 100}%`, backgroundColor: t.color }}
+                            style={{
+                              width: `${(t.count / maxCount) * 100}%`,
+                              backgroundColor: t.color,
+                            }}
                           />
                         </div>
-                        <span className="text-[10px] text-gray-400 w-6 text-right">{t.count}次</span>
+                        <span className="text-[10px] text-gray-400 w-6 text-right">
+                          {t.count}次
+                        </span>
                       </div>
                     );
                   })}
@@ -731,7 +815,9 @@ export default function DashboardPage() {
                 <Award className="w-4 h-4 text-yellow-500" />
                 本周表现排行
               </h2>
-              <Link href="/training-analysis" className="text-[10px] text-orange-500">详情 →</Link>
+              <Link href="/training-analysis" className="text-[10px] text-orange-500">
+                详情 →
+              </Link>
             </div>
             <div className="p-4">
               {topPlayers.length > 0 ? (
@@ -740,18 +826,32 @@ export default function DashboardPage() {
                     const gc = groupColors[p.group] || groupColors.U10;
                     return (
                       <div key={i} className="flex items-center gap-2">
-                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white ${
-                          i === 0 ? 'bg-yellow-400' : i === 1 ? 'bg-gray-400' : i === 2 ? 'bg-orange-400' : 'bg-gray-300'
-                        }`}>
+                        <span
+                          className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white ${
+                            i === 0
+                              ? 'bg-yellow-400'
+                              : i === 1
+                                ? 'bg-gray-400'
+                                : i === 2
+                                  ? 'bg-orange-400'
+                                  : 'bg-gray-300'
+                          }`}
+                        >
                           {i + 1}
                         </span>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1">
-                            <span className="text-xs font-medium text-gray-900 truncate">{p.name}</span>
-                            <span className={`text-[9px] px-1 rounded ${gc.light} ${gc.text}`}>{p.group}</span>
+                            <span className="text-xs font-medium text-gray-900 truncate">
+                              {p.name}
+                            </span>
+                            <span className={`text-[9px] px-1 rounded ${gc.light} ${gc.text}`}>
+                              {p.group}
+                            </span>
                           </div>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[10px] text-gray-400">均分 {p.avgPerformance}</span>
+                            <span className="text-[10px] text-gray-400">
+                              均分 {p.avgPerformance}
+                            </span>
                             <span className="text-[10px] text-gray-400">出勤 {p.attendance}%</span>
                           </div>
                         </div>
@@ -774,25 +874,37 @@ export default function DashboardPage() {
 
         {/* ===== 快捷操作 ===== */}
         <div className="grid grid-cols-4 gap-3">
-          <Link href="/checkin" className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex flex-col items-center gap-1.5 hover:shadow-md transition-shadow">
+          <Link
+            href="/checkin"
+            className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex flex-col items-center gap-1.5 hover:shadow-md transition-shadow"
+          >
             <div className="w-9 h-9 bg-green-100 rounded-xl flex items-center justify-center">
               <CheckCircle2 className="w-4 h-4 text-green-600" />
             </div>
             <span className="text-[11px] font-medium text-gray-700">签到点名</span>
           </Link>
-          <Link href="/plan/new" className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex flex-col items-center gap-1.5 hover:shadow-md transition-shadow">
+          <Link
+            href="/plan/new"
+            className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex flex-col items-center gap-1.5 hover:shadow-md transition-shadow"
+          >
             <div className="w-9 h-9 bg-orange-100 rounded-xl flex items-center justify-center">
               <ClipboardList className="w-4 h-4 text-orange-600" />
             </div>
             <span className="text-[11px] font-medium text-gray-700">生成教案</span>
           </Link>
-          <Link href="/assessment" className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex flex-col items-center gap-1.5 hover:shadow-md transition-shadow">
+          <Link
+            href="/assessment"
+            className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex flex-col items-center gap-1.5 hover:shadow-md transition-shadow"
+          >
             <div className="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center">
               <Star className="w-4 h-4 text-purple-600" />
             </div>
             <span className="text-[11px] font-medium text-gray-700">球员评估</span>
           </Link>
-          <Link href="/training-analysis" className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex flex-col items-center gap-1.5 hover:shadow-md transition-shadow">
+          <Link
+            href="/training-analysis"
+            className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex flex-col items-center gap-1.5 hover:shadow-md transition-shadow"
+          >
             <div className="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center">
               <BarChart3 className="w-4 h-4 text-blue-600" />
             </div>
@@ -824,20 +936,31 @@ export default function DashboardPage() {
             ) : (
               <div className="space-y-2">
                 {schedules.map((schedule) => (
-                  <div key={schedule.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                  <div
+                    key={schedule.id}
+                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl"
+                  >
                     <div className="text-center min-w-[50px]">
-                      <div className="text-base font-bold text-orange-600">{schedule.startTime}</div>
+                      <div className="text-base font-bold text-orange-600">
+                        {schedule.startTime}
+                      </div>
                       <div className="text-[10px] text-gray-400">至 {schedule.endTime}</div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-gray-900 text-sm truncate">{schedule.title}</div>
+                      <div className="font-medium text-gray-900 text-sm truncate">
+                        {schedule.title}
+                      </div>
                       <div className="text-[10px] text-gray-500 mt-0.5">
                         {schedule.location && `${schedule.location} · `}
                         {schedule.group}
-                        {schedule.maxPlayers > 0 && ` · ${schedule.currentCount}/${schedule.maxPlayers}人`}
+                        {schedule.maxPlayers > 0 &&
+                          ` · ${schedule.currentCount}/${schedule.maxPlayers}人`}
                       </div>
                     </div>
-                    <Link href="/checkin" className="px-3 py-1.5 bg-orange-500 text-white text-[10px] rounded-lg hover:bg-orange-600 transition-colors shrink-0">
+                    <Link
+                      href="/checkin"
+                      className="px-3 py-1.5 bg-orange-500 text-white text-[10px] rounded-lg hover:bg-orange-600 transition-colors shrink-0"
+                    >
                       签到
                     </Link>
                   </div>
@@ -855,13 +978,18 @@ export default function DashboardPage() {
                 <AlertCircle className="w-4 h-4 text-yellow-500" />
                 待办提醒
               </h2>
-              <span className="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full">{alerts.length} 条</span>
+              <span className="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
+                {alerts.length} 条
+              </span>
             </div>
             <div className="p-4 space-y-2">
               {alerts.map((alert) => {
                 const Icon = severityIcons[alert.severity];
                 return (
-                  <div key={alert.id} className={`flex items-center gap-3 p-3 rounded-xl border ${severityStyles[alert.severity]}`}>
+                  <div
+                    key={alert.id}
+                    className={`flex items-center gap-3 p-3 rounded-xl border ${severityStyles[alert.severity]}`}
+                  >
                     <Icon className="w-4 h-4 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
@@ -871,7 +999,10 @@ export default function DashboardPage() {
                       <div className="text-[10px] mt-0.5 opacity-80">{alert.message}</div>
                     </div>
                     {alert.type === 'low_hours' && (
-                      <Link href="/orders" className="text-[10px] font-medium shrink-0 hover:underline">
+                      <Link
+                        href="/orders"
+                        className="text-[10px] font-medium shrink-0 hover:underline"
+                      >
                         处理 →
                       </Link>
                     )}
@@ -907,7 +1038,9 @@ export default function DashboardPage() {
                       <Users className="w-4 h-4 text-blue-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-xs text-gray-900 truncate">{fb.playerName}</div>
+                      <div className="font-medium text-xs text-gray-900 truncate">
+                        {fb.playerName}
+                      </div>
                       <div className="text-[10px] text-gray-500 truncate">
                         {fb.planTitle} · {new Date(fb.date).toLocaleDateString('zh-CN')}
                       </div>
@@ -915,7 +1048,9 @@ export default function DashboardPage() {
                     {fb.performance && (
                       <div className="flex items-center gap-1 shrink-0">
                         <Star className="w-3 h-3 text-yellow-400" />
-                        <span className="text-sm font-semibold text-gray-700">{fb.performance}</span>
+                        <span className="text-sm font-semibold text-gray-700">
+                          {fb.performance}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -924,7 +1059,6 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
-
       </main>
     </div>
   );

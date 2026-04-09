@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchWithAuth } from '@/lib/auth';
 import {
   Lightbulb,
@@ -71,7 +71,7 @@ export default function RecommendationsPage() {
     }
   };
 
-  const fetchRecommendations = async () => {
+  const fetchRecommendations = useCallback(async () => {
     if (!selectedPlayer) return;
     setLoading(true);
     try {
@@ -83,13 +83,13 @@ export default function RecommendationsPage() {
       console.error('获取推荐失败:', error);
     }
     setLoading(false);
-  };
+  }, [selectedPlayer]);
 
   useEffect(() => {
     if (selectedPlayer) {
       fetchRecommendations();
     }
-  }, [selectedPlayer]);
+  }, [selectedPlayer, fetchRecommendations]);
 
   const getPriorityBadge = (priority: string) => {
     const badges: Record<string, string> = {

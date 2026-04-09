@@ -5,15 +5,11 @@ import Link from 'next/link';
 import {
   ArrowLeft,
   Search,
-  Users,
   TrendingUp,
   Calendar,
   Target,
   Clock,
-  CheckCircle,
   AlertCircle,
-  ChevronRight,
-  Phone,
   User,
   GraduationCap,
 } from 'lucide-react';
@@ -125,7 +121,7 @@ export default function ParentPage() {
       } else {
         alert(data.error);
       }
-    } catch (error) {
+    } catch {
       alert('查询失败');
     } finally {
       setLoading(false);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { fetchWithAuth } from '@/lib/auth';
@@ -84,11 +84,7 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
     notes: '',
   });
 
-  useEffect(() => {
-    fetchPlan();
-  }, [params.id]);
-
-  async function fetchPlan() {
+  const fetchPlan = useCallback(async () => {
     try {
       const response = await fetchWithAuth(`/api/plans/${params.id}`);
       const data = await response.json();
@@ -114,7 +110,11 @@ export default function EditPlanPage({ params }: { params: { id: string } }) {
     } finally {
       setLoading(false);
     }
-  }
+  }, [params.id]);
+
+  useEffect(() => {
+    fetchPlan();
+  }, [fetchPlan]);
 
   // 添加环节
   function addSection() {

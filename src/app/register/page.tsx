@@ -86,7 +86,7 @@ export default function RegisterPage() {
       // 注册成功，自动登录并跳转到首页
       login(data.data.user, data.data.token);
       router.push('/');
-    } catch (err) {
+    } catch {
       setError('网络错误，请重试');
       setLoading(false);
     }

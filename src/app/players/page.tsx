@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { fetchWithAuth } from '@/lib/auth';
 import {
@@ -121,11 +121,7 @@ export default function PlayersPage() {
     parentWechat: '',
   });
 
-  useEffect(() => {
-    fetchPlayers();
-  }, []);
-
-  async function fetchPlayers() {
+  const fetchPlayers = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -144,11 +140,15 @@ export default function PlayersPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [groupFilter, statusFilter, search]);
 
   useEffect(() => {
     fetchPlayers();
-  }, [groupFilter, statusFilter]);
+  }, [fetchPlayers]);
+
+  useEffect(() => {
+    fetchPlayers();
+  }, [groupFilter, statusFilter, fetchPlayers]);
 
   const handleSearch = () => {
     fetchPlayers();

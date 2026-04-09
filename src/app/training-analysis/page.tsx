@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchWithAuth } from '@/lib/auth';
 import {
   Activity,
@@ -39,14 +39,10 @@ interface TrainingAnalysis {
 export default function TrainingAnalysisPage() {
   const [analysis, setAnalysis] = useState<TrainingAnalysis | null>(null);
   const [group, setGroup] = useState('');
-  const [groups, setGroups] = useState<string[]>(['U6', 'U8', 'U10', 'U12', 'U14']);
+  const [groups] = useState<string[]>(['U6', 'U8', 'U10', 'U12', 'U14']);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchAnalysis();
-  }, [group]);
-
-  const fetchAnalysis = async () => {
+  const fetchAnalysis = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -58,7 +54,11 @@ export default function TrainingAnalysisPage() {
       console.error('获取训练分析失败:', error);
     }
     setLoading(false);
-  };
+  }, [group]);
+
+  useEffect(() => {
+    fetchAnalysis();
+  }, [fetchAnalysis]);
 
   const skillNames: Record<string, string> = {
     dribbling: '运球',

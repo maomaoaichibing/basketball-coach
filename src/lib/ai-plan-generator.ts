@@ -76,11 +76,15 @@ ${params.previousTraining?.length ? `- 最近训练内容：${params.previousTra
 3. 每个环节2-4个活动
 4. 活动描述要具体可执行
 5. ${params.location === '室外' ? '如为雨天，建议调整适合室内或遮蔽场地的内容' : ''}
-6. ${params.weather === '晴天' ? '注意安排休息和补水' : params.weather === '雨天' ? '避免滑倒，安全第一' : ''}${params.caseExamples ? `
+6. ${params.weather === '晴天' ? '注意安排休息和补水' : params.weather === '雨天' ? '避免滑倒，安全第一' : ''}${
+    params.caseExamples
+      ? `
 
 ## 参考案例（来自案例库，请参考但不要照搬）
 ${params.caseExamples}
-请参考以上案例的训练方法、要点和教练引导语，结合本次训练要求生成教案。可以借鉴好的训练设计，但要根据实际学员情况调整难度和内容。` : ''}`;
+请参考以上案例的训练方法、要点和教练引导语，结合本次训练要求生成教案。可以借鉴好的训练设计，但要根据实际学员情况调整难度和内容。`
+      : ''
+  }`;
 
   return prompt;
 }

@@ -1,20 +1,77 @@
 // Prisma Client mock for testing
-const m = (name: string) => ({
-  findMany: jest.fn(),
-  findUnique: jest.fn(),
-  findFirst: jest.fn(),
-  create: jest.fn(),
-  createMany: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-  deleteMany: jest.fn(),
-  count: jest.fn(),
-  groupBy: jest.fn(),
-  aggregate: jest.fn(),
-  upsert: jest.fn(),
+import { jest } from '@jest/globals';
+
+// Use any type for mock functions to avoid strict type checking in tests
+type MockFn = jest.Mock<any, any>;
+
+type MockPrismaModel = {
+  findMany: MockFn;
+  findUnique: MockFn;
+  findFirst: MockFn;
+  create: MockFn;
+  createMany: MockFn;
+  update: MockFn;
+  delete: MockFn;
+  deleteMany: MockFn;
+  count: MockFn;
+  groupBy: MockFn;
+  aggregate: MockFn;
+  upsert: MockFn;
+};
+
+type MockPrismaClient = {
+  player: MockPrismaModel;
+  coach: MockPrismaModel;
+  guardian: MockPrismaModel;
+  playerGoal: MockPrismaModel;
+  playerAssessment: MockPrismaModel;
+  assessment: MockPrismaModel;
+  trainingRecord: MockPrismaModel;
+  trainingPlan: MockPrismaModel;
+  team: MockPrismaModel;
+  course: MockPrismaModel;
+  courseEnrollment: MockPrismaModel;
+  enrollment: MockPrismaModel;
+  campus: MockPrismaModel;
+  court: MockPrismaModel;
+  schedule: MockPrismaModel;
+  booking: MockPrismaModel;
+  order: MockPrismaModel;
+  orderItem: MockPrismaModel;
+  payment: MockPrismaModel;
+  checkIn: MockPrismaModel;
+  checkInLike: MockPrismaModel;
+  leave: MockPrismaModel;
+  match: MockPrismaModel;
+  matchEvent: MockPrismaModel;
+  message: MockPrismaModel;
+  notification: MockPrismaModel;
+  notificationTemplate: MockPrismaModel;
+  growthReport: MockPrismaModel;
+  abilityAnalysis: MockPrismaModel;
+  trainingRecommend: MockPrismaModel;
+  teamRecommendation: MockPrismaModel;
+  $connect: MockFn;
+  $disconnect: MockFn;
+  $transaction: MockFn;
+};
+
+const m = (name: string): MockPrismaModel => ({
+  findMany: jest.fn<any, any>(),
+  findUnique: jest.fn<any, any>(),
+  findFirst: jest.fn<any, any>(),
+  create: jest.fn<any, any>(),
+  createMany: jest.fn<any, any>(),
+  update: jest.fn<any, any>(),
+  delete: jest.fn<any, any>(),
+  deleteMany: jest.fn<any, any>(),
+  count: jest.fn<any, any>(),
+  groupBy: jest.fn<any, any>(),
+  aggregate: jest.fn<any, any>(),
+  upsert: jest.fn<any, any>(),
 });
 
-const mockPrisma = {
+const mockPrisma: MockPrismaClient = {
   player: m('player'),
   coach: m('coach'),
   guardian: m('guardian'),
@@ -46,9 +103,9 @@ const mockPrisma = {
   abilityAnalysis: m('abilityAnalysis'),
   trainingRecommend: m('trainingRecommend'),
   teamRecommendation: m('teamRecommendation'),
-  $connect: jest.fn(),
-  $disconnect: jest.fn(),
-  $transaction: jest.fn((ops: unknown[]) => Promise.all(ops)),
+  $connect: jest.fn<any, any>(),
+  $disconnect: jest.fn<any, any>(),
+  $transaction: jest.fn<any, any>(),
 };
 
 export default mockPrisma;

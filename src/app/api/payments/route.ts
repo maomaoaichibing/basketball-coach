@@ -47,10 +47,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('获取支付记录失败:', error);
-    return NextResponse.json(
-      { error: '获取支付记录失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '获取支付记录失败' }, { status: 500 });
   }
 }
 
@@ -94,7 +91,6 @@ export async function POST(request: NextRequest) {
     const allPayments = await prisma.payment.findMany({
       where: { orderId, status: 'completed' },
     });
-    const totalPaid = allPayments.reduce((sum: number, p: { amount: number }) => sum + p.amount, 0);
 
     const newPaidAmount = order.paidAmount + parseFloat(String(amount));
     const newPendingAmount = Math.max(0, order.totalAmount - newPaidAmount - order.discountAmount);
@@ -127,7 +123,7 @@ export async function POST(request: NextRequest) {
           const validDays = item.validDays || course?.validDays || 365;
 
           // 查找该学员是否有该课程的购买记录
-          let enrollment = await prisma.courseEnrollment.findFirst({
+          const enrollment = await prisma.courseEnrollment.findFirst({
             where: {
               playerId: order.playerId,
               courseId: item.courseId,
@@ -166,9 +162,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ payment, orderStatus: newStatus }, { status: 201 });
   } catch (error) {
     console.error('创建支付记录失败:', error);
-    return NextResponse.json(
-      { error: '创建支付记录失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '创建支付记录失败' }, { status: 500 });
   }
 }

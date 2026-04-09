@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchWithAuth } from '@/lib/auth';
 import {
   Bell,
@@ -149,14 +149,9 @@ export default function NotificationsPage() {
   });
   const [sending, setSending] = useState(false);
 
-  useEffect(() => {
-    fetchNotifications();
-    fetchPlayers();
-  }, [filter]);
-
   // ========== 通知列表逻辑 ==========
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -172,9 +167,9 @@ export default function NotificationsPage() {
       console.error('获取通知失败:', error);
     }
     setLoading(false);
-  };
+  }, [filter]);
 
-  const fetchPlayers = async () => {
+  const fetchPlayers = useCallback(async () => {
     try {
       const res = await fetchWithAuth('/api/players?status=training');
       const data = await res.json();
@@ -182,7 +177,12 @@ export default function NotificationsPage() {
     } catch (error) {
       console.error('获取学员失败:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchNotifications();
+    fetchPlayers();
+  }, [filter, fetchNotifications, fetchPlayers]);
 
   const handleCreateNotification = async () => {
     try {
@@ -193,7 +193,13 @@ export default function NotificationsPage() {
       });
       if (res.ok) {
         setShowCreateModal(false);
-        setNewNotification({ playerId: '', guardianName: '', title: '', content: '', type: 'system' });
+        setNewNotification({
+          playerId: '',
+          guardianName: '',
+          title: '',
+          content: '',
+          type: 'system',
+        });
         fetchNotifications();
       }
     } catch (error) {
@@ -268,7 +274,7 @@ export default function NotificationsPage() {
 
   // ========== 模板逻辑 ==========
 
-  const fetchTemplates = async () => {
+  const fetchTemplates = useCallback(async () => {
     setTemplateLoading(true);
     try {
       const res = await fetchWithAuth('/api/notification-templates');
@@ -278,7 +284,7 @@ export default function NotificationsPage() {
       console.error('获取模板失败:', error);
     }
     setTemplateLoading(false);
-  };
+  }, []);
 
   const handleToggleTemplate = async (template: NotificationTemplate) => {
     try {
@@ -316,7 +322,7 @@ export default function NotificationsPage() {
 
   // ========== 统计逻辑 ==========
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     setStatsLoading(true);
     try {
       const res = await fetchWithAuth('/api/notifications/stats');
@@ -326,14 +332,14 @@ export default function NotificationsPage() {
       console.error('获取统计失败:', error);
     }
     setStatsLoading(false);
-  };
+  }, []);
 
   // ========== Tab 切换时加载数据 ==========
 
   useEffect(() => {
     if (activeTab === 'templates' && templates.length === 0) fetchTemplates();
     if (activeTab === 'stats') fetchStats();
-  }, [activeTab]);
+  }, [activeTab, templates.length, fetchTemplates, fetchStats]);
 
   // ========== 渲染 ==========
 
@@ -439,7 +445,9 @@ export default function NotificationsPage() {
             >
               <option value="">全部学员</option>
               {players.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
               ))}
             </select>
             <button
@@ -486,22 +494,38 @@ export default function NotificationsPage() {
                             <h3 className="text-sm font-medium text-gray-900 truncate">
                               {notif.title}
                             </h3>
-                            <span className={`px-2 py-0.5 rounded text-xs ${tc.class}`}>{tc.label}</span>
-                            <span className={`px-2 py-0.5 rounded text-xs ${sc.class}`}>{sc.label}</span>
+                            <span className={`px-2 py-0.5 rounded text-xs ${tc.class}`}>
+                              {tc.label}
+                            </span>
+                            <span className={`px-2 py-0.5 rounded text-xs ${sc.class}`}>
+                              {sc.label}
+                            </span>
                           </div>
                           <p className="text-sm text-gray-500 line-clamp-2 mb-2">{notif.content}</p>
                           <div className="flex items-center gap-4 text-xs text-gray-400 flex-wrap">
                             {notif.player && <span>学员: {notif.player.name}</span>}
                             {notif.guardianName && <span>监护人: {notif.guardianName}</span>}
-                            {notif.sentAt && <span>发送于: {new Date(notif.sentAt).toLocaleString()}</span>}
-                            {!notif.sentAt && <span>创建于: {new Date(notif.createdAt).toLocaleString()}</span>}
+                            {notif.sentAt && (
+                              <span>发送于: {new Date(notif.sentAt).toLocaleString()}</span>
+                            )}
+                            {!notif.sentAt && (
+                              <span>创建于: {new Date(notif.createdAt).toLocaleString()}</span>
+                            )}
                           </div>
                         </div>
                         <div className="flex items-center gap-1">
-                          <button onClick={() => openDetailModal(notif)} className="p-2 text-gray-400 hover:text-blue-600" title="查看详情">
+                          <button
+                            onClick={() => openDetailModal(notif)}
+                            className="p-2 text-gray-400 hover:text-blue-600"
+                            title="查看详情"
+                          >
                             <Eye className="w-4 h-4" />
                           </button>
-                          <button onClick={() => handleDelete(notif)} className="p-2 text-gray-400 hover:text-red-600" title="删除">
+                          <button
+                            onClick={() => handleDelete(notif)}
+                            className="p-2 text-gray-400 hover:text-red-600"
+                            title="删除"
+                          >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -521,7 +545,10 @@ export default function NotificationsPage() {
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="px-4 py-3 border-b flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900">通知模板管理</h2>
-              <button onClick={fetchTemplates} className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
+              <button
+                onClick={fetchTemplates}
+                className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
+              >
                 <RefreshCw className="w-3.5 h-3.5" /> 刷新
               </button>
             </div>
@@ -544,24 +571,35 @@ export default function NotificationsPage() {
                           <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <h3 className="text-sm font-medium text-gray-900">{t.name}</h3>
                             <span className="text-xs text-gray-400 font-mono">{t.code}</span>
-                            <span className={`px-2 py-0.5 rounded text-xs ${cc.class}`}>{cc.label}</span>
-                            <span className={`px-2 py-0.5 rounded text-xs ${pc.class}`}>{pc.label}</span>
+                            <span className={`px-2 py-0.5 rounded text-xs ${cc.class}`}>
+                              {cc.label}
+                            </span>
+                            <span className={`px-2 py-0.5 rounded text-xs ${pc.class}`}>
+                              {pc.label}
+                            </span>
                             {t.isAutomated && (
-                              <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">自动</span>
+                              <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">
+                                自动
+                              </span>
                             )}
                           </div>
                           <p className="text-sm text-gray-500 mb-1">
-                            <span className="font-medium text-gray-700">标题：</span>{t.title}
+                            <span className="font-medium text-gray-700">标题：</span>
+                            {t.title}
                           </p>
                           <p className="text-sm text-gray-500 mb-2 line-clamp-2">
-                            <span className="font-medium text-gray-700">内容：</span>{t.content}
+                            <span className="font-medium text-gray-700">内容：</span>
+                            {t.content}
                           </p>
                           <div className="flex gap-1 flex-wrap">
                             {(() => {
                               try {
                                 const vars = JSON.parse(t.variables);
                                 return vars.map((v: string) => (
-                                  <span key={v} className="px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded text-xs font-mono">
+                                  <span
+                                    key={v}
+                                    className="px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded text-xs font-mono"
+                                  >
                                     {`{{${v}}}`}
                                   </span>
                                 ));
@@ -577,7 +615,11 @@ export default function NotificationsPage() {
                             className="p-2 text-gray-400 hover:text-orange-600"
                             title={t.isActive ? '停用' : '启用'}
                           >
-                            {t.isActive ? <ToggleRight className="w-5 h-5 text-orange-500" /> : <ToggleLeft className="w-5 h-5" />}
+                            {t.isActive ? (
+                              <ToggleRight className="w-5 h-5 text-orange-500" />
+                            ) : (
+                              <ToggleLeft className="w-5 h-5" />
+                            )}
                           </button>
                           <button
                             onClick={() => handleEditTemplate(t)}
@@ -601,20 +643,44 @@ export default function NotificationsPage() {
       {activeTab === 'stats' && (
         <div className="max-w-7xl mx-auto px-4 py-4 space-y-4">
           {statsLoading ? (
-            <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">加载中...</div>
+            <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+              加载中...
+            </div>
           ) : stats ? (
             <>
               {/* 概览卡片 */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { label: '总通知', value: stats.total, icon: Bell, color: 'bg-gray-100 text-gray-600' },
-                  { label: '今日发送', value: stats.todaySent, icon: Send, color: 'bg-blue-100 text-blue-600' },
-                  { label: '本周发送', value: stats.weekSent, icon: Zap, color: 'bg-orange-100 text-orange-600' },
-                  { label: '已读率', value: `${stats.readRate}%`, icon: CheckCircle, color: 'bg-green-100 text-green-600' },
+                  {
+                    label: '总通知',
+                    value: stats.total,
+                    icon: Bell,
+                    color: 'bg-gray-100 text-gray-600',
+                  },
+                  {
+                    label: '今日发送',
+                    value: stats.todaySent,
+                    icon: Send,
+                    color: 'bg-blue-100 text-blue-600',
+                  },
+                  {
+                    label: '本周发送',
+                    value: stats.weekSent,
+                    icon: Zap,
+                    color: 'bg-orange-100 text-orange-600',
+                  },
+                  {
+                    label: '已读率',
+                    value: `${stats.readRate}%`,
+                    icon: CheckCircle,
+                    color: 'bg-green-100 text-green-600',
+                  },
                 ].map(({ label, value, icon: Icon, color }) => (
                   <div key={label} className="bg-white rounded-lg shadow p-4">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${color}`}>
+                      <div
+                        className={`w-10 h-10 rounded-lg flex items-center justify-center ${color}`}
+                      >
                         <Icon className="w-5 h-5" />
                       </div>
                       <div>
@@ -641,10 +707,15 @@ export default function NotificationsPage() {
                       <div key={label}>
                         <div className="flex items-center justify-between text-sm mb-1">
                           <span className="text-gray-600">{label}</span>
-                          <span className="font-medium text-gray-900">{count} ({pct.toFixed(1)}%)</span>
+                          <span className="font-medium text-gray-900">
+                            {count} ({pct.toFixed(1)}%)
+                          </span>
                         </div>
                         <div className="w-full bg-gray-100 rounded-full h-2">
-                          <div className={`${color} h-2 rounded-full transition-all`} style={{ width: `${pct}%` }} />
+                          <div
+                            className={`${color} h-2 rounded-full transition-all`}
+                            style={{ width: `${pct}%` }}
+                          />
                         </div>
                       </div>
                     );
@@ -657,10 +728,18 @@ export default function NotificationsPage() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">类型分布</h3>
                 <div className="grid grid-cols-2 gap-3">
                   {Object.entries(stats.byType).map(([type, count]) => {
-                    const tc = typeConfig[type] || { label: type, class: 'bg-gray-100 text-gray-700' };
+                    const tc = typeConfig[type] || {
+                      label: type,
+                      class: 'bg-gray-100 text-gray-700',
+                    };
                     return (
-                      <div key={type} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <span className={`px-2 py-0.5 rounded text-xs ${tc.class}`}>{tc.label}</span>
+                      <div
+                        key={type}
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                      >
+                        <span className={`px-2 py-0.5 rounded text-xs ${tc.class}`}>
+                          {tc.label}
+                        </span>
                         <span className="font-medium text-gray-900">{count} 条</span>
                       </div>
                     );
@@ -672,7 +751,9 @@ export default function NotificationsPage() {
               </div>
             </>
           ) : (
-            <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">暂无统计数据</div>
+            <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+              暂无统计数据
+            </div>
           )}
         </div>
       )}
@@ -689,7 +770,9 @@ export default function NotificationsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">学员</label>
                 <select
                   value={newNotification.playerId}
-                  onChange={(e) => setNewNotification({ ...newNotification, playerId: e.target.value })}
+                  onChange={(e) =>
+                    setNewNotification({ ...newNotification, playerId: e.target.value })
+                  }
                   className="w-full px-3 py-2 border rounded-lg"
                 >
                   <option value="">请选择学员</option>
@@ -705,7 +788,9 @@ export default function NotificationsPage() {
                 <input
                   type="text"
                   value={newNotification.guardianName}
-                  onChange={(e) => setNewNotification({ ...newNotification, guardianName: e.target.value })}
+                  onChange={(e) =>
+                    setNewNotification({ ...newNotification, guardianName: e.target.value })
+                  }
                   className="w-full px-3 py-2 border rounded-lg"
                   placeholder="输入监护人姓名"
                 />
@@ -728,7 +813,9 @@ export default function NotificationsPage() {
                 <input
                   type="text"
                   value={newNotification.title}
-                  onChange={(e) => setNewNotification({ ...newNotification, title: e.target.value })}
+                  onChange={(e) =>
+                    setNewNotification({ ...newNotification, title: e.target.value })
+                  }
                   className="w-full px-3 py-2 border rounded-lg"
                   placeholder="输入通知标题"
                 />
@@ -737,7 +824,9 @@ export default function NotificationsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">通知内容</label>
                 <textarea
                   value={newNotification.content}
-                  onChange={(e) => setNewNotification({ ...newNotification, content: e.target.value })}
+                  onChange={(e) =>
+                    setNewNotification({ ...newNotification, content: e.target.value })
+                  }
                   className="w-full px-3 py-2 border rounded-lg"
                   rows={4}
                   placeholder={'输入通知内容，支持 {{playerName}} 变量'}
@@ -745,7 +834,10 @@ export default function NotificationsPage() {
               </div>
             </div>
             <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3">
-              <button onClick={() => setShowCreateModal(false)} className="px-4 py-2 border rounded-lg hover:bg-gray-100">
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="px-4 py-2 border rounded-lg hover:bg-gray-100"
+              >
                 取消
               </button>
               <button
@@ -765,7 +857,9 @@ export default function NotificationsPage() {
           <div className="bg-white rounded-lg shadow-xl w-full max-w-lg m-4">
             <div className="border-b px-6 py-4 flex items-center justify-between">
               <h2 className="text-xl font-bold">批量发送通知</h2>
-              <span className="text-sm text-gray-500">已选 {bulkForm.selectedPlayerIds.length} 人</span>
+              <span className="text-sm text-gray-500">
+                已选 {bulkForm.selectedPlayerIds.length} 人
+              </span>
             </div>
             <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
               <div>
@@ -774,7 +868,9 @@ export default function NotificationsPage() {
                   <label className="flex items-center gap-2 px-3 py-2 border-b bg-gray-50 sticky top-0">
                     <input
                       type="checkbox"
-                      checked={bulkForm.selectedPlayerIds.length === players.length && players.length > 0}
+                      checked={
+                        bulkForm.selectedPlayerIds.length === players.length && players.length > 0
+                      }
                       onChange={(e) =>
                         setBulkForm({
                           ...bulkForm,
@@ -785,7 +881,10 @@ export default function NotificationsPage() {
                     <span className="text-sm font-medium text-gray-700">全选</span>
                   </label>
                   {players.map((p) => (
-                    <label key={p.id} className="flex items-center gap-2 px-3 py-2 border-b last:border-0 hover:bg-gray-50">
+                    <label
+                      key={p.id}
+                      className="flex items-center gap-2 px-3 py-2 border-b last:border-0 hover:bg-gray-50"
+                    >
                       <input
                         type="checkbox"
                         checked={bulkForm.selectedPlayerIds.includes(p.id)}
@@ -882,13 +981,17 @@ export default function NotificationsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">类型</label>
-                  <span className={`px-2 py-0.5 rounded text-xs ${(typeConfig[selectedNotification.type] || typeConfig.system).class}`}>
+                  <span
+                    className={`px-2 py-0.5 rounded text-xs ${(typeConfig[selectedNotification.type] || typeConfig.system).class}`}
+                  >
                     {(typeConfig[selectedNotification.type] || typeConfig.system).label}
                   </span>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">状态</label>
-                  <span className={`px-2 py-0.5 rounded text-xs ${(statusConfig[selectedNotification.status] || statusConfig.pending).class}`}>
+                  <span
+                    className={`px-2 py-0.5 rounded text-xs ${(statusConfig[selectedNotification.status] || statusConfig.pending).class}`}
+                  >
                     {(statusConfig[selectedNotification.status] || statusConfig.pending).label}
                   </span>
                 </div>
@@ -915,19 +1018,26 @@ export default function NotificationsPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">发送时间</label>
                   <p className="text-gray-900">
-                    {selectedNotification.sentAt ? new Date(selectedNotification.sentAt).toLocaleString() : '-'}
+                    {selectedNotification.sentAt
+                      ? new Date(selectedNotification.sentAt).toLocaleString()
+                      : '-'}
                   </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">阅读时间</label>
                   <p className="text-gray-900">
-                    {selectedNotification.readAt ? new Date(selectedNotification.readAt).toLocaleString() : '-'}
+                    {selectedNotification.readAt
+                      ? new Date(selectedNotification.readAt).toLocaleString()
+                      : '-'}
                   </p>
                 </div>
               </div>
             </div>
             <div className="bg-gray-50 px-6 py-4 flex justify-end">
-              <button onClick={() => setShowDetailModal(false)} className="px-4 py-2 border rounded-lg hover:bg-gray-100">
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className="px-4 py-2 border rounded-lg hover:bg-gray-100"
+              >
                 关闭
               </button>
             </div>
@@ -957,7 +1067,9 @@ export default function NotificationsPage() {
                 <input
                   type="text"
                   value={editingTemplate.title}
-                  onChange={(e) => setEditingTemplate({ ...editingTemplate, title: e.target.value })}
+                  onChange={(e) =>
+                    setEditingTemplate({ ...editingTemplate, title: e.target.value })
+                  }
                   className="w-full px-3 py-2 border rounded-lg"
                 />
               </div>
@@ -965,17 +1077,23 @@ export default function NotificationsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">通知内容</label>
                 <textarea
                   value={editingTemplate.content}
-                  onChange={(e) => setEditingTemplate({ ...editingTemplate, content: e.target.value })}
+                  onChange={(e) =>
+                    setEditingTemplate({ ...editingTemplate, content: e.target.value })
+                  }
                   className="w-full px-3 py-2 border rounded-lg font-mono text-sm"
                   rows={5}
                 />
-                <p className="text-xs text-gray-400 mt-1">{'支持变量: {{guardianName}}, {{playerName}}, {{courseName}} 等'}</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  {'支持变量: {{guardianName}}, {{playerName}}, {{courseName}} 等'}
+                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">分类</label>
                 <select
                   value={editingTemplate.category}
-                  onChange={(e) => setEditingTemplate({ ...editingTemplate, category: e.target.value })}
+                  onChange={(e) =>
+                    setEditingTemplate({ ...editingTemplate, category: e.target.value })
+                  }
                   className="w-full px-3 py-2 border rounded-lg"
                 >
                   <option value="system">系统</option>
@@ -988,7 +1106,9 @@ export default function NotificationsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">优先级</label>
                 <select
                   value={editingTemplate.priority}
-                  onChange={(e) => setEditingTemplate({ ...editingTemplate, priority: e.target.value })}
+                  onChange={(e) =>
+                    setEditingTemplate({ ...editingTemplate, priority: e.target.value })
+                  }
                   className="w-full px-3 py-2 border rounded-lg"
                 >
                   <option value="low">低</option>
@@ -1000,7 +1120,10 @@ export default function NotificationsPage() {
             </div>
             <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3">
               <button
-                onClick={() => { setShowTemplateModal(false); setEditingTemplate(null); }}
+                onClick={() => {
+                  setShowTemplateModal(false);
+                  setEditingTemplate(null);
+                }}
                 className="px-4 py-2 border rounded-lg hover:bg-gray-100"
               >
                 取消

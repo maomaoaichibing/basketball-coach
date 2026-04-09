@@ -2,7 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Plus, Package, Users, Clock, Edit2, Trash2, Check, X, AlertTriangle, Search, Filter } from 'lucide-react';
+import {
+  ArrowLeft,
+  Plus,
+  Package,
+  Users,
+  Clock,
+  Edit2,
+  Trash2,
+  Check,
+  X,
+  AlertTriangle,
+  Search,
+  Filter,
+} from 'lucide-react';
 import { fetchWithAuth } from '@/lib/auth';
 
 // 类型定义
@@ -362,12 +375,12 @@ export default function CoursesPage() {
             {/* 课时预警卡片 */}
             {(() => {
               const lowHours = enrollments.filter(
-                (e) => e.status === 'active' && e.remainingHours > 0 && e.remainingHours <= 5,
+                (e) => e.status === 'active' && e.remainingHours > 0 && e.remainingHours <= 5
               );
               const expiringSoon = enrollments.filter((e) => {
                 if (!e.expireDate || e.status !== 'active') return false;
                 const daysLeft = Math.ceil(
-                  (new Date(e.expireDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+                  (new Date(e.expireDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
                 );
                 return daysLeft <= 14 && daysLeft > 0;
               });
@@ -405,7 +418,7 @@ export default function CoursesPage() {
                       <div className="flex flex-wrap gap-2">
                         {expiringSoon.map((e) => {
                           const daysLeft = Math.ceil(
-                            (new Date(e.expireDate!).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+                            (new Date(e.expireDate!).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
                           );
                           return (
                             <span
@@ -449,122 +462,132 @@ export default function CoursesPage() {
               </select>
             </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-100 bg-gray-50">
-                  <th className="text-left p-4 font-medium text-gray-600">学员</th>
-                  <th className="text-left p-4 font-medium text-gray-600">课程</th>
-                  <th className="text-left p-4 font-medium text-gray-600">总课时</th>
-                  <th className="text-left p-4 font-medium text-gray-600">已用</th>
-                  <th className="text-left p-4 font-medium text-gray-600">剩余</th>
-                  <th className="text-left p-4 font-medium text-gray-600">状态</th>
-                  <th className="text-left p-4 font-medium text-gray-600">购买日期</th>
-                </tr>
-              </thead>
-              <tbody>
-                {enrollments
-                  .filter((e) => {
-                    if (filterEnrollStatus === 'low-hours') {
-                      if (e.status !== 'active' || e.remainingHours > 5) return false;
-                    } else if (filterEnrollStatus !== 'all' && e.status !== filterEnrollStatus) {
-                      return false;
-                    }
-                    if (searchEnroll) {
-                      const term = searchEnroll.toLowerCase();
-                      return (
-                        (e.player?.name || '').toLowerCase().includes(term) ||
-                        (e.course?.name || '').toLowerCase().includes(term) ||
-                        (e.player?.group || '').toLowerCase().includes(term)
-                      );
-                    }
-                    return true;
-                  })
-                  .map((enrollment) => (
-                  <tr key={enrollment.id} className="border-b border-gray-50 hover:bg-gray-50">
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center text-white text-sm font-bold">
-                          {enrollment.player?.name?.charAt(0) || '?'}
-                        </div>
-                        <div>
-                          <div className="font-medium text-gray-900">
-                            {enrollment.player?.name || '未知'}
-                          </div>
-                          <div className="text-xs text-gray-500">{enrollment.player?.group}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-4 text-gray-700">{enrollment.course?.name}</td>
-                    <td className="p-4 text-gray-700">{enrollment.totalHours} 课时</td>
-                    <td className="p-4 text-gray-700">{enrollment.usedHours} 课时</td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`font-semibold ${
-                            enrollment.remainingHours <= 3
-                              ? 'text-red-600'
-                              : enrollment.remainingHours <= 5
-                                ? 'text-orange-600'
-                                : 'text-green-600'
-                          }`}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-100 bg-gray-50">
+                      <th className="text-left p-4 font-medium text-gray-600">学员</th>
+                      <th className="text-left p-4 font-medium text-gray-600">课程</th>
+                      <th className="text-left p-4 font-medium text-gray-600">总课时</th>
+                      <th className="text-left p-4 font-medium text-gray-600">已用</th>
+                      <th className="text-left p-4 font-medium text-gray-600">剩余</th>
+                      <th className="text-left p-4 font-medium text-gray-600">状态</th>
+                      <th className="text-left p-4 font-medium text-gray-600">购买日期</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {enrollments
+                      .filter((e) => {
+                        if (filterEnrollStatus === 'low-hours') {
+                          if (e.status !== 'active' || e.remainingHours > 5) return false;
+                        } else if (
+                          filterEnrollStatus !== 'all' &&
+                          e.status !== filterEnrollStatus
+                        ) {
+                          return false;
+                        }
+                        if (searchEnroll) {
+                          const term = searchEnroll.toLowerCase();
+                          return (
+                            (e.player?.name || '').toLowerCase().includes(term) ||
+                            (e.course?.name || '').toLowerCase().includes(term) ||
+                            (e.player?.group || '').toLowerCase().includes(term)
+                          );
+                        }
+                        return true;
+                      })
+                      .map((enrollment) => (
+                        <tr
+                          key={enrollment.id}
+                          className="border-b border-gray-50 hover:bg-gray-50"
                         >
-                          {enrollment.remainingHours} 课时
-                        </span>
-                        {enrollment.status === 'active' && enrollment.remainingHours <= 5 && enrollment.remainingHours > 0 && (
-                          <AlertTriangle className="w-4 h-4 text-red-500" />
-                        )}
-                      </div>
-                      {/* 课时进度条 */}
-                      {enrollment.totalHours > 0 && (
-                        <div className="w-20 h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${
-                              enrollment.remainingHours <= 3
-                                ? 'bg-red-500'
-                                : enrollment.remainingHours <= 5
-                                  ? 'bg-orange-500'
-                                  : 'bg-green-500'
-                            }`}
-                            style={{
-                              width: `${Math.max(0, (enrollment.remainingHours / enrollment.totalHours) * 100)}%`,
-                            }}
-                          />
-                        </div>
-                      )}
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className={`px-2 py-1 text-xs rounded-full ${statusMap[enrollment.status]?.color || 'bg-gray-100 text-gray-700'}`}
-                      >
-                        {statusMap[enrollment.status]?.label || enrollment.status}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <div className="text-sm text-gray-700">
-                        {new Date(enrollment.purchaseDate).toLocaleDateString('zh-CN')}
-                      </div>
-                      {enrollment.expireDate && enrollment.status === 'active' && (
-                        <div className="text-xs text-gray-400">
-                          {new Date(enrollment.expireDate).toLocaleDateString('zh-CN')} 到期
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </div>
-
-            {enrollments.length === 0 && (
-              <div className="p-12 text-center">
-                <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">暂无购买记录</h3>
-                <p className="text-gray-500">点击上方"购买课程"按钮为学员购买课程</p>
+                          <td className="p-4">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center text-white text-sm font-bold">
+                                {enrollment.player?.name?.charAt(0) || '?'}
+                              </div>
+                              <div>
+                                <div className="font-medium text-gray-900">
+                                  {enrollment.player?.name || '未知'}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {enrollment.player?.group}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4 text-gray-700">{enrollment.course?.name}</td>
+                          <td className="p-4 text-gray-700">{enrollment.totalHours} 课时</td>
+                          <td className="p-4 text-gray-700">{enrollment.usedHours} 课时</td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`font-semibold ${
+                                  enrollment.remainingHours <= 3
+                                    ? 'text-red-600'
+                                    : enrollment.remainingHours <= 5
+                                      ? 'text-orange-600'
+                                      : 'text-green-600'
+                                }`}
+                              >
+                                {enrollment.remainingHours} 课时
+                              </span>
+                              {enrollment.status === 'active' &&
+                                enrollment.remainingHours <= 5 &&
+                                enrollment.remainingHours > 0 && (
+                                  <AlertTriangle className="w-4 h-4 text-red-500" />
+                                )}
+                            </div>
+                            {/* 课时进度条 */}
+                            {enrollment.totalHours > 0 && (
+                              <div className="w-20 h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full ${
+                                    enrollment.remainingHours <= 3
+                                      ? 'bg-red-500'
+                                      : enrollment.remainingHours <= 5
+                                        ? 'bg-orange-500'
+                                        : 'bg-green-500'
+                                  }`}
+                                  style={{
+                                    width: `${Math.max(0, (enrollment.remainingHours / enrollment.totalHours) * 100)}%`,
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </td>
+                          <td className="p-4">
+                            <span
+                              className={`px-2 py-1 text-xs rounded-full ${statusMap[enrollment.status]?.color || 'bg-gray-100 text-gray-700'}`}
+                            >
+                              {statusMap[enrollment.status]?.label || enrollment.status}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <div className="text-sm text-gray-700">
+                              {new Date(enrollment.purchaseDate).toLocaleDateString('zh-CN')}
+                            </div>
+                            {enrollment.expireDate && enrollment.status === 'active' && (
+                              <div className="text-xs text-gray-400">
+                                {new Date(enrollment.expireDate).toLocaleDateString('zh-CN')} 到期
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
               </div>
-            )}
-          </div>
+
+              {enrollments.length === 0 && (
+                <div className="p-12 text-center">
+                  <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">暂无购买记录</h3>
+                  <p className="text-gray-500">点击上方"购买课程"按钮为学员购买课程</p>
+                </div>
+              )}
+            </div>
           </>
         )}
       </main>

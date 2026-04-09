@@ -13,7 +13,6 @@ import {
   Phone,
   MapPin,
   Clock,
-  ChevronRight,
   X,
   User,
 } from 'lucide-react';

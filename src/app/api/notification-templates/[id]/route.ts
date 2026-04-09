@@ -74,7 +74,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 // DELETE /api/notification-templates/[id] - 删除模板
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const auth = await verifyAuth(request, { roles: ['admin'] });
   if (!auth.success) return auth.response;
 

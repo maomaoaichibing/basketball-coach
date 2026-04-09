@@ -23,7 +23,9 @@ export async function GET(request: NextRequest) {
       where,
       include: {
         team: { select: { id: true, name: true } },
-        plan: { select: { id: true, title: true, date: true, group: true, theme: true, status: true } },
+        plan: {
+          select: { id: true, title: true, date: true, group: true, theme: true, status: true },
+        },
       },
       orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
     });
@@ -85,7 +87,9 @@ export async function POST(request: NextRequest) {
         notes,
       },
       include: {
-        plan: { select: { id: true, title: true, date: true, group: true, theme: true, status: true } },
+        plan: {
+          select: { id: true, title: true, date: true, group: true, theme: true, status: true },
+        },
       },
     });
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Trophy, Star, Save, User } from 'lucide-react';
+import { ArrowLeft, Save, User } from 'lucide-react';
 import { fetchWithAuth } from '@/lib/auth';
 
 // 类型定义
@@ -44,15 +44,6 @@ const skillLabels: Record<string, string> = {
   defending: '防守',
   physical: '体能',
   tactical: '战术',
-};
-
-const skillColors: Record<string, string> = {
-  dribbling: 'from-blue-400 to-blue-500',
-  passing: 'from-green-400 to-green-500',
-  shooting: 'from-red-400 to-red-500',
-  defending: 'from-yellow-400 to-yellow-500',
-  physical: 'from-purple-400 to-purple-500',
-  tactical: 'from-orange-400 to-orange-500',
 };
 
 export default function AssessmentPage() {
@@ -146,7 +137,7 @@ export default function AssessmentPage() {
       } else {
         alert(data.error || '保存失败');
       }
-    } catch (error) {
+    } catch (_error) {
       alert('保存失败');
     } finally {
       setSaving(false);

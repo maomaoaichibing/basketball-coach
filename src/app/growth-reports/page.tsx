@@ -4,20 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { fetchWithAuth } from '@/lib/auth';
-import {
-  FileText,
-  Plus,
-  ChevronRight,
-  Search,
-  Filter,
-  Calendar,
-  User,
-  Star,
-  TrendingUp,
-  Trophy,
-  Download,
-  Eye,
-} from 'lucide-react';
+import { FileText, Plus, ChevronRight, Search, Calendar, User, Star } from 'lucide-react';
 
 type AbilityMetrics = {
   dribbling: number;
@@ -63,15 +50,6 @@ type GrowthReport = {
   coachName: string;
   status: string;
   createdAt: string;
-};
-
-type AbilityDimensions = {
-  dribbling: number;
-  passing: number;
-  shooting: number;
-  defending: number;
-  physical: number;
-  tactical: number;
 };
 
 type PreviewData = {
