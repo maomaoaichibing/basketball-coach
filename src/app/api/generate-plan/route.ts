@@ -618,7 +618,12 @@ function tryRepairTruncatedJson(jsonStr: string): string {
     const afterLastObj = str.substring(lastCompleteActivity + 1).trim();
 
     // 如果后面还有内容但不是有效的JSON结构（逗号或未闭合的括号）
-    if (afterLastObj && !afterLastObj.startsWith(',') && !afterLastObj.startsWith(']') && !afterLastObj.startsWith('}')) {
+    if (
+      afterLastObj &&
+      !afterLastObj.startsWith(',') &&
+      !afterLastObj.startsWith(']') &&
+      !afterLastObj.startsWith('}')
+    ) {
       // 说明有未完成的内容，截断到最后完整对象
       str = str.substring(0, lastCompleteActivity + 1);
     }
