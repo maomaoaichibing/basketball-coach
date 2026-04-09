@@ -220,7 +220,11 @@ export default function PromptsPage() {
             toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
           }`}
         >
-          {toast.type === 'success' ? <CheckCircle className="w-4 h-4 inline mr-1" /> : <XCircle className="w-4 h-4 inline mr-1" />}
+          {toast.type === 'success' ? (
+            <CheckCircle className="w-4 h-4 inline mr-1" />
+          ) : (
+            <XCircle className="w-4 h-4 inline mr-1" />
+          )}
           {toast.message}
         </div>
       )}
@@ -239,7 +243,9 @@ export default function PromptsPage() {
               <FileText className="w-5 h-5" />
               Prompt 管理
             </h1>
-            <p className="text-purple-200 text-sm">管理和编辑 AI 教案生成的提示词模板，支持版本控制</p>
+            <p className="text-purple-200 text-sm">
+              管理和编辑 AI 教案生成的提示词模板，支持版本控制
+            </p>
           </div>
         </div>
       </header>
@@ -328,9 +334,7 @@ export default function PromptsPage() {
             <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <History className="w-5 h-5" />
               版本历史
-              <span className="text-sm font-normal text-gray-500">
-                ({versions.length} 个版本)
-              </span>
+              <span className="text-sm font-normal text-gray-500">({versions.length} 个版本)</span>
             </h2>
             <div className="space-y-3">
               {versions.map((v, idx) => (
@@ -414,9 +418,7 @@ export default function PromptsPage() {
                 <ArrowLeft className="w-4 h-4" /> 返回版本历史
               </button>
               <div className="flex items-center gap-3">
-                <span className="text-xs text-gray-400">
-                  {getContentStats(editingContent)}
-                </span>
+                <span className="text-xs text-gray-400">{getContentStats(editingContent)}</span>
                 <button
                   onClick={handleSave}
                   disabled={saving || !editingContent.trim()}

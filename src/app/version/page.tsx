@@ -16,6 +16,21 @@ import {
 // 版本历史记录
 const versions = [
   {
+    version: 'v5.10.0',
+    date: '2026-04-09',
+    title: '成长曲线功能',
+    description: '学员能力历史趋势可视化，支持多维度成长追踪',
+    features: [
+      { type: 'feature', text: 'API /api/players/[id]/growth-curve - 获取历史能力数据' },
+      { type: 'feature', text: '可视化组件 GrowthCurveChart - 多维度能力趋势展示' },
+      { type: 'feature', text: '学员详情页集成 - 能力评估上方展示成长曲线卡片' },
+      { type: 'feature', text: '新增"成长曲线"标签页 - 详细查看历史趋势' },
+      { type: 'feature', text: '支持6维度独立显示/隐藏：运球/传球/投篮/防守/体能/战术' },
+      { type: 'improvement', text: '自动计算成长趋势（上升/下降/稳定）和成长速度' },
+      { type: 'improvement', text: '成长洞察卡片 - 显示进步最快和需要关注的技能' },
+    ],
+  },
+  {
     version: 'v5.9.0',
     date: '2026-04-09',
     title: 'Prompt 管理后台',
@@ -25,7 +40,10 @@ const versions = [
       { type: 'feature', text: 'API 路由：/api/prompts（CRUD + 版本管理）' },
       { type: 'feature', text: '管理页面：/prompts - 列表/编辑/预览/版本切换' },
       { type: 'improvement', text: '重构 generate-plan API：从数据库读取 Prompt 模板' },
-      { type: 'improvement', text: '占位符系统：{{group}}、{{duration}}、{{ageGroupInfo}} 等动态变量' },
+      {
+        type: 'improvement',
+        text: '占位符系统：{{group}}、{{duration}}、{{ageGroupInfo}} 等动态变量',
+      },
     ],
   },
   {

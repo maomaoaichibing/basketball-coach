@@ -3,10 +3,7 @@ import prisma from '@/lib/db';
 import { verifyAuth } from '@/lib/auth-middleware';
 
 // GET /api/prompts/[id] - 获取单个 Prompt 模板
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const auth = await verifyAuth(request);
     if (!auth) {
@@ -29,10 +26,7 @@ export async function GET(
 }
 
 // PATCH /api/prompts/[id] - 更新 Prompt 模板（创建新版本）
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const auth = await verifyAuth(request);
     if (!auth) {
@@ -89,10 +83,7 @@ export async function PATCH(
 }
 
 // POST /api/prompts/[id]/activate - 激活指定版本
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const auth = await verifyAuth(request);
     if (!auth) {
@@ -127,10 +118,7 @@ export async function POST(
 }
 
 // DELETE /api/prompts/[id] - 删除 Prompt 模板版本
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const auth = await verifyAuth(request);
     if (!auth) {
@@ -151,10 +139,7 @@ export async function DELETE(
     });
 
     if (count <= 1) {
-      return NextResponse.json(
-        { success: false, error: '至少保留一个版本' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: '至少保留一个版本' }, { status: 400 });
     }
 
     // 如果删除的是激活版本，需要先激活另一个

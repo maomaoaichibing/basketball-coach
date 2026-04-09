@@ -1639,13 +1639,15 @@ function injectPromptParams(
     ? `## 教练案例库（教练自行录入的优秀案例，请重点参考）\n${dbCasesText}\n请参考以上教练案例库中的训练方法、要点和教练引导语，结合本次训练要求生成教案。可以借鉴好的训练设计，但要根据实际学员情况调整难度和内容。\n`
     : '';
 
-  const multiThemeHint = params.theme && params.theme.includes('+')
-    ? '\n（教练选择了多个主题，教案中需要同时覆盖这些主题的训练内容，可以将不同主题分配到不同时间段或进行组合训练）'
-    : '';
+  const multiThemeHint =
+    params.theme && params.theme.includes('+')
+      ? '\n（教练选择了多个主题，教案中需要同时覆盖这些主题的训练内容，可以将不同主题分配到不同时间段或进行组合训练）'
+      : '';
 
-  const weatherNote = params.location === '室外' && params.weather === '雨天'
-    ? '雨天室外注意安全，可改为室内或减少对抗环节'
-    : '';
+  const weatherNote =
+    params.location === '室外' && params.weather === '雨天'
+      ? '雨天室外注意安全，可改为室内或减少对抗环节'
+      : '';
 
   const casesRef = casesText ? '5. 参考案例库的训练方法格式' : '';
 
@@ -1654,7 +1656,7 @@ function injectPromptParams(
     : '';
 
   // 在模板中替换占位符
-  let prompt = template
+  const prompt = template
     .replace(/\{\{group\}\}/g, params.group)
     .replace(/\{\{ageGroupInfo\}\}/g, ageGroupInfo[params.group] || '')
     .replace(/\{\{duration\}\}/g, String(params.duration))
@@ -1662,13 +1664,23 @@ function injectPromptParams(
     .replace(/\{\{weather\}\}/g, params.weather || '未指定')
     .replace(/\{\{playerCount\}\}/g, String(params.playerCount || '8-12'))
     .replace(/\{\{levelLabel\}\}/g, levelLabel)
-    .replace(/\{\{levelDesc\}\}/g, isU10 && levelLabel ? `\n## U10级别说明（${levelLabel}）\n${u10LevelGuide[levelLabel] || ''}\n` : '')
+    .replace(
+      /\{\{levelDesc\}\}/g,
+      isU10 && levelLabel
+        ? `\n## U10级别说明（${levelLabel}）\n${u10LevelGuide[levelLabel] || ''}\n`
+        : ''
+    )
     .replace(/\{\{intensityLabel\}\}/g, intensityLabel)
     .replace(/\{\{intensityText\}\}/g, intensityText)
     .replace(/\{\{theme\}\}/g, params.theme || '根据年龄段特点自动确定')
     .replace(/\{\{multiThemeHint\}\}/g, multiThemeHint)
     .replace(/\{\{focusSkills\}\}/g, params.focusSkills?.join('、') || '根据年龄段特点自动确定')
-    .replace(/\{\{skillLevel\}\}/g, isU10 ? levelLabel + '（' + (u10LevelGuide[levelLabel] || '') + '）' : params.skillLevel || 'intermediate')
+    .replace(
+      /\{\{skillLevel\}\}/g,
+      isU10
+        ? levelLabel + '（' + (u10LevelGuide[levelLabel] || '') + '）'
+        : params.skillLevel || 'intermediate'
+    )
     .replace(/\{\{previousTraining\}\}/g, previousTrainingText)
     .replace(/\{\{additionalNotes\}\}/g, additionalNotesText)
     .replace(/\{\{additionalNotesStrict\}\}/g, additionalNotesStrict)

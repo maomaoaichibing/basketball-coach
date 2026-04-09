@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { fetchWithAuth } from '@/lib/auth';
-import { ArrowLeft, Edit2, Phone, Calendar, Users, TrendingUp, Target, X } from 'lucide-react';
+import { ArrowLeft, Edit2, Phone, Calendar, Users, TrendingUp, Target, X, LineChart } from 'lucide-react';
+import { GrowthCurveCard } from '@/components/growth-curve-chart';
 
 // 类型定义
 type Player = {
@@ -132,8 +133,10 @@ export default function PlayerDetailPage() {
   const params = useParams();
   const [player, setPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'records' | 'assessments' | 'goals'>('records');
+  const [activeTab, setActiveTab] = useState<'records' | 'assessments' | 'goals' | 'growth'>('records');
   const [showEditModal, setShowEditModal] = useState(false);
+  const [growthCurveData, setGrowthCurveData] = useState<any>(null);
+  const [growthLoading, setGrowthLoading] = useState(false);
   const [editForm, setEditForm] = useState({
     name: '',
     gender: 'male',
@@ -161,8 +164,24 @@ export default function PlayerDetailPage() {
   useEffect(() => {
     if (params.id) {
       fetchPlayer(params.id as string);
+      fetchGrowthCurve(params.id as string);
     }
   }, [params.id]);
+
+  async function fetchGrowthCurve(id: string) {
+    try {
+      setGrowthLoading(true);
+      const response = await fetchWithAuth(`/api/players/${id}/growth-curve?months=6`);
+      const data = await response.json();
+      if (data.success) {
+        setGrowthCurveData(data.data);
+      }
+    } catch (error) {
+      console.error('获取成长曲线失败:', error);
+    } finally {
+      setGrowthLoading(false);
+    }
+  }
 
   async function fetchPlayer(id: string) {
     try {
@@ -366,6 +385,13 @@ export default function PlayerDetailPage() {
           </div>
         </div>
 
+        {/* 成长曲线 */}
+        {growthCurveData && growthCurveData.dataPoints.length > 1 && (
+          <div className="mb-4 sm:mb-6">
+            <GrowthCurveCard data={growthCurveData} />
+          </div>
+        )}
+
         {/* 能力雷达 */}
         <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100 mb-4 sm:mb-6">
           <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -460,6 +486,19 @@ export default function PlayerDetailPage() {
                 }`}
               >
                 阶段目标 ({player.goals.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('growth')}
+                className={`flex-1 py-3 text-sm font-medium text-center ${
+                  activeTab === 'growth'
+                    ? 'text-orange-600 border-b-2 border-orange-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <span className="flex items-center justify-center gap-1">
+                  <LineChart className="w-3.5 h-3.5" />
+                  成长曲线
+                </span>
               </button>
             </div>
           </div>
@@ -614,6 +653,26 @@ export default function PlayerDetailPage() {
                       )}
                     </div>
                   ))
+                )}
+              </div>
+            )}
+
+            {/* 成长曲线 */}
+            {activeTab === 'growth' && (
+              <div className="space-y-4">
+                {growthLoading ? (
+                  <div className="text-center py-8">
+                    <div className="inline-block w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                    <p className="mt-2 text-gray-500 text-sm">加载成长曲线...</p>
+                  </div>
+                ) : growthCurveData && growthCurveData.dataPoints.length > 1 ? (
+                  <GrowthCurveCard data={growthCurveData} />
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <LineChart className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p>暂无足够数据生成成长曲线</p>
+                    <p className="text-sm text-gray-400 mt-1">需要至少2次能力评估记录</p>
+                  </div>
                 )}
               </div>
             )}
