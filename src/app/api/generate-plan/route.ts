@@ -598,9 +598,110 @@ function generateDefaultDrillDiagram(
   return svg;
 }
 
+// 尝试修复被截断的JSON（AI输出被max_tokens截断导致不完整）
+function tryRepairTruncatedJson(jsonStr: string): string {
+  let str = jsonStr.trim();
+
+  // 快速检查：如果JSON已经是完整的，直接返回
+  try {
+    JSON.parse(str);
+    return str; // 已经是合法JSON
+  } catch {
+    // 继续，需要修复
+  }
+
+  // 策略1：找到最后一个完整的活动对象，截断后面的内容并补全括号
+  // 找最后一个完整的 "activities" 数组中的对象（以 } 结尾）
+  const lastCompleteActivity = str.lastIndexOf('}');
+  if (lastCompleteActivity > 0) {
+    // 从最后完整对象的位置之后开始检查
+    const afterLastObj = str.substring(lastCompleteActivity + 1).trim();
+
+    // 如果后面还有内容但不是有效的JSON结构（逗号或未闭合的括号）
+    if (afterLastObj && !afterLastObj.startsWith(',') && !afterLastObj.startsWith(']') && !afterLastObj.startsWith('}')) {
+      // 说明有未完成的内容，截断到最后完整对象
+      str = str.substring(0, lastCompleteActivity + 1);
+    }
+  }
+
+  // 策略2：修复未闭合的字符串值
+  // 找到最后一个未闭合的引号
+  let inString = false;
+  let lastQuoteIdx = -1;
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === '"' && (i === 0 || str[i - 1] !== '\\')) {
+      inString = !inString;
+      lastQuoteIdx = i;
+    }
+  }
+
+  if (inString && lastQuoteIdx >= 0) {
+    // 有未闭合的字符串，截断到最后一个完整的值
+    // 往回找到这个值开始的冒号或逗号
+    let cutPoint = lastQuoteIdx;
+    for (let i = lastQuoteIdx - 1; i >= 0; i--) {
+      if (str[i] === ':' || str[i] === ',') {
+        cutPoint = i;
+        break;
+      }
+    }
+    // 如果 cutPoint 指向的是逗号，保留逗号（可能还有后续元素）
+    // 如果 cutPoint 指向的是冒号，说明值被截断了，连同key一起移除
+    str = str.substring(0, cutPoint);
+    // 移除尾随的逗号
+    str = str.replace(/,\s*$/, '');
+  }
+
+  // 策略3：统计并补全未闭合的括号
+  const openBrackets: string[] = [];
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i];
+    if (ch === '"') {
+      // 跳过字符串内容
+      i++;
+      while (i < str.length) {
+        if (str[i] === '\\' && i + 1 < str.length) {
+          i += 2;
+          continue;
+        }
+        if (str[i] === '"') break;
+        i++;
+      }
+      continue;
+    }
+    if (ch === '{' || ch === '[') {
+      openBrackets.push(ch);
+    } else if (ch === '}' || ch === ']') {
+      if (openBrackets.length > 0) {
+        const last = openBrackets[openBrackets.length - 1];
+        if ((ch === '}' && last === '{') || (ch === ']' && last === '[')) {
+          openBrackets.pop();
+        }
+      }
+    }
+  }
+
+  // 补全未闭合的括号
+  while (openBrackets.length > 0) {
+    const last = openBrackets.pop()!;
+    str += last === '{' ? '}' : ']';
+  }
+
+  // 移除可能的尾随逗号
+  str = str.replace(/,\s*([}\]])/g, '$1');
+
+  console.log(`[JSON修复] 原始长度: ${jsonStr.length}, 修复后长度: ${str.length}`);
+
+  return str;
+}
+
 // 修复常见JSON格式问题
 function fixJsonString(jsonStr: string): string {
   let fixed = jsonStr;
+
+  // 0. 处理截断的JSON（AI输出被max_tokens截断）
+  // 检测未闭合的字符串、数组、对象
+  fixed = tryRepairTruncatedJson(fixed);
 
   // 1. 处理未转义的换行符在字符串值内
   fixed = fixed.replace(/:\s*"([^"]*?)"/g, (match, content) => {
@@ -1377,7 +1478,7 @@ async function callAIAPI(
       { role: 'user', content: prompt },
     ],
     temperature: 0.7,
-    max_tokens: 8000,
+    max_tokens: 16000,
   });
 
   return new Promise((resolve) => {
@@ -1567,7 +1668,7 @@ export async function POST(request: NextRequest) {
       const kimiResult = await callAIAPI(
         KIMI_API_KEY,
         'https://api.moonshot.cn/v1/chat/completions',
-        'moonshot-v1-8k',
+        'moonshot-v1-32k',
         prompt
       );
 
