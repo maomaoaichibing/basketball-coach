@@ -154,8 +154,8 @@ interface AISection {
 function validateAndFixActivity(
   activity: AIActivity,
   category: string,
-  sectionIndex: number = 0,
-  allSections: AISection[] = []
+  _sectionIndex: number = 0,
+  _allSections: AISection[] = []
 ): AIActivity {
   const fixed = { ...activity };
 
@@ -164,13 +164,15 @@ function validateAndFixActivity(
     fixed.sets = '2-3组';
   }
   if (!fixed.repetitions) {
-    // 根据活动类型设置默认次数
+    // 根据活动类型设置默认次数 - 更精确的时间计算
     if (fixed.name.includes('运球') || fixed.name.includes('传球')) {
       fixed.repetitions = '每组30秒或20次';
     } else if (fixed.name.includes('拉伸') || fixed.name.includes('伸展')) {
-      fixed.repetitions = '每组8-10次或20秒';
+      fixed.repetitions = '每组8-10次或15秒';
     } else if (fixed.name.includes('慢跑') || fixed.name.includes('跑')) {
-      fixed.repetitions = '1-2圈或3分钟';
+      fixed.repetitions = '1-2圈或2-3分钟';
+    } else if (fixed.name.includes('投篮') || fixed.name.includes('上篮')) {
+      fixed.repetitions = '每组5-8次';
     } else {
       fixed.repetitions = '每组8-10次';
     }
@@ -205,7 +207,7 @@ function validateAndFixActivity(
 }
 
 // 根据活动名称智能生成递进式设计
-function generateProgressionByActivity(activityName: string, category: string): string {
+function generateProgressionByActivity(activityName: string, _category: string): string {
   // 运球类
   if (activityName.includes('运球')) {
     if (activityName.includes('变向')) {
@@ -388,7 +390,7 @@ function generateDefaultDrillDiagram(
   activityName: string = ''
 ): string {
   const formType = form || '集体';
-  const activityType = category || 'technical';
+  // const activityType = category || 'technical'; // 预留字段，后续可能使用
 
   // 所有活动统一使用篮球场半场图
   let svg = generateBasketballCourtSVG(true);
@@ -640,17 +642,37 @@ function validateAndFixPlan(plan: AIResult, duration: number): AIResult {
 
     // ===== 全局强制规则 =====
 
-    // 规则1：慢跑时间强制≤3分钟（适用于所有节次）
-    activities.forEach((a: AIActivity) => {
-      if (a.name && (a.name.includes('慢跑') || a.name.includes('跑步'))) {
-        if (a.duration > 3) {
-          console.warn(
-            `⚠️ [第${sectionIndex + 1}节] 慢跑"${a.name}"时间${a.duration}分钟，强制调整为3分钟`
-          );
-          a.duration = 3;
-        }
+    // 规则1：慢跑+拉伸总时间强制≤5分钟（适用于第一节）
+    if (sectionIndex === 0) {
+      const warmupActivities = activities.filter(a => 
+        a.name && (a.name.includes('慢跑') || a.name.includes('跑步') || 
+                   a.name.includes('拉伸') || a.name.includes('伸展'))
+      );
+      const warmupTotalTime = warmupActivities.reduce((sum, a) => sum + (a.duration || 0), 0);
+      
+      // 如果慢跑+拉伸超过5分钟，需要调整
+      const jogActivity = activities.find(a => a.name && (a.name.includes('慢跑') || a.name.includes('跑步')));
+      const stretchActivities = activities.filter(a => a.name && (a.name.includes('拉伸') || a.name.includes('伸展')));
+      
+      if (jogActivity && warmupTotalTime > 5) {
+        // 慢跑固定2分钟
+        const oldJogTime = jogActivity.duration;
+        jogActivity.duration = 2;
+        console.warn(`⚠️ [第一节] 慢跑"${jogActivity.name}"时间${oldJogTime}分钟，强制调整为2分钟`);
+        
+        // 剩余时间分配给拉伸（每个拉伸动作约1分钟）
+        const remainingTime = 3; // 5分钟总预算 - 2分钟慢跑
+        const stretchTimePerActivity = Math.max(1, Math.floor(remainingTime / Math.max(1, stretchActivities.length)));
+        stretchActivities.forEach(a => {
+          a.duration = stretchTimePerActivity;
+        });
+        console.warn(`⚠️ [第一节] 拉伸动作调整为每个${stretchTimePerActivity}分钟，总计${stretchTimePerActivity * stretchActivities.length}分钟`);
+      } else if (jogActivity && jogActivity.duration > 2) {
+        // 单独慢跑超过2分钟也要调整
+        console.warn(`⚠️ [第一节] 慢跑"${jogActivity.name}"时间${jogActivity.duration}分钟，强制调整为2分钟`);
+        jogActivity.duration = 2;
       }
-    });
+    }
 
     // 规则2：第一节活动顺序强制检查
     if (sectionIndex === 0) {
@@ -968,23 +990,26 @@ ${dbCasesText ? `## 教练案例库（教练自行录入的优秀案例，请重
   "trainingProgression": "整体递进关系说明：热身中的基础动作在正式训练中如何进阶（必须明确写出前后关联）"
 }
 
-## 关键要求（严格按照以下5点执行）
+## 关键要求（严格按照以下6点执行）
 
-### 1. 第一节顺序要求（重点⚠️）
-**必须按此顺序生成4-5个活动，严格按照标注的时间：**
+### 1. 第一节顺序要求（重点⚠️）- 5分钟完成慢跑+拉伸
+**必须按此顺序生成活动，严格控制总时间≤30分钟，其中慢跑+拉伸必须在5分钟内完成：**
+
 1. **课前礼仪**（2分钟）：集合、点名、讲解本节课内容
-2. **慢跑热身**（严格≤3分钟，duration必须设为2或3）：绕场慢跑1-2圈，最多3分钟，绝对不能超过3分钟。此条为硬性规则，违反将导致教案作废。
-3. **动态伸展**（5-8分钟）：**必须将每个拉伸动作单独列为一个活动！** 不要笼统写"依次进行肩关节、髋关节拉伸"。
-   每个拉伸动作必须包含：具体动作名称（如"直腿摸脚尖""前抱腿""后提拉腿""提膝外展"等）、详细的姿势描述、行进间还是原地。
-   示例（参考真实教案格式）：
-   - 活动1（2分钟）：直腿摸脚尖 — 行进间 — 【姿势】跨出一步脚跟落地脚尖翘起 — 【动作】双手碰触前脚尖交替进行 — 【次数】底线至中线2趟 — 【要点】增强协调能力、拉伸大腿后侧
-   - 活动2（2分钟）：前抱腿 — 行进间 — 【姿势】十指交叉抱膝盖 — 【动作】向上提拉交替进行 — 【次数】每条腿10次 — 【要点】增强单腿稳定性、拉伸大腿肌肉
-   - 活动3（2分钟）：后提拉腿 — 行进间 — 【姿势】身体直立 — 【动作】身后抓住脚踝向上提拉 — 【次数】每条腿10次 — 【要点】拉伸大腿前侧
-   - 活动4（2分钟）：提膝外展 — 原地 — 【姿势】单脚站立 — 【动作】提膝外展小跳交换进行 — 【次数】每侧8次×2组 — 【要点】增强髋关节稳定性
-4. **身体协调性**（5-8分钟）：每个协调训练动作也要单独列出（如"双脚脚尖前后跳""小碎步变向""侧滑步"等），包含具体姿势、动作、次数
-5. **球性熟悉**（8-10分钟）：原地运球、移动运球、球绕环等
+2. **慢跑热身**（严格2分钟）：绕场慢跑1-2圈，绝对不能超过2分钟
+3. **动态伸展**（严格3分钟，约2-3个动作）：**每个拉伸动作1分钟，简洁高效**
+   - 只选择最必要的2-3个拉伸动作
+   - 每个动作时间控制在1分钟以内
+   - 行进间完成，边走边拉伸
+   - 示例格式：
+     - 活动1（1分钟）：行进间直腿摸脚尖 — 【路线】从底线走到中线 — 【动作】每步跨出时双手触脚尖 — 【次数】10-12步
+     - 活动2（1分钟）：行进间抱膝提踵 — 【路线】从中线走回底线 — 【动作】每步抱膝向上提拉 — 【次数】10-12步
+4. **身体协调性**（5-8分钟）：2-3个协调动作，每个2-3分钟
+5. **球性熟悉**（8-10分钟）：2-3个球性动作
 
-### 2. 具体动作描述规范（核心改进⭐）
+**⚠️ 硬性规则：慢跑（2分钟）+ 拉伸（3分钟）= 5分钟，绝对不能超过！**
+
+### 2. 具体动作描述规范（核心改进⭐）- 6要素+教科书式路线
 **每个动作必须包含以下6个要素，缺一不可：**
 
 **⚠️ 重要：每个动作必须单独列为一个活动（activity），不能把多个动作合并成一条描述！**
@@ -1008,9 +1033,10 @@ ${dbCasesText ? `## 教练案例库（教练自行录入的优秀案例，请重
 - 示例2："右脚蹬地发力，左脚向前跨步"
 - 示例3："手腕下压，手指拨球"
 
-**【时间/次数】** - 明确的组数、次数、时间
-- 示例："每组30秒×2组，组间休息15秒"
-- 示例："每组10次×3组"
+**【时间/次数】** - 明确的组数、次数、时间（必须精确计算，确保与实际训练量匹配）
+- 示例："每组30秒×2组，组间休息15秒"（实际耗时约1.5分钟）
+- 示例："每组10次×3组，组间休息10秒"（实际耗时约2分钟）
+- 示例："底线到中线往返2趟"（实际耗时约1分钟）
 
 **【形式】** - 原地/行进间/队列/分组
 - 示例："原地进行"
@@ -1034,18 +1060,159 @@ ${dbCasesText ? `## 教练案例库（教练自行录入的优秀案例，请重
 【形式】原地进行
 【要点目的】强化手腕力量，建立正确的运球手型，熟悉球性"
 
-### 3. 组数、次数、递进式要求
-**每个练习必须包含：**
-- **组数**："2-3组"
-- **次数/时间**："每组30秒"或"每组8-10次"
-- **递进式设计**：明确写出从易到难的3个层次
-  - 示例：
-    - 基础：原地高低运球（熟悉球性）
-    - 进阶：行进间直线运球（结合脚步）
-    - 挑战：行进间变向运球（增加难度）
+### 3. 训练时间与内容匹配（核心改进⭐）- 精确计算
+**必须确保标注的duration与实际训练量匹配！**
 
-### 4. 场地图生成要求（核心改进⭐）
-**如果是半场/全场训练，必须生成标准篮球场地图！**
+**计算方法：**
+- 原地个人练习：组数 × (每组时间 + 组间休息)
+  - 例：3组×30秒，组间休息15秒 = 30×3 + 15×2 = 120秒 = 2分钟
+- 行进间练习：距离 ÷ 速度 + 往返次数
+  - 例：底线到中线往返2趟，每趟15秒 = 15×2 = 30秒 = 0.5分钟
+- 分组轮流：组数 × 每组人数 × 单次时间
+  - 例：8人分4组，每组2人，每人30秒 = 4组 × 30秒 = 2分钟
+- 对抗比赛：固定时间
+  - 例：3v3比赛10分钟 = 10分钟
+
+**常见错误修正：**
+- ❌ 错误："行进间体前变向运球，来回两组，10分钟"
+  - 实际：2组 × 30秒 = 1分钟，标注10分钟严重不符
+- ✅ 正确："行进间体前变向运球，底线到罚球线往返3组，3分钟"
+  - 实际：3组 × (20秒运球 + 10秒回位) = 90秒 ≈ 1.5分钟，标注3分钟合理（含讲解、等待）
+
+**duration标注原则：**
+- 个人技术训练：实际耗时 + 1分钟（讲解、过渡）
+- 分组训练：实际耗时 + 2分钟（轮换、等待）
+- 对抗比赛：固定时长
+
+### 4. 动作细节精确化（核心改进⭐）- 手型/次数/路线
+**每个技术动作必须包含以下精确细节：**
+
+**运球类动作：**
+- 哪只手：右手/左手/双手
+- 运几下：明确次数（如"运3下后变向"）
+- 高度：高运球（腰以上）/低运球（膝以下）/高低变化
+- 路线：原地/直线/Z字形/绕障碍
+- 示例："右手低运球3下，接体前变向换左手，运3下后急停，往返3组"
+
+**传球类动作：**
+- 哪只手：双手/单手（右手/左手）
+- 传球方式：胸前/击地/头上/单手肩上传球
+- 传几次：明确次数（如"连续传5次后交换"）
+- 距离：近距离（1-2米）/中距离（3-4米）/远距离（5米以上）
+- 示例："两人一组间距3米，双手胸前传球，连续传10次后交换位置，3组"
+
+**投篮类动作：**
+- 投篮方式：原地跳投/接球投篮/运球急停投篮/三步上篮
+- 投篮点：明确位置（如"右侧45度三分线内一步"）
+- 投几个：明确次数（如"每个点投5次，进3个算完成"）
+- 示例："右侧45度角，运球急停跳投，每个点投5次，命中3个后换点，左右各3组"
+
+**防守类动作：**
+- 防守对象：有球人/无球人
+- 移动方式：滑步/交叉步/后撤步
+- 距离：贴身防守/一步距离/两步距离
+- 示例："防守滑步跟随，保持一步距离，从底线滑步到中线再返回，3组"
+
+### 5. 战术演练具体化（核心改进⭐）- 详细战术库
+**战术训练不能笼统写"演练战术"，必须明确：**
+- 演练什么战术（具体名称）
+- 怎么演练（步骤分解）
+- 什么组织形式（人数、站位、移动路线）
+
+**战术库（必须按此详细描述）：**
+
+**一、进攻战术**
+
+**1. 快攻类战术**
+- **长传快攻**：后卫抢篮板后长传给快下前锋，前锋接球直接上篮
+  - 组织：3人（1后卫+2前锋）
+  - 步骤：后卫抢板→长传→前锋接球上篮→后卫跟进
+  - 路线：后卫在弧顶，前锋从两侧快下
+  
+- **短传快攻**：通过2-3次短传推进到前场得分
+  - 组织：3人
+  - 步骤：抢板后短传→中间接应→再传→上篮
+  - 要点：传球快、跑位快、不运球
+
+- **三线快攻**：三人呈三线快下，中间持球，两侧接应
+  - 组织：3人（左中右三线）
+  - 步骤：中间持球推进→传球给两侧→接球上篮
+  - 路线：中间直线，两侧斜向跑位
+
+**2. 阵地基础配合类**
+- **传切配合（一传一切）**：传球后立刻空切篮下接球上篮
+  - 组织：2人
+  - 步骤：A传球给B→A立刻向篮下切入→B回传给A→A上篮
+  - 要点：传球后立刻切，时机要快
+
+- **传切配合（空切）**：无球队员突然空切篮下接球
+  - 组织：3人（1持球+2无球）
+  - 步骤：持球人在弧顶，无球队员从底线或侧翼突然切入
+  - 要点：假动作摆脱，切入要突然
+
+- **挡拆配合（侧挡拆）**：持球人借助队友掩护突破或投篮
+  - 组织：2人（持球人+掩护人）
+  - 步骤：掩护人上提做墙→持球人贴近掩护人突破→掩护人拆入篮下
+  - 路线：掩护人从侧翼上提到弧顶，持球人沿掩护方向突破
+
+- **挡拆配合（下挡拆）**：内线球员为外线球员做下掩护
+  - 组织：2人
+  - 步骤：内线球员在低位做掩护→外线球员绕掩护接球投篮或突破
+
+- **无球掩护配合**：无球队员为队友做掩护创造接球机会
+  - 组织：3人
+  - 步骤：A为B做掩护→B绕掩护接球投篮→A掩护后拆入篮下
+
+**3. 整体阵地进攻体系**
+- **动态进攻**：通过不断传球和空切寻找机会
+  - 组织：5人
+  - 原则：球动人动，每次传球后都有人空切或掩护
+  - 要点：耐心传导，寻找最佳投篮机会
+
+- **普林斯顿进攻**：强调传球、空切、背身单打结合
+  - 组织：5人
+  - 特点：后卫将球传给高位策应者，然后空切或做掩护
+  - 要点：高位策应者的传球能力是关键
+
+**二、防守战术**
+
+**1. 人盯人防守体系**
+- **半场人盯人防守**：每人防守一个对手，随球移动
+  - 组织：5人
+  - 要点：人球兼顾，强侧协防，弱侧回收
+
+- **全场人盯人防守**：从发球开始全场紧逼
+  - 组织：5人
+  - 要点：压迫持球人，切断传球路线，快速轮转
+
+**2. 区域联防体系**
+- **2-3联防**：2人在外线，3人在内线，保护篮板
+  - 站位：弧顶2人，底线3人呈弧形
+  - 要点：随球移动，封堵突破路线
+
+- **3-2联防**：3人在外线，2人在内线，防外线投篮
+  - 站位：弧顶1人，两侧各1人，内线2人
+  - 要点：快速轮转补防外线
+
+**3. 紧逼 & 夹击类**
+- **全场1-2-1-1紧逼**：发球时1人盯发球者，2人在中场拦截
+  - 站位：1人在发球者前，2人在中场，1人在后场，1人保护篮筐
+  - 要点：逼迫对方失误，快速轮转
+
+- **半场夹击防守**：在边角或底线对持球人进行双人夹击
+  - 时机：持球人进入边角陷阱区
+  - 要点：夹击要快，封堵传球路线
+
+**战术演练描述格式示例:**
+- 活动名称 - 传切配合(一传一切)演练
+- duration - 8分钟
+- form - 分组(2人一组,共4组)
+- description - 【站位】两人一组,相距4米面对面站立,一人持球在三分线外,另一人在同侧侧翼 / 【步骤】1.持球人A传球给B 2.A传球后立刻向篮下方向空切 3.B接球后回传球 4.A接球上篮 5.交换角色 / 【路线】传球→切入→回传→上篮 / 【要点】传球后立刻切,切入要突然,回传时机要准
+- sets - 3组
+- repetitions - 每组每人完成5次传切
+
+### 6. 场地图生成要求（核心改进⭐）- 教科书式移动符号
+**必须生成标准篮球场地图，使用教科书式移动符号！**
 
 **标准篮球半场SVG结构（必须包含的元素）：**
 - 场地边界：矩形边框
@@ -1057,22 +1224,57 @@ ${dbCasesText ? `## 教练案例库（教练自行录入的优秀案例，请重
 - 中线（全场）：中间直线
 - 颜色：灰色线条，浅色填充
 
-**标准篮球场图将自动生成，无需手动绘制**
+**教科书式移动符号（必须严格使用）：**
+- **学员位置**：蓝色圆圈 + 白色编号（①②③...）
+- **教练位置**：红色方块 + "教"字
+- **球的位置**：橙色圆点
+- **移动路线**：
+  - 实线箭头（→）：运球路线
+  - 虚线箭头（⇢）：传球路线
+  - 波浪线箭头：跑位/空切路线
+  - 折线箭头：变向移动路线
+- **防守位置**：红色小圆圈 + D编号（D1 D2 D3）
+- **掩护位置**：两条平行短线（=）表示掩护墙
 
-**根据训练类型选择场地图：**
-- 运球训练：不需要完整场地，用简化图
-- 传球训练：需要2人站位图
-- 投篮训练：需要带篮筐的半场图
-- 对抗比赛：必须用标准半场/全场图
+**不同训练类型的图解要求：**
 
-**半场训练场地标注要求：**
-- 标注站位点（用数字圆圈）
-- 标注投篮位置
-- 标注移动路线（箭头）
-- 标注防守位置（可选）
+**运球训练图解：**
+- 标注起点（蓝色圆圈①）
+- 标注终点（蓝色圆圈②或篮筐）
+- 用实线箭头画出运球路线
+- 如有变向，用折线箭头表示
+- 障碍物用三角形（▲）标注
 
+**传球训练图解：**
+- 标注传球者位置（蓝色圆圈①）
+- 标注接球者位置（蓝色圆圈②）
+- 用虚线箭头画出传球路线
+- 标注球的位置（橙色圆点）
 
-### 5. 前后关联要求（重点 - 必须严格执行）
+**投篮训练图解：**
+- 标注投篮点位置（蓝色圆圈+编号）
+- 标注篮筐位置（橙色圆圈）
+- 用虚线箭头画出投篮路线（弧线）
+- 标注投篮角度（如"45°"）
+
+**战术演练图解：**
+- 标注所有球员初始位置（蓝色圆圈①②③...）
+- 标注防守位置（红色圆圈D1 D2...）
+- 用不同线型表示不同移动：
+  - 实线箭头：持球移动/运球
+  - 虚线箭头：传球
+  - 波浪线：无球跑位/空切
+- 标注掩护位置（=）
+- 用数字标注移动顺序（1→2→3）
+
+**图解示例(传切配合):**
+- 初始位置: 球员1持球在弧顶,球员2在右侧45度
+- 移动1: 球员1传球给球员2(虚线箭头表示传球)
+- 移动2: 球员1向篮下空切(波浪线箭头表示跑位)
+- 移动3: 球员2回传给球员1(虚线箭头)
+- 移动4: 球员1接球上篮(实线箭头表示运球)
+
+### 7. 前后关联要求（重点 - 必须严格执行）
 **递进式设计：从热身到训练的完整关联链条**
 
 **基本原则：今天的重点训练内容，必须在热身环节有体现**
@@ -1243,7 +1445,18 @@ export async function POST(request: NextRequest) {
     });
 
     // RAG 2.0: 同时从数据库案例库(TrainingCase)中检索
-    let dbCases: Array<{ id: string; title: string; category: string; content: string; keyPoints: string | null; coachGuide: string | null; duration: number; techType: string | null; ageGroup: string; tags: string }> = [];
+    let dbCases: Array<{
+      id: string;
+      title: string;
+      category: string;
+      content: string;
+      keyPoints: string | null;
+      coachGuide: string | null;
+      duration: number;
+      techType: string | null;
+      ageGroup: string;
+      tags: string;
+    }> = [];
     try {
       const searchTerms = searchKeyword.split(/\s+/).filter((t) => t.length > 0);
       const caseWhere: Record<string, unknown> = {
@@ -1279,18 +1492,19 @@ export async function POST(request: NextRequest) {
 
     // 合并 RAG 结果到 prompt 中
     // dbCases 会通过 casesText 注入到 prompt
-    const dbCasesText = dbCases.length > 0
-      ? '\n### 用户案例库（教练自行录入的优秀案例）\n' +
-        dbCases
-          .map((c, i) => {
-            let text = `案例${i + 1}: ${c.title} [${c.ageGroup}/${c.category}${c.techType ? '/' + c.techType : ''}] ${c.duration}分钟\n`;
-            text += `  内容：${c.content}\n`;
-            if (c.keyPoints) text += `  要点：${c.keyPoints}\n`;
-            if (c.coachGuide) text += `  教练引导：${c.coachGuide}\n`;
-            return text;
-          })
-          .join('\n')
-      : '';
+    const dbCasesText =
+      dbCases.length > 0
+        ? '\n### 用户案例库（教练自行录入的优秀案例）\n' +
+          dbCases
+            .map((c, i) => {
+              let text = `案例${i + 1}: ${c.title} [${c.ageGroup}/${c.category}${c.techType ? '/' + c.techType : ''}] ${c.duration}分钟\n`;
+              text += `  内容：${c.content}\n`;
+              if (c.keyPoints) text += `  要点：${c.keyPoints}\n`;
+              if (c.coachGuide) text += `  教练引导：${c.coachGuide}\n`;
+              return text;
+            })
+            .join('\n')
+        : '';
 
     // 调试日志：输出检索到的案例
     console.log('=== RAG 案例检索 ===');
@@ -1394,7 +1608,7 @@ export async function POST(request: NextRequest) {
                 ...s,
                 // 移除 coachGuide 字段（不再展示）
                 activities: (s.activities as unknown[] | undefined)?.map((act: unknown) => {
-                  const { coachGuide, ...rest } = act as Record<string, unknown>;
+                  const { coachGuide: _coachGuide, ...rest } = act as Record<string, unknown>;
                   return rest;
                 }),
               };
@@ -1460,7 +1674,7 @@ export async function POST(request: NextRequest) {
                 ...s,
                 // 移除 coachGuide 字段（不再展示）
                 activities: (s.activities as unknown[] | undefined)?.map((act: unknown) => {
-                  const { coachGuide, ...rest } = act as Record<string, unknown>;
+                  const { coachGuide: _coachGuide, ...rest } = act as Record<string, unknown>;
                   return rest;
                 }),
               };
