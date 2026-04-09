@@ -16,17 +16,39 @@ import {
 // 版本历史记录
 const versions = [
   {
+    version: 'v5.9.0',
+    date: '2026-04-09',
+    title: 'Prompt 管理后台',
+    description: 'AI 教案生成 Prompt 模板化，支持在线编辑和版本控制',
+    features: [
+      { type: 'feature', text: '数据库新增 PromptTemplate 表，支持版本控制' },
+      { type: 'feature', text: 'API 路由：/api/prompts（CRUD + 版本管理）' },
+      { type: 'feature', text: '管理页面：/prompts - 列表/编辑/预览/版本切换' },
+      { type: 'improvement', text: '重构 generate-plan API：从数据库读取 Prompt 模板' },
+      { type: 'improvement', text: '占位符系统：{{group}}、{{duration}}、{{ageGroupInfo}} 等动态变量' },
+    ],
+  },
+  {
     version: 'v5.8.2',
     date: '2026-04-09',
     title: '教案生成 Prompt 大幅强化 + 详情页崩溃修复',
     description: '战术库扩充到60+个，动作描述6要素强制标签，时间匹配强化',
     features: [
-      { type: 'fix', text: '教案详情页客户端崩溃：API 返回 sections 为 JSON 字符串导致前端 .map() 报错' },
+      {
+        type: 'fix',
+        text: '教案详情页客户端崩溃：API 返回 sections 为 JSON 字符串导致前端 .map() 报错',
+      },
       { type: 'feature', text: '战术库扩充：从15个扩充到60+个（完整进攻/防守/个人战术体系）' },
-      { type: 'feature', text: '新增战术：反跑配合、高低位策应、突分配合、破盯人/联防/紧逼、个人攻防、挡拆防守等' },
+      {
+        type: 'feature',
+        text: '新增战术：反跑配合、高低位策应、突分配合、破盯人/联防/紧逼、个人攻防、挡拆防守等',
+      },
       { type: 'improvement', text: '动作描述强制6个【】标签：姿势/动作/发力/次数/形式/要点目的' },
       { type: 'improvement', text: '时间匹配增加❌错误 vs ✅正确对比示例，强化 AI 遵守度' },
-      { type: 'improvement', text: '运球/传球/投篮/防守各类动作增加精确细节要求（左右手、次数、路线）' },
+      {
+        type: 'improvement',
+        text: '运球/传球/投篮/防守各类动作增加精确细节要求（左右手、次数、路线）',
+      },
     ],
   },
   {
@@ -50,7 +72,10 @@ const versions = [
       { type: 'improvement', text: '动作描述6要素：姿势、动作、发力、时间/次数、形式、要点目的' },
       { type: 'improvement', text: 'duration 计算方法：确保标注时间与实际训练量匹配' },
       { type: 'improvement', text: '动作细节细化：运球/传球/投篮/防守各类增加精确要求' },
-      { type: 'feature', text: '战术库扩充：进攻战术（快攻/阵地配合/整体进攻/破防守/固定战术）+ 防守战术' },
+      {
+        type: 'feature',
+        text: '战术库扩充：进攻战术（快攻/阵地配合/整体进攻/破防守/固定战术）+ 防守战术',
+      },
     ],
   },
   {

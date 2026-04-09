@@ -986,6 +986,7 @@ const u10LevelGuide: Record<string, string> = {
 };
 
 // 生成Prompt
+// 保留原始 generatePrompt 作为回退
 function generatePrompt(
   params: AIPlanParams,
   cases: LessonPlan[],
@@ -1571,6 +1572,118 @@ ${params.additionalNotes ? `\n7. **教练特别要求必须完全遵守**：${pa
 `.trim();
 }
 
+// 从数据库模板注入参数生成最终 Prompt
+function injectPromptParams(
+  template: string,
+  params: AIPlanParams,
+  cases: LessonPlan[],
+  playerAnalysis?: string,
+  dbCasesText?: string
+): string {
+  const ageGroupInfo: Record<string, string> = {
+    U6: '4-6岁幼儿班，注意力短暂，以游戏为主培养球性和兴趣。每个动作不超过3分钟，多重复少讲解。热身用模仿秀（木头人、动物爬行），运球只做原地高低运球和拉球，投篮只做无球脚步模仿。对抗用投篮小游戏、接力赛代替。教练多鼓励、多击掌。',
+    U8: '7-8岁小学低年级，可进行基础技术训练。运球：行进间运球、基础体前变向、运双球。传球：双手胸前传球、击地传球。投篮：三步上篮脚步+持球上篮。体能：绳梯、侧滑步。有少量对抗（2v2），重点培养基本功和比赛兴趣。',
+    U10: '9-10岁小学中年级，技术规范化，开始体能训练。运球：体前变向、胯下运球、运双球。传球：行进间传接球、移动传球。投篮：接球上篮、基础投篮训练。体能：绳梯进阶、敏捷梯。有正式对抗（3v3），强调规则和基础战术配合。',
+    U12: '11-12岁小学高年级，接近比赛水平。运球：组合运球（体前+胯下+背后）、运球突破。传球：快攻传球、行进间不停球传球。投篮：急停投篮、接球投篮、三威胁衔接。防守：防有球/无球、人球兼顾。正式全场对抗（4v4/5v5），有战术配合和位置训练。',
+    U14: '13-14岁初中，接近成人比赛。全面技术：四项组合运球、运球衔接突破上篮/急停投篮、全场快攻、半场阵地战术、1v1-5v5对抗。体能：自重力量训练+专项体能。防守：全场紧逼、半场联防/人盯人。强度高、时间长的正式比赛。',
+  };
+
+  const segments = generateSegmentStructure(params.duration);
+  const isU10 = params.group === 'U10';
+  const levelLabel =
+    isU10 && params.skillLevel
+      ? params.skillLevel === 'beginner'
+        ? '基础'
+        : params.skillLevel === 'intermediate'
+          ? '进阶'
+          : '精英'
+      : '';
+
+  const casesText =
+    cases.length > 0
+      ? cases
+          .map(
+            (c, i) =>
+              `案例${i + 1} [${c.age_group} ${c.class_level} ${c.month}] ${c.section}-${c.part}: ${c.method}（要点：${c.key_points}）`
+          )
+          .join('\n')
+      : '';
+
+  const intensityDesc: Record<string, string> = {
+    low: '低强度：以游戏化、趣味性为主，训练量小，组间休息充分，适合恢复性训练或初次接触的学员。减少体能负荷，增加趣味互动。',
+    medium: '中强度：正常训练节奏，适度休息，适合日常训练。技术动作规范为主，体能训练穿插其中。',
+    high: '高强度：训练量大，组间休息短，节奏紧凑。增加体能负荷和对抗强度，适合赛前集训或体能强化。每个动作时间饱满，减少空闲等待。',
+  };
+  const intensityLabel =
+    params.intensity === 'low' ? '低强度' : params.intensity === 'high' ? '高强度' : '中强度';
+  const intensityText = intensityDesc[params.intensity || 'medium'] || intensityDesc['medium'];
+
+  const segmentDesc = segments
+    .map((s) => `- ${s.name}（${s.minutes}分钟）：${s.description}`)
+    .join('\n');
+
+  const previousTrainingText = params.previousTraining?.length
+    ? `- 最近训练内容：${params.previousTraining.join('、')}（避免重复或进阶）`
+    : '';
+
+  const additionalNotesText = params.additionalNotes
+    ? `- 教练特别要求（必须严格执行）：${params.additionalNotes}\n（以上要求是教练明确的训练需求，必须在教案中完整体现，不能忽略！\n如果教练要求"运球和传球结合"，则教案中必须有运球传球结合的练习！）`
+    : '';
+
+  const playerAnalysisBlock = playerAnalysis
+    ? `\n## 参训学员技能分析（重要 - 根据此分析调整训练重点）\n${playerAnalysis}`
+    : '';
+
+  const casesBlock = casesText ? `## 参考案例（来自真实教学数据）\n${casesText}\n` : '';
+  const dbCasesBlock = dbCasesText
+    ? `## 教练案例库（教练自行录入的优秀案例，请重点参考）\n${dbCasesText}\n请参考以上教练案例库中的训练方法、要点和教练引导语，结合本次训练要求生成教案。可以借鉴好的训练设计，但要根据实际学员情况调整难度和内容。\n`
+    : '';
+
+  const multiThemeHint = params.theme && params.theme.includes('+')
+    ? '\n（教练选择了多个主题，教案中需要同时覆盖这些主题的训练内容，可以将不同主题分配到不同时间段或进行组合训练）'
+    : '';
+
+  const weatherNote = params.location === '室外' && params.weather === '雨天'
+    ? '雨天室外注意安全，可改为室内或减少对抗环节'
+    : '';
+
+  const casesRef = casesText ? '5. 参考案例库的训练方法格式' : '';
+
+  const additionalNotesStrict = params.additionalNotes
+    ? `\n7. **教练特别要求必须完全遵守**：${params.additionalNotes}。这是教练明确的训练需求，必须在教案中完整体现！\n   - 如果要求"A和B结合"，则必须有A和B结合的练习\n   - 如果要求"增加某项内容"，则必须加入该内容\n   - 如果要求"减少某项内容"，则必须减少或取消\n   - 违反教练要求=教案不合格`
+    : '';
+
+  // 在模板中替换占位符
+  let prompt = template
+    .replace(/\{\{group\}\}/g, params.group)
+    .replace(/\{\{ageGroupInfo\}\}/g, ageGroupInfo[params.group] || '')
+    .replace(/\{\{duration\}\}/g, String(params.duration))
+    .replace(/\{\{location\}\}/g, params.location)
+    .replace(/\{\{weather\}\}/g, params.weather || '未指定')
+    .replace(/\{\{playerCount\}\}/g, String(params.playerCount || '8-12'))
+    .replace(/\{\{levelLabel\}\}/g, levelLabel)
+    .replace(/\{\{levelDesc\}\}/g, isU10 && levelLabel ? `\n## U10级别说明（${levelLabel}）\n${u10LevelGuide[levelLabel] || ''}\n` : '')
+    .replace(/\{\{intensityLabel\}\}/g, intensityLabel)
+    .replace(/\{\{intensityText\}\}/g, intensityText)
+    .replace(/\{\{theme\}\}/g, params.theme || '根据年龄段特点自动确定')
+    .replace(/\{\{multiThemeHint\}\}/g, multiThemeHint)
+    .replace(/\{\{focusSkills\}\}/g, params.focusSkills?.join('、') || '根据年龄段特点自动确定')
+    .replace(/\{\{skillLevel\}\}/g, isU10 ? levelLabel + '（' + (u10LevelGuide[levelLabel] || '') + '）' : params.skillLevel || 'intermediate')
+    .replace(/\{\{previousTraining\}\}/g, previousTrainingText)
+    .replace(/\{\{additionalNotes\}\}/g, additionalNotesText)
+    .replace(/\{\{additionalNotesStrict\}\}/g, additionalNotesStrict)
+    .replace(/\{\{playerAnalysisBlock\}\}/g, playerAnalysisBlock)
+    .replace(/\{\{casesBlock\}\}/g, casesBlock)
+    .replace(/\{\{dbCasesBlock\}\}/g, dbCasesBlock)
+    .replace(/\{\{segmentDesc\}\}/g, segmentDesc)
+    .replace(/\{\{intensity\}\}/g, params.intensity || 'medium')
+    .replace(/\{\{weatherNote\}\}/g, weatherNote)
+    .replace(/\{\{casesRef\}\}/g, casesRef)
+    .replace(/\{\{segments1Minutes\}\}/g, String(segments[1]?.minutes || 30));
+
+  return prompt.trim();
+}
+
 // 调用 AI API（通用函数，支持 Kimi 和 MiniMax）
 async function callAIAPI(
   apiKey: string,
@@ -1771,7 +1884,26 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const prompt = generatePrompt(params, similarCases, playerAnalysisText, dbCasesText);
+    // 从数据库加载 Prompt 模板
+    const promptTemplate = await prisma.promptTemplate.findFirst({
+      where: { key: 'generate-plan', isActive: true },
+    });
+
+    if (!promptTemplate) {
+      return NextResponse.json(
+        { success: false, error: 'Prompt 模板未配置，请先创建模板' },
+        { status: 500 }
+      );
+    }
+
+    // 使用模板生成 Prompt，注入参数
+    const prompt = injectPromptParams(
+      promptTemplate.content,
+      params,
+      similarCases,
+      playerAnalysisText,
+      dbCasesText
+    );
 
     // 优先使用 Kimi
     if (KIMI_API_KEY) {

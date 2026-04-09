@@ -1264,3 +1264,20 @@ model Setting {
   key   String @unique
   value String
 }
+
+// ============================================
+// Prompt 模板管理
+// ============================================
+
+model PromptTemplate {
+  id          String   @id @default(uuid())
+  name        String                      // 模板名称，如 "教案生成Prompt"
+  key         String   @unique            // 唯一标识，如 "generate-plan"
+  description String?                     // 模板用途说明
+  content     String                      // Prompt 内容（Markdown 格式）
+  version     Int      @default(1)        // 版本号，每次更新递增
+  isActive    Boolean  @default(false)    // 是否为当前激活版本
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+

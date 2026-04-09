@@ -149,7 +149,7 @@ export default function Home() {
                   <div className="flex items-center gap-2">
                     <h1 className="text-lg sm:text-xl font-bold">篮球青训教案系统</h1>
                     <span className="px-2 py-0.5 bg-white/20 text-white text-xs rounded-full font-medium hidden sm:inline">
-                      v5.8.2
+                      v5.9.0
                     </span>
                   </div>
                   <p className="text-orange-100 text-sm hidden sm:block">
@@ -181,6 +181,12 @@ export default function Home() {
                 className="px-3 py-1.5 text-sm hover:bg-white/10 rounded-lg flex items-center gap-1"
               >
                 <span>版本管理</span>
+              </Link>
+              <Link
+                href="/prompts"
+                className="px-3 py-1.5 text-sm hover:bg-white/10 rounded-lg flex items-center gap-1"
+              >
+                <span>Prompt管理</span>
               </Link>
             </div>
 
@@ -243,6 +249,13 @@ export default function Home() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 版本管理
+              </Link>
+              <Link
+                href="/prompts"
+                className="block px-3 py-2 text-sm hover:bg-white/10 rounded-lg"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Prompt管理
               </Link>
             </div>
           )}
