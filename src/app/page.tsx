@@ -18,6 +18,7 @@ import {
   Dumbbell,
   FileText,
   Lightbulb,
+  LayoutDashboard,
   Medal,
   Menu,
   MessageCircle,
@@ -67,6 +68,7 @@ export default function Home() {
   const [recentPlans, setRecentPlans] = useState<TrainingPlan[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showCoachDashboard, setShowCoachDashboard] = useState(false);
   const [stats, setStats] = useState<Stats>({
     totalPlayers: 0,
     totalPlans: 0,
@@ -79,17 +81,10 @@ export default function Home() {
     if (isLoading) {
       return;
     }
-    // 未登录状态下获取公开数据
-    if (!isAuthenticated) {
-      fetchRecentPlans();
-      fetchStats();
-    }
-  }, [isLoading, isAuthenticated]);
-
-  // 已登录 → 教练工作台
-  if (!isLoading && isAuthenticated) {
-    return <CoachDashboard />;
-  }
+    // 获取公开数据（登录/未登录都显示）
+    fetchRecentPlans();
+    fetchStats();
+  }, [isLoading]);
 
   async function fetchStats() {
     try {
@@ -326,8 +321,56 @@ export default function Home() {
 
         {/* 快速操作 */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {/* 教练工作台入口 - 仅登录用户可见 */}
+          {isAuthenticated && (
+            <button
+              onClick={() => setShowCoachDashboard(true)}
+              className="bg-gradient-to-br from-orange-500 to-red-500 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-white group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                  <LayoutDashboard className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">教练工作台</h3>
+                  <p className="text-sm text-orange-100">今日课程 · 预警</p>
+                </div>
+              </div>
+            </button>
+          )}
+          {!isAuthenticated && (
+            <Link
+              href="/login"
+              className="bg-gradient-to-br from-orange-500 to-red-500 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-white group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                  <LayoutDashboard className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">教练工作台</h3>
+                  <p className="text-sm text-orange-100">登录后使用</p>
+                </div>
+              </div>
+            </Link>
+          )}
           <Link
             href="/plan/new"
+            className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center group-hover:bg-orange-500 transition-colors">
+                <Plus className="w-6 h-6 text-orange-600 group-hover:text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">生成教案</h3>
+                <p className="text-sm text-gray-500">AI 智能生成</p>
+              </div>
+            </div>
+          </Link>
+
+          <Link
+            href="/training"
             className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 group"
           >
             <div className="flex items-center gap-4">
@@ -657,6 +700,28 @@ export default function Home() {
           <p className="text-sm text-gray-500">AI训练建议 · 能力分析报告 · 智能分班推荐</p>
         </section>
       </main>
+
+      {/* 教练工作台弹窗 */}
+      {showCoachDashboard && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* 背景遮罩 */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowCoachDashboard(false)}
+          />
+          {/* 工作台内容 */}
+          <div className="relative w-full max-w-7xl mx-4 max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl">
+            {/* 关闭按钮 */}
+            <button
+              onClick={() => setShowCoachDashboard(false)}
+              className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-600" />
+            </button>
+            <CoachDashboard />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
