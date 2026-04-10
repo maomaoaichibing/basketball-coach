@@ -3,10 +3,7 @@ import { verifyAuth } from '@/lib/auth-middleware';
 import prisma from '@/lib/db';
 
 // GET /api/players/[id]/growth-curve - 获取学员成长曲线数据
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await verifyAuth(request);
   if (!auth.success) return auth.response;
 
@@ -87,14 +84,17 @@ export async function GET(
     });
 
     // 计算各项能力的成长趋势
-    const calculateTrend = (key: 'dribbling' | 'passing' | 'shooting' | 'defending' | 'physical' | 'tactical') => {
+    const calculateTrend = (
+      key: 'dribbling' | 'passing' | 'shooting' | 'defending' | 'physical' | 'tactical'
+    ) => {
       if (dataPoints.length < 2) return { change: 0, trend: 'stable' as const };
       const first = dataPoints[0][key] as number;
       const last = dataPoints[dataPoints.length - 1][key] as number;
       const change = last - first;
       return {
         change,
-        trend: change > 0.5 ? ('up' as const) : change < -0.5 ? ('down' as const) : ('stable' as const),
+        trend:
+          change > 0.5 ? ('up' as const) : change < -0.5 ? ('down' as const) : ('stable' as const),
       };
     };
 

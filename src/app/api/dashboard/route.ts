@@ -113,15 +113,42 @@ export async function GET(request: NextRequest) {
             late: records.filter((r) => r.attendance === 'late').length,
           };
         }
-        return { ...schedule, applicableCourses: JSON.parse((schedule.applicableCourses as string) || '[]'), planStats };
+        // applicableCourses 可能已经是数组或字符串
+        let applicableCourses: string[] = [];
+        if (typeof schedule.applicableCourses === 'string') {
+          try {
+            applicableCourses = JSON.parse(schedule.applicableCourses);
+          } catch {
+            applicableCourses = [];
+          }
+        } else if (Array.isArray(schedule.applicableCourses)) {
+          applicableCourses = schedule.applicableCourses;
+        }
+        return {
+          ...schedule,
+          applicableCourses,
+          planStats,
+        };
       })
     );
 
     // 解析课时预警的 recordIds
-    const parsedLowHours = lowHourEnrollments.map((e) => ({
-      ...e,
-      recordIds: JSON.parse((e.recordIds as string) || '[]'),
-    }));
+    const parsedLowHours = lowHourEnrollments.map((e) => {
+      let recordIds: string[] = [];
+      if (typeof e.recordIds === 'string') {
+        try {
+          recordIds = JSON.parse(e.recordIds);
+        } catch {
+          recordIds = [];
+        }
+      } else if (Array.isArray(e.recordIds)) {
+        recordIds = e.recordIds;
+      }
+      return {
+        ...e,
+        recordIds,
+      };
+    });
 
     // 计算今日出勤率
     const todayRecords = await prisma.trainingRecord.findMany({
@@ -135,8 +162,7 @@ export async function GET(request: NextRequest) {
     const attendanceRate =
       todayRecords.length > 0
         ? Math.round(
-            (todayRecords.filter((r) => r.attendance === 'present').length /
-              todayRecords.length) *
+            (todayRecords.filter((r) => r.attendance === 'present').length / todayRecords.length) *
               100
           )
         : null;

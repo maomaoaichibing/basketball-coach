@@ -64,11 +64,6 @@ type TrainingPlan = {
 export default function Home() {
   const { user, isLoading, isAuthenticated, logout } = useAuth();
   const [selectedGroup, setSelectedGroup] = useState('U10');
-
-  // 已登录 → 教练工作台
-  if (!isLoading && isAuthenticated) {
-    return <CoachDashboard />;
-  }
   const [recentPlans, setRecentPlans] = useState<TrainingPlan[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -80,9 +75,17 @@ export default function Home() {
   });
 
   useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      return;
+    }
     fetchRecentPlans();
     fetchStats();
-  }, []);
+  }, [isLoading, isAuthenticated]);
+
+  // 已登录 → 教练工作台
+  if (!isLoading && isAuthenticated) {
+    return <CoachDashboard />;
+  }
 
   async function fetchStats() {
     try {

@@ -179,11 +179,10 @@ export default function CoachDashboard() {
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold">
-                {greeting()}，教练 👋
-              </h1>
+              <h1 className="text-xl sm:text-2xl font-bold">{greeting()}，教练 👋</h1>
               <p className="text-orange-100 mt-1">
-                {data.dayName} · {new Date(data.date).toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' })}
+                {data.dayName} ·{' '}
+                {new Date(data.date).toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' })}
                 {data.stats.todayScheduleCount > 0 && (
                   <span className="ml-2 px-2 py-0.5 bg-white/20 rounded-full text-xs">
                     今日 {data.stats.todayScheduleCount} 节课
@@ -213,7 +212,9 @@ export default function CoachDashboard() {
                 <CalendarDays className="w-5 h-5 text-orange-600" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-gray-900">{data.stats.todayScheduleCount}</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {data.stats.todayScheduleCount}
+                </div>
                 <div className="text-xs text-gray-500">今日课程</div>
               </div>
             </div>
@@ -266,7 +267,10 @@ export default function CoachDashboard() {
                   <Clock className="w-4 h-4 text-orange-500" />
                   今日课程
                 </h2>
-                <Link href="/schedule" className="text-xs text-orange-600 hover:text-orange-700 flex items-center gap-1">
+                <Link
+                  href="/schedule"
+                  className="text-xs text-orange-600 hover:text-orange-700 flex items-center gap-1"
+                >
                   全部排课 <ChevronRight className="w-3 h-3" />
                 </Link>
               </div>
@@ -285,7 +289,9 @@ export default function CoachDashboard() {
                       <div className="flex items-start gap-3">
                         {/* 时间轴 */}
                         <div className="flex flex-col items-center">
-                          <span className="text-sm font-bold text-orange-600">{schedule.startTime}</span>
+                          <span className="text-sm font-bold text-orange-600">
+                            {schedule.startTime}
+                          </span>
                           <div className="w-0.5 h-6 bg-orange-200 my-1" />
                           <span className="text-xs text-gray-400">{schedule.endTime}</span>
                         </div>
@@ -335,7 +341,9 @@ export default function CoachDashboard() {
 
                         {/* 操作 */}
                         <Link
-                          href={schedule.planId ? `/training?planId=${schedule.planId}` : '/training'}
+                          href={
+                            schedule.planId ? `/training?planId=${schedule.planId}` : '/training'
+                          }
                           className="shrink-0 px-3 py-1.5 bg-orange-500 text-white text-xs rounded-lg hover:bg-orange-600 flex items-center gap-1 transition-colors"
                         >
                           <Play className="w-3 h-3" /> 开始
@@ -356,7 +364,10 @@ export default function CoachDashboard() {
                 </h2>
               </div>
               <div className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <Link href="/plan/new" className="flex items-center gap-3 p-3 rounded-lg bg-orange-50 hover:bg-orange-100 transition-colors group">
+                <Link
+                  href="/plan/new"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-orange-50 hover:bg-orange-100 transition-colors group"
+                >
                   <div className="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Sparkles className="w-5 h-5 text-white" />
                   </div>
@@ -365,7 +376,10 @@ export default function CoachDashboard() {
                     <div className="text-xs text-gray-500">智能生成</div>
                   </div>
                 </Link>
-                <Link href="/training" className="flex items-center gap-3 p-3 rounded-lg bg-red-50 hover:bg-red-100 transition-colors group">
+                <Link
+                  href="/training"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-red-50 hover:bg-red-100 transition-colors group"
+                >
                   <div className="w-9 h-9 bg-red-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Play className="w-5 h-5 text-white" />
                   </div>
@@ -374,7 +388,10 @@ export default function CoachDashboard() {
                     <div className="text-xs text-gray-500">签到打分</div>
                   </div>
                 </Link>
-                <Link href="/assessment" className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors group">
+                <Link
+                  href="/assessment"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors group"
+                >
                   <div className="w-9 h-9 bg-purple-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                     <BarChart3 className="w-5 h-5 text-white" />
                   </div>
@@ -383,7 +400,10 @@ export default function CoachDashboard() {
                     <div className="text-xs text-gray-500">能力打分</div>
                   </div>
                 </Link>
-                <Link href="/players" className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors group">
+                <Link
+                  href="/players"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors group"
+                >
                   <div className="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Users className="w-5 h-5 text-white" />
                   </div>
@@ -402,19 +422,28 @@ export default function CoachDashboard() {
                   <ClipboardList className="w-4 h-4 text-orange-500" />
                   最近教案
                 </h2>
-                <Link href="/plans" className="text-xs text-orange-600 hover:text-orange-700 flex items-center gap-1">
+                <Link
+                  href="/plans"
+                  className="text-xs text-orange-600 hover:text-orange-700 flex items-center gap-1"
+                >
                   全部 <ChevronRight className="w-3 h-3" />
                 </Link>
               </div>
               {!data.recentPlans || data.recentPlans.length === 0 ? (
                 <div className="px-4 py-8 text-center text-gray-400">
                   <p>暂无教案</p>
-                  <Link href="/plan/new" className="text-orange-500 text-sm mt-1 inline-block">生成第一个教案 →</Link>
+                  <Link href="/plan/new" className="text-orange-500 text-sm mt-1 inline-block">
+                    生成第一个教案 →
+                  </Link>
                 </div>
               ) : (
                 <div className="divide-y divide-gray-50">
                   {data.recentPlans.map((plan) => (
-                    <Link key={plan.id} href={`/plans/${plan.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                    <Link
+                      key={plan.id}
+                      href={`/plans/${plan.id}`}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                    >
                       <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
                         {plan.generatedBy === 'ai' ? (
                           <Sparkles className="w-4 h-4 text-purple-500" />
@@ -423,7 +452,9 @@ export default function CoachDashboard() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-gray-900 truncate">{plan.title}</div>
+                        <div className="text-sm font-medium text-gray-900 truncate">
+                          {plan.title}
+                        </div>
                         <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
                           <span>{plan.group}</span>
                           <span>·</span>
@@ -449,7 +480,10 @@ export default function CoachDashboard() {
                   <AlertTriangle className="w-4 h-4 text-amber-500" />
                   课时预警
                 </h2>
-                <Link href="/courses" className="text-xs text-orange-600 hover:text-orange-700 flex items-center gap-1">
+                <Link
+                  href="/courses"
+                  className="text-xs text-orange-600 hover:text-orange-700 flex items-center gap-1"
+                >
                   管理 <ChevronRight className="w-3 h-3" />
                 </Link>
               </div>
@@ -461,18 +495,37 @@ export default function CoachDashboard() {
               ) : (
                 <div className="divide-y divide-gray-50">
                   {data.lowHourEnrollments.map((enrollment) => (
-                    <Link key={enrollment.id} href={`/players/${enrollment.playerId}`} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0 ${
-                        enrollment.remainingHours <= 2 ? 'bg-red-500' : enrollment.remainingHours <= 4 ? 'bg-amber-500' : 'bg-yellow-500'
-                      }`}>
+                    <Link
+                      key={enrollment.id}
+                      href={`/players/${enrollment.playerId}`}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                    >
+                      <div
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0 ${
+                          enrollment.remainingHours <= 2
+                            ? 'bg-red-500'
+                            : enrollment.remainingHours <= 4
+                              ? 'bg-amber-500'
+                              : 'bg-yellow-500'
+                        }`}
+                      >
                         {enrollment.remainingHours}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-gray-900 truncate">{enrollment.player.name}</div>
-                        <div className="text-xs text-gray-500">{enrollment.course.name} · 剩{enrollment.remainingHours}课时</div>
+                        <div className="text-sm font-medium text-gray-900 truncate">
+                          {enrollment.player.name}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {enrollment.course.name} · 剩{enrollment.remainingHours}课时
+                        </div>
                       </div>
                       <div className="text-xs text-gray-400 shrink-0">
-                        {enrollment.expireDate && new Date(enrollment.expireDate).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}到期
+                        {enrollment.expireDate &&
+                          new Date(enrollment.expireDate).toLocaleDateString('zh-CN', {
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        到期
                       </div>
                     </Link>
                   ))}
@@ -487,7 +540,10 @@ export default function CoachDashboard() {
                   <Target className="w-4 h-4 text-purple-500" />
                   进行中目标
                 </h2>
-                <Link href="/goals" className="text-xs text-orange-600 hover:text-orange-700 flex items-center gap-1">
+                <Link
+                  href="/goals"
+                  className="text-xs text-orange-600 hover:text-orange-700 flex items-center gap-1"
+                >
                   全部 <ChevronRight className="w-3 h-3" />
                 </Link>
               </div>
@@ -499,27 +555,44 @@ export default function CoachDashboard() {
               ) : (
                 <div className="divide-y divide-gray-50">
                   {data.activeGoals.map((goal) => (
-                    <Link key={goal.id} href={`/players/${goal.playerId}`} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                    <Link
+                      key={goal.id}
+                      href={`/players/${goal.playerId}`}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                    >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-gray-900">{goal.playerName}</span>
-                          <span className="text-xs text-gray-400">{skillLabels[goal.skillType] || goal.skillType}</span>
+                          <span className="text-sm font-medium text-gray-900">
+                            {goal.playerName}
+                          </span>
+                          <span className="text-xs text-gray-400">
+                            {skillLabels[goal.skillType] || goal.skillType}
+                          </span>
                         </div>
                         <div className="mt-1.5 flex items-center gap-2">
                           <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                             <div
                               className={`h-full rounded-full ${
-                                goal.progress >= 80 ? 'bg-green-500' : goal.progress >= 50 ? 'bg-blue-500' : 'bg-orange-500'
+                                goal.progress >= 80
+                                  ? 'bg-green-500'
+                                  : goal.progress >= 50
+                                    ? 'bg-blue-500'
+                                    : 'bg-orange-500'
                               }`}
                               style={{ width: `${Math.min(goal.progress, 100)}%` }}
                             />
                           </div>
-                          <span className="text-xs text-gray-500 shrink-0">{goal.currentScore}/{goal.targetScore}</span>
+                          <span className="text-xs text-gray-500 shrink-0">
+                            {goal.currentScore}/{goal.targetScore}
+                          </span>
                         </div>
                       </div>
                       {goal.targetDate && (
                         <div className="text-xs text-gray-400 shrink-0">
-                          {new Date(goal.targetDate).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
+                          {new Date(goal.targetDate).toLocaleDateString('zh-CN', {
+                            month: 'short',
+                            day: 'numeric',
+                          })}
                         </div>
                       )}
                     </Link>
@@ -535,7 +608,10 @@ export default function CoachDashboard() {
                   <TrendingUp className="w-4 h-4 text-green-500" />
                   近7天训练
                 </h2>
-                <Link href="/records" className="text-xs text-orange-600 hover:text-orange-700 flex items-center gap-1">
+                <Link
+                  href="/records"
+                  className="text-xs text-orange-600 hover:text-orange-700 flex items-center gap-1"
+                >
                   全部 <ChevronRight className="w-3 h-3" />
                 </Link>
               </div>
@@ -548,10 +624,15 @@ export default function CoachDashboard() {
                 <div className="divide-y divide-gray-50">
                   {data.recentRecords.slice(0, 8).map((record) => (
                     <div key={record.id} className="flex items-center gap-3 px-4 py-2.5">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                        record.attendance === 'present' ? 'bg-green-100' :
-                        record.attendance === 'late' ? 'bg-yellow-100' : 'bg-red-100'
-                      }`}>
+                      <div
+                        className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                          record.attendance === 'present'
+                            ? 'bg-green-100'
+                            : record.attendance === 'late'
+                              ? 'bg-yellow-100'
+                              : 'bg-red-100'
+                        }`}
+                      >
                         {record.attendance === 'present' ? (
                           <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
                         ) : record.attendance === 'late' ? (
@@ -561,11 +642,15 @@ export default function CoachDashboard() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-xs font-medium text-gray-900 truncate">{record.playerName}</div>
+                        <div className="text-xs font-medium text-gray-900 truncate">
+                          {record.playerName}
+                        </div>
                         <div className="text-xs text-gray-400 truncate">{record.planTitle}</div>
                       </div>
                       {record.performance && (
-                        <span className="text-xs font-medium text-orange-600 shrink-0">{record.performance}分</span>
+                        <span className="text-xs font-medium text-orange-600 shrink-0">
+                          {record.performance}分
+                        </span>
                       )}
                     </div>
                   ))}

@@ -56,8 +56,7 @@ function TrendIcon({ trend, change }: { trend: string; change: number }) {
   if (trend === 'up') {
     return (
       <span className="flex items-center gap-0.5 text-green-600 text-xs">
-        <TrendingUp className="w-3 h-3" />
-        +{change.toFixed(1)}
+        <TrendingUp className="w-3 h-3" />+{change.toFixed(1)}
       </span>
     );
   }
@@ -97,8 +96,7 @@ export function GrowthCurveChart({ data, height = 280, showLegend = true }: Grow
     if (dataPoints.length <= 1) return () => padding.left;
     const minX = 0;
     const maxX = dataPoints.length - 1;
-    return (index: number) =>
-      padding.left + (index / (maxX - minX)) * innerWidth;
+    return (index: number) => padding.left + (index / (maxX - minX)) * innerWidth;
   }, [dataPoints.length, innerWidth]);
 
   const yScale = useMemo(() => {
@@ -142,10 +140,7 @@ export function GrowthCurveChart({ data, height = 280, showLegend = true }: Grow
 
   if (dataPoints.length === 0) {
     return (
-      <div
-        className="flex items-center justify-center bg-gray-50 rounded-lg"
-        style={{ height }}
-      >
+      <div className="flex items-center justify-center bg-gray-50 rounded-lg" style={{ height }}>
         <p className="text-gray-400 text-sm">暂无成长数据</p>
       </div>
     );
@@ -387,18 +382,14 @@ export function GrowthCurveCard({ data }: { data: GrowthCurveData }) {
       <div className="mt-4 grid grid-cols-2 gap-3">
         <div className="bg-green-50 rounded-lg p-3">
           <div className="text-xs text-green-600 mb-1">进步最快</div>
-          <div className="font-medium text-green-700">
-            {skillConfig[fastestSkill].label}
-          </div>
+          <div className="font-medium text-green-700">{skillConfig[fastestSkill].label}</div>
           <div className="text-xs text-green-600 mt-0.5">
             +{growthRate[fastestSkill].toFixed(2)} 分/月
           </div>
         </div>
         <div className="bg-orange-50 rounded-lg p-3">
           <div className="text-xs text-orange-600 mb-1">需要关注</div>
-          <div className="font-medium text-orange-700">
-            {skillConfig[slowestSkill].label}
-          </div>
+          <div className="font-medium text-orange-700">{skillConfig[slowestSkill].label}</div>
           <div className="text-xs text-orange-600 mt-0.5">
             {growthRate[slowestSkill] >= 0 ? '+' : ''}
             {growthRate[slowestSkill].toFixed(2)} 分/月

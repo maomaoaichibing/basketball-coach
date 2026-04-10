@@ -4,7 +4,17 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { fetchWithAuth } from '@/lib/auth';
-import { ArrowLeft, Edit2, Phone, Calendar, Users, TrendingUp, Target, X, LineChart } from 'lucide-react';
+import {
+  ArrowLeft,
+  Edit2,
+  Phone,
+  Calendar,
+  Users,
+  TrendingUp,
+  Target,
+  X,
+  LineChart,
+} from 'lucide-react';
 import { GrowthCurveCard } from '@/components/growth-curve-chart';
 
 // 类型定义
@@ -133,7 +143,9 @@ export default function PlayerDetailPage() {
   const params = useParams();
   const [player, setPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'records' | 'assessments' | 'goals' | 'growth'>('records');
+  const [activeTab, setActiveTab] = useState<'records' | 'assessments' | 'goals' | 'growth'>(
+    'records'
+  );
   const [showEditModal, setShowEditModal] = useState(false);
   const [growthCurveData, setGrowthCurveData] = useState<any>(null);
   const [growthLoading, setGrowthLoading] = useState(false);
