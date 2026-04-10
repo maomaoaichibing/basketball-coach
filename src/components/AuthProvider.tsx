@@ -87,35 +87,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const init = async () => {
       if (typeof window === 'undefined') return;
 
-      const { user: storedUser, token: storedToken } = getAuthFromStorage();
-      const cookieToken = getCookie('auth_token');
-      const finalToken = storedToken || cookieToken;
+      try {
+        const { user: storedUser, token: storedToken } = getAuthFromStorage();
+        const cookieToken = getCookie('auth_token');
+        const finalToken = storedToken || cookieToken;
 
-      if (finalToken && storedUser) {
-        try {
-          // 尝试静默刷新 token
-          const newToken = await tryRefreshToken();
-          const activeToken = newToken || finalToken;
+        if (finalToken && storedUser) {
+          try {
+            // 尝试静默刷新 token
+            const newToken = await tryRefreshToken();
+            const activeToken = newToken || finalToken;
 
-          setToken(activeToken);
-          setUser(storedUser);
+            setToken(activeToken);
+            setUser(storedUser);
 
-          // 如果 token 被刷新了，同步 localStorage
-          if (newToken && newToken !== finalToken) {
-            // 不需要额外操作，tryRefreshToken 已经保存了
+            // 如果 token 被刷新了，同步 localStorage
+            if (newToken && newToken !== finalToken) {
+              // 不需要额外操作，tryRefreshToken 已经保存了
+            }
+
+            // 同步到 cookie（如果只有 cookie 没有 localStorage）
+            if (!storedToken && cookieToken) {
+              localStorage.setItem('auth_token', cookieToken);
+            }
+          } catch {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('auth_user');
+            deleteCookie('auth_token');
           }
-
-          // 同步到 cookie（如果只有 cookie 没有 localStorage）
-          if (!storedToken && cookieToken) {
-            localStorage.setItem('auth_token', cookieToken);
-          }
-        } catch {
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('auth_user');
-          deleteCookie('auth_token');
         }
+      } finally {
+        // 确保无论成功失败，loading 状态都会结束
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     init();

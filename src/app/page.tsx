@@ -75,11 +75,15 @@ export default function Home() {
   });
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
+    // 等待认证状态加载完成后再获取数据
+    if (isLoading) {
       return;
     }
-    fetchRecentPlans();
-    fetchStats();
+    // 未登录状态下获取公开数据
+    if (!isAuthenticated) {
+      fetchRecentPlans();
+      fetchStats();
+    }
   }, [isLoading, isAuthenticated]);
 
   // 已登录 → 教练工作台
