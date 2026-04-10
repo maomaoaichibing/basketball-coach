@@ -270,7 +270,7 @@ export default function CoachDashboard() {
                   全部排课 <ChevronRight className="w-3 h-3" />
                 </Link>
               </div>
-              {data.todaySchedules.length === 0 ? (
+              {!data.todaySchedules || data.todaySchedules.length === 0 ? (
                 <div className="px-4 py-8 text-center text-gray-400">
                   <CalendarDays className="w-10 h-10 mx-auto mb-2 text-gray-300" />
                   <p>今天没有排课</p>
@@ -406,7 +406,7 @@ export default function CoachDashboard() {
                   全部 <ChevronRight className="w-3 h-3" />
                 </Link>
               </div>
-              {data.recentPlans.length === 0 ? (
+              {!data.recentPlans || data.recentPlans.length === 0 ? (
                 <div className="px-4 py-8 text-center text-gray-400">
                   <p>暂无教案</p>
                   <Link href="/plan/new" className="text-orange-500 text-sm mt-1 inline-block">生成第一个教案 →</Link>
@@ -453,7 +453,7 @@ export default function CoachDashboard() {
                   管理 <ChevronRight className="w-3 h-3" />
                 </Link>
               </div>
-              {data.lowHourEnrollments.length === 0 ? (
+              {!data.lowHourEnrollments || data.lowHourEnrollments.length === 0 ? (
                 <div className="px-4 py-6 text-center text-gray-400 text-sm">
                   <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-green-300" />
                   <p>暂无课时预警</p>
@@ -491,7 +491,7 @@ export default function CoachDashboard() {
                   全部 <ChevronRight className="w-3 h-3" />
                 </Link>
               </div>
-              {data.activeGoals.length === 0 ? (
+              {!data.activeGoals || data.activeGoals.length === 0 ? (
                 <div className="px-4 py-6 text-center text-gray-400 text-sm">
                   <Target className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                   <p>暂无进行中目标</p>
@@ -539,7 +539,7 @@ export default function CoachDashboard() {
                   全部 <ChevronRight className="w-3 h-3" />
                 </Link>
               </div>
-              {data.recentRecords.length === 0 ? (
+              {!data.recentRecords || data.recentRecords.length === 0 ? (
                 <div className="px-4 py-6 text-center text-gray-400 text-sm">
                   <Activity className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                   <p>近7天无训练记录</p>
