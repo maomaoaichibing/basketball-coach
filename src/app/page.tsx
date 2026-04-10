@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
 import UserMenu from '@/components/UserMenu';
+import CoachDashboard from '@/components/coach-dashboard';
 import { fetchWithAuth } from '@/lib/auth';
 import {
   Activity,
@@ -63,6 +64,11 @@ type TrainingPlan = {
 export default function Home() {
   const { user, isLoading, isAuthenticated, logout } = useAuth();
   const [selectedGroup, setSelectedGroup] = useState('U10');
+
+  // 已登录 → 教练工作台
+  if (!isLoading && isAuthenticated) {
+    return <CoachDashboard />;
+  }
   const [recentPlans, setRecentPlans] = useState<TrainingPlan[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -149,7 +155,7 @@ export default function Home() {
                   <div className="flex items-center gap-2">
                     <h1 className="text-lg sm:text-xl font-bold">篮球青训教案系统</h1>
                     <span className="px-2 py-0.5 bg-white/20 text-white text-xs rounded-full font-medium hidden sm:inline">
-                      v5.10.0
+                      v5.11.0
                     </span>
                   </div>
                   <p className="text-orange-100 text-sm hidden sm:block">

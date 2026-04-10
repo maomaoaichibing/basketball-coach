@@ -16,6 +16,20 @@ import {
 // 版本历史记录
 const versions = [
   {
+    version: 'v5.11.0',
+    date: '2026-04-10',
+    title: '教练工作台',
+    description: '首页智能切换教练工作台，一页掌握全局',
+    features: [
+      { type: 'feature', text: 'API /api/dashboard - 汇总今日课程、课时预警、阶段目标' },
+      { type: 'feature', text: '已登录显示教练工作台，未登录显示原首页' },
+      { type: 'feature', text: '今日课程卡片：时间轴展示、签到统计、一键开始训练' },
+      { type: 'feature', text: '课时预警：剩余≤4课时标黄、≤2课时标红' },
+      { type: 'feature', text: '进行中目标进度条 + 近7天训练记录' },
+      { type: 'improvement', text: '快捷操作：AI教案、训练执行、球员评估、学员管理' },
+    ],
+  },
+  {
     version: 'v5.10.0',
     date: '2026-04-09',
     title: '成长曲线功能',
