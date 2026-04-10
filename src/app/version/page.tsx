@@ -16,6 +16,19 @@ import {
 // 版本历史记录
 const versions = [
   {
+    version: 'v5.12.0',
+    date: '2026-04-10',
+    title: '教案生成质量大幅提升',
+    description: 'Prompt强化+代码硬兜底双保险，彻底解决技能混入问题',
+    features: [
+      { type: 'feature', text: 'Prompt规则A-D：子技能独立、技能封闭、热身针对性、数量要求' },
+      { type: 'feature', text: '负面清单：9大主题各自禁止混入的非目标技能' },
+      { type: 'feature', text: 'Few-Shot范例：4个完整正确示例引导AI输出' },
+      { type: 'feature', text: 'validateAndFixPlan()代码级硬过滤：白名单+黑名单双重校验' },
+      { type: 'improvement', text: '5个单主题测试全部零违规，质量100%达标' },
+    ],
+  },
+  {
     version: 'v5.11.0',
     date: '2026-04-10',
     title: '教练工作台',

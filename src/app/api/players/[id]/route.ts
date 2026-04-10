@@ -138,7 +138,6 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       defending,
       physical,
       tactical,
-      overallAssessment,
     } = body;
 
     // 检查学员是否存在

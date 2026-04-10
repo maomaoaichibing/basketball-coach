@@ -3,9 +3,10 @@ import https from 'https';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { TrainingPlanOutput, PlanSection } from '@/lib/plan-generator';
-import { retrieveSimilarCases, allPlans, LessonPlan } from '@/lib/cases';
+import { retrieveSimilarCases, retrieveCasesByTrainingThemes, getThemeDetailText, allPlans, LessonPlan } from '@/lib/cases';
 import { verifyAuth } from '@/lib/auth-middleware';
 import prisma from '@/lib/db';
+import { formatAllModulesForPrompt, getModuleById, TRAINING_MODULES } from '@/lib/training-modules';
 
 // AI生成参数
 interface AIPlanParams {
@@ -738,9 +739,106 @@ function fixJsonString(jsonStr: string): string {
 }
 
 // 验证和修正整个教案
-function validateAndFixPlan(plan: AIResult, duration: number): AIResult {
+function validateAndFixPlan(plan: AIResult, duration: number, theme?: string): AIResult {
   const fixed = { ...plan };
   const sections = (fixed.segments || fixed.sections || []) as unknown as AISection[];
+
+  // ===== 0. 技能封闭强制修复（代码级硬约束）=====
+  // 无论AI怎么生成，正式训练环节（第二节）必须只包含主题相关内容
+  if (theme && !theme.includes('+')) {
+    // 定义每个主题允许的关键词和禁止的关键词
+    const themeRules: Record<string, { allowedKeywords: string[], forbiddenInSec2: string[] }> = {
+      '运球基础': { 
+        allowedKeywords: ['运球', '球性', '高低', '变向', '胯下', '背后', '绕环', '拉球', '拨球', '双球'],
+        forbiddenInSec2: ['传球', '投篮', '上篮', '传切', '战术', '协防', '补防', '投篮'] 
+      },
+      '运球进阶': { 
+        allowedKeywords: ['运球', '变向', '胯下', '背后', '转身', '双球', '组合运球'],
+        forbiddenInSec2: ['传球', '投篮', '上篮', '传切', '战术', '协防']
+      },
+      '传球技术': { 
+        allowedKeywords: ['传球', '胸前', '击地', '头上', '传接', '手递手'],
+        forbiddenInSec2: ['运球变向', '体前变向', '胯下', '背后', '防守滑步', '协防']
+      },
+      '投篮训练': { 
+        allowedKeywords: ['投篮', '跳投', '上篮', '定点', '急停', '罚球', '手型', '擦板'],
+        forbiddenInSec2: ['运球变向', '体前变向', '防守滑步', '协防', '区域联防']
+      },
+      '防守入门': { 
+        allowedKeywords: ['防守', '滑步', '脚步', '协防', '补防', '轮转', '姿态', '干扰'],
+        forbiddenInSec2: ['运球进攻', '投篮训练', '传切配合', '突破过人']
+      },
+      '突破模块': { 
+        allowedKeywords: ['突破', '交叉步', '同侧步', '第一步', '假动作', '启动'],
+        forbiddenInSec2: ['传球演练', '投篮技术', '协防', '战术跑位']
+      },
+      '进攻战术': { 
+        allowedKeywords: ['传切', '挡拆', '掩护', '快攻', '突分', '跑位'],
+        forbiddenInSec2: ['防守滑步', '协防训练', '区域联防']
+      },
+      '防守战术': { 
+        allowedKeywords: ['联防', '紧逼', '夹击', '轮转', '补位', '换防'],
+        forbiddenInSec2: ['进攻技术', '投篮', '运球进攻']
+      },
+      '体能训练': { 
+        allowedKeywords: ['绳梯', '敏捷', '折返', '波比', '俯卧撑', '核心', '耐力'],
+        forbiddenInSec2: ['运球技术', '投篮', '战术', '阵地']
+      },
+    };
+
+    // 匹配主题规则（模糊匹配）
+    let matchedRule = null;
+    for (const [ruleKey, rule] of Object.entries(themeRules)) {
+      if (theme.includes(ruleKey) || ruleKey.includes(theme.replace('基础','').replace('进阶','').replace('入门',''))) {
+        matchedRule = rule;
+        break;
+      }
+    }
+
+    if (matchedRule) {
+      // 找到第二节并过滤违规活动
+      const sec2 = sections[1] || sections.find((s: AISection) => (String(s.name || '')).includes('第二') || String(s.category || '') === 'technical');
+      if (sec2 && sec2.activities) {
+        const before = sec2.activities.length;
+        sec2.activities = sec2.activities.filter((activity: AIActivity) => {
+          const name = activity.name || '';
+          const desc = activity.description || '';
+          const combined = name + desc;
+          
+          // 检查是否包含禁用词
+          for (const forbidden of matchedRule.forbiddenInSec2) {
+            if (combined.includes(forbidden)) {
+              console.warn(`⚠️ [技能封闭] 第二节移除违规活动「${name}」(匹配禁用词「${forbidden}」), 主题=${theme}`);
+              return false; // 过滤掉
+            }
+          }
+          return true;
+        });
+        
+        const removed = before - sec2.activities.length;
+        if (removed > 0) {
+          console.log(`🔧 [技能封闭] 主题「${theme}」第二节移除${removed}个违规活动，剩余${sec2.activities.length}个`);
+          
+          // 如果过滤后活动太少，从第三节的活动补充
+          if (sec2.activities.length < 3 && sections.length >= 3) {
+            const sec3 = sections[2];
+            if (sec3?.activities) {
+              const extraActs = sec3.activities.filter(a => {
+                const name = a.name || '';
+                return matchedRule.allowedKeywords.some(kw => name.includes(kw));
+              });
+              // 补充1-2个合规活动到第二节
+              for (const act of extraActs.slice(0, 3 - sec2.activities.length)) {
+                const newAct = { ...act };
+                console.log(`  → 从第三节补充「{newAct.name}」到第二节`);
+                sec2.activities.push(newAct);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 
   // 验证所有节次的活动
   sections.forEach((section: AISection, sectionIndex: number) => {
@@ -1064,8 +1162,97 @@ ${segmentDesc}
 ${params.previousTraining?.length ? `- 最近训练内容：${params.previousTraining.join('、')}（避免重复或进阶）` : ''}
 ${params.additionalNotes ? `- 教练特别要求（必须严格执行）：${params.additionalNotes}\n（以上要求是教练明确的训练需求，必须在教案中完整体现，不能忽略！\n如果教练要求"运球和传球结合"，则教案中必须有运球传球结合的练习！）` : ''}
 
+## 🏀 专业篮球训练模块知识库（v2 - 8大模块106+子技能）
+
+**⚠️ 极其重要：你的所有训练动作设计都必须从以下模块中选择具体的子技能！不允许自己编造不在列表中的训练内容！**
+
+${formatAllModulesForPrompt()}
+
+**🔥 严格技能选择规则（违反任何一条 = 教案不合格）：**
+
+**规则A — 子技能独立活动原则（最重要！）：**
+- 从知识库中选中一个子技能 = 必须创建 **1个独立的 activity**
+- ❌ 禁止：把多个子技能合并成一个 activity（如"运球技术训练"里面包含体前变向+胯下+双球）
+- ✅ 要求："体前变向运球"是一个activity（5min），"胯下运球"是另一个activity（5min）
+- 每个选中的子技能在正式训练环节必须**各自独立出现**
+
+**规则B — 技能封闭原则（严禁混入无关内容）：**
+- 正式训练环节（第二节）的**所有活动**，**只允许包含教练选定主题范围内的子技能**
+- 示例：教练选了"运球基础" → 第二节只能出现运球类活动（高低运球/体前变向/胯下/背后等）
+- ❌ 绝对禁止：运球课中出现"传切配合""战术训练""投篮练习""上篮"等非运球内容
+- ❌ 绝对禁止：传球课中出现"上篮""突破""防守滑步"等非传球内容
+- 如需综合应用（如对抗），必须在第三节进行，且以目标技能为主
+
+**🚫 负面清单（绝对不能出现在第二节的活动名称或描述中）：**
+| 如果主题是 | 第二节绝对禁止出现 |
+|-----------|------------------|
+| 运球(任何子类) | 传球、投篮、上篮、传切、战术、协防、补防 |
+| 传球(任何子类) | 运球变向、投篮（不含传球后接投篮）、上篮、突破、防守滑步 |
+| 投篮(任何子类) | 运球变向、传球演练、防守脚步、战术跑位（除非是接球投篮） |
+| 防守(任何子类) | 运球进攻、传球进攻、投篮训练、突破过人 |
+| 突破(任何子类) | 传球配合、投篮技术、防守战术、区域联防 |
+
+**✅ 正确做法：如果教练选了"运球基础"，第二节应该这样安排：**
+1. 原地高低运球（5min）— 基础
+2. 体前变向运球（8min）— 核心技能1
+3. 胯下/背后运球（7min）— 核心技能2
+4. 行进间组合运球（10min）— 进阶组合
+→ **每个都是纯运球，不混入传球/投篮！**
+
+**💡 教练想要综合训练怎么办？**
+- 让教练选择 **多主题**（如"运球+传球"），而不是你在单主题中擅自加内容
+- 只有教练明确选了多个主题，才在第二节混合设计
+
+**📋 完整正确范例（请严格参照此格式输出）：**
+
+**范例A — 运球基础课（单主题，第二节纯运球）：**
+- 第二节活动1: "原地高低运球"(6min) — 右手高运球(腰上)+左手低运球(膝下)交替
+- 第二节活动2: "体前变向运球"(8min) — 右手运5下后体前换左手再运5下
+- 第二节活动3: "胯下运球练习"(8min) — 原地胯下8字形运球
+- 第二节活动4: "行进间Z字运球"(8min) — 底线到罚球线Z字形体前变向
+- 注意：没有"传接球"！没有"投篮"！没有"战术"！100%纯运球！
+
+**范例B — 传球技术课（单主题，第二节纯传球）：**
+- 第二节活动1: "双手胸前传接球"(8min) — 两人一组间距3米，连续传20次乘3组
+- 第二节活动2: "击地传球训练"(7min) — 两人一组，击地传接球15次乘3组
+- 第二节活动3: "移动中传球"(8min) — 行进间两人边跑边传
+- 第二节活动4: "传切配合演练"(7min) — 传球后空切接回传上篮
+- 注意：没有"运球变向"！没有"防守滑步"！100%纯传球！
+
+**范例C — 投篮训练课（单主题，第二节纯投篮）：**
+- 第二节活动1: "投篮手型定型"(6min) — 近距离篮下2米单手拨球投篮
+- 第二节活动2: "罚球线定点投篮"(10min) — 每点投5个乘3轮
+- 第二节活动3: "接球急停跳投"(8min) — 45度角接球后急停后跳投
+- 第二节活动4: "运球急停投篮"(6min) — 运球两下后急停后跳投
+- 注意：没有"运球技术训练"！没有"协防"！100%纯投篮！
+
+**范例D — 防守入门课（单主题，第二节纯防守）：**
+- 第二节活动1: "防守滑步基本功"(10min) — 从底线到罚球线横滑步往返
+- 第二节活动2: "防守脚步组合"(8min) — 滑步+交叉步+后撤步组合
+- 第二节活动3: "一对一防突破"(8min) — 防守持球人突破
+- 第二节活动4: "协防轮转练习"(4min) — 弱侧协防补位
+- 注意：没有"进攻技术"！没有"投篮训练"！100%纯防守！
+
+**⚠️ 输出时：先确定主题属于哪个范例类型，然后严格按照对应范例的结构和风格输出！禁止偏离范例的技能范围！**
+→ 注意：没有"运球技术训练"！没有"协防"！100%纯投篮！
+**⚠️ 输出时：先确定主题属于哪个范例类型，然后严格按照对应范例的结构输出！**
+
+**规则C — 热身针对性原则：**
+- 热身的"球性熟悉"和"身体协调性"活动**必须与训练主题相关联**
+- 运球课 → 运球类热身（原地高/低运球、手指拨球、绕环）
+- 传球课 → 传球类热身（双手胸前传接、击地传接、移动传接）
+- 投篮课 → 投篮热身（近距离投篮手型、罚球线定点投篮模仿）
+- 防守课 → 防守热身（防守滑步、脚步移动、防守姿态保持）
+- ❌ 禁止：无论什么课都用完全相同的热身模板
+
+**规则D — 数量要求：**
+- 从对应模块中选择 **3-4个具体子技能** 进行设计
+- 每个子技能在正式训练环节有1个标准activity（5-10min）
+- 同一个子技能可以在热身→正式→对抗中递进出现，但每次表现形式不同
+
 ${casesText ? `## 参考案例（来自真实教学数据）\n${casesText}\n` : ''}
 ${dbCasesText ? `## 教练案例库（教练自行录入的优秀案例，请重点参考）\n${dbCasesText}\n请参考以上教练案例库中的训练方法、要点和教练引导语，结合本次训练要求生成教案。可以借鉴好的训练设计，但要根据实际学员情况调整难度和内容。\n` : ''}
+{{themeDetailBlock}}
 
 ## 输出格式（严格JSON）
 {
@@ -1087,7 +1274,12 @@ ${dbCasesText ? `## 教练案例库（教练自行录入的优秀案例，请重
           "keyPoints": ["要点1", "要点2"],
           "sets": "2-3组（必须填写具体组数）",
           "repetitions": "每组8-10次或30秒（必须填写具体次数或时间，必须与实际耗时匹配）",
-          "progression": "从易到难的3个层次：1.基础动作（简单模仿）→ 2.进阶动作（增加难度）→ 3.挑战动作（组合运用）（必须明确写出3个层次）",
+          "progression": "从易到难的3个层次（必须针对当前活动写具体内容，禁止模板化！）
+❌ 禁止写：'1.基础动作（简单模仿）→ 2.进阶动作（增加难度）→ 3.挑战动作（组合运用）'
+✅ 运球活动示例：'1.原地慢速运球(感受球性) → 2.加快运球节奏(提高控球力) → 3.加防守人干扰下运球(实战模拟)'
+✅ 投篮活动示例：'1.近距离定点投篮(练手型) → 2.罚球线投篮(标准距离) → 3.接球急停跳投(比赛情境)'
+✅ 传球活动示例：'1.原地固定距离传(找感觉) → 2.移动中传(加难度) → 3.有防守压力下传球(实战)'
+✅ 防守活动示例：'1.原地对镜滑步(练姿势) → 2.跟防守对象滑步(练距离) → 3.一对一防突破(实战对抗)'",
           "equipment": ["器材（如有）"],
           "drillDiagram": "<svg>...</svg> 动作路线示意图（必须包含：学员圆圈+编号蓝色、教练方块红色、球橙色圆点、箭头路线）",
           "relatedTo": "关联说明（可选）：如果是热身环节的基础动作，说明为后面的哪个技术训练做准备。例如："为后面的行进间体前变向运球做准备""
@@ -1123,11 +1315,21 @@ ${dbCasesText ? `## 教练案例库（教练自行录入的优秀案例，请重
    - 只选择最必要的2-3个拉伸动作
    - 每个动作时间控制在1分钟以内
    - 行进间完成，边走边拉伸
-   - 示例格式：
-     - 活动1（1分钟）：行进间直腿摸脚尖 — 【路线】从底线走到中线 — 【动作】每步跨出时双手触脚尖 — 【次数】10-12步
-     - 活动2（1分钟）：行进间抱膝提踵 — 【路线】从中线走回底线 — 【动作】每步抱膝向上提拉 — 【次数】10-12步
-4. **身体协调性**（5-8分钟）：2-3个协调动作，每个2-3分钟
-5. **球性熟悉**（8-10分钟）：2-3个球性动作
+4. **主题针对性热身**（5-8分钟）：**⚠️ 此部分必须根据训练主题定制！**
+5. **主题球性熟悉**（8-10分钟）：**⚠️ 此部分必须根据训练主题定制！**
+
+**🔥 热身针对化规则（规则C的具体执行）：**
+| 训练主题 | 第4项"协调性"应包含 | 第5项"球性"应包含 |
+|---------|-------------------|------------------|
+| 运球基础/进阶 | 左右手交替拍球节奏练习、运球脚步配合 | 原地高/低运球、手指拨球、单手左右拉球、绕头/腰/腿 |
+| 传球基础/进阶 | 两人移动中传接球协调、跑动接球节奏 | 双手胸前传接球、击地传接球、头上传接球、移动传球 |
+| 投篮(基础/进阶/上篮) | 投篮协调性、起跳时机模仿 | 近距离投篮手型、罚球线定点投篮模仿、篮下擦板模仿 |
+| 防守(脚步/个人) | 滑步节奏、防守姿态保持 | 滑步中抢断模拟、干扰传球路线模拟 |
+| 突破(基础/进阶) | 第一步爆发力协调、假动作节奏 | 假动作+第一步突破模仿、交叉步/同侧步突破模仿 |
+| 进攻战术 | 跑位协调、无球移动节奏 | 传切跑位模仿、掩护后转身模仿 |
+| 防守战术 | 团队滑步协调、轮转换位节奏 | 协防滑步、补位移动、包夹路线模仿 |
+
+**⚠️ 绝对禁止所有课程都用相同的热身模板！必须按上表定制！**
 
 **⚠️ 硬性规则：慢跑（2分钟）+ 拉伸（3分钟）= 5分钟，绝对不能超过！这是铁律！**
 
@@ -1556,6 +1758,32 @@ ${dbCasesText ? `## 教练案例库（教练自行录入的优秀案例，请重
 3. 对抗比赛：在【具体对抗形式】中实战应用，提升比赛中的运用能力。
 实现从基础熟悉→标准掌握→实战应用的完整递进链条。
 
+### 8. 技能封闭检查（🔥🔥🔥 违反 = 教案严重不合格）
+**在输出 JSON 之前，你必须逐条自检以下内容：**
+
+**8.1 第二节（正式训练）活动清单检查：**
+- 列出第二节的所有 activity 名称
+- 逐一确认每个 activity **只包含**教练选定主题范围内的技能
+- ❌ 如果发现任何非目标主题的活动（如运球课中的"传切配合""战术训练""投篮"），**必须删除或替换**
+- **替换方法**：用同主题的更进阶子技能替代（如运球课中把"传球配合"替换为"行进间组合运球/双球运球/Z字运球"）
+
+**8.2 子技能拆分检查：**
+- 确认每个选中的子技能都是独立的 activity
+- ❌ 如果发现"运球技术训练"这种包含多个子技能的笼统activity，**必须拆分**
+- ✅ 正确：一个activity = 一个具体技能（如"体前变向运球""胯下运球"）
+
+**8.3 热身针对性检查：**
+- 检查第4项（协调性/针对性热身）和第5项（球性熟悉）
+- 确认这些活动的名称和内容与训练主题匹配
+- ❌ 如果所有课程的热身都一样，**必须重新定制**
+
+**8.4 最后一次扫描（输出前必做）：**
+用教练的眼光扫一遍整个 JSON：
+1. 看标题和主题是否匹配
+2. 看第二节每个活动是否**100%属于**选定主题
+3. 看热身是否有针对性
+4. 如果有任何违和感 → **修改后再输出**
+
 ### 其他要求
 1. 活动描述只写【队形】【位置】【具体动作】，不要教练引导语
 2. 每节包含2-4个活动，总时长严格=${params.duration}分钟
@@ -1578,7 +1806,8 @@ function injectPromptParams(
   params: AIPlanParams,
   cases: LessonPlan[],
   playerAnalysis?: string,
-  dbCasesText?: string
+  dbCasesText?: string,
+  themeDetailText?: string  // 新增：训练主题详细描述
 ): string {
   const ageGroupInfo: Record<string, string> = {
     U6: '4-6岁幼儿班，注意力短暂，以游戏为主培养球性和兴趣。每个动作不超过3分钟，多重复少讲解。热身用模仿秀（木头人、动物爬行），运球只做原地高低运球和拉球，投篮只做无球脚步模仿。对抗用投篮小游戏、接力赛代替。教练多鼓励、多击掌。',
@@ -1687,6 +1916,10 @@ function injectPromptParams(
     .replace(/\{\{playerAnalysisBlock\}\}/g, playerAnalysisBlock)
     .replace(/\{\{casesBlock\}\}/g, casesBlock)
     .replace(/\{\{dbCasesBlock\}\}/g, dbCasesBlock)
+    .replace(/\{\{themeDetailBlock\}\}/g, themeDetailText
+      ? `\n## 训练主题详细分解\n教练选择的训练主题已细化为以下具体子技能，教案中必须覆盖这些内容：\n${themeDetailText}\n`
+      : ''
+    )
     .replace(/\{\{segmentDesc\}\}/g, segmentDesc)
     .replace(/\{\{intensity\}\}/g, params.intensity || 'medium')
     .replace(/\{\{weatherNote\}\}/g, weatherNote)
@@ -1786,14 +2019,19 @@ export async function POST(request: NextRequest) {
     const MINIMAX_API_KEY =
       process.env.MINIMAX_API_KEY || process.env.NEXT_PUBLIC_MINIMAX_API_KEY || '';
 
-    // RAG: 检索相似案例
-    // keyword 合并 theme 和 focusSkills，category 留空让 keyword 全局搜索
+    // RAG: 检索相似案例（Phase 2 - 基于训练模块知识库的细粒度匹配）
+    // 优先使用新的细粒度检索，fallback 到旧的关键词搜索
     const searchKeyword = [params.theme, ...(params.focusSkills || [])].filter(Boolean).join(' ');
-    const similarCases = retrieveSimilarCases({
-      ageGroup: params.group,
-      keyword: searchKeyword || undefined,
-      limit: 5,
-    });
+    const similarCases = params.theme
+      ? retrieveCasesByTrainingThemes(params.theme, params.group, 5)
+      : retrieveSimilarCases({
+          ageGroup: params.group,
+          keyword: searchKeyword || undefined,
+          limit: 5,
+        });
+
+    // 获取训练主题的详细描述（用于注入 Prompt）
+    const themeDetailText = params.theme ? getThemeDetailText(params.theme) : '';
 
     // RAG 2.0: 同时从数据库案例库(TrainingCase)中检索
     let dbCases: Array<{
@@ -1914,7 +2152,8 @@ export async function POST(request: NextRequest) {
       params,
       similarCases,
       playerAnalysisText,
-      dbCasesText
+      dbCasesText,
+      themeDetailText  // 新增：训练主题详细描述
     );
 
     // 优先使用 Kimi
@@ -1957,7 +2196,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 验证并修正AI生成的数据
-        const validatedResult = validateAndFixPlan(aiResult, params.duration);
+        const validatedResult = validateAndFixPlan(aiResult, params.duration, params.theme);
 
         const planOutput: TrainingPlanOutput = {
           title: validatedResult.title,
@@ -2023,7 +2262,7 @@ export async function POST(request: NextRequest) {
         const aiResult = JSON.parse(jsonContent);
 
         // 验证并修正AI生成的数据
-        const validatedResult = validateAndFixPlan(aiResult, params.duration);
+        const validatedResult = validateAndFixPlan(aiResult, params.duration, params.theme);
 
         const planOutput: TrainingPlanOutput = {
           title: validatedResult.title,

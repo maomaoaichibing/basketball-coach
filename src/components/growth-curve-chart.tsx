@@ -97,14 +97,14 @@ export function GrowthCurveChart({ data, height = 280, showLegend = true }: Grow
     const minX = 0;
     const maxX = dataPoints.length - 1;
     return (index: number) => padding.left + (index / (maxX - minX)) * innerWidth;
-  }, [dataPoints.length, innerWidth]);
+  }, [dataPoints.length, innerWidth, padding.left]);
 
   const yScale = useMemo(() => {
     const minY = 0;
     const maxY = 10;
     return (value: number) =>
       padding.top + innerHeight - ((value - minY) / (maxY - minY)) * innerHeight;
-  }, [innerHeight]);
+  }, [innerHeight, padding.top]);
 
   // 生成路径
   const generatePath = (key: SkillKey) => {
@@ -355,7 +355,7 @@ export function GrowthCurveChart({ data, height = 280, showLegend = true }: Grow
 
 // 简化的成长曲线卡片（用于展示）
 export function GrowthCurveCard({ data }: { data: GrowthCurveData }) {
-  const { growthRate, trends } = data;
+  const { growthRate } = data;
 
   // 找出进步最快的技能
   const fastestSkill = (Object.keys(growthRate) as SkillKey[]).reduce((a, b) =>

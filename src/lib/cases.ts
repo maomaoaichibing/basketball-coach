@@ -1,6 +1,7 @@
 /**
  * 篮球教案案例库 - RAG数据加载模块
  * Phase 1: 基于字段匹配的快速检索
+ * Phase 2: 基于训练模块知识库的细粒度子技能匹配
  *
  * 支持外部配置文件：
  * - 通过环境变量 LESSON_PLANS_PATH 指定外部数据文件路径
@@ -11,6 +12,7 @@
 import { readFileSync, existsSync } from 'fs';
 
 import plansData from './lesson_plans_raw.json';
+import { searchSkills, TRAINING_MODULES } from './training-modules';
 
 export interface LessonPlan {
   class_level: string; // 班级: "幼儿班", "小班", "中班", "大班"
@@ -186,3 +188,137 @@ export function getStats() {
 }
 
 export { allPlans };
+
+// ============================================
+// Phase 2: 基于训练模块知识库的细粒度检索
+// ============================================
+
+/**
+ * 将教练选择的训练主题（如 "运球基础" 或 "dribbling:db-01"）解析为
+ * 对应的训练模块和子技能，然后从案例库中检索最相关的教案数据。
+ *
+ * 支持两种格式：
+ * 1. 旧格式简单字符串: "运球基础", "传球技术", "投篮训练"
+ * 2. 新格式模块ID: "dribbling:db-01", "passing:pa-01"
+ * 3. 多主题组合（+号分隔）: "运球基础+传球技术" 或 "dribbling:db-01+passing:pb-01"
+ */
+export function retrieveCasesByTrainingThemes(
+  themes: string,
+  ageGroup?: string,
+  limit: number = 8
+): LessonPlan[] {
+  if (!themes) return [];
+
+  // 解析多主题
+  const themeList = themes.split('+').map((t) => t.trim()).filter(Boolean);
+  if (themeList.length === 0) return [];
+
+  // 收集所有匹配关键词（用于在RAG库中搜索）
+  const allKeywords: string[] = [];
+  const matchedModules: string[] = [];   // 匹配到的模块ID
+  const matchedSkills: string[] = [];    // 匹配到的子技能名称
+
+  for (const theme of themeList) {
+    // 尝试新格式 "moduleId:skillId"
+    if (theme.includes(':')) {
+      const [modId, skillId] = theme.split(':');
+      const mod = TRAINING_MODULES.find((m) => m.id === modId);
+      if (mod) {
+        matchedModules.push(mod.name);
+        // 在该模块的所有子技能中查找
+        for (const cat of mod.categories) {
+          const skill = cat.skills.find((s) => s.id === skillId);
+          if (skill) {
+            matchedSkills.push(skill.name);
+            allKeywords.push(...skill.keywords, skill.name, cat.name, mod.name);
+            break;
+          }
+        }
+        // 如果没找到具体skill，把整个模块的keywords都加上
+        if (!matchedSkills.includes(mod.name)) {
+          for (const cat of mod.categories) {
+            for (const s of cat.skills) {
+              allKeywords.push(...s.keywords);
+            }
+          }
+        }
+      }
+    } else {
+      // 旧格式：用主题名搜索知识库中的匹配子技能
+      const matchedSkillsFromKB = searchSkills(theme);
+      if (matchedSkillsFromKB.length > 0) {
+        matchedSkills.push(...matchedSkillsFromKB.map((s) => s.name));
+        for (const s of matchedSkillsFromKB) {
+          allKeywords.push(...s.keywords, s.name);
+          // 找到所属模块
+          const parentMod = TRAINING_MODULES.find((m) =>
+            m.categories.some((c) => c.skills.some((sk) => sk.id === s.id))
+          );
+          if (parentMod && !matchedModules.includes(parentMod.name)) {
+            matchedModules.push(parentMod.name);
+          }
+        }
+      } else {
+        // 知识库也没匹配到，直接作为关键词搜索
+        allKeywords.push(theme);
+      }
+    }
+  }
+
+  // 使用所有关键词进行 RAG 检索
+  if (allKeywords.length > 0) {
+    return retrieveSimilarCases({
+      keyword: allKeywords.join(' '),
+      ageGroup,
+      limit,
+    });
+  }
+
+  // fallback：按年龄组随机返回一些案例
+  if (ageGroup) {
+    const filtered = allPlans.filter((p) => p.age_group === ageGroup);
+    return filtered.slice(0, limit).length > 0
+      ? filtered.slice(0, limit)
+      : allPlans.slice(0, limit);
+  }
+
+  return allPlans.slice(0, limit);
+}
+
+/**
+ * 获取训练主题的详细描述文本（用于注入 Prompt）
+ * 将选中的训练主题扩展为 AI 可理解的详细技能描述
+ */
+export function getThemeDetailText(themes: string): string {
+  if (!themes) return '';
+
+  const themeList = themes.split('+').map((t) => t.trim()).filter(Boolean);
+  const sections: string[] = [];
+
+  for (const theme of themeList) {
+    if (theme.includes(':')) {
+      const [modId, skillId] = theme.split(':');
+      const mod = TRAINING_MODULES.find((m) => m.id === modId);
+      if (mod) {
+        for (const cat of mod.categories) {
+          const skill = cat.skills.find((s) => s.id === skillId);
+          if (skill) {
+            sections.push(`- **${mod.name} > ${cat.name} > ${skill.name}**：${skill.description}`);
+            break;
+          }
+        }
+      }
+    } else {
+      // 旧格式：搜索匹配的所有子技能
+      const matched = searchSkills(theme);
+      if (matched.length > 0) {
+        const skillNames = matched.map((s) => s.name).join('、');
+        sections.push(`- **${theme}**（包含子技能：${skillNames}）`);
+      } else {
+        sections.push(`- ${theme}`);
+      }
+    }
+  }
+
+  return sections.length > 0 ? sections.join('\n') : '';
+}

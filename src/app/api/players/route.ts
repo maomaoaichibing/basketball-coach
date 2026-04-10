@@ -126,7 +126,6 @@ export async function POST(request: NextRequest) {
 
     // 计算年龄
     const birth = new Date(birthDate);
-    const age = Math.floor((Date.now() - birth.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
 
     const player = await prisma.player.create({
       data: {

@@ -66,7 +66,7 @@ describe('GET /api/auth/me', () => {
   });
 
   it('should return 401 when token is expired', async () => {
-    jwt.verify.mockImplementation(() => { throw new jwt.TokenExpiredError('jwt expired'); });
+    jwt.verify.mockImplementation(() => { throw new jwt.TokenExpiredError('jwt expired', new Date()); });
 
     const response = await GET(createAuthRequest('expired-token'));
     const result = await parseJsonResponse(response);

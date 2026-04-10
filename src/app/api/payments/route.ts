@@ -87,11 +87,6 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // 更新订单支付状态
-    const allPayments = await prisma.payment.findMany({
-      where: { orderId, status: 'completed' },
-    });
-
     const newPaidAmount = order.paidAmount + parseFloat(String(amount));
     const newPendingAmount = Math.max(0, order.totalAmount - newPaidAmount - order.discountAmount);
 
