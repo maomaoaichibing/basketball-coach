@@ -1,17 +1,18 @@
 {
   "name": "basketball-coach",
-  "version": "5.13.0",
+  "version": "5.14.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "db:generate": "prisma generate",
-    "db:push": "prisma db push"
+    "db:push": "prisma db push",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@prisma/client": "^5.10.0",

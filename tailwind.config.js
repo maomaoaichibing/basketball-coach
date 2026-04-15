@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   // 确保所有内容路径都被扫描
   content: [
     './src/**/*.{js,ts,jsx,tsx,mdx}',

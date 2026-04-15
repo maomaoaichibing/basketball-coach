@@ -1,0 +1,48 @@
+#!/usr/bin/expect -f
+
+set server_ip "62.234.79.188"
+set server_user "ubuntu"
+set server_password "boX123456"
+
+spawn ssh -o StrictHostKeyChecking=no $server_user@$server_ip
+
+expect "password:"
+send "$server_password\r"
+
+expect "$"
+send "cd /var/www/basketball-coach\r"
+
+expect "$"
+send "echo '=== 检查文件权限 ==='\r"
+
+expect "$"
+send "ls -la\r"
+
+expect "$"
+send "echo '=== 检查数据库文件 ==='\r"
+
+expect "$"
+send "ls -la prisma/\r"
+
+expect "$"
+send "echo '=== 检查PM2状态 ==='\r"
+
+expect "$"
+send "pm2 status\r"
+
+expect "$"
+send "echo '=== 检查数据库连接 ==='\r"
+
+expect "$"
+send "npx prisma db status\r"
+
+expect "$"
+send "echo '=== 检查环境变量 ==='\r"
+
+expect "$"
+send "cat .env.local\r"
+
+expect "$"
+send "exit\r"
+
+expect eof

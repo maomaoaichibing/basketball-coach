@@ -67,7 +67,7 @@ const emptyForm: CoachFormData = {
 };
 
 export default function CoachesPage() {
-  const { user, isLoading, token } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
 
   const [coaches, setCoaches] = useState<Coach[]>([]);

@@ -6,9 +6,7 @@ import { fetchWithAuth } from '@/lib/auth';
 import {
   ArrowLeft,
   Search,
-  Filter,
   Calendar,
-  Users,
   Star,
   CheckCircle2,
   XCircle,
@@ -266,12 +264,6 @@ export default function RecordsPage() {
               const groupLate = group.records.filter((r) => r.attendance === 'late').length;
               const groupAbsent = group.records.filter((r) => r.attendance === 'absent').length;
               const groupScored = group.records.filter((r) => r.performance && r.performance > 0);
-              const groupAvg =
-                groupScored.length > 0
-                  ? (
-                      groupScored.reduce((s, r) => s + (r.performance || 0), 0) / groupScored.length
-                    ).toFixed(1)
-                  : '--';
 
               return (
                 <div

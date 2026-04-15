@@ -97,7 +97,7 @@ export default function BookingPage() {
       } else {
         alert(data.error);
       }
-    } catch (error) {
+    } catch {
       alert('预约失败');
     } finally {
       setSubmitting(false);

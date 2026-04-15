@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-# 篮球青训系统 v5.13.0 — 全自动一键部署脚本
+# 篮球青训系统 v5.14.0 — 全自动一键部署脚本
 # 
 # 方案: Git 仓库 + SSH 远程 pull & build（与珍珠项目完全一致）
 # 
@@ -83,7 +83,7 @@ step_push() {
   if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
     log "发现未提交的更改，自动提交..."
     git add -A
-    git commit -m "Basketball Coach v5.13.0 — 优化教案生成主题严格性 $(date '+%Y-%m-%d %H:%M')" || true
+    git commit -m "Basketball Coach v5.14.0 — 优化代码结构和性能 $(date '+%Y-%m-%d %H:%M')" || true
   fi
   
   # 推送

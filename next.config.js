@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+export default {
   // 确保 Tailwind CSS 正确工作
   experimental: {
     optimizeCss: false,
@@ -9,5 +9,3 @@ const nextConfig = {
     return config
   },
 }
-
-module.exports = nextConfig

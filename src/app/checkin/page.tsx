@@ -367,7 +367,6 @@ export default function CheckinPage() {
                     <div className="grid gap-3">
                       {groupPlayers.map((player) => {
                         const currentAttendance = tempRecords[player.id] || 'present';
-                        const existingRecord = records[player.id];
 
                         return (
                           <div
