@@ -1,0 +1,106 @@
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/api/generate-plan/route.ts
+    15:37  warning  'getModuleById' is defined but never used                                        @typescript-eslint/no-unused-vars
+    15:52  warning  'TRAINING_MODULES' is defined but never used                                     @typescript-eslint/no-unused-vars
+   941:64  warning  'activityIndex' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  1117:10  warning  'generatePrompt' is defined but never used                                       @typescript-eslint/no-unused-vars
+  2013:20  warning  'e' is defined but never used                                                    @typescript-eslint/no-unused-vars
+  2251:39  warning  '_coachGuide' is assigned a value but never used                                 @typescript-eslint/no-unused-vars
+  2317:39  warning  '_coachGuide' is assigned a value but never used                                 @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/assessment/page.tsx
+  140:14  warning  '_error' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/booking/page.tsx
+  100:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/checkin/page.tsx
+  370:31  warning  'existingRecord' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/coaches/page.tsx
+  70:28  warning  'token' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/courses/page.tsx
+   17:3   warning  'Filter' is defined but never used  @typescript-eslint/no-unused-vars
+  128:14  warning  'error' is defined but never used   @typescript-eslint/no-unused-vars
+  143:14  warning  'error' is defined but never used   @typescript-eslint/no-unused-vars
+  172:14  warning  'error' is defined but never used   @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/dashboard/page.tsx
+  100:6   warning  'PlanWithRecords' is defined but never used  @typescript-eslint/no-unused-vars
+  190:10  warning  'MiniBarChart' is defined but never used     @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/goals/page.tsx
+  11:3  warning  'XCircle' is defined but never used       @typescript-eslint/no-unused-vars
+  13:3  warning  'ChevronRight' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/growth-reports/[id]/page.tsx
+  9:3  warning  'ChevronRight' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/library/page.tsx
+  12:3  warning  'Upload' is defined but never used       @typescript-eslint/no-unused-vars
+  16:3  warning  'ChevronDown' is defined but never used  @typescript-eslint/no-unused-vars
+  18:3  warning  'Sparkles' is defined but never used     @typescript-eslint/no-unused-vars
+  19:3  warning  'Tag' is defined but never used          @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/matches/[id]/page.tsx
+  552:45  warning  'index' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/matches/page.tsx
+  15:3  warning  'Filter' is defined but never used  @typescript-eslint/no-unused-vars
+  19:3  warning  'Clock' is defined but never used   @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/notifications/page.tsx
+  14:3  warning  'Filter' is defined but never used  @typescript-eslint/no-unused-vars
+  23:3  warning  'Tag' is defined but never used     @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/plan/new/page.tsx
+  450:9  warning  'getWeatherIcon' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  490:9  warning  'getSectionLabel' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/plans/[id]/edit/page.tsx
+  11:3  warning  'MapPin' is defined but never used       @typescript-eslint/no-unused-vars
+  12:3  warning  'Calendar' is defined but never used     @typescript-eslint/no-unused-vars
+  16:3  warning  'ChevronDown' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/plans/[id]/page.tsx
+   24:3   warning  'Bookmark' is defined but never used                   @typescript-eslint/no-unused-vars
+   96:25  warning  'setPlayerDetails' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   97:19  warning  'setRecords' is assigned a value but never used        @typescript-eslint/no-unused-vars
+  319:9   warning  'totalTime' is assigned a value but never used         @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/plans/page.tsx
+  18:3   warning  'Trash2' is defined but never used            @typescript-eslint/no-unused-vars
+  20:3   warning  'Sparkles' is defined but never used          @typescript-eslint/no-unused-vars
+  51:10  warning  'loading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/players/page.tsx
+   14:3   warning  'Filter' is defined but never used              @typescript-eslint/no-unused-vars
+   16:3   warning  'MoreVertical' is defined but never used        @typescript-eslint/no-unused-vars
+   20:3   warning  'Star' is defined but never used                @typescript-eslint/no-unused-vars
+   22:3   warning  'TrendingUp' is defined but never used          @typescript-eslint/no-unused-vars
+  100:10  warning  'importing' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/prompts/page.tsx
+   16:3   warning  'ChevronDown' is defined but never used                                @typescript-eslint/no-unused-vars
+   17:3   warning  'ChevronUp' is defined but never used                                  @typescript-eslint/no-unused-vars
+   45:10  warning  'showDiff' is assigned a value but never used                          @typescript-eslint/no-unused-vars
+   46:10  warning  'diffContent' is assigned a value but never used                       @typescript-eslint/no-unused-vars
+  111:9   warning  'handleDiff' is assigned a value but never used                        @typescript-eslint/no-unused-vars
+  144:14  warning  'error' is defined but never used                                      @typescript-eslint/no-unused-vars
+  166:14  warning  'error' is defined but never used                                      @typescript-eslint/no-unused-vars
+  187:14  warning  'error' is defined but never used                                      @typescript-eslint/no-unused-vars
+  340:33  warning  'idx' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/app/records/page.tsx
+    9:3   warning  'Filter' is defined but never used             @typescript-eslint/no-unused-vars
+   11:3   warning  'Users' is defined but never used              @typescript-eslint/no-unused-vars
+  269:21  warning  'groupAvg' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/zhangxiaohei/WorkBuddy/Claw/basketball-coach/src/components/coach-dashboard.tsx
+    7:3   warning  'Calendar' is defined but never used                                     @typescript-eslint/no-unused-vars
+   13:3   warning  'ArrowRight' is defined but never used                                   @typescript-eslint/no-unused-vars
+  287:55  warning  'index' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+✖ 61 problems (0 errors, 61 warnings)
+

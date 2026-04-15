@@ -3,7 +3,13 @@ import https from 'https';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { TrainingPlanOutput, PlanSection } from '@/lib/plan-generator';
-import { retrieveSimilarCases, retrieveCasesByTrainingThemes, getThemeDetailText, allPlans, LessonPlan } from '@/lib/cases';
+import {
+  retrieveSimilarCases,
+  retrieveCasesByTrainingThemes,
+  getThemeDetailText,
+  allPlans,
+  LessonPlan,
+} from '@/lib/cases';
 import { verifyAuth } from '@/lib/auth-middleware';
 import prisma from '@/lib/db';
 import { formatAllModulesForPrompt, getModuleById, TRAINING_MODULES } from '@/lib/training-modules';
@@ -42,6 +48,8 @@ async function analyzePlayerWeaknesses(playerIds: string[]): Promise<{
   weaknessText: string;
   avgScores: Record<string, number>;
   playerCount: number;
+  focusSkills: string[];
+  skillAnalysis: string;
 }> {
   const players = await prisma.player.findMany({
     where: { id: { in: playerIds } },
@@ -53,11 +61,13 @@ async function analyzePlayerWeaknesses(playerIds: string[]): Promise<{
       defending: true,
       physical: true,
       tactical: true,
+      group: true,
+      status: true,
     },
   });
 
   if (players.length === 0) {
-    return { weaknessText: '', avgScores: {}, playerCount: 0 };
+    return { weaknessText: '', avgScores: {}, playerCount: 0, focusSkills: [], skillAnalysis: '' };
   }
 
   const skills = ['dribbling', 'passing', 'shooting', 'defending', 'physical', 'tactical'];
@@ -72,11 +82,13 @@ async function analyzePlayerWeaknesses(playerIds: string[]): Promise<{
   const allAvg = Object.values(avgScores).reduce((a, b) => a + b, 0) / skills.length;
   const weaknesses: string[] = [];
   const strongPoints: string[] = [];
+  const focusSkills: string[] = [];
 
   for (const [skill, avg] of Object.entries(avgScores)) {
     const label = SKILL_LABELS[skill] || skill;
     if (avg < 6 || avg < allAvg - 0.5) {
       weaknesses.push(`${label}(${avg}分)`);
+      focusSkills.push(label);
     } else if (avg >= allAvg + 0.5) {
       strongPoints.push(`${label}(${avg}分)`);
     }
@@ -98,7 +110,26 @@ async function analyzePlayerWeaknesses(playerIds: string[]): Promise<{
     weaknessText += `请根据以上薄弱技能，在教案中有针对性地加强训练。如果是多个薄弱技能，可以在不同训练阶段分别侧重。\n`;
   }
 
-  return { weaknessText, avgScores, playerCount: players.length };
+  // 生成详细的技能分析
+  let skillAnalysis = `技能分析详情：\n`;
+  skillAnalysis += `1. 整体水平：${allAvg >= 7 ? '优秀' : allAvg >= 5 ? '中等' : '需加强'}\n`;
+
+  if (weaknesses.length > 0) {
+    skillAnalysis += `2. 重点提升：${weaknesses.join('、')}\n`;
+  }
+
+  if (strongPoints.length > 0) {
+    skillAnalysis += `3. 保持优势：${strongPoints.join('、')}\n`;
+  }
+
+  // 根据年龄段提供针对性建议
+  const ageGroupsSet = new Set(players.map((p) => p.group));
+  const ageGroups = Array.from(ageGroupsSet);
+  if (ageGroups.length > 0) {
+    skillAnalysis += `4. 年龄段特点：${ageGroups.join('、')}\n`;
+  }
+
+  return { weaknessText, avgScores, playerCount: players.length, focusSkills, skillAnalysis };
 }
 
 // AI返回结果接口
@@ -747,49 +778,63 @@ function validateAndFixPlan(plan: AIResult, duration: number, theme?: string): A
   // 无论AI怎么生成，正式训练环节（第二节）必须只包含主题相关内容
   if (theme && !theme.includes('+')) {
     // 定义每个主题允许的关键词和禁止的关键词
-    const themeRules: Record<string, { allowedKeywords: string[], forbiddenInSec2: string[] }> = {
-      '运球基础': { 
-        allowedKeywords: ['运球', '球性', '高低', '变向', '胯下', '背后', '绕环', '拉球', '拨球', '双球'],
-        forbiddenInSec2: ['传球', '投篮', '上篮', '传切', '战术', '协防', '补防', '投篮'] 
+    const themeRules: Record<string, { allowedKeywords: string[]; forbiddenInSec2: string[] }> = {
+      运球基础: {
+        allowedKeywords: [
+          '运球',
+          '球性',
+          '高低',
+          '变向',
+          '胯下',
+          '背后',
+          '绕环',
+          '拉球',
+          '拨球',
+          '双球',
+        ],
+        forbiddenInSec2: ['传球', '投篮', '上篮', '传切', '战术', '协防', '补防', '投篮'],
       },
-      '运球进阶': { 
+      运球进阶: {
         allowedKeywords: ['运球', '变向', '胯下', '背后', '转身', '双球', '组合运球'],
-        forbiddenInSec2: ['传球', '投篮', '上篮', '传切', '战术', '协防']
+        forbiddenInSec2: ['传球', '投篮', '上篮', '传切', '战术', '协防'],
       },
-      '传球技术': { 
+      传球技术: {
         allowedKeywords: ['传球', '胸前', '击地', '头上', '传接', '手递手'],
-        forbiddenInSec2: ['运球变向', '体前变向', '胯下', '背后', '防守滑步', '协防']
+        forbiddenInSec2: ['运球变向', '体前变向', '胯下', '背后', '防守滑步', '协防'],
       },
-      '投篮训练': { 
+      投篮训练: {
         allowedKeywords: ['投篮', '跳投', '上篮', '定点', '急停', '罚球', '手型', '擦板'],
-        forbiddenInSec2: ['运球变向', '体前变向', '防守滑步', '协防', '区域联防']
+        forbiddenInSec2: ['运球变向', '体前变向', '防守滑步', '协防', '区域联防'],
       },
-      '防守入门': { 
+      防守入门: {
         allowedKeywords: ['防守', '滑步', '脚步', '协防', '补防', '轮转', '姿态', '干扰'],
-        forbiddenInSec2: ['运球进攻', '投篮训练', '传切配合', '突破过人']
+        forbiddenInSec2: ['运球进攻', '投篮训练', '传切配合', '突破过人'],
       },
-      '突破模块': { 
+      突破模块: {
         allowedKeywords: ['突破', '交叉步', '同侧步', '第一步', '假动作', '启动'],
-        forbiddenInSec2: ['传球演练', '投篮技术', '协防', '战术跑位']
+        forbiddenInSec2: ['传球演练', '投篮技术', '协防', '战术跑位'],
       },
-      '进攻战术': { 
+      进攻战术: {
         allowedKeywords: ['传切', '挡拆', '掩护', '快攻', '突分', '跑位'],
-        forbiddenInSec2: ['防守滑步', '协防训练', '区域联防']
+        forbiddenInSec2: ['防守滑步', '协防训练', '区域联防'],
       },
-      '防守战术': { 
+      防守战术: {
         allowedKeywords: ['联防', '紧逼', '夹击', '轮转', '补位', '换防'],
-        forbiddenInSec2: ['进攻技术', '投篮', '运球进攻']
+        forbiddenInSec2: ['进攻技术', '投篮', '运球进攻'],
       },
-      '体能训练': { 
+      体能训练: {
         allowedKeywords: ['绳梯', '敏捷', '折返', '波比', '俯卧撑', '核心', '耐力'],
-        forbiddenInSec2: ['运球技术', '投篮', '战术', '阵地']
+        forbiddenInSec2: ['运球技术', '投篮', '战术', '阵地'],
       },
     };
 
     // 匹配主题规则（模糊匹配）
     let matchedRule = null;
     for (const [ruleKey, rule] of Object.entries(themeRules)) {
-      if (theme.includes(ruleKey) || ruleKey.includes(theme.replace('基础','').replace('进阶','').replace('入门',''))) {
+      if (
+        theme.includes(ruleKey) ||
+        ruleKey.includes(theme.replace('基础', '').replace('进阶', '').replace('入门', ''))
+      ) {
         matchedRule = rule;
         break;
       }
@@ -797,35 +842,44 @@ function validateAndFixPlan(plan: AIResult, duration: number, theme?: string): A
 
     if (matchedRule) {
       // 找到第二节并过滤违规活动
-      const sec2 = sections[1] || sections.find((s: AISection) => (String(s.name || '')).includes('第二') || String(s.category || '') === 'technical');
+      const sec2 =
+        sections[1] ||
+        sections.find(
+          (s: AISection) =>
+            String(s.name || '').includes('第二') || String(s.category || '') === 'technical'
+        );
       if (sec2 && sec2.activities) {
         const before = sec2.activities.length;
         sec2.activities = sec2.activities.filter((activity: AIActivity) => {
           const name = activity.name || '';
           const desc = activity.description || '';
           const combined = name + desc;
-          
+
           // 检查是否包含禁用词
           for (const forbidden of matchedRule.forbiddenInSec2) {
             if (combined.includes(forbidden)) {
-              console.warn(`⚠️ [技能封闭] 第二节移除违规活动「${name}」(匹配禁用词「${forbidden}」), 主题=${theme}`);
+              console.warn(
+                `⚠️ [技能封闭] 第二节移除违规活动「${name}」(匹配禁用词「${forbidden}」), 主题=${theme}`
+              );
               return false; // 过滤掉
             }
           }
           return true;
         });
-        
+
         const removed = before - sec2.activities.length;
         if (removed > 0) {
-          console.log(`🔧 [技能封闭] 主题「${theme}」第二节移除${removed}个违规活动，剩余${sec2.activities.length}个`);
-          
+          console.log(
+            `🔧 [技能封闭] 主题「${theme}」第二节移除${removed}个违规活动，剩余${sec2.activities.length}个`
+          );
+
           // 如果过滤后活动太少，从第三节的活动补充
           if (sec2.activities.length < 3 && sections.length >= 3) {
             const sec3 = sections[2];
             if (sec3?.activities) {
-              const extraActs = sec3.activities.filter(a => {
+              const extraActs = sec3.activities.filter((a) => {
                 const name = a.name || '';
-                return matchedRule.allowedKeywords.some(kw => name.includes(kw));
+                return matchedRule.allowedKeywords.some((kw) => name.includes(kw));
               });
               // 补充1-2个合规活动到第二节
               for (const act of extraActs.slice(0, 3 - sec2.activities.length)) {
@@ -1089,7 +1143,9 @@ function generatePrompt(
   params: AIPlanParams,
   cases: LessonPlan[],
   playerAnalysis?: string,
-  dbCasesText?: string
+  dbCasesText?: string,
+  skillAnalysis?: string,
+  focusSkills?: string[]
 ): string {
   const ageGroupInfo: Record<string, string> = {
     U6: '4-6岁幼儿班，注意力短暂，以游戏为主培养球性和兴趣。每个动作不超过3分钟，多重复少讲解。热身用模仿秀（木头人、动物爬行），运球只做原地高低运球和拉球，投篮只做无球脚步模仿。对抗用投篮小游戏、接力赛代替。教练多鼓励、多击掌。',
@@ -1125,6 +1181,12 @@ function generatePrompt(
   const levelDesc = isU10
     ? `\n## U10级别说明（${levelLabel}）\n${u10LevelGuide[levelLabel] || ''}\n`
     : '';
+
+  // 学员技能分析
+  const playerAnalysisText = playerAnalysis ? `\n## 学员技能分析\n${playerAnalysis}\n` : '';
+  const skillAnalysisText = skillAnalysis ? `\n## 详细技能分析\n${skillAnalysis}\n` : '';
+  const focusSkillsText =
+    focusSkills && focusSkills.length > 0 ? `\n## 重点训练技能\n${focusSkills.join('、')}\n` : '';
 
   // 强度描述
   const intensityDesc: Record<string, string> = {
@@ -1179,8 +1241,12 @@ ${formatAllModulesForPrompt()}
 **规则B — 技能封闭原则（严禁混入无关内容）：**
 - 正式训练环节（第二节）的**所有活动**，**只允许包含教练选定主题范围内的子技能**
 - 示例：教练选了"运球基础" → 第二节只能出现运球类活动（高低运球/体前变向/胯下/背后等）
+- 示例：教练选了"投篮训练" → 第二节只能出现投篮类活动（投篮手型、定点投篮、急停跳投等）
+- 示例：教练选了"运球+投篮" → 第二节可以包含运球和投篮类活动，但不能包含传球、防守等其他内容
 - ❌ 绝对禁止：运球课中出现"传切配合""战术训练""投篮练习""上篮"等非运球内容
 - ❌ 绝对禁止：传球课中出现"上篮""突破""防守滑步"等非传球内容
+- ❌ 绝对禁止：投篮课中出现"运球变向""传球演练""防守脚步"等非投篮内容
+- ❌ 绝对禁止：防守课中出现"运球进攻""传球进攻""投篮训练"等非防守内容
 - 如需综合应用（如对抗），必须在第三节进行，且以目标技能为主
 
 **🚫 负面清单（绝对不能出现在第二节的活动名称或描述中）：**
@@ -1191,6 +1257,10 @@ ${formatAllModulesForPrompt()}
 | 投篮(任何子类) | 运球变向、传球演练、防守脚步、战术跑位（除非是接球投篮） |
 | 防守(任何子类) | 运球进攻、传球进攻、投篮训练、突破过人 |
 | 突破(任何子类) | 传球配合、投篮技术、防守战术、区域联防 |
+| 运球+投篮 | 传球、传切、战术、协防、补防、防守滑步 |
+| 运球+传球 | 投篮、上篮、突破、防守滑步、协防、补防 |
+| 传球+投篮 | 运球变向、突破、防守滑步、协防、补防 |
+| 综合训练 | 无限制，但需平衡各个技能的训练时间 |
 
 **✅ 正确做法：如果教练选了"运球基础"，第二节应该这样安排：**
 1. 原地高低运球（5min）— 基础
@@ -1807,7 +1877,9 @@ function injectPromptParams(
   cases: LessonPlan[],
   playerAnalysis?: string,
   dbCasesText?: string,
-  themeDetailText?: string  // 新增：训练主题详细描述
+  themeDetailText?: string, // 新增：训练主题详细描述
+  skillAnalysis?: string, // 新增：详细技能分析
+  focusSkillsFromAnalysis?: string[] // 新增：从分析中提取的重点技能
 ): string {
   const ageGroupInfo: Record<string, string> = {
     U6: '4-6岁幼儿班，注意力短暂，以游戏为主培养球性和兴趣。每个动作不超过3分钟，多重复少讲解。热身用模仿秀（木头人、动物爬行），运球只做原地高低运球和拉球，投篮只做无球脚步模仿。对抗用投篮小游戏、接力赛代替。教练多鼓励、多击掌。',
@@ -1860,7 +1932,7 @@ function injectPromptParams(
     : '';
 
   const playerAnalysisBlock = playerAnalysis
-    ? `\n## 参训学员技能分析（重要 - 根据此分析调整训练重点）\n${playerAnalysis}`
+    ? `\n## 参训学员技能分析（重要 - 根据此分析调整训练重点）\n${playerAnalysis}\n${skillAnalysis ? `\n### 详细技能分析\n${skillAnalysis}` : ''}`
     : '';
 
   const casesBlock = casesText ? `## 参考案例（来自真实教学数据）\n${casesText}\n` : '';
@@ -1916,9 +1988,11 @@ function injectPromptParams(
     .replace(/\{\{playerAnalysisBlock\}\}/g, playerAnalysisBlock)
     .replace(/\{\{casesBlock\}\}/g, casesBlock)
     .replace(/\{\{dbCasesBlock\}\}/g, dbCasesBlock)
-    .replace(/\{\{themeDetailBlock\}\}/g, themeDetailText
-      ? `\n## 训练主题详细分解\n教练选择的训练主题已细化为以下具体子技能，教案中必须覆盖这些内容：\n${themeDetailText}\n`
-      : ''
+    .replace(
+      /\{\{themeDetailBlock\}\}/g,
+      themeDetailText
+        ? `\n## 训练主题详细分解\n教练选择的训练主题已细化为以下具体子技能，教案中必须覆盖这些内容：\n${themeDetailText}\n`
+        : ''
     )
     .replace(/\{\{segmentDesc\}\}/g, segmentDesc)
     .replace(/\{\{intensity\}\}/g, params.intensity || 'medium')
@@ -2110,25 +2184,36 @@ export async function POST(request: NextRequest) {
 
     // 智能短板分析：如果有选中学员，分析其技能数据
     let playerAnalysisText: string | undefined;
+    let skillAnalysisText: string | undefined;
+    let focusSkillsFromAnalysis: string[] = [];
     if (params.playerIds && params.playerIds.length > 0) {
       const analysis = await analyzePlayerWeaknesses(params.playerIds);
       if (analysis.playerCount > 0) {
         playerAnalysisText = analysis.weaknessText;
+        skillAnalysisText = analysis.skillAnalysis;
+        focusSkillsFromAnalysis = analysis.focusSkills;
         console.log('=== 学员技能分析 ===');
         console.log(playerAnalysisText);
+        console.log('详细技能分析:', skillAnalysisText);
+        console.log('提取的重点技能:', focusSkillsFromAnalysis);
         console.log('====================');
 
         // 如果教练没指定 focusSkills，自动从短板中提取
         if (!params.focusSkills || params.focusSkills.length === 0) {
-          const weaknessSkills = Object.entries(analysis.avgScores)
-            .filter(([, score]) => score < 6)
-            .sort(([, a], [, b]) => a - b)
-            .slice(0, 3)
-            .map(([skill]) => SKILL_LABELS[skill])
-            .filter(Boolean);
-          if (weaknessSkills.length > 0) {
-            params.focusSkills = weaknessSkills;
-            console.log('自动提取短板作为重点训练技能:', weaknessSkills);
+          if (focusSkillsFromAnalysis.length > 0) {
+            params.focusSkills = focusSkillsFromAnalysis;
+            console.log('自动提取短板作为重点训练技能:', focusSkillsFromAnalysis);
+          } else {
+            const weaknessSkills = Object.entries(analysis.avgScores)
+              .filter(([, score]) => score < 6)
+              .sort(([, a], [, b]) => a - b)
+              .slice(0, 3)
+              .map(([skill]) => SKILL_LABELS[skill])
+              .filter(Boolean);
+            if (weaknessSkills.length > 0) {
+              params.focusSkills = weaknessSkills;
+              console.log('自动提取短板作为重点训练技能:', weaknessSkills);
+            }
           }
         }
       }
@@ -2153,7 +2238,9 @@ export async function POST(request: NextRequest) {
       similarCases,
       playerAnalysisText,
       dbCasesText,
-      themeDetailText  // 新增：训练主题详细描述
+      themeDetailText, // 新增：训练主题详细描述
+      skillAnalysisText, // 新增：详细技能分析
+      focusSkillsFromAnalysis // 新增：从分析中提取的重点技能
     );
 
     // 优先使用 Kimi

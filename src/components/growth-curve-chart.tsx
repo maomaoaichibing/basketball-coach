@@ -33,7 +33,7 @@ type TrendInfo = {
   trend: 'up' | 'down' | 'stable';
 };
 
-type GrowthCurveData = {
+export type GrowthCurveData = {
   playerId: string;
   dataPoints: DataPoint[];
   trends: Record<SkillKey, TrendInfo>;

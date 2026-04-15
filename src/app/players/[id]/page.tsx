@@ -15,7 +15,7 @@ import {
   X,
   LineChart,
 } from 'lucide-react';
-import { GrowthCurveCard } from '@/components/growth-curve-chart';
+import { GrowthCurveCard, GrowthCurveData } from '@/components/growth-curve-chart';
 
 // 类型定义
 type Player = {
@@ -147,7 +147,7 @@ export default function PlayerDetailPage() {
     'records'
   );
   const [showEditModal, setShowEditModal] = useState(false);
-  const [growthCurveData, setGrowthCurveData] = useState<any>(null);
+  const [growthCurveData, setGrowthCurveData] = useState<GrowthCurveData | null>(null);
   const [growthLoading, setGrowthLoading] = useState(false);
   const [editForm, setEditForm] = useState({
     name: '',

@@ -4,13 +4,11 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { fetchWithAuth } from '@/lib/auth';
 import {
-  Calendar,
   CalendarDays,
   ChevronRight,
   Clock,
   ClipboardList,
   AlertTriangle,
-  ArrowRight,
   Activity,
   CheckCircle2,
   XCircle,

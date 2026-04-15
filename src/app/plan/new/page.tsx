@@ -331,9 +331,14 @@ export default function NewPlanPage() {
     }
   }
 
+  const [generationProgress, setGenerationProgress] = useState(0);
+  const [generationStatus, setGenerationStatus] = useState('');
+
   // 生成教案
   async function handleGenerate() {
     setGenerating(true);
+    setGenerationProgress(0);
+    setGenerationStatus('正在准备生成参数...');
 
     try {
       let result: TrainingPlanOutput;
@@ -366,12 +371,42 @@ export default function NewPlanPage() {
               : undefined,
         };
 
+        setGenerationProgress(20);
+        setGenerationStatus('正在分析学员数据...');
+
+        // 模拟进度更新
+        const progressInterval = setInterval(() => {
+          setGenerationProgress((prev) => {
+            if (prev >= 80) {
+              clearInterval(progressInterval);
+              return prev;
+            }
+            return prev + 10;
+          });
+          setGenerationStatus((prev) => {
+            const statuses = [
+              '正在分析学员数据...',
+              '正在检索参考案例...',
+              '正在生成教案内容...',
+              '正在优化训练方案...',
+              '正在验证教案质量...',
+            ];
+            const currentIndex = statuses.indexOf(prev);
+            return currentIndex < statuses.length - 1 ? statuses[currentIndex + 1] : prev;
+          });
+        }, 500);
+
         // 调用服务端API生成教案
         const response = await fetchWithAuth('/api/generate-plan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(aiParams),
         });
+
+        clearInterval(progressInterval);
+        setGenerationProgress(90);
+        setGenerationStatus('正在处理生成结果...');
+
         const data = await response.json();
         if (!data.success) {
           throw new Error(data.error || 'AI生成失败');
@@ -379,7 +414,12 @@ export default function NewPlanPage() {
         result = data.plan;
       } else {
         // 规则引擎生成
-        await new Promise((resolve) => setTimeout(resolve, 800));
+        setGenerationProgress(30);
+        setGenerationStatus('正在生成教案内容...');
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        setGenerationProgress(70);
+        setGenerationStatus('正在优化训练方案...');
+        await new Promise((resolve) => setTimeout(resolve, 400));
         result = generateTrainingPlan({
           group: form.group,
           duration: form.duration,
@@ -390,12 +430,21 @@ export default function NewPlanPage() {
         });
       }
 
+      setGenerationProgress(100);
+      setGenerationStatus('生成完成！');
+      await new Promise((resolve) => setTimeout(resolve, 500));
       setPlan(result);
     } catch (error) {
       console.error('生成教案失败:', error);
-      alert('生成教案失败，请重试');
+      setGenerationStatus('生成失败');
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      alert('生成教案失败：' + (error instanceof Error ? error.message : '请检查网络连接后重试'));
     } finally {
       setGenerating(false);
+      setTimeout(() => {
+        setGenerationProgress(0);
+        setGenerationStatus('');
+      }, 1000);
     }
   }
 
@@ -1102,6 +1151,22 @@ export default function NewPlanPage() {
                     </>
                   )}
                 </button>
+
+                {/* 生成进度条 */}
+                {generating && (
+                  <div className="mt-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-medium text-gray-700">{generationStatus}</span>
+                      <span className="text-sm text-gray-500">{generationProgress}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div
+                        className="bg-gradient-to-r from-orange-500 to-orange-600 h-2.5 rounded-full transition-all duration-300 ease-in-out"
+                        style={{ width: `${generationProgress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

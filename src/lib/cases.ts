@@ -210,13 +210,16 @@ export function retrieveCasesByTrainingThemes(
   if (!themes) return [];
 
   // 解析多主题
-  const themeList = themes.split('+').map((t) => t.trim()).filter(Boolean);
+  const themeList = themes
+    .split('+')
+    .map((t) => t.trim())
+    .filter(Boolean);
   if (themeList.length === 0) return [];
 
   // 收集所有匹配关键词（用于在RAG库中搜索）
   const allKeywords: string[] = [];
-  const matchedModules: string[] = [];   // 匹配到的模块ID
-  const matchedSkills: string[] = [];    // 匹配到的子技能名称
+  const matchedModules: string[] = []; // 匹配到的模块ID
+  const matchedSkills: string[] = []; // 匹配到的子技能名称
 
   for (const theme of themeList) {
     // 尝试新格式 "moduleId:skillId"
@@ -292,8 +295,33 @@ export function retrieveCasesByTrainingThemes(
 export function getThemeDetailText(themes: string): string {
   if (!themes) return '';
 
-  const themeList = themes.split('+').map((t) => t.trim()).filter(Boolean);
+  const themeList = themes
+    .split('+')
+    .map((t) => t.trim())
+    .filter(Boolean);
   const sections: string[] = [];
+
+  // 主题到模块的映射，确保只返回与主题直接相关的子技能
+  const themeToModuleMap: Record<string, string> = {
+    运球基础: 'dribbling',
+    运球: 'dribbling',
+    传球技术: 'passing',
+    传球: 'passing',
+    投篮训练: 'shooting',
+    投篮: 'shooting',
+    防守入门: 'defense',
+    防守: 'defense',
+    进攻战术: 'offense',
+    战术: 'offense',
+    防守战术: 'defense',
+    体能训练: 'fitness',
+    体能: 'fitness',
+    综合训练: 'all',
+    对抗比赛: 'game',
+    考核评估: 'assessment',
+    球性熟悉: 'ball_handling',
+    中考体育: 'exam',
+  };
 
   for (const theme of themeList) {
     if (theme.includes(':')) {
@@ -309,13 +337,49 @@ export function getThemeDetailText(themes: string): string {
         }
       }
     } else {
-      // 旧格式：搜索匹配的所有子技能
-      const matched = searchSkills(theme);
-      if (matched.length > 0) {
-        const skillNames = matched.map((s) => s.name).join('、');
-        sections.push(`- **${theme}**（包含子技能：${skillNames}）`);
+      // 旧格式：根据主题映射到特定模块
+      const moduleId = themeToModuleMap[theme] || 'all';
+
+      if (moduleId === 'all') {
+        // 综合训练，包含所有模块
+        const matched = searchSkills(theme);
+        if (matched.length > 0) {
+          const skillNames = matched.map((s) => s.name).join('、');
+          sections.push(`- **${theme}**（包含子技能：${skillNames}）`);
+        } else {
+          sections.push(`- ${theme}`);
+        }
       } else {
-        sections.push(`- ${theme}`);
+        // 特定模块，只返回该模块下的子技能
+        const mod = TRAINING_MODULES.find((m) => m.id === moduleId);
+        if (mod) {
+          const allSkills = mod.categories.flatMap((cat) => cat.skills);
+          // 过滤出与主题相关的技能
+          const matchedSkills = allSkills.filter(
+            (skill) =>
+              skill.name.toLowerCase().includes(theme.toLowerCase()) ||
+              skill.description.toLowerCase().includes(theme.toLowerCase()) ||
+              skill.keywords.some((keyword) => keyword.toLowerCase().includes(theme.toLowerCase()))
+          );
+
+          if (matchedSkills.length > 0) {
+            const skillNames = matchedSkills.map((s) => s.name).join('、');
+            sections.push(`- **${theme}**（包含子技能：${skillNames}）`);
+          } else {
+            // 如果没有直接匹配，返回该模块的所有技能
+            const skillNames = allSkills.map((s) => s.name).join('、');
+            sections.push(`- **${theme}**（包含子技能：${skillNames}）`);
+          }
+        } else {
+          // 模块未找到，使用原始搜索
+          const matched = searchSkills(theme);
+          if (matched.length > 0) {
+            const skillNames = matched.map((s) => s.name).join('、');
+            sections.push(`- **${theme}**（包含子技能：${skillNames}）`);
+          } else {
+            sections.push(`- ${theme}`);
+          }
+        }
       }
     }
   }

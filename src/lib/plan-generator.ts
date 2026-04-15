@@ -321,6 +321,32 @@ const TECHNICAL_ACTIVITIES: Omit<TrainingActivity, 'id'>[] = [
     keyPoints: ['手指触球', '掌心空出', '高低变化'],
   },
   {
+    name: '双球运球',
+    description:
+      '【姿势】双脚与肩同宽，膝盖微屈，重心降低，眼睛看前方\n【动作】双手各持一球，同时进行高低运球，保持节奏一致\n【发力】双手手腕同时发力，控制两球的高度和节奏\n【次数】每组20秒×3组，组间休息20秒\n【形式】原地进行，集体练习\n【要点目的】提高双手协调性，增强控球能力',
+    duration: 8,
+    category: 'technical',
+    skills: ['dribbling'],
+    difficulty: 3,
+    equipment: ['球', '标志桶'],
+    form: '集体',
+    coachGuide: '双手各拿一个球，同时拍！保持节奏一致，不要让球掉下来！眼睛看前方，不要低头！',
+    keyPoints: ['双手协调', '节奏一致', '眼睛看前方'],
+  },
+  {
+    name: '运球后转身',
+    description:
+      '【姿势】双脚与肩同宽，膝盖微屈，重心降低\n【动作】运球至标志桶前，做后转身动作，同时换手运球绕过标志桶\n【发力】转身时重心降低，核心发力，手腕控制球的方向\n【次数】每个方向5次×2组，组间休息15秒\n【形式】依次进行，一人练习时其他人等待\n【要点目的】提高运球转身技巧，增强实战中的变向能力',
+    duration: 10,
+    category: 'technical',
+    skills: ['dribbling'],
+    difficulty: 3,
+    equipment: ['球', '标志桶'],
+    form: '依次',
+    coachGuide: '运球到标志桶前！后转身！换手！绕过标志桶！动作要快，球要控制好！',
+    keyPoints: ['重心降低', '转身快速', '换手流畅'],
+  },
+  {
     name: '行进间直线运球',
     description:
       '【姿势】身体略微前倾，重心在前脚掌，目视前方\n【动作】从底线运球到另一侧底线，保持直线运球，不要低头看球，运到终点后换手运球返回\n【发力】前脚掌蹬地发力，运球手手腕下压控制球\n【次数】往返2次×3组，组间休息20秒\n【形式】依次进行，一人练习时其他人等待\n【要点目的】建立行进间运球基础，培养抬头运球的习惯',
@@ -506,6 +532,32 @@ const TECHNICAL_ACTIVITIES: Omit<TrainingActivity, 'id'>[] = [
     form: '依次',
     coachGuide: '投篮前屈膝，像弹簧一样压下去！然后蹬地起来，手腕向下压，像把球推进篮筐一样！',
     keyPoints: ['屈膝发力', '手型正确', '压腕出手'],
+  },
+  {
+    name: '急停跳投',
+    description:
+      '【队形】学员在三分线外排成一排。【动作】运球行进中，急停跳投，保持身体平衡，手腕下压将球投出。',
+    duration: 10,
+    category: 'technical',
+    skills: ['shooting', 'dribbling'],
+    difficulty: 3,
+    equipment: ['球', '篮筐'],
+    form: '依次',
+    coachGuide: '运球！急停！跳起来！手腕下压！球要投进！保持平衡，不要摔倒！',
+    keyPoints: ['急停稳定', '跳投协调', '手腕下压'],
+  },
+  {
+    name: '三分球练习',
+    description:
+      '【队形】学员在三分线外排成一排。【动作】接球后调整脚步，屈膝蹬地发力，手腕下压将球投出，球飞行轨迹成高抛物线。',
+    duration: 10,
+    category: 'technical',
+    skills: ['shooting'],
+    difficulty: 4,
+    equipment: ['球', '篮筐'],
+    form: '依次',
+    coachGuide: '站在三分线外！接球后调整脚步！屈膝蹬地！手腕用力压！球要飞得高一点，像彩虹一样！',
+    keyPoints: ['脚步调整', '屈膝发力', '高抛物线'],
   },
   {
     name: '行进间投篮',
