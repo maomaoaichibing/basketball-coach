@@ -16,6 +16,20 @@ import {
 // 版本历史记录
 const versions = [
   {
+    version: 'v5.15.0',
+    date: '2026-04-15',
+    title: '训练指导全面升级',
+    description: '解决教练"不知道怎么练"的痛点，添加详细训练步骤、常见错误纠正、教学视频',
+    features: [
+      { type: 'feature', text: '训练步骤详解：每个训练活动分步骤教学，每步含具体指令和教练提示' },
+      { type: 'feature', text: '常见错误与纠正：标注技术错误及纠正方法，按严重程度分级' },
+      { type: 'feature', text: '教学视频集成：支持B站/YouTube/西瓜视频等多平台视频链接' },
+      { type: 'feature', text: '教练指导要点：详细的观察重点和指导方法' },
+      { type: 'feature', text: '组织方式提示：场地布置和人员安排说明' },
+      { type: 'feature', text: '安全提示：训练中的安全注意事项标注' },
+    ],
+  },
+  {
     version: 'v5.14.0',
     date: '2026-04-15',
     title: '代码结构与性能优化',

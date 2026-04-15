@@ -3,12 +3,31 @@ export type AgeGroup = 'U6' | 'U8' | 'U10' | 'U12' | 'U14';
 export type Intensity = 'low' | 'medium' | 'high';
 export type Location = '室内' | '室外';
 
-// 训练活动
+export interface VideoResource {
+  platform: 'bilibili' | 'youtube' | 'xigua' | 'custom';
+  videoId: string;
+  title?: string;
+  thumbnailUrl?: string;
+  duration?: number;
+}
+
+export interface DrillStep {
+  step: number;
+  instruction: string;
+  coachingTip?: string;
+}
+
+export interface CommonMistake {
+  mistake: string;
+  correction: string;
+  severity?: 'low' | 'medium' | 'high';
+}
+
 export interface TrainingActivity {
   id: string;
   name: string;
-  description: string; // 详细训练步骤，格式：【队形】+【学员位置】+【具体动作】
-  duration: number; // 分钟
+  description: string;
+  duration: number;
   category:
     | 'warmup'
     | 'ball_familiarity'
@@ -19,15 +38,21 @@ export interface TrainingActivity {
     | 'cooldown'
     | 'etiquette';
   skills: string[];
-  difficulty: number; // 1-5
+  difficulty: number;
   equipment: string[];
   keyPoints?: string[];
-  form?: string; // 建议形式：集体/排面/分组等
-  coachGuide?: string; // 教练引导语
-  sets?: string; // 组数（如：2-3组）
-  repetitions?: string; // 次数/时间（如：每组8-10次）
-  progression?: string; // 递进式说明（从易到难）
-  drillDiagram?: string; // 动作路线示意图（SVG格式）
+  form?: string;
+  coachGuide?: string;
+  sets?: string;
+  repetitions?: string;
+  progression?: string;
+  drillDiagram?: string;
+  drillSteps?: DrillStep[];
+  commonMistakes?: CommonMistake[];
+  videos?: VideoResource[];
+  coachingDetails?: string;
+  organizationTips?: string;
+  safetyNotes?: string[];
 }
 
 // 教案输出
@@ -66,16 +91,22 @@ export interface PlanSection {
 export interface SectionActivity {
   name: string;
   duration: number;
-  description: string; // 详细训练步骤
+  description: string;
   keyPoints: string[];
   equipment?: string[];
   form?: string;
-  coachGuide?: string; // 教练引导语
-  sets?: string; // 组数（如：2-3组）
-  repetitions?: string; // 次数/时间（如：每组8-10次）
-  progression?: string; // 递进式说明（从易到难）
-  drillDiagram?: string; // 动作路线示意图（SVG格式）
-  relatedTo?: string; // 关联提示（如：为后面的XX训练做准备）
+  coachGuide?: string;
+  sets?: string;
+  repetitions?: string;
+  progression?: string;
+  drillDiagram?: string;
+  relatedTo?: string;
+  drillSteps?: DrillStep[];
+  commonMistakes?: CommonMistake[];
+  videos?: VideoResource[];
+  coachingDetails?: string;
+  organizationTips?: string;
+  safetyNotes?: string[];
 }
 
 // 年龄段配置类型

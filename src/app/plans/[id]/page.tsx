@@ -43,6 +43,12 @@ type Section = {
     repetitions?: string;
     progression?: string;
     coachGuide?: string;
+    drillSteps?: { step: number; instruction: string; coachingTip?: string }[];
+    commonMistakes?: { mistake: string; correction: string; severity?: string }[];
+    videos?: { platform: string; videoId: string; title?: string; thumbnailUrl?: string; duration?: number }[];
+    coachingDetails?: string;
+    organizationTips?: string;
+    safetyNotes?: string[];
   }[];
   points?: string[];
 };
@@ -745,6 +751,141 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                             </div>
                           </div>
                         )}
+                      </div>
+                    )}
+
+                    {/* 训练步骤 */}
+                    {activity.drillSteps && activity.drillSteps.length > 0 && (
+                      <div className="mt-3 bg-white rounded-lg border border-orange-200 p-3">
+                        <div className="text-xs font-bold text-orange-700 mb-2 flex items-center gap-1">
+                          📋 训练步骤
+                        </div>
+                        <div className="space-y-2">
+                          {activity.drillSteps.map((step, sIdx) => (
+                            <div key={sIdx} className="flex gap-2">
+                              <div className="flex-shrink-0 w-5 h-5 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                                {step.step}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="text-xs text-gray-800">{step.instruction}</div>
+                                {step.coachingTip && (
+                                  <div className="text-xs text-orange-600 mt-0.5 flex items-start gap-1">
+                                    <span>💡</span>
+                                    <span>{step.coachingTip}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 常见错误与纠正 */}
+                    {activity.commonMistakes && activity.commonMistakes.length > 0 && (
+                      <div className="mt-3 bg-white rounded-lg border border-red-200 p-3">
+                        <div className="text-xs font-bold text-red-700 mb-2 flex items-center gap-1">
+                          ⚠️ 常见错误与纠正
+                        </div>
+                        <div className="space-y-2">
+                          {activity.commonMistakes.map((m, mIdx) => (
+                            <div key={mIdx} className="text-xs">
+                              <div className="flex items-start gap-1.5">
+                                <span className={`flex-shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full ${
+                                  m.severity === 'high' ? 'bg-red-500' : m.severity === 'medium' ? 'bg-yellow-500' : 'bg-gray-400'
+                                }`} />
+                                <div>
+                                  <span className="text-red-600 font-medium">❌ {m.mistake}</span>
+                                  <div className="text-green-700 mt-0.5">✅ 纠正：{m.correction}</div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 教练详细指导 */}
+                    {activity.coachingDetails && (
+                      <div className="mt-3 bg-white rounded-lg border border-purple-200 p-3">
+                        <div className="text-xs font-bold text-purple-700 mb-1 flex items-center gap-1">
+                          🎯 教练指导要点
+                        </div>
+                        <div className="text-xs text-gray-700 whitespace-pre-line">{activity.coachingDetails}</div>
+                      </div>
+                    )}
+
+                    {/* 组织方式 */}
+                    {activity.organizationTips && (
+                      <div className="mt-2 text-xs text-gray-500 flex items-start gap-1">
+                        <span>👥</span>
+                        <span>{activity.organizationTips}</span>
+                      </div>
+                    )}
+
+                    {/* 安全提示 */}
+                    {activity.safetyNotes && activity.safetyNotes.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {activity.safetyNotes.map((note, nIdx) => (
+                          <span key={nIdx} className="text-xs bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded flex items-center gap-1">
+                            🛡️ {note}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* 教学视频 */}
+                    {activity.videos && activity.videos.length > 0 && (
+                      <div className="mt-3 bg-white rounded-lg border border-blue-200 p-3">
+                        <div className="text-xs font-bold text-blue-700 mb-2 flex items-center gap-1">
+                          🎬 教学视频
+                        </div>
+                        <div className="space-y-2">
+                          {activity.videos.map((video, vIdx) => {
+                            const getSourceUrl = () => {
+                              switch (video.platform) {
+                                case 'bilibili': return `https://www.bilibili.com/video/${video.videoId}`;
+                                case 'youtube': return `https://www.youtube.com/watch?v=${video.videoId}`;
+                                case 'xigua': return `https://www.ixigua.com/${video.videoId}`;
+                                default: return video.videoId;
+                              }
+                            };
+                            const getLabel = () => {
+                              switch (video.platform) {
+                                case 'bilibili': return 'B站';
+                                case 'youtube': return 'YouTube';
+                                case 'xigua': return '西瓜视频';
+                                default: return '视频';
+                              }
+                            };
+                            const getColor = () => {
+                              switch (video.platform) {
+                                case 'bilibili': return 'bg-pink-100 text-pink-700';
+                                case 'youtube': return 'bg-red-100 text-red-700';
+                                case 'xigua': return 'bg-orange-100 text-orange-700';
+                                default: return 'bg-gray-100 text-gray-700';
+                              }
+                            };
+                            return (
+                              <a
+                                key={vIdx}
+                                href={getSourceUrl()}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                              >
+                                <span className="text-orange-500">▶</span>
+                                <span className="text-sm text-gray-700 truncate flex-1">
+                                  {video.title || '观看教学视频'}
+                                </span>
+                                <span className={`text-xs px-1.5 py-0.5 rounded ${getColor()}`}>
+                                  {getLabel()}
+                                </span>
+                                <span className="text-gray-400 text-xs">↗</span>
+                              </a>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>
