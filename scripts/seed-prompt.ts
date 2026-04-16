@@ -31,7 +31,7 @@ async function main() {
   }
 
   // 提取的 Prompt 是模板字符串，需要处理其中的 ${...} 为 {{...}} 占位符
-  let promptTemplate = promptMatch[1];
+  const promptTemplate = promptMatch[1];
 
   // 替换常见的动态变量为占位符格式
   const replacements: Record<string, string> = {

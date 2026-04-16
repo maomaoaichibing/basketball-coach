@@ -19,7 +19,7 @@ export interface ErrorResponse {
   error: {
     type: ErrorType;
     code: string;
-    details?: any;
+    details?: unknown;
   };
   timestamp: string;
 }
@@ -28,9 +28,9 @@ export interface ErrorResponse {
 export class AppError extends Error {
   public type: ErrorType;
   public code: string;
-  public details?: any;
+  public details?: unknown;
 
-  constructor(message: string, type: ErrorType, code: string, details?: any) {
+  constructor(message: string, type: ErrorType, code: string, details?: unknown) {
     super(message);
     this.name = 'AppError';
     this.type = type;
@@ -56,26 +56,27 @@ export const ErrorHandler = {
   },
 
   // 处理API错误
-  handleApiError(error: any): ErrorResponse {
+  handleApiError(error: unknown): ErrorResponse {
     if (error instanceof AppError) {
       return this.createErrorResponse(error);
     }
 
     // 处理其他错误
+    const err = error as { message?: string; stack?: string };
     return {
       success: false,
-      message: error.message || '服务器内部错误',
+      message: err.message || '服务器内部错误',
       error: {
         type: ErrorType.INTERNAL_SERVER_ERROR,
         code: 'INTERNAL_ERROR',
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+        details: process.env.NODE_ENV === 'development' ? err.stack : undefined,
       },
       timestamp: new Date().toISOString(),
     };
   },
 
   // 创建常见错误
-  badRequest(message: string, code: string = 'BAD_REQUEST', details?: any): AppError {
+  badRequest(message: string, code: string = 'BAD_REQUEST', details?: unknown): AppError {
     return new AppError(message, ErrorType.BAD_REQUEST, code, details);
   },
 
@@ -94,19 +95,19 @@ export const ErrorHandler = {
   internalServerError(
     message: string = '服务器内部错误',
     code: string = 'INTERNAL_ERROR',
-    details?: any
+    details?: unknown
   ): AppError {
     return new AppError(message, ErrorType.INTERNAL_SERVER_ERROR, code, details);
   },
 
-  validationError(message: string, code: string = 'VALIDATION_ERROR', details?: any): AppError {
+  validationError(message: string, code: string = 'VALIDATION_ERROR', details?: unknown): AppError {
     return new AppError(message, ErrorType.VALIDATION_ERROR, code, details);
   },
 
   databaseError(
     message: string = '数据库错误',
     code: string = 'DATABASE_ERROR',
-    details?: any
+    details?: unknown
   ): AppError {
     return new AppError(message, ErrorType.DATABASE_ERROR, code, details);
   },
@@ -114,7 +115,7 @@ export const ErrorHandler = {
   externalApiError(
     message: string = '外部API错误',
     code: string = 'EXTERNAL_API_ERROR',
-    details?: any
+    details?: unknown
   ): AppError {
     return new AppError(message, ErrorType.EXTERNAL_API_ERROR, code, details);
   },

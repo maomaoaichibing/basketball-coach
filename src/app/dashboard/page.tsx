@@ -97,16 +97,6 @@ type Player = {
   enrollments?: { remainingHours: number; status: string }[];
 };
 
-type PlanWithRecords = {
-  id: string;
-  title?: string;
-  theme?: string;
-  date?: string;
-  group?: string;
-  playerIds?: string;
-  records: TrainingRecord[];
-};
-
 // ============ 常量 ============
 
 const severityStyles = {
@@ -184,38 +174,6 @@ function MiniLineChart({
         );
       })}
     </svg>
-  );
-}
-
-function MiniBarChart({
-  data,
-  labels,
-  color = '#3b82f6',
-  height = 64,
-}: {
-  data: number[];
-  labels?: string[];
-  color?: string;
-  height?: number;
-}) {
-  const max = Math.max(...data, 1);
-  return (
-    <div className="flex items-end gap-1" style={{ height }}>
-      {data.map((v, i) => (
-        <div key={i} className="flex-1 flex flex-col items-center gap-1">
-          <span className="text-[10px] text-gray-400 font-medium">{v > 0 ? v : ''}</span>
-          <div
-            className="w-full rounded-t transition-all duration-300"
-            style={{
-              height: `${Math.max((v / max) * (height - 20), v > 0 ? 6 : 0)}px`,
-              backgroundColor: color,
-              opacity: 0.7 + (v / max) * 0.3,
-            }}
-          />
-          {labels && <span className="text-[9px] text-gray-400">{labels[i]}</span>}
-        </div>
-      ))}
-    </div>
   );
 }
 

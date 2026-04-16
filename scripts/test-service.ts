@@ -22,7 +22,7 @@ const log = {
 };
 
 // 测试结果统计
-let results = {
+const results = {
   total: 0,
   passed: 0,
   failed: 0,

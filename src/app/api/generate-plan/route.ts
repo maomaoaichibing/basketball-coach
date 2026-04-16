@@ -12,7 +12,7 @@ import {
 } from '@/lib/cases';
 import { verifyAuth } from '@/lib/auth-middleware';
 import prisma from '@/lib/db';
-import { formatAllModulesForPrompt, getModuleById, TRAINING_MODULES } from '@/lib/training-modules';
+import { formatAllModulesForPrompt } from '@/lib/training-modules';
 
 // AI生成参数
 interface AIPlanParams {

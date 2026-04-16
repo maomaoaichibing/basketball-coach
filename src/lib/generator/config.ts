@@ -1,5 +1,5 @@
 // ============================================// 教案生成引擎 - 配置信息// ============================================
-import type { AgeGroup, AgeGroupConfig, ThemeConfig, Intensity } from './types';
+import type { AgeGroup, AgeGroupConfig, ThemeConfig } from './types';
 
 // 年龄段配置
 export const AGE_GROUP_CONFIG: Record<AgeGroup, AgeGroupConfig> = {

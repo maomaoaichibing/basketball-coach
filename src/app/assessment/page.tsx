@@ -137,7 +137,7 @@ export default function AssessmentPage() {
       } else {
         alert(data.error || '保存失败');
       }
-    } catch (_error) {
+    } catch {
       alert('保存失败');
     } finally {
       setSaving(false);

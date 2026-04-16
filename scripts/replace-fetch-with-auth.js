@@ -30,7 +30,7 @@ function isPublicApi(apiPath) {
 }
 
 function processFile(filePath) {
-  let content = fs.readFileSync(filePath, 'utf-8');
+  const content = fs.readFileSync(filePath, 'utf-8');
   
   // 检查是否是 'use client' 组件
   const isClient = content.includes("'use client'") || content.includes('"use client"');
@@ -43,7 +43,7 @@ function processFile(filePath) {
   const fetchRegex = /(?<!fetchWithAuth\()fetch\((['"`])\/api\/([^'"`\)]+)(?:\1)/g;
   
   let match;
-  let replacements = [];
+  const replacements = [];
   let newContent = content;
   let offset = 0;
   
