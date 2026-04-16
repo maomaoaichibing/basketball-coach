@@ -92,11 +92,15 @@ export default function VideoPlayer({ video, compact = false }: VideoPlayerProps
       >
         <Play className="w-4 h-4 text-orange-500 flex-shrink-0" />
         <span className="text-sm text-gray-700 truncate">{video.title || '观看教学视频'}</span>
-        <span className={`text-xs px-1.5 py-0.5 rounded ${getPlatformColor(video.platform)} flex-shrink-0`}>
+        <span
+          className={`text-xs px-1.5 py-0.5 rounded ${getPlatformColor(video.platform)} flex-shrink-0`}
+        >
           {getPlatformLabel(video.platform)}
         </span>
         {video.duration && (
-          <span className="text-xs text-gray-400 flex-shrink-0">{formatDuration(video.duration)}</span>
+          <span className="text-xs text-gray-400 flex-shrink-0">
+            {formatDuration(video.duration)}
+          </span>
         )}
         <ExternalLink className="w-3 h-3 text-gray-400 flex-shrink-0" />
       </a>
@@ -132,9 +136,7 @@ export default function VideoPlayer({ video, compact = false }: VideoPlayerProps
                 <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-white/30 transition-colors">
                   <Play className="w-8 h-8 text-white ml-1" />
                 </div>
-                <p className="text-white/80 text-sm">
-                  {getPlatformLabel(video.platform)} 教学视频
-                </p>
+                <p className="text-white/80 text-sm">{getPlatformLabel(video.platform)} 教学视频</p>
                 {video.duration && (
                   <p className="text-white/60 text-xs mt-1">{formatDuration(video.duration)}</p>
                 )}
@@ -175,12 +177,14 @@ export default function VideoPlayer({ video, compact = false }: VideoPlayerProps
             rel="noopener noreferrer"
             className="flex items-center gap-1 text-xs text-gray-500 hover:text-orange-500 transition-colors"
           >
-            <ExternalLink className="w-3 h-3" />
-            在{getPlatformLabel(video.platform)}打开
+            <ExternalLink className="w-3 h-3" />在{getPlatformLabel(video.platform)}打开
           </a>
         </div>
       )}
-      <div className="relative w-full rounded-xl overflow-hidden bg-black" style={{ aspectRatio: '16/9' }}>
+      <div
+        className="relative w-full rounded-xl overflow-hidden bg-black"
+        style={{ aspectRatio: '16/9' }}
+      >
         <iframe
           src={getEmbedUrl(video)}
           scrolling="no"
@@ -201,13 +205,23 @@ export default function VideoPlayer({ video, compact = false }: VideoPlayerProps
   );
 }
 
-export function VideoList({ videos, compact = false }: { videos: VideoResource[]; compact?: boolean }) {
+export function VideoList({
+  videos,
+  compact = false,
+}: {
+  videos: VideoResource[];
+  compact?: boolean;
+}) {
   if (!videos || videos.length === 0) return null;
 
   return (
     <div className={`space-y-3 ${compact ? 'space-y-2' : ''}`}>
       {videos.map((video, idx) => (
-        <VideoPlayer key={`${video.platform}-${video.videoId}-${idx}`} video={video} compact={compact} />
+        <VideoPlayer
+          key={`${video.platform}-${video.videoId}-${idx}`}
+          video={video}
+          compact={compact}
+        />
       ))}
     </div>
   );

@@ -45,7 +45,13 @@ type Section = {
     coachGuide?: string;
     drillSteps?: { step: number; instruction: string; coachingTip?: string }[];
     commonMistakes?: { mistake: string; correction: string; severity?: string }[];
-    videos?: { platform: string; videoId: string; title?: string; thumbnailUrl?: string; duration?: number }[];
+    videos?: {
+      platform: string;
+      videoId: string;
+      title?: string;
+      thumbnailUrl?: string;
+      duration?: number;
+    }[];
     coachingDetails?: string;
     organizationTips?: string;
     safetyNotes?: string[];
@@ -791,12 +797,20 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                           {activity.commonMistakes.map((m, mIdx) => (
                             <div key={mIdx} className="text-xs">
                               <div className="flex items-start gap-1.5">
-                                <span className={`flex-shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full ${
-                                  m.severity === 'high' ? 'bg-red-500' : m.severity === 'medium' ? 'bg-yellow-500' : 'bg-gray-400'
-                                }`} />
+                                <span
+                                  className={`flex-shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full ${
+                                    m.severity === 'high'
+                                      ? 'bg-red-500'
+                                      : m.severity === 'medium'
+                                        ? 'bg-yellow-500'
+                                        : 'bg-gray-400'
+                                  }`}
+                                />
                                 <div>
                                   <span className="text-red-600 font-medium">❌ {m.mistake}</span>
-                                  <div className="text-green-700 mt-0.5">✅ 纠正：{m.correction}</div>
+                                  <div className="text-green-700 mt-0.5">
+                                    ✅ 纠正：{m.correction}
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -811,7 +825,9 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                         <div className="text-xs font-bold text-purple-700 mb-1 flex items-center gap-1">
                           🎯 教练指导要点
                         </div>
-                        <div className="text-xs text-gray-700 whitespace-pre-line">{activity.coachingDetails}</div>
+                        <div className="text-xs text-gray-700 whitespace-pre-line">
+                          {activity.coachingDetails}
+                        </div>
                       </div>
                     )}
 
@@ -827,7 +843,10 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                     {activity.safetyNotes && activity.safetyNotes.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-1">
                         {activity.safetyNotes.map((note, nIdx) => (
-                          <span key={nIdx} className="text-xs bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded flex items-center gap-1">
+                          <span
+                            key={nIdx}
+                            className="text-xs bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded flex items-center gap-1"
+                          >
                             🛡️ {note}
                           </span>
                         ))}
@@ -844,26 +863,38 @@ export default function PlanDetailPage({ params }: { params: { id: string } }) {
                           {activity.videos.map((video, vIdx) => {
                             const getSourceUrl = () => {
                               switch (video.platform) {
-                                case 'bilibili': return `https://www.bilibili.com/video/${video.videoId}`;
-                                case 'youtube': return `https://www.youtube.com/watch?v=${video.videoId}`;
-                                case 'xigua': return `https://www.ixigua.com/${video.videoId}`;
-                                default: return video.videoId;
+                                case 'bilibili':
+                                  return `https://www.bilibili.com/video/${video.videoId}`;
+                                case 'youtube':
+                                  return `https://www.youtube.com/watch?v=${video.videoId}`;
+                                case 'xigua':
+                                  return `https://www.ixigua.com/${video.videoId}`;
+                                default:
+                                  return video.videoId;
                               }
                             };
                             const getLabel = () => {
                               switch (video.platform) {
-                                case 'bilibili': return 'B站';
-                                case 'youtube': return 'YouTube';
-                                case 'xigua': return '西瓜视频';
-                                default: return '视频';
+                                case 'bilibili':
+                                  return 'B站';
+                                case 'youtube':
+                                  return 'YouTube';
+                                case 'xigua':
+                                  return '西瓜视频';
+                                default:
+                                  return '视频';
                               }
                             };
                             const getColor = () => {
                               switch (video.platform) {
-                                case 'bilibili': return 'bg-pink-100 text-pink-700';
-                                case 'youtube': return 'bg-red-100 text-red-700';
-                                case 'xigua': return 'bg-orange-100 text-orange-700';
-                                default: return 'bg-gray-100 text-gray-700';
+                                case 'bilibili':
+                                  return 'bg-pink-100 text-pink-700';
+                                case 'youtube':
+                                  return 'bg-red-100 text-red-700';
+                                case 'xigua':
+                                  return 'bg-orange-100 text-orange-700';
+                                default:
+                                  return 'bg-gray-100 text-gray-700';
                               }
                             };
                             return (

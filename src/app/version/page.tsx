@@ -35,8 +35,14 @@ const versions = [
     title: '代码结构与性能优化',
     description: '模块化重构、缓存机制、统一错误处理、代码质量提升',
     features: [
-      { type: 'feature', text: '代码结构：plan-generator.ts 拆分为 types.ts、activities.ts、config.ts、utils.ts、cache.ts、index.ts' },
-      { type: 'feature', text: '性能：训练活动数据的缓存和按需加载，减少内存使用，提高系统启动速度' },
+      {
+        type: 'feature',
+        text: '代码结构：plan-generator.ts 拆分为 types.ts、activities.ts、config.ts、utils.ts、cache.ts、index.ts',
+      },
+      {
+        type: 'feature',
+        text: '性能：训练活动数据的缓存和按需加载，减少内存使用，提高系统启动速度',
+      },
       { type: 'feature', text: '错误处理：统一错误处理模块，标准化错误响应格式' },
       { type: 'feature', text: '代码质量：运行所有558个测试，全部通过' },
       { type: 'feature', text: '部署：优化构建配置，完善CI/CD工作流，添加type-check脚本' },

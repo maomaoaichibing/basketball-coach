@@ -236,24 +236,62 @@ export const TECHNICAL_ACTIVITIES: Omit<TrainingActivity, 'id'>[] = [
       '高运球时用力拍！球跳得高高的，像在和球玩耍！低运球时轻轻拍，手指摸球，球乖乖听话！换手！',
     keyPoints: ['手指触球', '掌心空出', '高低变化'],
     drillSteps: [
-      { step: 1, instruction: '双脚与肩同宽站立，膝盖微屈，重心降低', coachingTip: '想象坐在椅子上，但不要真的坐下去' },
-      { step: 2, instruction: '右手持球，手指自然张开，掌心空出', coachingTip: '手指像蜘蛛腿一样张开，掌心不要碰到球' },
-      { step: 3, instruction: '手腕下压，用力拍球，球弹起高度超过腰部（高运球）', coachingTip: '拍球时手腕要像鞭子一样甩下去，听"砰砰"的声音' },
-      { step: 4, instruction: '切换为手指轻拍，球弹起高度不超过膝盖（低运球）', coachingTip: '低运球时手指像弹钢琴一样，轻轻触碰球' },
-      { step: 5, instruction: '左右手交替练习，每手30秒', coachingTip: '换手时不要停顿，保持节奏流畅' },
+      {
+        step: 1,
+        instruction: '双脚与肩同宽站立，膝盖微屈，重心降低',
+        coachingTip: '想象坐在椅子上，但不要真的坐下去',
+      },
+      {
+        step: 2,
+        instruction: '右手持球，手指自然张开，掌心空出',
+        coachingTip: '手指像蜘蛛腿一样张开，掌心不要碰到球',
+      },
+      {
+        step: 3,
+        instruction: '手腕下压，用力拍球，球弹起高度超过腰部（高运球）',
+        coachingTip: '拍球时手腕要像鞭子一样甩下去，听"砰砰"的声音',
+      },
+      {
+        step: 4,
+        instruction: '切换为手指轻拍，球弹起高度不超过膝盖（低运球）',
+        coachingTip: '低运球时手指像弹钢琴一样，轻轻触碰球',
+      },
+      {
+        step: 5,
+        instruction: '左右手交替练习，每手30秒',
+        coachingTip: '换手时不要停顿，保持节奏流畅',
+      },
     ],
     commonMistakes: [
-      { mistake: '用掌心拍球', correction: '手指张开，掌心空出，用手指和指根触球', severity: 'high' },
+      {
+        mistake: '用掌心拍球',
+        correction: '手指张开，掌心空出，用手指和指根触球',
+        severity: 'high',
+      },
       { mistake: '低头看球', correction: '眼睛看前方，用手指感受球的位置', severity: 'high' },
-      { mistake: '运球时手臂僵硬', correction: '手腕放松，像弹簧一样有弹性地拍球', severity: 'medium' },
-      { mistake: '球弹起高度不一致', correction: '控制手腕力度，高运球大力、低运球轻力', severity: 'medium' },
+      {
+        mistake: '运球时手臂僵硬',
+        correction: '手腕放松，像弹簧一样有弹性地拍球',
+        severity: 'medium',
+      },
+      {
+        mistake: '球弹起高度不一致',
+        correction: '控制手腕力度，高运球大力、低运球轻力',
+        severity: 'medium',
+      },
       { mistake: '身体重心太高', correction: '屈膝降低重心，像坐在椅子上一样', severity: 'low' },
     ],
     videos: [
-      { platform: 'bilibili' as const, videoId: 'BV1sW4y1L7jE', title: '篮球基础运球教学：高低运球' },
+      {
+        platform: 'bilibili' as const,
+        videoId: 'BV1sW4y1L7jE',
+        title: '篮球基础运球教学：高低运球',
+      },
     ],
-    coachingDetails: '训练时教练应站在学员侧面观察，重点关注：1）手指是否张开、掌心是否空出；2）球弹起高度是否达标；3）学员是否低头看球。发现错误立即纠正，让学员重新做正确的动作。每组结束后给予鼓励，如"很棒！手指张开得很好！"',
-    organizationTips: '学员排成2-3排，每人间距1.5米以上，确保运球不会碰到旁边的人。教练站在前方示范，然后走到学员中间逐一检查。',
+    coachingDetails:
+      '训练时教练应站在学员侧面观察，重点关注：1）手指是否张开、掌心是否空出；2）球弹起高度是否达标；3）学员是否低头看球。发现错误立即纠正，让学员重新做正确的动作。每组结束后给予鼓励，如"很棒！手指张开得很好！"',
+    organizationTips:
+      '学员排成2-3排，每人间距1.5米以上，确保运球不会碰到旁边的人。教练站在前方示范，然后走到学员中间逐一检查。',
     safetyNotes: ['确保学员之间有足够间距', '提醒学员不要在运球时互相碰撞', '地面要干燥防滑'],
   },
   {
@@ -402,23 +440,57 @@ export const TECHNICAL_ACTIVITIES: Omit<TrainingActivity, 'id'>[] = [
       '双手抱球在胸前，像抱小宝贝一样！手指用力弹出去，球飞出去要平！接球时双手张开，像小碗一样接住！',
     keyPoints: ['手指拨球', '出手要平', '接球缓冲'],
     drillSteps: [
-      { step: 1, instruction: '两人一组面对面站立，间距3米，双脚前后开立', coachingTip: '前脚指向传球方向，后脚稳定支撑' },
-      { step: 2, instruction: '双手持球于胸前，大拇指在后，四指在前', coachingTip: '手指自然张开，像握住一个碗' },
-      { step: 3, instruction: '蹬地发力，手臂前伸，手腕外翻，手指拨球传出', coachingTip: '出手时手腕像甩鞭子一样，球最后离开指尖' },
-      { step: 4, instruction: '传球后手臂完全伸直，手指指向目标', coachingTip: '像射箭一样，出手后保持姿势1秒' },
-      { step: 5, instruction: '接球者双手张开迎球，触球后收至胸前缓冲', coachingTip: '接球时双手像弹簧一样缓冲，不要硬接' },
+      {
+        step: 1,
+        instruction: '两人一组面对面站立，间距3米，双脚前后开立',
+        coachingTip: '前脚指向传球方向，后脚稳定支撑',
+      },
+      {
+        step: 2,
+        instruction: '双手持球于胸前，大拇指在后，四指在前',
+        coachingTip: '手指自然张开，像握住一个碗',
+      },
+      {
+        step: 3,
+        instruction: '蹬地发力，手臂前伸，手腕外翻，手指拨球传出',
+        coachingTip: '出手时手腕像甩鞭子一样，球最后离开指尖',
+      },
+      {
+        step: 4,
+        instruction: '传球后手臂完全伸直，手指指向目标',
+        coachingTip: '像射箭一样，出手后保持姿势1秒',
+      },
+      {
+        step: 5,
+        instruction: '接球者双手张开迎球，触球后收至胸前缓冲',
+        coachingTip: '接球时双手像弹簧一样缓冲，不要硬接',
+      },
     ],
     commonMistakes: [
-      { mistake: '用手掌推球而非手指拨球', correction: '手指张开，用指尖和指根拨球，球最后离开指尖', severity: 'high' },
-      { mistake: '传球弧度过高', correction: '手臂前伸而非上举，手腕下压，让球平飞', severity: 'medium' },
+      {
+        mistake: '用手掌推球而非手指拨球',
+        correction: '手指张开，用指尖和指根拨球，球最后离开指尖',
+        severity: 'high',
+      },
+      {
+        mistake: '传球弧度过高',
+        correction: '手臂前伸而非上举，手腕下压，让球平飞',
+        severity: 'medium',
+      },
       { mistake: '接球时不缓冲', correction: '双手迎球，触球后收至胸前缓冲', severity: 'medium' },
       { mistake: '传球时没有蹬地', correction: '先蹬地再出手，力量从脚传到手', severity: 'low' },
     ],
     videos: [
-      { platform: 'bilibili' as const, videoId: 'BV1Y54y1L7jE', title: '篮球传球教学：双手胸前传球' },
+      {
+        platform: 'bilibili' as const,
+        videoId: 'BV1Y54y1L7jE',
+        title: '篮球传球教学：双手胸前传球',
+      },
     ],
-    coachingDetails: '教练应重点观察：1）传球时手指是否拨球；2）球飞行轨迹是否平直；3）接球时是否有缓冲。可以让学员先做无球模仿练习，再持球练习。每组10次传球，左右手各5次。',
-    organizationTips: '学员两两配对，面对面站好，间距3米。教练在中间巡视，纠正动作。可以设置传球目标（如对方胸口），提高准确性。',
+    coachingDetails:
+      '教练应重点观察：1）传球时手指是否拨球；2）球飞行轨迹是否平直；3）接球时是否有缓冲。可以让学员先做无球模仿练习，再持球练习。每组10次传球，左右手各5次。',
+    organizationTips:
+      '学员两两配对，面对面站好，间距3米。教练在中间巡视，纠正动作。可以设置传球目标（如对方胸口），提高准确性。',
     safetyNotes: ['传球力度适中，不要用力过猛', '接球时注意看球，不要走神', '保持间距，避免碰撞'],
   },
   {
@@ -488,24 +560,66 @@ export const TECHNICAL_ACTIVITIES: Omit<TrainingActivity, 'id'>[] = [
     coachGuide: '投篮前屈膝，像弹簧一样压下去！然后蹬地起来，手腕向下压，像把球推进篮筐一样！',
     keyPoints: ['屈膝发力', '手型正确', '压腕出手'],
     drillSteps: [
-      { step: 1, instruction: '面向篮筐站立，双脚与肩同宽，脚尖指向篮筐', coachingTip: '右撇子右脚稍前，左撇子左脚稍前' },
-      { step: 2, instruction: '屈膝下蹲，重心降低，双手持球于胸前', coachingTip: '膝盖弯曲约90度，像坐在椅子上' },
-      { step: 3, instruction: '球从胸前上举至额头前方，投篮手托球，辅助手扶球侧', coachingTip: '投篮手像天鹅颈一样，肘部对齐篮筐' },
-      { step: 4, instruction: '蹬地发力，身体向上伸展，手臂伸直', coachingTip: '力量从脚→膝→腰→肩→肘→腕→指尖传递' },
-      { step: 5, instruction: '手腕下压，食指和中指最后离球，球旋转飞出', coachingTip: '出手后手腕像摘苹果一样向下弯曲，保持1秒' },
+      {
+        step: 1,
+        instruction: '面向篮筐站立，双脚与肩同宽，脚尖指向篮筐',
+        coachingTip: '右撇子右脚稍前，左撇子左脚稍前',
+      },
+      {
+        step: 2,
+        instruction: '屈膝下蹲，重心降低，双手持球于胸前',
+        coachingTip: '膝盖弯曲约90度，像坐在椅子上',
+      },
+      {
+        step: 3,
+        instruction: '球从胸前上举至额头前方，投篮手托球，辅助手扶球侧',
+        coachingTip: '投篮手像天鹅颈一样，肘部对齐篮筐',
+      },
+      {
+        step: 4,
+        instruction: '蹬地发力，身体向上伸展，手臂伸直',
+        coachingTip: '力量从脚→膝→腰→肩→肘→腕→指尖传递',
+      },
+      {
+        step: 5,
+        instruction: '手腕下压，食指和中指最后离球，球旋转飞出',
+        coachingTip: '出手后手腕像摘苹果一样向下弯曲，保持1秒',
+      },
     ],
     commonMistakes: [
-      { mistake: '投篮时双手同时发力', correction: '投篮手发力推出，辅助手只扶住球侧面保持稳定', severity: 'high' },
-      { mistake: '出手时手臂没有完全伸直', correction: '出手后手臂完全伸直，像够高处的东西一样', severity: 'high' },
+      {
+        mistake: '投篮时双手同时发力',
+        correction: '投篮手发力推出，辅助手只扶住球侧面保持稳定',
+        severity: 'high',
+      },
+      {
+        mistake: '出手时手臂没有完全伸直',
+        correction: '出手后手臂完全伸直，像够高处的东西一样',
+        severity: 'high',
+      },
       { mistake: '没有屈膝蹬地', correction: '先屈膝再蹬地，力量从下往上传递', severity: 'medium' },
-      { mistake: '球出手后没有旋转', correction: '手腕下压，食指和中指拨球，让球向后旋转', severity: 'medium' },
-      { mistake: '投篮弧度太平', correction: '出手时手臂向上45度伸展，让球飞出高弧线', severity: 'low' },
+      {
+        mistake: '球出手后没有旋转',
+        correction: '手腕下压，食指和中指拨球，让球向后旋转',
+        severity: 'medium',
+      },
+      {
+        mistake: '投篮弧度太平',
+        correction: '出手时手臂向上45度伸展，让球飞出高弧线',
+        severity: 'low',
+      },
     ],
     videos: [
-      { platform: 'bilibili' as const, videoId: 'BV1bW4y1L7jE', title: '篮球投篮教学：BEEF原则与基础投篮' },
+      {
+        platform: 'bilibili' as const,
+        videoId: 'BV1bW4y1L7jE',
+        title: '篮球投篮教学：BEEF原则与基础投篮',
+      },
     ],
-    coachingDetails: 'BEEF原则：Balance（平衡）、Eyes（眼睛看篮筐）、Elbow（肘部对齐）、Follow-through（跟随动作）。教练应站在学员侧面观察投篮手型，重点关注：1）辅助手是否过早离开球；2）出手后手腕是否下压；3）球的旋转是否正确。可以先用墙做无篮投篮练习，再过渡到篮下。',
-    organizationTips: '学员在罚球线后排成一列，每人2个球。一人投篮后自己抢篮板，传给下一位。教练站在侧面观察手型，及时纠正。',
+    coachingDetails:
+      'BEEF原则：Balance（平衡）、Eyes（眼睛看篮筐）、Elbow（肘部对齐）、Follow-through（跟随动作）。教练应站在学员侧面观察投篮手型，重点关注：1）辅助手是否过早离开球；2）出手后手腕是否下压；3）球的旋转是否正确。可以先用墙做无篮投篮练习，再过渡到篮下。',
+    organizationTips:
+      '学员在罚球线后排成一列，每人2个球。一人投篮后自己抢篮板，传给下一位。教练站在侧面观察手型，及时纠正。',
     safetyNotes: ['投篮后注意抢篮板安全', '不要在别人投篮时走到篮下', '排队时保持安全距离'],
   },
   {
@@ -599,24 +713,62 @@ export const TECHNICAL_ACTIVITIES: Omit<TrainingActivity, 'id'>[] = [
     coachGuide: '滑步！像在冰上滑行一样！一只脚滑动，另一只脚跟上，保持低重心！跟紧他！',
     keyPoints: ['滑步流畅', '重心低', '不 crossed feet'],
     drillSteps: [
-      { step: 1, instruction: '防守姿势准备：屈膝降低重心，双手张开，双脚略宽于肩', coachingTip: '重心放在前脚掌，像坐在椅子上' },
-      { step: 2, instruction: '向右滑步：右脚先向右迈出，左脚迅速跟上', coachingTip: '脚不要交叉，像螃蟹横着走' },
-      { step: 3, instruction: '向左滑步：左脚先向左迈出，右脚迅速跟上', coachingTip: '保持低重心，不要上下起伏' },
-      { step: 4, instruction: '跟随进攻者移动，保持一臂距离', coachingTip: '眼睛看进攻者腰部，不要看球' },
-      { step: 5, instruction: '进攻者变向时，快速滑步跟随', coachingTip: '变向时先用小碎步调整，再大步滑步' },
+      {
+        step: 1,
+        instruction: '防守姿势准备：屈膝降低重心，双手张开，双脚略宽于肩',
+        coachingTip: '重心放在前脚掌，像坐在椅子上',
+      },
+      {
+        step: 2,
+        instruction: '向右滑步：右脚先向右迈出，左脚迅速跟上',
+        coachingTip: '脚不要交叉，像螃蟹横着走',
+      },
+      {
+        step: 3,
+        instruction: '向左滑步：左脚先向左迈出，右脚迅速跟上',
+        coachingTip: '保持低重心，不要上下起伏',
+      },
+      {
+        step: 4,
+        instruction: '跟随进攻者移动，保持一臂距离',
+        coachingTip: '眼睛看进攻者腰部，不要看球',
+      },
+      {
+        step: 5,
+        instruction: '进攻者变向时，快速滑步跟随',
+        coachingTip: '变向时先用小碎步调整，再大步滑步',
+      },
     ],
     commonMistakes: [
-      { mistake: '双脚交叉（交叉步）', correction: '滑步时脚不要交叉，像螃蟹一样横着移动', severity: 'high' },
-      { mistake: '重心上下起伏', correction: '保持屈膝低重心，滑步时身体高度不变', severity: 'high' },
+      {
+        mistake: '双脚交叉（交叉步）',
+        correction: '滑步时脚不要交叉，像螃蟹一样横着移动',
+        severity: 'high',
+      },
+      {
+        mistake: '重心上下起伏',
+        correction: '保持屈膝低重心，滑步时身体高度不变',
+        severity: 'high',
+      },
       { mistake: '看球不看人', correction: '眼睛看进攻者腰部，用余光看球', severity: 'medium' },
-      { mistake: '防守距离太近或太远', correction: '保持一臂距离，伸手能触到进攻者', severity: 'medium' },
+      {
+        mistake: '防守距离太近或太远',
+        correction: '保持一臂距离，伸手能触到进攻者',
+        severity: 'medium',
+      },
       { mistake: '脚步太慢跟不上', correction: '用小碎步调整位置，不要大步追赶', severity: 'low' },
     ],
     videos: [
-      { platform: 'bilibili' as const, videoId: 'BV1dW4y1L7jE', title: '篮球防守教学：滑步与防守姿势' },
+      {
+        platform: 'bilibili' as const,
+        videoId: 'BV1dW4y1L7jE',
+        title: '篮球防守教学：滑步与防守姿势',
+      },
     ],
-    coachingDetails: '防守滑步是篮球防守的基础。教练应重点观察：1）脚步是否交叉；2）重心是否稳定；3）眼睛是否看人。初学者可以先做无对手的横向滑步练习，熟练后加入进攻者。进攻者开始时慢速移动，逐渐加速。',
-    organizationTips: '学员两两配对，一人进攻一人防守，在半场内进行。教练在场边观察，纠正动作。每30秒交换攻防角色。',
+    coachingDetails:
+      '防守滑步是篮球防守的基础。教练应重点观察：1）脚步是否交叉；2）重心是否稳定；3）眼睛是否看人。初学者可以先做无对手的横向滑步练习，熟练后加入进攻者。进攻者开始时慢速移动，逐渐加速。',
+    organizationTips:
+      '学员两两配对，一人进攻一人防守，在半场内进行。教练在场边观察，纠正动作。每30秒交换攻防角色。',
     safetyNotes: ['滑步时注意不要绊倒', '保持合理距离，避免碰撞', '地面要干燥防滑'],
   },
   {
@@ -660,25 +812,67 @@ export const TECHNICAL_ACTIVITIES: Omit<TrainingActivity, 'id'>[] = [
     coachGuide: '右左跳！一大二小三高！球要打板！轻轻推进去！像小兔子跳一样轻快！',
     keyPoints: ['脚步正确', '打板点准', '手腕柔和'],
     drillSteps: [
-      { step: 1, instruction: '从底线运球出发，右手运球向篮筐方向推进', coachingTip: '运球时抬头看篮筐，不要低头看球' },
-      { step: 2, instruction: '接近篮筐时收球，右脚迈出第一步（大步）', coachingTip: '第一步要大，像跨过一条小河' },
-      { step: 3, instruction: '左脚迈出第二步（小步），准备起跳', coachingTip: '第二步要小而快，像踩在弹簧上' },
-      { step: 4, instruction: '左脚蹬地起跳，同时右手将球举高', coachingTip: '起跳时像火箭发射一样向上冲' },
-      { step: 5, instruction: '在最高点手腕柔和地将球打板入筐', coachingTip: '球打在篮板白色方框的右上角，像把球放进去一样' },
+      {
+        step: 1,
+        instruction: '从底线运球出发，右手运球向篮筐方向推进',
+        coachingTip: '运球时抬头看篮筐，不要低头看球',
+      },
+      {
+        step: 2,
+        instruction: '接近篮筐时收球，右脚迈出第一步（大步）',
+        coachingTip: '第一步要大，像跨过一条小河',
+      },
+      {
+        step: 3,
+        instruction: '左脚迈出第二步（小步），准备起跳',
+        coachingTip: '第二步要小而快，像踩在弹簧上',
+      },
+      {
+        step: 4,
+        instruction: '左脚蹬地起跳，同时右手将球举高',
+        coachingTip: '起跳时像火箭发射一样向上冲',
+      },
+      {
+        step: 5,
+        instruction: '在最高点手腕柔和地将球打板入筐',
+        coachingTip: '球打在篮板白色方框的右上角，像把球放进去一样',
+      },
     ],
     commonMistakes: [
-      { mistake: '脚步顺序错误（走步）', correction: '右手上篮：右脚-左脚-起跳；左手上篮：左脚-右脚-起跳', severity: 'high' },
-      { mistake: '起跳后球没有举高', correction: '起跳同时将球举到最高点，在最高点出手', severity: 'high' },
+      {
+        mistake: '脚步顺序错误（走步）',
+        correction: '右手上篮：右脚-左脚-起跳；左手上篮：左脚-右脚-起跳',
+        severity: 'high',
+      },
+      {
+        mistake: '起跳后球没有举高',
+        correction: '起跳同时将球举到最高点，在最高点出手',
+        severity: 'high',
+      },
       { mistake: '上篮时用力过猛', correction: '手腕柔和，像把球轻轻放进篮筐', severity: 'medium' },
-      { mistake: '打板点不对', correction: '球打在篮板白色方框的角上，不要直接投向篮筐', severity: 'medium' },
+      {
+        mistake: '打板点不对',
+        correction: '球打在篮板白色方框的角上，不要直接投向篮筐',
+        severity: 'medium',
+      },
       { mistake: '低头看球不看篮筐', correction: '运球和上篮时都要抬头看篮筐', severity: 'low' },
     ],
     videos: [
-      { platform: 'bilibili' as const, videoId: 'BV1cW4y1L7jE', title: '篮球三步上篮教学：脚步与打板' },
+      {
+        platform: 'bilibili' as const,
+        videoId: 'BV1cW4y1L7jE',
+        title: '篮球三步上篮教学：脚步与打板',
+      },
     ],
-    coachingDetails: '口诀"一大二小三高"：第一步大步跨出，第二步小步蓄力，第三步高跳出手。教练应站在篮筐侧面观察脚步和出手动作。初学者可以先做无球脚步练习，再持球慢速练习，最后全速练习。',
-    organizationTips: '学员在底线右侧排成一列，依次运球上篮。每人2次机会（右手1次+左手1次）。上篮后自己抢篮板，传给下一位。教练站在篮下观察打板点。',
-    safetyNotes: ['上篮落地时注意膝盖微屈缓冲', '抢篮板时注意不要撞到其他人', '排队时站在底线外等待'],
+    coachingDetails:
+      '口诀"一大二小三高"：第一步大步跨出，第二步小步蓄力，第三步高跳出手。教练应站在篮筐侧面观察脚步和出手动作。初学者可以先做无球脚步练习，再持球慢速练习，最后全速练习。',
+    organizationTips:
+      '学员在底线右侧排成一列，依次运球上篮。每人2次机会（右手1次+左手1次）。上篮后自己抢篮板，传给下一位。教练站在篮下观察打板点。',
+    safetyNotes: [
+      '上篮落地时注意膝盖微屈缓冲',
+      '抢篮板时注意不要撞到其他人',
+      '排队时站在底线外等待',
+    ],
   },
   {
     name: '左右手上篮',

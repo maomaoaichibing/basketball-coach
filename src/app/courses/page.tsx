@@ -14,7 +14,6 @@ import {
   X,
   AlertTriangle,
   Search,
-  Filter,
 } from 'lucide-react';
 import { fetchWithAuth } from '@/lib/auth';
 
@@ -125,7 +124,7 @@ export default function CoursesPage() {
       } else {
         alert(data.error);
       }
-    } catch (error) {
+    } catch {
       alert('保存失败');
     }
   }
@@ -140,7 +139,7 @@ export default function CoursesPage() {
       } else {
         alert(data.error);
       }
-    } catch (error) {
+    } catch {
       alert('删除失败');
     }
   }
@@ -169,7 +168,7 @@ export default function CoursesPage() {
       } else {
         alert(data.error);
       }
-    } catch (error) {
+    } catch {
       alert('创建失败');
     }
   }
